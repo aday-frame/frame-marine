@@ -117,10 +117,10 @@
       </div>
 
       <!-- FINANCE -->
-      <div class="module-tab locked" style="position:relative">
+      <div class="module-tab locked">
         <span class="module-tab-dot" style="background:#60A5FA"></span>
         Finance
-        <div class="module-preview" onclick="event.stopPropagation()" style="left:auto;right:0">
+        <div class="module-preview" onclick="event.stopPropagation()">
           <div class="mp-tag">Add-on module</div>
           <div class="mp-title">Finance</div>
           <div class="mp-sub">Charter invoicing, operating budget &amp; full APA accounting</div>
@@ -2073,6 +2073,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const unread = (FM.notifications||[]).filter(n => !n.read).length;
   const ct = document.getElementById('notif-count');
   if (ct) { ct.textContent = unread; ct.style.display = unread ? '' : 'none'; }
+});
+
+/* ── MODULE PREVIEW POPUPS ── */
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.module-tab.locked').forEach(tab => {
+    const popup = tab.querySelector('.module-preview');
+    if (!popup) return;
+    tab.addEventListener('mouseenter', () => {
+      const rect = tab.getBoundingClientRect();
+      // Position left-aligned with tab, but don't clip right edge
+      let left = rect.left;
+      const popW = 300;
+      if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+      popup.style.left = left + 'px';
+      popup.style.display = 'block';
+    });
+    tab.addEventListener('mouseleave', () => {
+      popup.style.display = 'none';
+    });
+  });
 });
 
 /* ── PMS DETAIL DRAWER ── */
