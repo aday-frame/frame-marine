@@ -218,10 +218,7 @@ Dash.renderVessels = function() {
   if (!wrap) return;
 
   if (App.currentVesselId === 'all') {
-    // Fleet overview: vessel cards full width, hide calendar column
     if (upcoming) upcoming.style.display = 'none';
-    const grid = document.getElementById('dash-body-grid');
-    if (grid) grid.style.gridTemplateColumns = '1fr';
     wrap.innerHTML = `
       <div class="dash-section-title">All vessels</div>
       <div class="vessel-cards">${FM.vessels.map(v => _vesselCardHTML(v)).join('')}</div>`;
@@ -230,8 +227,6 @@ Dash.renderVessels = function() {
 
   // Single vessel: show tenders only (vessel itself is in the hero)
   if (upcoming) upcoming.style.display = '';
-  const grid = document.getElementById('dash-body-grid');
-  if (grid) grid.style.gridTemplateColumns = '340px 1fr';
 
   const v = FM.currentVessel();
   if (!v) { wrap.innerHTML = ''; return; }
@@ -247,7 +242,7 @@ Dash.renderVessels = function() {
 
   wrap.innerHTML = `
     <div class="dash-section-title">Tender &amp; small craft</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:grid;grid-template-columns:repeat(${tenders.length},1fr);gap:10px">
       ${tenders.map(t => {
         const fc = fuelColor(t.fuelPct);
         const hoursToSvc = t.nextServiceHours - t.hours;
@@ -283,15 +278,9 @@ Dash.renderVessels = function() {
             </div>
           </div>
           <div style="display:flex;border-top:.5px solid var(--bd)">
-            <button onclick="fleetLogHours('${t.id}','${t.name}')"
-                    style="flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--txt2);background:transparent;border:none;border-right:.5px solid var(--bd);cursor:pointer;transition:background var(--t1)"
-                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">Log hours</button>
-            <button onclick="${t.fuel === 'electric' ? `fleetCharge('${t.id}','${t.name}')` : `fleetFuelUp('${t.id}','${t.name}')`}"
-                    style="flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--txt2);background:transparent;border:none;border-right:.5px solid var(--bd);cursor:pointer;transition:background var(--t1)"
-                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">${t.fuel === 'electric' ? 'Charge' : 'Fuel up'}</button>
-            <button onclick="WO.openNewModal()"
-                    style="flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--or);background:transparent;border:none;cursor:pointer;transition:background var(--t1)"
-                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">+ Work order</button>
+            <button onclick="fleetLogHours('${t.id}','${t.name}')" style="flex:1;padding:7px 2px;font-size:10px;font-weight:500;color:var(--txt2);background:transparent;border:none;border-right:.5px solid var(--bd);cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">Log hrs</button>
+            <button onclick="${t.fuel === 'electric' ? `fleetCharge('${t.id}','${t.name}')` : `fleetFuelUp('${t.id}','${t.name}')`}" style="flex:1;padding:7px 2px;font-size:10px;font-weight:500;color:var(--txt2);background:transparent;border:none;border-right:.5px solid var(--bd);cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">${t.fuel === 'electric' ? 'Charge' : 'Fuel up'}</button>
+            <button onclick="WO.openNewModal()" style="flex:1;padding:7px 2px;font-size:10px;font-weight:500;color:var(--or);background:transparent;border:none;cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">+ WO</button>
           </div>
         </div>`;
       }).join('')}
