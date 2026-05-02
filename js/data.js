@@ -606,6 +606,18 @@ FM.fleet = [
   },
 ];
 
+/* ── FLEET ACTIVITY LOG ── */
+FM.fleetLog = [
+  { id: 'fl1', craftId: 'f1', type: 'hours',  date: '2026-04-30', crew: 'c5', hours: 847,  note: 'Guest transfer run × 3, Shoal Bay' },
+  { id: 'fl2', craftId: 'f3', type: 'fuel',   date: '2026-04-30', crew: 'c5', litres: 42,  cost: 126,  fuelPct: 70,  note: 'Fuelled dockside before watersports afternoon' },
+  { id: 'fl3', craftId: 'f1', type: 'fuel',   date: '2026-04-29', crew: 'c5', litres: 110, cost: 330,  fuelPct: 85,  note: 'Full top-up at Gustavia fuel dock' },
+  { id: 'fl4', craftId: 'f4', type: 'hours',  date: '2026-04-28', crew: 'c7', hours: 298,  note: 'Jet ski 2 — guest session 1.5hrs, Anguilla' },
+  { id: 'fl5', craftId: 'f2', type: 'hours',  date: '2026-04-28', crew: 'c5', hours: 234,  note: 'Provisions run to town quay × 2' },
+  { id: 'fl6', craftId: 'f5', type: 'charge', date: '2026-04-27', crew: 'c7', fuelPct: 100, note: 'Seabob fully charged overnight — 3.5h charge cycle' },
+  { id: 'fl7', craftId: 'f3', type: 'hours',  date: '2026-04-27', crew: 'c7', hours: 312,  note: 'Jet ski 1 — guest session 2hrs, Île Fourchue' },
+  { id: 'fl8', craftId: 'f1', type: 'hours',  date: '2026-04-26', crew: 'c5', hours: 843,  note: 'Beach BBQ tender runs — 4 trips' },
+];
+
 /* ── PLANNED MAINTENANCE SYSTEM ── */
 FM.pms = [
   // PORT ENGINE
