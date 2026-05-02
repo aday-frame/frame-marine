@@ -7,6 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -483,6 +485,38 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
 
+    /* ── SECTION NAV ── */
+    .section-nav {
+      position: sticky; top: 43px; z-index: 39;
+      background: var(--bg); border-bottom: .5px solid var(--bd);
+    }
+    .section-nav-inner {
+      max-width: 760px; margin: 0 auto;
+      display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 4px;
+    }
+    .section-nav-inner::-webkit-scrollbar { display: none; }
+    .snav-item {
+      display: flex; align-items: center;
+      padding: 9px 13px; font-size: 11px; font-weight: 500;
+      color: var(--txt3); text-decoration: none; white-space: nowrap;
+      border-bottom: 1.5px solid transparent; margin-bottom: -1px;
+      transition: color .15s, border-color .15s;
+    }
+    .snav-item:hover { color: var(--txt2); }
+    .snav-item.active { color: var(--pur); border-bottom-color: var(--pur); }
+
+    /* ── VOYAGE MAP 3D ── */
+    #voyage-map { height: 440px; }
+    .maplibregl-popup-content {
+      background: #171716 !important; border: .5px solid rgba(255,255,255,.14) !important;
+      border-radius: 8px !important; padding: 10px 14px !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,.7) !important; color: #F0F0EC;
+    }
+    .maplibregl-popup-tip { display: none !important; }
+    .maplibregl-ctrl-attrib-inner a { color: rgba(255,255,255,.2) !important; font-size: 8px; }
+    .maplibregl-ctrl-attrib.maplibregl-compact { background: transparent !important; }
+    .maplibregl-ctrl-logo { display: none !important; }
+
     /* ── MOBILE ── */
     @media (max-width: 600px) {
       .hero { min-height: 52vh; padding-bottom: 40px; }
@@ -575,6 +609,20 @@
         <span class="live-stat-val">Partly cloudy</span>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- SECTION NAV -->
+<div class="section-nav">
+  <div class="section-nav-inner">
+    <a href="#today"       class="snav-item">Today</a>
+    <a href="#menu"        class="snav-item">Menu</a>
+    <a href="#route"       class="snav-item">Route</a>
+    <a href="#itinerary"   class="snav-item">Itinerary</a>
+    <a href="#activities"  class="snav-item">Activities</a>
+    <a href="#preferences" class="snav-item">Preferences</a>
+    <a href="#crew"        class="snav-item">Crew</a>
+    <a href="#safety"      class="snav-item">Safety</a>
   </div>
 </div>
 
@@ -1000,88 +1048,8 @@
           <div class="map-legend-item"><div class="map-legend-dot" style="background:var(--bd3)"></div>Ahead</div>
         </div>
       </div>
-      <div class="map-svg-wrap">
-        <svg viewBox="0 0 720 360" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
-          <defs>
-            <radialGradient id="oceanGrad" cx="50%" cy="50%" r="70%">
-              <stop offset="0%" stop-color="#0a1628"/>
-              <stop offset="100%" stop-color="#050c18"/>
-            </radialGradient>
-            <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-              <path d="M0,0 L6,3 L0,6 Z" fill="rgba(167,139,250,.4)"/>
-            </marker>
-          </defs>
-
-          <!-- Ocean background -->
-          <rect width="720" height="360" fill="url(#oceanGrad)"/>
-
-          <!-- Ocean depth contours — abstract -->
-          <ellipse cx="360" cy="200" rx="300" ry="140" fill="none" stroke="rgba(56,189,248,.04)" stroke-width="1"/>
-          <ellipse cx="360" cy="200" rx="240" ry="110" fill="none" stroke="rgba(56,189,248,.04)" stroke-width="1"/>
-          <ellipse cx="360" cy="200" rx="180" ry="80" fill="none" stroke="rgba(56,189,248,.03)" stroke-width="1"/>
-
-          <!-- Latitude lines -->
-          <line x1="0" y1="300" x2="720" y2="300" stroke="rgba(255,255,255,.04)" stroke-width=".5"/>
-          <text x="8" y="296" font-family="DM Mono,monospace" font-size="8" fill="rgba(255,255,255,.15)">18°N</text>
-          <line x1="0" y1="200" x2="720" y2="200" stroke="rgba(255,255,255,.04)" stroke-width=".5"/>
-          <text x="8" y="196" font-family="DM Mono,monospace" font-size="8" fill="rgba(255,255,255,.15)">25°N</text>
-          <line x1="0" y1="100" x2="720" y2="100" stroke="rgba(255,255,255,.04)" stroke-width=".5"/>
-          <text x="8" y="96" font-family="DM Mono,monospace" font-size="8" fill="rgba(255,255,255,.15)">32°N</text>
-
-          <!-- Completed route: Gustavia → Île Fourchue → Anguilla -->
-          <path d="M280,305 C282,298 290,298 295,298" stroke="#4ADE80" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-
-          <!-- Current segment dashed line: Anguilla (now) to future -->
-          <path d="M295,298 Q340,220 420,180 T580,78"
-            stroke="rgba(167,139,250,.35)" stroke-width="1.5" fill="none"
-            stroke-dasharray="6,4" stroke-linecap="round"/>
-
-          <!-- Bermuda landmass hint -->
-          <ellipse cx="580" cy="72" rx="18" ry="10" fill="rgba(74,222,128,.08)" stroke="rgba(74,222,128,.2)" stroke-width=".5"/>
-
-          <!-- St. Barths landmass hint -->
-          <ellipse cx="270" cy="307" rx="22" ry="8" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
-
-          <!-- Anguilla landmass hint (slim island) -->
-          <ellipse cx="290" cy="296" rx="30" ry="6" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.1)" stroke-width=".5"/>
-
-          <!-- Stop 1: Gustavia — past -->
-          <circle cx="280" cy="305" r="6" fill="#4ADE80" filter="url(#glow)"/>
-          <circle cx="280" cy="305" r="10" fill="none" stroke="rgba(74,222,128,.3)" stroke-width="1"/>
-          <text x="230" y="326" font-family="DM Sans,sans-serif" font-size="9.5" fill="#4ADE80" font-weight="500">Gustavia</text>
-          <text x="230" y="337" font-family="DM Mono,monospace" font-size="7.5" fill="rgba(74,222,128,.5)">May 5 · departed</text>
-
-          <!-- Stop 2: Île Fourchue — past (small) -->
-          <circle cx="290" cy="298" r="3" fill="#4ADE80"/>
-          <text x="298" y="294" font-family="DM Sans,sans-serif" font-size="8" fill="rgba(74,222,128,.7)">Île Fourchue</text>
-
-          <!-- Stop 3: ANGUILLA — NOW -->
-          <circle cx="295" cy="298" r="8" fill="var(--pur)" filter="url(#glow)"/>
-          <circle cx="295" cy="298" r="14" fill="none" stroke="rgba(167,139,250,.3)" stroke-width="1.5"/>
-          <circle cx="295" cy="298" r="20" fill="none" stroke="rgba(167,139,250,.12)" stroke-width="1"/>
-          <text x="318" y="286" font-family="DM Sans,sans-serif" font-size="10" fill="var(--pur)" font-weight="600">Anguilla</text>
-          <text x="318" y="298" font-family="DM Mono,monospace" font-size="8" fill="rgba(167,139,250,.7)">May 8 · anchored now</text>
-
-          <!-- Stop 4: Bermuda — upcoming -->
-          <circle cx="580" cy="72" r="7" fill="rgba(255,255,255,.15)" stroke="rgba(255,255,255,.25)" stroke-width=".5"/>
-          <text x="598" y="70" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,.5)" font-weight="500">Bermuda</text>
-          <text x="598" y="82" font-family="DM Mono,monospace" font-size="8" fill="rgba(255,255,255,.25)">May 11–12</text>
-
-          <!-- Compass rose -->
-          <g transform="translate(672,40)">
-            <circle cx="0" cy="0" r="16" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)" stroke-width=".5"/>
-            <line x1="0" y1="-11" x2="0" y2="11" stroke="rgba(255,255,255,.2)" stroke-width=".8"/>
-            <line x1="-11" y1="0" x2="11" y2="0" stroke="rgba(255,255,255,.2)" stroke-width=".8"/>
-            <text x="-2" y="-14" font-family="DM Mono,monospace" font-size="7" fill="rgba(255,255,255,.4)" font-weight="600">N</text>
-          </g>
-
-          <!-- Distance annotation -->
-          <text x="440" y="145" font-family="DM Mono,monospace" font-size="8" fill="rgba(167,139,250,.5)" transform="rotate(-24,440,145)">~ 940 nm to Bermuda</text>
-        </svg>
+      <div class="map-svg-wrap" style="padding:0">
+        <div id="voyage-map"></div>
       </div>
     </div>
   </section>
@@ -1356,6 +1324,80 @@
 </footer>
 
 <script>
+/* ── VOYAGE MAP 3D ── */
+const map = new maplibregl.Map({
+  container: 'voyage-map',
+  style: {
+    version: 8,
+    sources: {
+      carto: {
+        type: 'raster',
+        tiles: [
+          'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
+          'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'
+        ],
+        tileSize: 256,
+        attribution: '© OpenStreetMap contributors © CARTO'
+      }
+    },
+    layers: [{ id: 'carto', type: 'raster', source: 'carto' }]
+  },
+  center: [-63.8, 24],
+  zoom: 4.4,
+  pitch: 52,
+  bearing: 8,
+  antialias: true
+});
+
+map.on('load', () => {
+  map.addSource('done', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString',
+    coordinates: [[-62.852,17.894],[-62.916,17.951],[-63.032,18.19]] } } });
+  map.addLayer({ id: 'done', type: 'line', source: 'done',
+    paint: { 'line-color': '#4ADE80', 'line-width': 2.5, 'line-opacity': .85 } });
+
+  map.addSource('ahead', { type: 'geojson', data: { type: 'Feature', geometry: { type: 'LineString',
+    coordinates: [[-63.032,18.19],[-64.68,32.38]] } } });
+  map.addLayer({ id: 'ahead', type: 'line', source: 'ahead',
+    paint: { 'line-color': '#B8964E', 'line-width': 2, 'line-opacity': .55, 'line-dasharray': [5,3] } });
+
+  const stops = [
+    { coords: [-62.852, 17.894], label: 'Gustavia',    sub: 'May 5 · departed',       size: 10, color: '#4ADE80',             now: false },
+    { coords: [-62.916, 17.951], label: 'Île Fourchue', sub: 'May 6',                 size: 6,  color: '#4ADE80',             now: false },
+    { coords: [-63.032, 18.19],  label: 'Anguilla',    sub: 'May 8 · anchored now',   size: 13, color: '#B8964E',             now: true  },
+    { coords: [-64.68,  32.38],  label: 'Bermuda',     sub: 'May 11–12',              size: 10, color: 'rgba(255,255,255,.3)', now: false },
+  ];
+
+  stops.forEach(s => {
+    const el = document.createElement('div');
+    el.style.cssText = `width:${s.size}px;height:${s.size}px;border-radius:50%;background:${s.color};
+      border:1.5px solid rgba(0,0,0,.5);cursor:pointer;
+      ${s.now ? 'box-shadow:0 0 0 5px rgba(184,150,78,.25),0 0 24px rgba(184,150,78,.35);' : ''}`;
+    new maplibregl.Marker({ element: el }).setLngLat(s.coords)
+      .setPopup(new maplibregl.Popup({ offset: 16, closeButton: false }).setHTML(
+        `<div style="font-family:DM Sans,sans-serif;font-size:12px;font-weight:600;color:#F0F0EC">${s.label}</div>
+         <div style="font-size:10px;color:#9A9A92;margin-top:2px;font-family:DM Mono,monospace">${s.sub}</div>`
+      )).addTo(map);
+  });
+
+  map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+});
+
+/* ── SECTION NAV ── */
+const snavLinks = document.querySelectorAll('.snav-item');
+const pageSections = document.querySelectorAll('section[id]');
+const secObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      const href = '#' + e.target.id;
+      snavLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === href));
+      const active = document.querySelector(`.snav-item[href="${href}"]`);
+      if (active) active.scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+pageSections.forEach(s => secObserver.observe(s));
+
 /* ── ITINERARY ── */
 const itinerary = [
   { date:'Tue 5 May',  location:'Gustavia, St. Barths',      notes:'Embarkation 18:00. Welcome cocktails on the sundeck. Chef Elena\'s welcome dinner.', state:'past' },

@@ -252,7 +252,6 @@ Dash.renderVessels = function() {
         <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);overflow:hidden">
           <div style="padding:12px 14px 11px">
             <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:9px">
-              <span style="font-size:18px;flex-shrink:0;margin-top:1px">${typeIcon(t)}</span>
               <div style="min-width:0;flex:1">
                 <div style="font-size:13px;font-weight:600;color:var(--txt);line-height:1.2">${t.name}</div>
                 <div style="font-size:10px;color:var(--txt3);margin-top:2px">${t.year} ${t.make} ${t.model}</div>
