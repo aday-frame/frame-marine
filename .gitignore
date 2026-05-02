@@ -1,0 +1,20 @@
+# Claude session files
+.claude/
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V5
+.Trashes
+
+# Large unused files
+*.docx
+frame-build.html
+frame-unified.html
+Frame.html
+*.webp
+
+# Secrets (never commit these)
+.env
+*.pem

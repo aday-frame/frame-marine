@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Frame Marine</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#080808">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/design-system.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<!-- OFFLINE BANNER -->
+<div id="offline-banner">
+  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+    <path d="M1 1l14 14M10.6 10.6A5 5 0 005.4 5.4M13.6 7.4A8 8 0 002.4 8.6M7.5 12.5a2 2 0 012.5-2"/>
+  </svg>
+  Working offline — changes will sync when connected
+</div>
+
+<!-- APP SHELL -->
+<div class="shell">
+
+  <!-- ── TOPBAR ── -->
+  <header class="topbar">
+    <a class="logo-wordmark" href="app.html">
+      <svg class="logo-mark" viewBox="0 0 58 77" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0 54H23V77H0V54Z" fill="var(--or)"/>
+        <path d="M0 27H40V50H0V27Z" fill="var(--or)" opacity=".75"/>
+        <path d="M0 0H58V23H0V0Z" fill="var(--or)" opacity=".5"/>
+      </svg>
+      <span>Frame <span style="color:var(--or);font-weight:500">Marine</span></span>
+    </a>
+
+    <div class="tb-divider"></div>
+
+    <!-- Vessel picker -->
+    <div class="vessel-picker" id="vessel-picker">
+      <span class="vessel-picker-dot" id="vessel-picker-dot" style="background:var(--or)"></span>
+      <span class="vessel-picker-name" id="vessel-picker-name">Lady M</span>
+      <span class="vessel-picker-type" id="vessel-picker-type">Motor Yacht</span>
+      <span class="vessel-picker-arrow">▾</span>
+      <div class="vessel-dropdown" id="vessel-dropdown"></div>
+    </div>
+
+    <div class="tb-divider"></div>
+
+    <!-- Module tabs -->
+    <nav class="module-tabs">
+      <div class="module-tab active" onclick="switchModule('operations',this)">
+        <span class="module-tab-dot" style="background:#F97316"></span>
+        Operations
+      </div>
+      <div class="module-tab" onclick="switchModule('charter',this)">
+        <span class="module-tab-dot" style="background:#A78BFA"></span>
+        Charter
+      </div>
+      <div class="module-tab locked" onclick="showToast('Contact us at hello@framemarine.io to add Build')" title="Contact us to add this module — hello@framemarine.io">
+        <span class="module-tab-dot" style="background:#F59E0B"></span>
+        Build
+      </div>
+      <div class="module-tab locked" onclick="showToast('Contact us at hello@framemarine.io to add Insights')" title="Contact us to add this module — hello@framemarine.io">
+        <span class="module-tab-dot" style="background:#4ADE80"></span>
+        Insights
+      </div>
+      <div class="module-tab locked" onclick="showToast('Contact us at hello@framemarine.io to add Finance')" title="Contact us to add this module — hello@framemarine.io">
+        <span class="module-tab-dot" style="background:#60A5FA"></span>
+        Finance
+      </div>
+    </nav>
+
+    <!-- Right side -->
+    <div class="tb-right">
+      <button class="btn btn-ghost btn-sm" id="template-btn" onclick="renderWOTemplates()" style="display:none">Templates</button>
+      <button class="btn btn-primary" id="new-btn" onclick="WO.openNewModal()">
+        <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px">
+          <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+        New work order
+      </button>
+      <button class="btn-icon" onclick="openAI()" title="Frame AI" style="display:flex;align-items:center;justify-content:center;position:relative">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:14px;height:14px">
+          <circle cx="8" cy="8" r="2.5"/>
+          <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.2 3.2l1 1M11.8 11.8l1 1M3.2 12.8l1-1M11.8 4.2l1-1"/>
+        </svg>
+        <div class="tb-notif-dot"></div>
+      </button>
+      <button class="btn-icon" id="notif-btn" onclick="toggleNotifPanel(event)" title="Notifications" style="display:flex;align-items:center;justify-content:center;position:relative">
+        <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px">
+          <path d="M8 1a5 5 0 00-5 5v3l-1.5 2h13L13 9V6a5 5 0 00-5-5zm-1 12a1 1 0 002 0H7z"/>
+        </svg>
+        <span class="notif-count" id="notif-count">2</span>
+      </button>
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-panel-hdr">
+          <span>Notifications</span>
+          <button class="btn btn-ghost btn-xs" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div id="notif-list"></div>
+      </div>
+      <div class="tb-avatar" title="Albert Day">AJ</div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="sb" id="mob-sb">
+    <div class="sb-scroll">
+
+      <div class="sec-lbl">Operations</div>
+
+      <div class="ni active" data-page="dashboard" onclick="navTo('dashboard',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1 1h6v6H1V1zm8 0h6v6H9V1zM1 9h6v6H1V9zm8 0h6v6H9V9z" opacity=".85"/>
+        </svg>
+        Dashboard
+      </div>
+
+      <div class="ni" data-page="work-orders" onclick="navTo('work-orders',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/>
+        </svg>
+        Work orders
+        <span class="ni-count ni-count-red" id="sb-wo-count">5</span>
+      </div>
+
+      <div class="ni" data-page="calendar" onclick="navTo('calendar',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h.5A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14h-9A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H4v-.5a.5.5 0 01.5-.5zM3.5 5a.5.5 0 000 1h9a.5.5 0 000-1h-9z"/>
+        </svg>
+        Calendar
+      </div>
+
+      <div class="ni" data-page="monitoring" onclick="navTo('monitoring',this)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 8h2l2-5 2 9 2-6 2 4 1-2h3"/>
+        </svg>
+        Monitoring
+        <span class="dot dot-red dot-pulse" style="margin-left:auto;width:6px;height:6px"></span>
+      </div>
+
+      <div class="ni" data-page="logbook" onclick="navTo('logbook',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 1v10h6V3H5zm1 2h4v1H6V5zm0 2h4v1H6V7zm0 2h3v1H6V9z"/>
+        </svg>
+        Logbook
+      </div>
+
+      <div class="ni" data-page="pms" onclick="navTo('pms',this)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+          <circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1"/>
+        </svg>
+        Maintenance
+        <span class="dot dot-red dot-pulse" style="margin-left:auto;width:6px;height:6px"></span>
+      </div>
+
+      <div class="sec-lbl">Register</div>
+
+      <div class="ni" data-page="fleet" onclick="navTo('fleet',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M1 11l2-6h10l2 6H1zm3-4h8l-1 3H5L4 7zm3-6a1 1 0 011 1v1H7V2a1 1 0 011-1z" opacity=".85"/>
+        </svg>
+        Tender fleet
+      </div>
+
+      <div class="ni" data-page="assets" onclick="navTo('assets',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 3.5A1.5 1.5 0 013.5 2h9A1.5 1.5 0 0114 3.5v9a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5v-9zm2.5 0v9h7v-9h-7z"/>
+        </svg>
+        Assets
+      </div>
+
+      <div class="ni" data-page="parts" onclick="navTo('parts',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M10.5 1a.5.5 0 01.5.5v1h1.5A1.5 1.5 0 0114 4v9a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 13V4a1.5 1.5 0 011.5-1.5H5v-1a.5.5 0 011 0v1h4v-1a.5.5 0 01.5-.5zM4 6v1h8V6H4zm0 3v1h8V9H4z"/>
+        </svg>
+        Parts
+      </div>
+
+      <div class="ni" data-page="vendors" onclick="navTo('vendors',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1a3.5 3.5 0 100 7 3.5 3.5 0 000-7zM3 13.5a5 5 0 0110 0v.5H3v-.5z"/>
+        </svg>
+        Vendors
+      </div>
+
+      <div class="sec-lbl">Crew</div>
+
+      <div class="ni" data-page="team" onclick="navTo('team',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/>
+        </svg>
+        Crew
+      </div>
+
+      <div class="ni" data-page="chat" onclick="navTo('chat',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H9l-3 3v-3H3a1 1 0 01-1-1V3z"/>
+        </svg>
+        Chat
+        <span class="ni-count ni-count-red">4</span>
+      </div>
+
+      <div class="sec-lbl">Documentation</div>
+
+      <div class="ni" data-page="files" onclick="navTo('files',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M2 3a1 1 0 011-1h3.586a1 1 0 01.707.293L8.707 3.707A1 1 0 019.414 4H13a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/>
+        </svg>
+        Files &amp; docs
+      </div>
+
+      <div class="ni" data-page="sops" onclick="navTo('sops',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M4 1h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V3a2 2 0 012-2zm0 1a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1V3a1 1 0 00-1-1H4zm1 3h6v1H5V5zm0 3h6v1H5V8zm0 3h4v1H5v-1z"/>
+        </svg>
+        SOPs &amp; procedures
+      </div>
+
+      <div class="ni" data-page="checklists" onclick="navTo('checklists',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 2v1h6V4H5zm0 2v1h6V6H5zm0 2v1h4V8H5zm0 2v1h6v-1H5z" opacity=".8"/>
+          <path d="M8.5 9.5l1 1 2-2" stroke="#4ADE80" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+        </svg>
+        Checklists
+      </div>
+
+      <div class="sec-lbl">System</div>
+
+      <div class="ni" data-page="settings" onclick="navTo('settings',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M7.5 1a.75.75 0 01.75.75v.878a5.002 5.002 0 012.314 1.337l.76-.44a.75.75 0 011.03.274l.5.866a.75.75 0 01-.274 1.03l-.76.44a5.002 5.002 0 010 2.67l.76.44a.75.75 0 01.274 1.03l-.5.866a.75.75 0 01-1.03.274l-.76-.44a5.002 5.002 0 01-2.314 1.337v.878a.75.75 0 01-1.5 0v-.878a5.002 5.002 0 01-2.314-1.337l-.76.44a.75.75 0 01-1.03-.274l-.5-.866a.75.75 0 01.274-1.03l.76-.44a5.002 5.002 0 010-2.67l-.76-.44a.75.75 0 01-.274-1.03l.5-.866a.75.75 0 011.03-.274l.76.44A5.002 5.002 0 016.75 2.628V1.75A.75.75 0 017.5 1zM7.5 5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/>
+        </svg>
+        Settings
+      </div>
+
+    </div>
+
+    <!-- ── CHARTER SIDEBAR (hidden until Charter module active) ── -->
+    <div id="charter-sb" style="display:none;flex:1;overflow-y:auto;padding:6px">
+      <!-- Charter list rendered by Charter.renderSidebar() -->
+    </div>
+
+    <!-- Sidebar footer -->
+    <div class="sb-foot">
+      <div class="sb-foot-av">
+        <div class="sb-foot-img">AJ</div>
+        <div>
+          <div class="sb-foot-name">Albert Day</div>
+          <div class="sb-foot-role">Owner</div>
+        </div>
+        <div style="margin-left:auto">
+          <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;color:var(--txt3)">
+            <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="main">
+
+    <!-- Page header -->
+    <div class="page-hdr">
+      <div class="page-title" id="page-title">Dashboard</div>
+      <div class="search" id="main-search" style="display:none">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1a5.5 5.5 0 014.384 8.823l3.646 3.647-.707.707-3.647-3.646A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <input id="wo-search" placeholder="Search work orders…">
+      </div>
+      <div class="ml-auto flex gap-8" id="page-actions"></div>
+    </div>
+
+    <!-- Stats bar (populated per-page) -->
+    <div class="stats" id="wo-stats" style="display:none"></div>
+
+    <!-- Filters (work orders) -->
+    <div class="filters" id="wo-filters" style="display:none">
+      <div class="fp on" data-f="all">All</div>
+      <div class="fp" data-f="open">Open</div>
+      <div class="fp" data-f="in-progress">In progress</div>
+      <div class="fp" data-f="high">High priority</div>
+      <div class="fp" data-f="on-hold">On hold</div>
+      <div class="fp" data-f="done">Completed</div>
+      <div class="fp-sep"></div>
+      <div class="fp" data-f="engineering">Engineering</div>
+      <div class="fp" data-f="deck">Deck</div>
+    </div>
+
+    <!-- Stats bar (monitoring) -->
+    <div class="stats" id="mon-stats" style="display:none"></div>
+
+    <!-- ── PAGE CONTENT ── -->
+    <div class="page-body">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page active">
+        <div class="dash-wrap">
+          <div>
+            <div class="dash-section-title">Active alerts</div>
+            <div id="dash-alerts" style="display:flex;flex-direction:column;gap:8px"></div>
+          </div>
+          <div>
+            <div class="dash-section-title">Vessels</div>
+            <div class="vessel-cards" id="dash-vessels"></div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div class="dash-section-title" style="margin-bottom:0">Upcoming</div>
+              <button class="btn btn-ghost btn-xs" onclick="navTo('calendar',document.querySelector('[data-page=calendar]'))">View calendar</button>
+            </div>
+            <div id="dash-upcoming" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div class="dash-section-title" style="margin-bottom:0">Open work orders — Lady M</div>
+              <button class="btn btn-ghost btn-xs" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'))">View all</button>
+            </div>
+            <div id="dash-recent-wos" class="tbl-wrap"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORK ORDERS -->
+      <div id="page-work-orders" class="page">
+        <div id="wo-table-wrap"></div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div id="page-calendar" class="page">
+        <div class="cal-month-wrap">
+          <div class="cal-month-main">
+            <div class="cal-month-hdr">
+              <div class="cal-month-nav">
+                <button class="cal-nav-btn" onclick="calNav(-1)">&#8249;</button>
+                <button class="cal-nav-btn" onclick="calNav(1)">&#8250;</button>
+              </div>
+              <span class="cal-month-title" id="cal-month-title">May 2026</span>
+              <div class="cal-month-legend">
+                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--or)"></div>Charter</div>
+                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--eng)"></div>Maintenance</div>
+                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red)"></div>Regulatory</div>
+                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--grn)"></div>Logistics</div>
+              </div>
+            </div>
+            <div class="cal-month-dow">
+              <div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div>
+              <div class="cal-dow">Thu</div><div class="cal-dow">Fri</div>
+              <div class="cal-dow" style="color:var(--txt2)">Sat</div><div class="cal-dow" style="color:var(--txt2)">Sun</div>
+            </div>
+            <div class="cal-month-grid" id="cal-month-grid"></div>
+          </div>
+          <div class="cal-upcoming-panel">
+            <div class="cal-upcoming-hdr">Upcoming</div>
+            <div class="cal-upcoming-list" id="cal-upcoming-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHARTER MODULE PAGES -->
+      <div id="page-charter" class="page-flex" style="padding:0;overflow:hidden">
+        <div id="charter-detail" style="display:flex;flex-direction:column;flex:1;overflow:hidden"></div>
+      </div>
+
+      <!-- MONITORING -->
+      <div id="page-monitoring" class="page">
+        <div id="mon-body" style="padding:16px 20px;display:flex;flex-direction:column;gap:20px">
+          <div id="mon-engines"></div>
+          <div id="mon-bilge"></div>
+          <div id="mon-climate"></div>
+          <div id="mon-power"></div>
+        </div>
+      </div>
+
+      <!-- ASSETS -->
+      <div id="page-assets" class="page">
+        <div class="assets-layout">
+          <div class="assets-list-wrap" id="assets-list-wrap"></div>
+          <div class="assets-detail" id="assets-detail">
+            <div style="color:var(--txt3);font-size:13px;text-align:center;padding:60px 0;margin-top:40px">Select an asset to view details</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARTS -->
+      <div id="page-parts" class="page">
+        <div class="parts-layout">
+          <div class="parts-list-wrap" id="parts-list-wrap"></div>
+          <div class="parts-detail" id="parts-detail">
+            <div style="color:var(--txt3);font-size:13px;text-align:center;padding:60px 0;margin-top:40px">Select a part to view details</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VENDORS -->
+      <div id="page-vendors" class="page">
+        <div id="vendors-wrap"></div>
+      </div>
+
+      <!-- TEAM / CREW -->
+      <div id="page-team" class="page">
+        <div id="team-wrap" class="dash-wrap"></div>
+      </div>
+
+      <!-- CHAT -->
+      <div id="page-chat" class="page" style="height:calc(100vh - 104px)">
+        <div class="chat-wrap" id="chat-wrap"></div>
+      </div>
+
+      <!-- FILES -->
+      <div id="page-files" class="page">
+        <div class="files-layout">
+          <div class="files-sidebar" id="files-sidebar"></div>
+          <div class="files-main">
+            <div class="files-main-hdr">
+              <span class="files-main-title" id="files-folder-title">Certificates &amp; Surveys</span>
+              <button class="btn btn-ghost btn-sm">Upload file</button>
+            </div>
+            <table class="files-tbl" id="files-tbl"></table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SOPS -->
+      <div id="page-sops" class="page">
+        <div class="sop-layout">
+          <div class="sop-sidebar" id="sop-sidebar"></div>
+          <div class="sop-main" id="sop-main"></div>
+        </div>
+      </div>
+
+      <!-- LOGBOOK -->
+      <div id="page-logbook" class="page">
+        <div class="logbook-layout">
+          <div class="logbook-sidebar" id="logbook-sidebar"></div>
+          <div class="logbook-main" id="logbook-main"></div>
+        </div>
+      </div>
+
+      <!-- PMS -->
+      <div id="page-pms" class="page">
+        <div class="pms-wrap">
+          <div class="pms-summary" id="pms-summary"></div>
+          <div class="pms-body" id="pms-body"></div>
+        </div>
+      </div>
+
+      <!-- FLEET -->
+      <div id="page-fleet" class="page">
+        <div class="fleet-grid" id="fleet-grid"></div>
+      </div>
+
+      <!-- CHECKLISTS -->
+      <div id="page-checklists" class="page">
+        <div class="cl-layout">
+          <div class="cl-sidebar" id="cl-sidebar"></div>
+          <div class="cl-main" id="cl-main"></div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page">
+        <div class="settings-wrap">
+          <div class="settings-section">
+            <div class="settings-title">Notifications</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Bilge alerts</div>
+                <div class="settings-row-sub">SMS and push when bilge exceeds threshold</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Engine alarms</div>
+                <div class="settings-row-sub">Immediate alert on critical engine parameters</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Work order assignments</div>
+                <div class="settings-row-sub">Notify when a WO is assigned to you</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Daily digest</div>
+                <div class="settings-row-sub">Morning summary at 07:00</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Vessel — Lady M</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">IMO / MMSI</div>
+                <div class="settings-row-sub">319123456</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">Edit</button>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Flag state</div>
+                <div class="settings-row-sub">Cayman Islands (CYM)</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">Edit</button>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Home port</div>
+                <div class="settings-row-sub">Gustavia, St. Barths</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">Edit</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <div class="settings-title">Account</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Plan</div>
+                <div class="settings-row-sub">Pro · $149/vessel/month · 2 vessels</div>
+              </div>
+              <button class="btn btn-ghost btn-sm">Manage</button>
+            </div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Offline mode</div>
+                <div class="settings-row-sub">App works without internet. Changes sync on reconnect.</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-body -->
+  </main>
+</div><!-- /shell -->
+
+<!-- ── DETAIL PANEL ── -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-hdr">
+    <div class="panel-title" id="panel-title">Details</div>
+    <button class="btn btn-ghost btn-sm" onclick="closePanel()">
+      <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px">
+        <path d="M3.72 3.72a.75.75 0 011.06 0L8 6.94l3.22-3.22a.75.75 0 111.06 1.06L9.06 8l3.22 3.22a.75.75 0 11-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 01-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 010-1.06z"/>
+      </svg>
+      Close
+    </button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+</div>
+
+<!-- ── MODAL ── -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">New work order</div>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-submit">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<!-- ── SCRIPTS ── -->
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+<script src="js/work-orders.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/monitoring.js"></script>
+<script src="js/charter.js"></script>
+<script src="js/offline.js"></script>
+
+<script>
+/* ── PAGE INIT HOOKS ── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Wire up work order filters
+  WO.initFilters();
+  WO.initSearch();
+});
+
+// Show/hide chrome per page
+(function() {
+  const origNav = navTo;
+  window.navTo = function(pageId, el) {
+    origNav(pageId, el);
+    const hasStats   = ['work-orders'].includes(pageId);
+    const hasFilters = ['work-orders'].includes(pageId);
+    const hasSearch  = ['work-orders'].includes(pageId);
+    const hasMonStats = ['monitoring'].includes(pageId);
+
+    document.getElementById('wo-stats').style.display   = hasStats   ? 'grid' : 'none';
+    document.getElementById('wo-filters').style.display = hasFilters ? 'flex' : 'none';
+    document.getElementById('main-search').style.display = hasSearch ? 'flex' : 'none';
+    document.getElementById('mon-stats').style.display  = hasMonStats ? 'grid' : 'none';
+
+    // Update new button visibility
+    const newBtn = document.getElementById('new-btn');
+    if (newBtn) {
+      newBtn.style.display = ['work-orders','dashboard','charter'].includes(pageId) ? '' : 'none';
+    const tmplBtn = document.getElementById('template-btn');
+    if (tmplBtn) tmplBtn.style.display = pageId === 'work-orders' ? '' : 'none';
+    }
+  };
+})();
+
+/* ── QR CODE GENERATOR (deterministic SVG) ── */
+function makeQR(sku) {
+  function hash(s) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+    return h;
+  }
+  const sz = 21, cell = 8, pad = 16, total = sz * cell + pad * 2;
+  const bits = [];
+  let h = hash(sku);
+  for (let i = 0; i < sz * sz; i++) {
+    if (i % 32 === 0) h = hash(sku + i);
+    bits.push((h >> (i % 32)) & 1);
+  }
+  // Finder pattern 7x7
+  function finder(ox, oy, rects) {
+    for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) {
+      const border = r===0||r===6||c===0||c===6;
+      const inner  = r>=2&&r<=4&&c>=2&&c<=4;
+      if (border || inner) rects.push([ox+c,oy+r]);
+    }
+  }
+  const dark = [];
+  finder(0,0,dark); finder(sz-7,0,dark); finder(0,sz-7,dark);
+  // Timing
+  for (let i=8;i<sz-8;i++) { if(i%2===0){dark.push([i,6]);dark.push([6,i]);} }
+  // Data modules (skip finder/timing zones)
+  const reserved = new Set();
+  [[0,0],[sz-7,0],[0,sz-7]].forEach(([ox,oy])=>{
+    for(let r=-1;r<=7;r++)for(let c=-1;c<=7;c++){if(ox+c>=0&&ox+c<sz&&oy+r>=0&&oy+r<sz)reserved.add((oy+r)*sz+(ox+c));}
+  });
+  for(let i=6;i<sz;i++){reserved.add(6*sz+i);reserved.add(i*sz+6);}
+  let bi=0;
+  for(let r=0;r<sz;r++)for(let c=0;c<sz;c++){
+    if(!reserved.has(r*sz+c)&&bits[bi++%bits.length])dark.push([c,r]);
+  }
+  const rects = dark.map(([c,r])=>`<rect x="${pad+c*cell}" y="${pad+r*cell}" width="${cell}" height="${cell}"/>`).join('');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${total}" height="${total}" viewBox="0 0 ${total} ${total}">
+    <rect width="${total}" height="${total}" fill="#fff" rx="6"/>
+    <g fill="#111">${rects}</g>
+  </svg>`;
+}
+
+/* ── PARTS RENDER ── */
+window.Parts = {
+  _active: null,
+  render() {
+    const listWrap = document.getElementById('parts-list-wrap');
+    if (!listWrap) return;
+    const parts = FM.parts;
+    listWrap.innerHTML = `
+      <div class="parts-list-hdr">
+        <span>Parts inventory</span>
+        <button class="btn btn-ghost btn-sm">+ Add part</button>
+      </div>
+      <table class="tbl" style="font-size:12px">
+        <thead><tr>
+          <th style="width:48px"></th>
+          <th>Part name</th>
+          <th style="width:130px">SKU</th>
+          <th style="width:90px">Zone</th>
+          <th style="width:70px">Stock</th>
+          <th style="width:90px">Unit cost</th>
+        </tr></thead>
+        <tbody>
+          ${parts.map(p => {
+            const stockClass = p.qty === 0 ? 'stock-out' : p.qty <= p.min ? 'stock-low' : 'stock-ok';
+            const stockLabel = p.qty === 0 ? 'Out' : p.qty <= p.min ? 'Low' : 'OK';
+            return `<tr onclick="Parts.select('${p.id}')" class="${this._active===p.id?'selected':''}">
+              <td style="padding:8px 10px">
+                <div class="part-thumb" style="background:${p.photoColor||'#252524'}">
+                  <span style="font-size:16px">${p.photoIcon||'📦'}</span>
+                </div>
+              </td>
+              <td><div class="tbl-title">${p.name}</div><div class="tbl-sub">${p.supplier}</div></td>
+              <td class="tbl-mono">${p.sku}</td>
+              <td class="c-txt2 t-11">${p.zone}</td>
+              <td><span class="stock-badge ${stockClass}">${p.qty} ${p.unit} · ${stockLabel}</span></td>
+              <td class="c-txt2">$${p.cost}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+    if (this._active) this.select(this._active);
+  },
+  select(id) {
+    this._active = id;
+    const p = FM.parts.find(x => x.id === id);
+    if (!p) return;
+    // Highlight row
+    document.querySelectorAll('#parts-list-wrap tbody tr').forEach(r => r.classList.remove('selected'));
+    const row = document.querySelector(`#parts-list-wrap tbody tr[onclick*="${id}"]`);
+    if (row) row.classList.add('selected');
+    const stockClass = p.qty === 0 ? 'stock-out' : p.qty <= p.min ? 'stock-low' : 'stock-ok';
+    const stockLabel = p.qty === 0 ? 'Out of stock' : p.qty <= p.min ? 'Low stock' : 'In stock';
+    const detail = document.getElementById('parts-detail');
+    if (!detail) return;
+    detail.innerHTML = `
+      <div class="part-detail-photo" style="background:${p.photoColor||'#252524'}">
+        <span style="font-size:48px">${p.photoIcon||'📦'}</span>
+        <div class="part-detail-sku">${p.sku}</div>
+      </div>
+      <div class="part-detail-body">
+        <div class="part-detail-name">${p.name}</div>
+        <div class="part-detail-supplier">${p.supplier}</div>
+        <span class="stock-badge ${stockClass}" style="margin-top:6px">${stockLabel} — ${p.qty} ${p.unit}</span>
+        <div class="part-detail-grid">
+          <div class="part-detail-item"><div class="part-detail-lbl">Zone</div><div>${p.zone}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Category</div><div>${p.category||'—'}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Unit cost</div><div>$${p.cost}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Min qty</div><div>${p.min} ${p.unit}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Unit</div><div>${p.unit}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Total value</div><div>$${(p.qty*p.cost).toLocaleString()}</div></div>
+        </div>
+        <div class="part-detail-qr-wrap">
+          <div class="part-detail-lbl" style="margin-bottom:8px">QR · Scan to pull</div>
+          ${makeQR(p.sku)}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px">
+          <button class="btn btn-primary btn-sm">Reorder</button>
+          <button class="btn btn-ghost btn-sm">Edit part</button>
+          <button class="btn btn-ghost btn-sm">Work order</button>
+        </div>
+      </div>`;
+  }
+};
+
+/* ── PMS RENDER ── */
+function renderPMS() {
+  const summary = document.getElementById('pms-summary');
+  const body = document.getElementById('pms-body');
+  if (!summary || !body) return;
+  const items = FM.pms || [];
+  const overdue   = items.filter(i => i.status === 'overdue');
+  const dueSoon   = items.filter(i => i.status === 'due-soon');
+  const upcoming  = items.filter(i => i.status === 'upcoming');
+  summary.innerHTML = `
+    <div class="stat"><div class="stat-lbl">Overdue</div><div class="stat-val red">${overdue.length}</div></div>
+    <div class="stat"><div class="stat-lbl">Due soon</div><div class="stat-val yel">${dueSoon.length}</div></div>
+    <div class="stat"><div class="stat-lbl">Upcoming</div><div class="stat-val">${upcoming.length}</div></div>
+    <div class="stat"><div class="stat-lbl">Total tasks</div><div class="stat-val">${items.length}</div></div>`;
+  // Group by system
+  const groups = {};
+  items.forEach(i => { (groups[i.system] = groups[i.system]||[]).push(i); });
+  body.innerHTML = Object.entries(groups).map(([sys, tasks]) => `
+    <div class="pms-group">
+      <div class="pms-group-hdr">${sys}</div>
+      ${tasks.map(t => {
+        const sc = t.status==='overdue'?'pms-status-overdue':t.status==='due-soon'?'pms-status-duesoon':'pms-status-upcoming';
+        const sl = t.status==='overdue'?'Overdue':t.status==='due-soon'?'Due soon':'Upcoming';
+        const assigneeName = FM.crewName ? FM.crewName(t.assignee) : t.assignee;
+        const hasHours = t.dueHours != null && t.currentHours != null && t.lastHours != null;
+        const hoursLeft = hasHours ? t.dueHours - t.currentHours : null;
+        const pct = hasHours ? Math.max(0, Math.min(100, (t.currentHours - t.lastHours) / (t.dueHours - t.lastHours) * 100)) : 50;
+        const dueStr = hoursLeft != null ? (hoursLeft >= 0 ? '+'+hoursLeft+' hrs' : Math.abs(hoursLeft)+' hrs overdue') : (t.dueDate || '');
+        return `<div class="pms-task" onclick="openPMSDetail('${t.id}')">
+          <div class="pms-task-left">
+            <div class="pms-task-dot ${sc}"></div>
+          </div>
+          <div class="pms-task-body">
+            <div class="pms-task-name">${t.task}</div>
+            <div class="pms-task-meta">${t.asset} · ${assigneeName} · ${t.interval}</div>
+            <div class="pms-bar-wrap"><div class="pms-bar-fill ${sc}" style="width:${pct}%"></div></div>
+          </div>
+          <div class="pms-task-right">
+            <span class="badge ${sc}">${sl}</span>
+            <div class="pms-task-hours">${dueStr}</div>
+            ${t.wo ? `<div class="pms-task-wo">${t.wo}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+window.renderPMS = renderPMS;
+
+/* ── LOGBOOK RENDER ── */
+let _logActive = null;
+function renderLogbook(id) {
+  const sidebar = document.getElementById('logbook-sidebar');
+  const main    = document.getElementById('logbook-main');
+  if (!sidebar || !main) return;
+  const entries = FM.logbook || [];
+  if (!_logActive && entries.length) _logActive = entries[0].id;
+  if (id) _logActive = id;
+  sidebar.innerHTML = `
+    <div class="logbook-sidebar-hdr">
+      <span>Logbook</span>
+      <button class="btn btn-primary btn-sm" onclick="openLogbookEntry()">+ Entry</button>
+    </div>
+    ${entries.map(e => `
+      <div class="logbook-entry-row${e.id===_logActive?' active':''}" onclick="renderLogbook('${e.id}')">
+        <div class="logbook-entry-date">${e.date}</div>
+        <div class="logbook-entry-loc">${e.location}</div>
+        <div class="logbook-entry-status ${e.status==='underway'?'log-underway':e.status==='at-anchor'?'log-anchored':'log-berth'}">${{underway:'Underway','at-anchor':'At anchor',berthed:'Berthed'}[e.status]||e.status}</div>
+      </div>`).join('')}`;
+  const entry = entries.find(e => e.id === _logActive);
+  if (!entry) { main.innerHTML = '<div class="empty"><div class="empty-title">No entry selected</div></div>'; return; }
+  const crew = FM.crew ? FM.crew.find(c => c.id === entry.watch) : null;
+  main.innerHTML = `
+    <div class="logbook-main-hdr">
+      <div>
+        <div class="logbook-main-date">${entry.date}</div>
+        <div class="logbook-main-loc">${entry.location} · ${entry.position}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm">Export PDF</button>
+        <button class="btn btn-ghost btn-sm">Edit</button>
+      </div>
+    </div>
+    <div class="logbook-meta-grid">
+      <div class="logbook-meta-item"><div class="logbook-meta-lbl">Watch officer</div><div>${crew ? crew.name : entry.watch}</div></div>
+      <div class="logbook-meta-item"><div class="logbook-meta-lbl">Port engine hrs</div><div class="t-mono">${entry.portHrs.toLocaleString()}</div></div>
+      <div class="logbook-meta-item"><div class="logbook-meta-lbl">Stbd engine hrs</div><div class="t-mono">${entry.stbdHrs.toLocaleString()}</div></div>
+      <div class="logbook-meta-item"><div class="logbook-meta-lbl">Generator hrs</div><div class="t-mono">${entry.genHrs.toLocaleString()}</div></div>
+      <div class="logbook-meta-item"><div class="logbook-meta-lbl">Status</div><div class="logbook-entry-status ${entry.status==='underway'?'log-underway':entry.status==='at-anchor'?'log-anchored':'log-berth'}">${{underway:'Underway','at-anchor':'At anchor',berthed:'Berthed'}[entry.status]||entry.status}</div></div>
+      <div class="logbook-meta-item"><div class="logbook-meta-lbl">Weather</div><div>${entry.weather}</div></div>
+    </div>
+    <div class="logbook-notes-wrap">
+      <div class="logbook-meta-lbl" style="margin-bottom:8px">Notes</div>
+      <div class="logbook-notes">${entry.notes}</div>
+    </div>`;
+}
+window.renderLogbook = renderLogbook;
+
+/* ── FLEET RENDER ── */
+function renderFleet() {
+  const grid = document.getElementById('fleet-grid');
+  if (!grid) return;
+  const craft = FM.fleet || [];
+  grid.innerHTML = craft.map(c => {
+    const fuelPct = c.fuelPct || 0;
+    const fuelColor = fuelPct < 25 ? 'var(--red)' : fuelPct < 50 ? 'var(--yel)' : 'var(--grn)';
+    const hoursLeft = c.nextServiceHours - c.hours;
+    const svcPct = Math.max(0, Math.min(100, c.hours / c.nextServiceHours * 100));
+    const typeIcon = c.type==='PWC'?'🚤':c.type==='Seabob'?'🤿':'⛵';
+    const statusMap = {'in-water':'b-done','davits':'b-progress','swim-platform':'b-done','charged':'b-done'};
+    const labelMap  = {'in-water':'In water','davits':'On davits','swim-platform':'Deployed','charged':'Charged'};
+    const statusClass = statusMap[c.status] || 'b-hold';
+    const statusLabel = labelMap[c.status] || c.status;
+    return `<div class="fleet-card">
+      <div class="fleet-card-photo" style="background:linear-gradient(145deg,${c.color}22,${c.color}08)">
+        <span style="font-size:40px">${typeIcon}</span>
+        <span class="badge ${statusClass}" style="position:absolute;top:10px;right:10px">${statusLabel}</span>
+      </div>
+      <div class="fleet-card-body">
+        <div class="fleet-card-name">${c.name}</div>
+        <div class="fleet-card-sub">${c.year} ${c.make} ${c.model} · ${c.loa}</div>
+        <div class="fleet-card-meta">
+          <div class="fleet-stat"><div class="fleet-stat-lbl">Hours</div><div class="fleet-stat-val">${c.hours.toLocaleString()}</div></div>
+          <div class="fleet-stat"><div class="fleet-stat-lbl">Engine</div><div class="fleet-stat-val t-11">${c.engine}</div></div>
+          <div class="fleet-stat"><div class="fleet-stat-lbl">Last service</div><div class="fleet-stat-val t-11">${c.lastService}</div></div>
+        </div>
+        <div class="fleet-bar-row">
+          <span class="fleet-bar-lbl">${c.fuel==='electric'?'Battery':'Fuel'}</span>
+          <div class="fleet-bar-track"><div class="fleet-bar-fill" style="width:${fuelPct}%;background:${fuelColor}"></div></div>
+          <span class="fleet-bar-val" style="color:${fuelColor}">${fuelPct}%</span>
+        </div>
+        <div class="fleet-bar-row">
+          <span class="fleet-bar-lbl">Next svc</span>
+          <div class="fleet-bar-track"><div class="fleet-bar-fill" style="width:${svcPct}%;background:var(--or)"></div></div>
+          <span class="fleet-bar-val">${hoursLeft > 0 ? hoursLeft+' hrs' : 'Due'}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:12px">
+          <button class="btn btn-ghost btn-sm">Log hours</button>
+          <button class="btn btn-ghost btn-sm">Fuel up</button>
+          <button class="btn btn-ghost btn-sm">Work order</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.renderFleet = renderFleet;
+
+/* ── VENDORS RENDER (two-panel) ── */
+window.Vendors = {
+  _active: null,
+  render() {
+    const wrap = document.getElementById('vendors-wrap');
+    if (!wrap) return;
+    wrap.style.cssText = 'display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 104px);overflow:hidden;';
+    const vendors = FM.vendors || [];
+    wrap.innerHTML = `
+      <div style="border-right:.5px solid var(--bd);overflow-y:auto">
+        <div class="parts-list-hdr"><span>Vendors</span><button class="btn btn-ghost btn-sm" onclick="showToast('Add vendor coming soon')">+ Add</button></div>
+        ${vendors.map(v => `
+          <div class="logbook-entry-row${v.id === Vendors._active ? ' active' : ''}" onclick="Vendors.select('${v.id}')">
+            <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px">${v.name}</div>
+            <div style="font-size:11px;color:var(--txt3)">${v.trade}</div>
+          </div>`).join('')}
+      </div>
+      <div id="vendor-detail" style="overflow-y:auto;background:var(--bg2)">
+        <div style="color:var(--txt3);font-size:13px;text-align:center;padding:60px 0">Select a vendor to view details</div>
+      </div>`;
+    if (this._active) this.select(this._active);
+    else if (vendors.length) this.select(vendors[0].id);
+  },
+  select(id) {
+    this._active = id;
+    const v = FM.vendors.find(x => x.id === id);
+    if (!v) return;
+    document.querySelectorAll('#vendors-wrap .logbook-entry-row').forEach(r => r.classList.remove('active'));
+    FM.vendors.forEach((vv, i) => {
+      if (vv.id === id) {
+        const rows = document.querySelectorAll('#vendors-wrap .logbook-entry-row');
+        if (rows[i]) rows[i].classList.add('active');
+      }
+    });
+    const linkedWOs = (FM.workOrders || []).filter(w => w.vendor === id);
+    const linkedAssets = (FM.assets || []).filter(a => a.vendor === id);
+    const detail = document.getElementById('vendor-detail');
+    if (!detail) return;
+    detail.innerHTML = `
+      <div style="padding:24px">
+        <div style="font-size:20px;font-weight:400;color:var(--txt);margin-bottom:4px">${v.name}</div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:20px">${v.trade}</div>
+        <div class="part-detail-grid" style="margin-bottom:20px">
+          <div class="part-detail-item"><div class="part-detail-lbl">Contact</div><div>${v.contact}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Phone</div><div>${v.phone}</div></div>
+          <div class="part-detail-item" style="grid-column:1/-1"><div class="part-detail-lbl">Email</div><div style="font-family:var(--mono);font-size:11px">${v.email}</div></div>
+        </div>
+        ${linkedAssets.length ? `
+          <div class="part-detail-lbl" style="margin-bottom:8px">Serviced assets (${linkedAssets.length})</div>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:18px">
+            ${linkedAssets.map(a => `
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r8);cursor:pointer" onclick="navTo('assets',document.querySelector('[data-page=assets]'));setTimeout(()=>Assets.select('${a.id}'),80)">
+                <div class="part-thumb" style="background:${a.photoColor};width:24px;height:24px;font-size:12px">${a.photoIcon}</div>
+                <div style="flex:1;font-size:12px;color:var(--txt)">${a.name}</div>
+                <div style="font-size:10px;color:var(--txt3)">${a.zone}</div>
+              </div>`).join('')}
+          </div>` : ''}
+        ${linkedWOs.length ? `
+          <div class="part-detail-lbl" style="margin-bottom:8px">Linked work orders (${linkedWOs.length})</div>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:18px">
+            ${linkedWOs.map(w => `
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r8);cursor:pointer" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)">
+                <span class="tbl-mono">${w.id}</span>
+                <span style="flex:1;font-size:12px;color:var(--txt)">${w.title}</span>
+                <span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>
+              </div>`).join('')}
+          </div>` : `<div style="font-size:12px;color:var(--txt3);margin-bottom:18px">No linked work orders.</div>`}
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="showToast('New work order created')">New work order</button>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Edit vendor coming soon')">Edit vendor</button>
+        </div>
+      </div>`;
+  }
+};
+
+/* ── SIMPLE TEAM RENDER ── */
+window.Team = {
+  render() {
+    const wrap = document.getElementById('team-wrap');
+    if (!wrap) return;
+    const crew = FM.crew.filter(c => c.vessel === App.currentVesselId);
+    wrap.innerHTML = `
+      <div class="crew-grid">
+        ${crew.map(c => `
+          <div class="crew-card">
+            <div class="crew-av" style="background:${c.color}">${c.initials}</div>
+            <div class="crew-name">${c.name}</div>
+            <div class="crew-role">${c.role}</div>
+            <div class="flex items-center gap-6" style="margin-bottom:6px">
+              <span class="dot dot-${c.status === 'onboard' ? 'grn' : 'txt3'}"></span>
+              <span class="t-11 c-txt3">${c.status === 'onboard' ? 'On board' : 'Ashore'}</span>
+            </div>
+            ${c.email ? `<div class="crew-contact">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:11px;height:11px"><path d="M2 4l6 5 6-5M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"/></svg>
+              ${c.email}
+            </div>` : ''}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+};
+
+/* ── SIMPLE CHAT RENDER ── */
+window.Chat = {
+  activeChannel: 'ch1',
+  render() {
+    const wrap = document.getElementById('chat-wrap');
+    if (!wrap) return;
+    wrap.innerHTML = `
+      <div class="chat-sidebar">
+        <div class="chat-lbl">Lady M</div>
+        ${FM.channels.filter(c => c.vessel === App.currentVesselId).map(ch => `
+          <div class="chat-ch ${ch.id === Chat.activeChannel ? 'active' : ''}"
+               onclick="Chat.openChannel('${ch.id}')">
+            <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;opacity:.5">
+              <path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v7a1 1 0 01-1 1H9l-3 3v-3H3a1 1 0 01-1-1V3z"/>
+            </svg>
+            ${ch.name.replace('Lady M — ','')}
+            ${ch.unread ? `<span class="chat-ch-unread">${ch.unread}</span>` : ''}
+          </div>
+        `).join('')}
+      </div>
+      <div class="chat-main" id="chat-main">
+        ${Chat.channelHTML(Chat.activeChannel)}
+      </div>
+    `;
+  },
+  openChannel(id) {
+    Chat.activeChannel = id;
+    const ch = FM.channels.find(c => c.id === id);
+    if (ch) ch.unread = 0;
+    document.getElementById('sb-req-count'); // update badges eventually
+    Chat.render();
+  },
+  channelHTML(id) {
+    const ch   = FM.channels.find(c => c.id === id);
+    const msgs = FM.messages[id] || [];
+    return `
+      <div class="chat-topbar">
+        <div>
+          <div class="chat-title">${ch?.name || ''}</div>
+          <div class="chat-sub">${FM.vessels.find(v=>v.id===ch?.vessel)?.name || ''}</div>
+        </div>
+      </div>
+      <div class="chat-messages" id="chat-msgs">
+        ${msgs.map(m => {
+          const crew = FM.getCrew(m.author);
+          const isMe = m.author === 'c1';
+          return `
+            <div class="chat-msg ${isMe ? 'me' : ''}">
+              <div class="chat-av" style="background:${crew?.color||'#555'}">${crew?.initials||'?'}</div>
+              <div>
+                <div class="chat-meta">${crew?.name||''} · ${m.time}</div>
+                <div class="chat-bubble ${isMe ? 'me' : 'them'}">${m.text}
+                  ${m.wo ? `<div class="chat-wo-embed" onclick="WO.openPanel('${m.wo}')">
+                    <span class="chat-wo-embed-title">${m.wo} — ${FM.getWO(m.wo)?.title?.slice(0,40)||''}</span>
+                    ${WO.statusBadge(FM.getWO(m.wo)?.status||'open')}
+                  </div>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('') || '<div class="c-txt3 t-12" style="text-align:center;padding:20px">No messages yet</div>'}
+      </div>
+      <div class="chat-input-wrap">
+        <textarea class="chat-input" id="chat-input-field" placeholder="Message ${ch?.name||''}…" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();Chat.send()}"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+        <button class="btn btn-primary btn-sm" onclick="Chat.send()">Send</button>
+      </div>
+    `;
+  },
+  send() {
+    const inp = document.getElementById('chat-input-field');
+    if (!inp || !inp.value.trim()) return;
+    const msgs = FM.messages[Chat.activeChannel] = FM.messages[Chat.activeChannel] || [];
+    msgs.push({
+      author: 'c1',
+      time: new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+      text: inp.value.trim(),
+    });
+    Chat.render();
+    setTimeout(() => {
+      const el = document.getElementById('chat-msgs');
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 50);
+  }
+};
+
+/* ── SIMPLE CALENDAR RENDER ── */
+(function() {
+  /* ── CALENDAR ── */
+  let calYear = 2026, calMonth = 4; // 0-indexed, May = 4
+
+  function calNav(dir) {
+    calMonth += dir;
+    if (calMonth < 0)  { calMonth = 11; calYear--; }
+    if (calMonth > 11) { calMonth = 0;  calYear++; }
+    renderCalendar();
+  }
+  window.calNav = calNav;
+
+  function renderCalendar() {
+    const grid     = document.getElementById('cal-month-grid');
+    const titleEl  = document.getElementById('cal-month-title');
+    const upcoming = document.getElementById('cal-upcoming-list');
+    if (!grid) return;
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    titleEl.textContent = `${monthNames[calMonth]} ${calYear}`;
+
+    const today = new Date(2026, 4, 1); // May 1, 2026 as "today" for demo
+    const todayStr = `2026-05-01`;
+
+    const firstDow   = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+    const offset     = firstDow === 0 ? 6 : firstDow - 1;      // Mon-anchored
+    const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    const prevDays    = new Date(calYear, calMonth, 0).getDate();
+
+    const padZ = n => String(n).padStart(2,'0');
+    const dateStr = d => `${calYear}-${padZ(calMonth+1)}-${padZ(d)}`;
+
+    let html = '';
+
+    // Leading days from previous month
+    for (let i = offset - 1; i >= 0; i--) {
+      html += `<div class="cal-month-cell other-month"><div class="cal-day-num">${prevDays - i}</div></div>`;
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const ds = dateStr(d);
+      const dayEvents = FM.events.filter(e => e.vessel === App.currentVesselId && e.start <= ds && e.end >= ds);
+      const isToday = ds === todayStr;
+      html += `<div class="cal-month-cell${isToday ? ' today' : ''}">
+        <div class="cal-day-num">${d}</div>
+        ${dayEvents.map(e => `<div class="cal-pill cal-pill-${e.color}" title="${e.title}">${e.title}</div>`).join('')}
+      </div>`;
+    }
+
+    // Trailing days
+    const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
+    for (let i = 1; i <= totalCells - offset - daysInMonth; i++) {
+      html += `<div class="cal-month-cell other-month"><div class="cal-day-num">${i}</div></div>`;
+    }
+
+    grid.innerHTML = html;
+
+    // Upcoming sidebar — all events from today forward
+    const upEvents = FM.events
+      .filter(e => e.vessel === App.currentVesselId && e.end >= todayStr)
+      .sort((a,b) => a.start.localeCompare(b.start));
+
+    const typeLabels = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics' };
+    const colorVars  = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
+
+    upcoming.innerHTML = upEvents.map(e => {
+      const start = new Date(e.start + 'T00:00');
+      const end   = new Date(e.end + 'T00:00');
+      const fmt   = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      const range = e.start === e.end ? fmt(start) : `${fmt(start)} – ${fmt(end)}`;
+      return `<div class="cal-up-item">
+        <div class="cal-up-date" style="color:${colorVars[e.color]}">${range}</div>
+        <div class="cal-up-title">${e.title}</div>
+        <div class="cal-up-meta">${typeLabels[e.type] || e.type}${e.wo ? ' · '+e.wo : ''}</div>
+      </div>`;
+    }).join('') || '<div style="padding:12px;font-size:12px;color:var(--txt3)">No upcoming events</div>';
+  }
+
+  /* ── SOPs ── */
+  const sopData = {
+    engine: {
+      label: 'Engine Room', color: 'var(--eng)',
+      procedures: [
+        {
+          id: 'er-entry', title: 'Engine room entry', role: 'Chief Engineer',
+          steps: [
+            { text: 'Don hearing protection and safety glasses before entering', note: 'PPE locker — starboard side, engine room access hatch' },
+            { text: 'Verify engine room ventilation fans are running' },
+            { text: 'Check CO / hydrocarbon levels with handheld sensor before full entry', note: 'Sensor stored on entry shelf — calibrate monthly' },
+            { text: 'Log entry time and purpose in the engine room log' },
+            { text: 'Do not open raw water seacocks without a second crew member present' },
+            { text: 'Report any anomalies immediately to the Chief Engineer' },
+            { text: 'Log exit time and close access hatch on departure' },
+          ]
+        },
+        {
+          id: 'er-bilge', title: 'Bilge inspection & pump test', role: 'Chief Engineer',
+          steps: [
+            { text: 'Visually inspect all bilge areas — forepeak, midships, engine room, lazarette' },
+            { text: 'Record water level in each compartment (inches)' },
+            { text: 'Test automatic float switch: manually raise float, confirm pump activates' },
+            { text: 'Run bilge pump manually for 30 seconds, confirm discharge overboard' },
+            { text: 'Check bilge water for oil sheen — report any oil contamination immediately' },
+            { text: 'Reset automatic switches and log inspection results' },
+          ]
+        },
+        {
+          id: 'er-fuel', title: 'Fuel system check & bunkering', role: 'Chief Engineer',
+          steps: [
+            { text: 'Record tank levels: port main, stbd main, day tank — log in litres' },
+            { text: 'Inspect fuel lines and filters for leaks or seeping' },
+            { text: 'Before bunkering: close all fuel tank vents except the active fill' },
+            { text: 'Confirm fuel grade and quantity with delivery captain or dock' },
+            { text: 'Station fire extinguisher at fill point — one crew member on watch' },
+            { text: 'Monitor tank gauge continuously — stop at 90% capacity' },
+            { text: 'Cap fill points, open all vents, log quantity and supplier' },
+          ]
+        },
+        {
+          id: 'er-coolant', title: 'Engine coolant system inspection', role: 'Chief Engineer',
+          steps: [
+            { text: 'Allow engines to cool for minimum 30 minutes after shutdown' },
+            { text: 'Check coolant level in each engine expansion tank' },
+            { text: 'Inspect fresh water pump belt for wear and correct tension' },
+            { text: 'Check raw water strainer basket — clean if more than 25% blocked' },
+            { text: 'Verify thermostat setpoint: C32 normal operating range 82–88°C' },
+            { text: 'Log current coolant type, concentration (50/50), and last change date' },
+          ]
+        },
+      ]
+    },
+    safety: {
+      label: 'Safety & Emergency', color: 'var(--red)',
+      procedures: [
+        {
+          id: 'sf-muster', title: 'Muster & safety briefing — guests', role: 'Captain / Stew',
+          steps: [
+            { text: 'Conduct muster briefing within 24h of guest embarkation' },
+            { text: 'Show location of all life jackets — stateroom wardrobes and bridge wing lockers' },
+            { text: 'Demonstrate donning of life jacket — adults and children' },
+            { text: 'Indicate primary muster station: main aft deck' },
+            { text: 'Point out life rings: port and stbd aft deck' },
+            { text: 'Demonstrate EPIRB location and activation procedure', note: 'EPIRB: bridge wing, stbd side' },
+            { text: 'Explain emergency flare kit location and basic use' },
+            { text: 'Give guests the ship\'s phone emergency extension: Ext. 100' },
+            { text: 'Log muster completion in log book — all guest names' },
+          ]
+        },
+        {
+          id: 'sf-fire', title: 'Fire emergency response', role: 'All crew',
+          steps: [
+            { text: 'On detection of fire or smoke: sound alarm, shout "Fire, fire, fire!" and location' },
+            { text: 'Dispatch crew to locate and assess fire — do not open smouldering compartments' },
+            { text: 'Captain: broadcast MAYDAY or PAN-PAN on VHF Ch 16 if fire is uncontrolled' },
+            { text: 'Muster all guests at aft deck — account for all persons' },
+            { text: 'Activate fixed CO2 / suppression system only after confirming compartment is clear of persons' },
+            { text: 'If fire threatens fuel or engine room: shut off fuel supply at isolation valves' },
+            { text: 'Prepare life raft for deployment if abandonment becomes necessary' },
+          ]
+        },
+        {
+          id: 'sf-mob', title: 'Man overboard (MOB) procedure', role: 'All crew',
+          steps: [
+            { text: 'Shout "Man overboard!" — note time and position' },
+            { text: 'Assign one crew member to keep eyes on the person at all times — never look away' },
+            { text: 'Throw life ring with light and line immediately' },
+            { text: 'Press MOB button on chart plotter to mark GPS position' },
+            { text: 'Captain takes helm — Williamson turn or quick stop manoeuvre' },
+            { text: 'Broadcast MAYDAY on VHF Ch 16: position, description, one person in water' },
+            { text: 'Approach from downwind, recover using boarding ladder or swim platform' },
+            { text: 'Assess victim for hypothermia, trauma — first aid as required' },
+            { text: 'Log incident: time, position, sea state, recovery time' },
+          ]
+        },
+      ]
+    },
+    deck: {
+      label: 'Deck & Navigation', color: 'var(--blu)',
+      procedures: [
+        {
+          id: 'dk-depart', title: 'Pre-departure checklist', role: 'Captain / Bosun',
+          steps: [
+            { text: 'Confirm fuel levels — main tanks and day tank (log litres)' },
+            { text: 'Test all navigation lights: port, stbd, stern, masthead, anchor' },
+            { text: 'Verify anchor is properly stowed and windlass operational' },
+            { text: 'Test VHF radios — Ch 16 DSC call, confirm DSC MMSI programmed' },
+            { text: 'Check weather routing: download latest GRIB, confirm route with Captain' },
+            { text: 'Brief all guests on safety equipment — complete muster if not done' },
+            { text: 'Secure all exterior loose gear, tender, tenders on davits locked' },
+            { text: 'Confirm port authority clearance and customs outward clearance' },
+            { text: 'Log departure: time, position, destination, crew list, fuel' },
+          ]
+        },
+        {
+          id: 'dk-anchor', title: 'Anchoring procedure', role: 'Captain / Bosun',
+          steps: [
+            { text: 'Approach anchorage at slow speed, assess depth with depth sounder' },
+            { text: 'Select holding ground: sand preferred, avoid coral and seagrass' },
+            { text: 'Captain confirms anchor position — bosun stands by at windlass' },
+            { text: 'Drop anchor when vessel stopped; pay out chain at controlled rate' },
+            { text: 'Scope ratio: minimum 5:1 (chain: depth), 7:1 in unsettled conditions' },
+            { text: 'Set anchor: short burst astern, confirm scope is taut' },
+            { text: 'Take bearings on two fixed objects; mark GPS anchor waypoint' },
+            { text: 'Set anchor watch alarm on chart plotter (50m radius)' },
+            { text: 'Hoist anchor ball forward (day); anchor light on deck (night)' },
+          ]
+        },
+        {
+          id: 'dk-tender', title: 'Tender launch & recovery', role: 'Bosun / Deckhand',
+          steps: [
+            { text: 'Check weather and sea state — do not launch tender in waves exceeding 1.5m' },
+            { text: 'Confirm tender fuel level, safety gear (PFDs, flares, VHF, throw line)' },
+            { text: 'Crew to wear PFDs for all tender operations in open water' },
+            { text: 'Lower davits to water: release with main vessel stationary or at slow speed' },
+            { text: 'Check painter is secured before releasing davit hooks' },
+            { text: 'Engine start and idle check before releasing from mother ship' },
+            { text: 'Recovery: approach from leeward, secure painter, attach davit hooks at aft first' },
+            { text: 'Hoist clear of water before engaging davit locks' },
+            { text: 'Flush tender engine with fresh water after each sea water use' },
+          ]
+        },
+      ]
+    },
+    interior: {
+      label: 'Interior & Hospitality', color: 'var(--pur)',
+      procedures: [
+        {
+          id: 'in-turndown', title: 'Evening turndown & stateroom service', role: 'Stewardess',
+          steps: [
+            { text: 'Begin turndown no earlier than 20:00 or after guests have moved to dining / sundeck' },
+            { text: 'Draw curtains and dim all stateroom lighting to warm setting' },
+            { text: 'Turn down bed — fold sheet corner back 30cm; place chocolates on pillow' },
+            { text: 'Close all hatches and portlights if vessel underway or wind picking up' },
+            { text: 'Refresh towels and bathrobes; replace used toiletries' },
+            { text: 'Set cabin temperature to guest preference (check preference card)' },
+            { text: 'Leave wake-up time card if guest has specified a time' },
+            { text: 'Quietly close door — never disturb guests after 22:00 except for safety' },
+          ]
+        },
+        {
+          id: 'in-provi', title: 'Provisions order & storage', role: 'Chief Stew / Chef',
+          steps: [
+            { text: 'Draft provisions list 72h before charter start — cross-reference guest preferences' },
+            { text: 'Check expiry dates on all existing stock before ordering' },
+            { text: 'Verify cold storage capacity: fridge and freezer space for full charter duration' },
+            { text: 'Order from approved suppliers only — use preferred provisioner for perishables' },
+            { text: 'Receive delivery: inspect all items for quality, quantity, and temperature' },
+            { text: 'Store dry goods, refrigerated items, and alcohol in designated lockers' },
+            { text: 'Log APA expenditure for provisions against charter budget' },
+            { text: 'Update galley inventory sheet after storage complete' },
+          ]
+        },
+      ]
+    },
+    regulatory: {
+      label: 'Regulatory & Surveys', color: 'var(--yel)',
+      procedures: [
+        {
+          id: 'reg-survey', title: 'Annual Lloyd\'s survey preparation', role: 'Captain / CE',
+          steps: [
+            { text: 'Book survey date minimum 6 weeks in advance — confirm with Lloyd\'s agent' },
+            { text: 'Gather all certificates: Load line, Tonnage, Safety Equipment, Radio' },
+            { text: 'Test all fire detection and suppression systems — log test results' },
+            { text: 'Service life rafts if due (annual service by certified station)' },
+            { text: 'Inspect and test all firefighting equipment — extinguishers pressure check' },
+            { text: 'Test bilge pumps, emergency stops, and watertight doors' },
+            { text: 'Engine room to be clean, dry, and fully documented before surveyor visit' },
+            { text: 'Compile engine hours log, oil analysis reports, and maintenance records' },
+          ]
+        },
+        {
+          id: 'reg-port', title: 'Port state control (PSC) inspection', role: 'Captain',
+          steps: [
+            { text: 'Have all vessel certificates readily available — original copies only' },
+            { text: 'Brief crew on PSC procedure: cooperative, answer questions accurately' },
+            { text: 'Escort inspector throughout — never leave officer unaccompanied' },
+            { text: 'Engine room inspection: show all log books, maintenance records' },
+            { text: 'Safety equipment inspection: life jackets, flares, EPIRB, SART tested and dated' },
+            { text: 'Note any deficiencies raised: photograph and create work order immediately' },
+            { text: 'If vessel is detained: notify owner, broker, and insurer immediately' },
+            { text: 'Resolve all deficiencies before requesting reinspection' },
+          ]
+        },
+      ]
+    },
+  };
+
+  let activeSopCat = 'engine';
+  let openProcedures = new Set();
+  let completedSteps = {};
+
+  function renderSops(cat) {
+    activeSopCat = cat;
+    const sidebar  = document.getElementById('sop-sidebar');
+    const main     = document.getElementById('sop-main');
+    if (!sidebar || !main) return;
+
+    // Sidebar
+    const catBadgeColors = {
+      engine: 'rgba(34,211,238,.12)', safety: 'var(--red-bg)', deck: 'var(--blu-bg)',
+      interior: 'var(--pur-bg)', regulatory: 'rgba(250,204,21,.10)'
+    };
+    const catTextColors = {
+      engine: 'var(--eng)', safety: 'var(--red)', deck: 'var(--blu)',
+      interior: 'var(--pur)', regulatory: 'var(--yel)'
+    };
+    sidebar.innerHTML = Object.entries(sopData).map(([key, cat]) =>
+      `<div class="sop-nav-item${key === activeSopCat ? ' active' : ''}" onclick="renderSops('${key}')">
+        <span style="width:8px;height:8px;border-radius:50%;background:${catTextColors[key]};flex-shrink:0;display:inline-block"></span>
+        ${cat.label}
+        <span style="margin-left:auto;font-size:10px;color:var(--txt3)">${cat.procedures.length}</span>
+      </div>`
+    ).join('');
+
+    // Main
+    const catData = sopData[cat];
+    main.innerHTML = catData.procedures.map(proc => {
+      const key    = cat + '-' + proc.id;
+      const steps  = proc.steps;
+      const done   = (completedSteps[key] || []).length;
+      const isOpen = openProcedures.has(key);
+      return `
+        <div class="sop-procedure${isOpen ? ' open' : ''}" id="sop-proc-${key}">
+          <div class="sop-proc-header" onclick="toggleSopProc('${key}')">
+            <span class="sop-proc-badge" style="background:${catBadgeColors[cat]};color:${catTextColors[cat]}">${catData.label}</span>
+            <span class="sop-proc-title">${proc.title}</span>
+            <span class="sop-proc-meta">${proc.role} · ${steps.length} steps</span>
+            <span class="sop-proc-chevron">&#9656;</span>
+          </div>
+          ${isOpen ? `
+          <div class="sop-progress">
+            <div class="sop-progress-bar"><div class="sop-progress-fill" id="sfill-${key}" style="width:${Math.round(done/steps.length*100)}%"></div></div>
+            <span class="sop-progress-label" id="spct-${key}">${done} / ${steps.length}</span>
+            <button class="sop-reset-btn" onclick="resetProc('${key}','${cat}')">Reset</button>
+          </div>
+          <div class="sop-steps" style="display:block">
+            ${steps.map((s, i) => {
+              const done = (completedSteps[key] || []).includes(i);
+              return `<div class="sop-step${done ? ' done' : ''}" id="sstep-${key}-${i}" onclick="toggleStep('${key}',${i},${steps.length})">
+                <div class="sop-num${done ? ' done' : ''}">${String(i+1).padStart(2,'0')}</div>
+                <div class="sop-step-body">
+                  <div class="sop-text">${s.text}</div>
+                  ${s.note ? `<div class="sop-step-note">${s.note}</div>` : ''}
+                </div>
+              </div>`;
+            }).join('')}
+          </div>` : '<div class="sop-steps"></div>'}
+        </div>`;
+    }).join('');
+  }
+  window.renderSops = renderSops;
+
+  function toggleSopProc(key) {
+    if (openProcedures.has(key)) openProcedures.delete(key);
+    else openProcedures.add(key);
+    renderSops(activeSopCat);
+  }
+  window.toggleSopProc = toggleSopProc;
+
+  function toggleStep(key, idx, total) {
+    if (!completedSteps[key]) completedSteps[key] = [];
+    const arr = completedSteps[key];
+    const pos = arr.indexOf(idx);
+    if (pos >= 0) arr.splice(pos, 1); else arr.push(idx);
+    const stepEl = document.getElementById(`sstep-${key}-${idx}`);
+    if (stepEl) {
+      const isDone = arr.includes(idx);
+      stepEl.classList.toggle('done', isDone);
+      stepEl.querySelector('.sop-num').classList.toggle('done', isDone);
+    }
+    const done = arr.length;
+    const fillEl = document.getElementById(`sfill-${key}`);
+    const pctEl  = document.getElementById(`spct-${key}`);
+    if (fillEl) fillEl.style.width = Math.round(done/total*100) + '%';
+    if (pctEl)  pctEl.textContent = `${done} / ${total}`;
+  }
+  window.toggleStep = toggleStep;
+
+  function resetProc(key, cat) {
+    completedSteps[key] = [];
+    renderSops(cat);
+  }
+  window.resetProc = resetProc;
+
+  /* ── FILES ── */
+  const filesData = {
+    certs:    { label: 'Certificates & Surveys', icon: '&#128196;', files: [
+      { name: 'Lloyd\'s Annual Survey 2026',   type:'pdf',  date:'2026-01-14', size:'2.1 MB', status:'current' },
+      { name: 'Load Line Certificate',          type:'pdf',  date:'2025-06-01', size:'340 KB', status:'current' },
+      { name: 'Tonnage Certificate',            type:'pdf',  date:'2023-03-08', size:'280 KB', status:'current' },
+      { name: 'Safety Equipment Certificate',   type:'pdf',  date:'2025-11-20', size:'560 KB', status:'expiring' },
+      { name: 'Radio Station Licence',          type:'pdf',  date:'2025-09-01', size:'190 KB', status:'current' },
+      { name: 'Flag State Certificate — MCA',   type:'pdf',  date:'2024-04-17', size:'410 KB', status:'current' },
+      { name: 'MARPOL Compliance Record',       type:'pdf',  date:'2026-01-14', size:'780 KB', status:'current' },
+    ]},
+    engine:   { label: 'Engine Room Manuals', icon: '&#9881;', files: [
+      { name: 'CAT C32 Operation & Maintenance Manual', type:'pdf', date:'2021-08-01', size:'34.2 MB', status:null },
+      { name: 'CAT C32 Parts Catalog',                  type:'pdf', date:'2021-08-01', size:'18.7 MB', status:null },
+      { name: 'Naiad Fin Stabilizer Manual v3.1',       type:'pdf', date:'2022-03-15', size:'9.4 MB',  status:null },
+      { name: 'Northern Lights 20kW Generator Manual',  type:'pdf', date:'2020-11-01', size:'5.6 MB',  status:null },
+      { name: 'Caterpillar C32 Service Bulletin 2024',  type:'pdf', date:'2024-07-22', size:'1.2 MB',  status:null },
+      { name: 'Watermaker — Spectra Newport 400 Manual',type:'pdf', date:'2019-04-10', size:'3.8 MB',  status:null },
+    ]},
+    schematics:{ label: 'Drawings & Schematics', icon: '&#128293;', files: [
+      { name: 'Electrical Schematic — 12V / 24V / 240V rev4', type:'pdf', date:'2024-11-05', size:'12.1 MB', status:null },
+      { name: 'Plumbing Schematic — Freshwater System',        type:'pdf', date:'2023-02-18', size:'4.4 MB',  status:null },
+      { name: 'Engine Room Layout Drawing',                    type:'img', date:'2022-09-01', size:'8.7 MB',  status:null },
+      { name: 'Fuel Tank Schematic',                           type:'pdf', date:'2023-02-18', size:'2.9 MB',  status:null },
+      { name: 'AC / HVAC Duct Layout',                         type:'pdf', date:'2023-08-14', size:'5.3 MB',  status:null },
+      { name: 'Bilge System Schematic',                        type:'pdf', date:'2022-09-01', size:'3.1 MB',  status:null },
+    ]},
+    safety:   { label: 'Safety & SOLAS', icon: '&#128690;', files: [
+      { name: 'Muster List — May 2026',       type:'pdf',  date:'2026-04-28', size:'280 KB', status:'current' },
+      { name: 'Emergency Procedures Manual',  type:'pdf',  date:'2025-11-01', size:'2.8 MB', status:'current' },
+      { name: 'Fire Plan',                    type:'pdf',  date:'2024-04-17', size:'1.4 MB', status:'current' },
+      { name: 'Life Raft Service Record',     type:'pdf',  date:'2025-10-08', size:'430 KB', status:'expiring' },
+      { name: 'EPIRB Registration',           type:'pdf',  date:'2023-07-01', size:'210 KB', status:'expiring' },
+      { name: 'SMS — Safety Management System',type:'pdf', date:'2024-01-15', size:'6.1 MB', status:'current' },
+    ]},
+    insurance:{ label: 'Insurance & Finance', icon: '&#128176;', files: [
+      { name: 'Hull & Machinery Policy 2026',       type:'pdf',  date:'2026-01-01', size:'3.4 MB', status:'current' },
+      { name: 'P&I Certificate 2026',               type:'pdf',  date:'2026-01-01', size:'890 KB', status:'current' },
+      { name: 'Broker Agreement — Camper & Nicholsons', type:'pdf', date:'2025-11-15', size:'1.2 MB', status:null },
+      { name: 'Vessel Valuation 2025',              type:'pdf',  date:'2025-06-20', size:'4.7 MB', status:null },
+      { name: 'Loss History Report',                type:'xlsx', date:'2026-01-10', size:'94 KB',  status:null },
+    ]},
+    charter:  { label: 'Charter Documents', icon: '&#9875;', files: [
+      { name: 'MYBA Charter Agreement Template',         type:'docx', date:'2025-08-01', size:'210 KB', status:null },
+      { name: 'Bermuda Charter — Day Agreement May 2026',type:'pdf',  date:'2026-04-12', size:'480 KB', status:'current' },
+      { name: 'APA Tracking Sheet — May 2026',          type:'xlsx', date:'2026-05-01', size:'62 KB',  status:null },
+      { name: 'Guest Preference Forms — May 2026',      type:'pdf',  date:'2026-04-30', size:'310 KB', status:null },
+      { name: 'Standard Terms & Conditions',            type:'pdf',  date:'2025-01-01', size:'980 KB', status:null },
+      { name: 'Mediterranean Charter Draft — Sep 2026', type:'pdf',  date:'2026-04-18', size:'390 KB', status:null },
+    ]},
+    crew:     { label: 'Crew Documents', icon: '&#128100;', files: [
+      { name: 'Crew List — May 2026',                 type:'pdf',  date:'2026-04-28', size:'190 KB', status:null },
+      { name: 'Romain Castillo — Master\'s Certificate', type:'pdf', date:'2024-09-15', size:'560 KB', status:'current' },
+      { name: 'Dmitri Koval — Chief Engineer CoC',   type:'pdf',  date:'2025-03-20', size:'480 KB', status:'current' },
+      { name: 'STCW Certificates — All Crew',        type:'pdf',  date:'2025-06-01', size:'2.1 MB', status:'expiring' },
+      { name: 'Crew Contracts 2026',                 type:'pdf',  date:'2026-01-01', size:'1.7 MB', status:null },
+      { name: 'Medical Certificates',                type:'pdf',  date:'2025-09-01', size:'890 KB', status:'current' },
+    ]},
+    nav:      { label: 'Navigation', icon: '&#127758;', files: [
+      { name: 'Caribbean Chart Portfolio — C-MAP',    type:'pdf',  date:'2026-04-01', size:'44.8 MB', status:'current' },
+      { name: 'Bermuda Harbour Guide',                type:'pdf',  date:'2025-01-01', size:'8.4 MB',  status:null },
+      { name: 'Pilot Book — Eastern Caribbean Vol 1', type:'pdf',  date:'2024-06-15', size:'15.2 MB', status:null },
+      { name: 'Passage Plan — Anguilla to Bermuda',   type:'pdf',  date:'2026-05-01', size:'1.1 MB',  status:'current' },
+      { name: 'Waypoint Library 2026',                type:'xlsx', date:'2026-01-08', size:'78 KB',   status:null },
+    ]},
+  };
+
+  let activeFilesFolder = 'certs';
+
+  function renderFiles(folder) {
+    activeFilesFolder = folder;
+    const sidebar   = document.getElementById('files-sidebar');
+    const titleEl   = document.getElementById('files-folder-title');
+    const tblEl     = document.getElementById('files-tbl');
+    if (!sidebar || !tblEl) return;
+
+    sidebar.innerHTML = Object.entries(filesData).map(([key, f]) =>
+      `<div class="files-folder${key === activeFilesFolder ? ' active' : ''}" onclick="renderFiles('${key}')">
+        <span class="files-folder-icon">${f.icon}</span>
+        <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.label}</span>
+        <span class="files-folder-count">${f.files.length}</span>
+      </div>`
+    ).join('');
+
+    const fd = filesData[folder];
+    titleEl.textContent = fd.label;
+
+    const statusBadge = s => {
+      if (!s) return '';
+      const m = { current:'file-status-current', expiring:'file-status-expiring', expired:'file-status-expired' };
+      const l = { current:'Current', expiring:'Expiring', expired:'Expired' };
+      return `<span class="file-status-badge ${m[s]}">${l[s]}</span>`;
+    };
+
+    tblEl.innerHTML = `<thead><tr>
+      <th style="width:100%">Name</th>
+      <th style="width:120px">Date</th>
+      <th style="width:80px">Size</th>
+      <th style="width:90px">Status</th>
+      <th style="width:60px"></th>
+    </tr></thead><tbody>${fd.files.map(f => {
+      const d = new Date(f.date + 'T00:00');
+      const dateStr = d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+      return `<tr>
+        <td><div class="file-name-cell">
+          <div class="file-type-icon ${f.type}">${f.type}</div>
+          <span class="file-name-text">${f.name}</span>
+        </div></td>
+        <td style="color:var(--txt3);font-size:12px">${dateStr}</td>
+        <td style="color:var(--txt3);font-size:12px;font-family:var(--mono)">${f.size}</td>
+        <td>${statusBadge(f.status)}</td>
+        <td><button class="file-action">View</button></td>
+      </tr>`;
+    }).join('')}</tbody>`;
+  }
+  window.renderFiles = renderFiles;
+
+  // Re-render when navigating to pages
+  document.addEventListener('DOMContentLoaded', () => {
+    const base = window.navTo;
+    window.navTo = function(pageId, el) {
+      base(pageId, el);
+      if (pageId === 'calendar')    renderCalendar();
+      if (pageId === 'sops')        renderSops(activeSopCat);
+      if (pageId === 'files')       renderFiles(activeFilesFolder);
+      if (pageId === 'pms')         renderPMS();
+      if (pageId === 'logbook')     renderLogbook();
+      if (pageId === 'fleet')       renderFleet();
+      if (pageId === 'checklists')  renderChecklists();
+    };
+  });
+})();
+
+/* ── ASSETS RENDERER ── */
+window.Assets = {
+  _active: null,
+  render() {
+    const wrap = document.getElementById('assets-list-wrap');
+    if (!wrap) return;
+    const assets = FM.assets || [];
+    wrap.innerHTML = `
+      <div class="parts-list-hdr">
+        <span>Assets register</span>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Add asset coming soon')">+ Add asset</button>
+      </div>
+      <table class="tbl" style="font-size:12px">
+        <thead><tr>
+          <th style="width:48px"></th>
+          <th>Asset</th>
+          <th style="width:110px">Zone</th>
+          <th style="width:110px">System</th>
+          <th style="width:120px">Make / Model</th>
+          <th style="width:100px">Last service</th>
+          <th style="width:80px">Status</th>
+        </tr></thead>
+        <tbody>
+          ${assets.map(a => {
+            const sc = a.status==='attention'?'stock-out':a.status==='due-soon'?'stock-low':'stock-ok';
+            const sl = a.status==='attention'?'Attention':a.status==='due-soon'?'Due soon':'OK';
+            return `<tr onclick="Assets.select('${a.id}')" class="${Assets._active===a.id?'selected':''}">
+              <td style="padding:8px 10px">
+                <div class="part-thumb" style="background:${a.photoColor||'#252524'}">
+                  <span style="font-size:15px">${a.photoIcon||'⚙'}</span>
+                </div>
+              </td>
+              <td><div class="tbl-title">${a.name}</div><div class="tbl-sub">${a.serial}</div></td>
+              <td class="c-txt2 t-11">${a.zone}</td>
+              <td class="c-txt2 t-11">${a.system}</td>
+              <td class="c-txt2 t-11">${a.make} ${a.model}</td>
+              <td class="tbl-mono t-11">${a.lastService}</td>
+              <td><span class="stock-badge ${sc}">${sl}</span></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+    if (this._active) this.select(this._active);
+    else if (assets.length) this.select(assets[0].id);
+  },
+  select(id) {
+    this._active = id;
+    const a = FM.assets ? FM.assets.find(x => x.id === id) : null;
+    if (!a) return;
+    document.querySelectorAll('#assets-list-wrap tbody tr').forEach(r => r.classList.remove('selected'));
+    const row = document.querySelector(`#assets-list-wrap tbody tr[onclick*="${id}"]`);
+    if (row) row.classList.add('selected');
+    const sc = a.status==='attention'?'stock-out':a.status==='due-soon'?'stock-low':'stock-ok';
+    const sl = a.status==='attention'?'Attention':a.status==='due-soon'?'Due soon':'OK';
+    const relParts = (FM.parts||[]).filter(p => (a.parts||[]).includes(p.id));
+    const vendor = a.vendor ? (FM.vendors||[]).find(v => v.id === a.vendor) : null;
+    const detail = document.getElementById('assets-detail');
+    if (!detail) return;
+    detail.innerHTML = `
+      <div class="part-detail-photo" style="background:${a.photoColor||'#252524'}">
+        <span style="font-size:52px">${a.photoIcon||'⚙'}</span>
+        <div class="part-detail-sku">${a.serial}</div>
+      </div>
+      <div class="part-detail-body">
+        <div class="part-detail-name">${a.name}</div>
+        <div class="part-detail-supplier">${a.make} ${a.model} · ${a.year}</div>
+        <span class="stock-badge ${sc}" style="display:inline-flex;margin-top:6px">${sl}</span>
+        <div class="part-detail-grid">
+          ${Object.entries(a.specs||{}).map(([k,v]) => `
+            <div class="part-detail-item"><div class="part-detail-lbl">${k}</div><div>${v}</div></div>`).join('')}
+          <div class="part-detail-item"><div class="part-detail-lbl">Zone</div><div>${a.zone}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">System</div><div>${a.system}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Last service</div><div>${a.lastService}</div></div>
+          <div class="part-detail-item"><div class="part-detail-lbl">Next service</div><div>${a.nextService}</div></div>
+          ${vendor ? `<div class="part-detail-item" style="grid-column:1/-1"><div class="part-detail-lbl">Service vendor</div><div>${vendor.name} · ${vendor.contact} · ${vendor.phone}</div></div>` : ''}
+        </div>
+        ${a.notes ? `<div style="font-size:12px;color:var(--txt2);background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r8);padding:12px 14px;margin-bottom:14px;line-height:1.7">${a.notes}</div>` : ''}
+        ${relParts.length ? `
+          <div class="part-detail-lbl" style="margin-bottom:8px">Parts on this asset (${relParts.length})</div>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+            ${relParts.map(p => `
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r6);cursor:pointer" onclick="navTo('parts',document.querySelector('[data-page=parts]'));setTimeout(()=>Parts.select('${p.id}'),80)">
+                <div class="part-thumb" style="background:${p.photoColor};width:24px;height:24px;font-size:12px">${p.photoIcon}</div>
+                <div style="flex:1;font-size:12px;color:var(--txt)">${p.name}</div>
+                <div class="tbl-mono t-11">${p.sku}</div>
+                <span class="stock-badge ${p.qty===0?'stock-out':p.qty<=p.min?'stock-low':'stock-ok'}">${p.qty} ${p.unit}</span>
+              </div>`).join('')}
+          </div>` : ''}
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Edit asset coming soon')">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Work order created')">Work order</button>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Service history coming soon')">Service history</button>
+        </div>
+      </div>`;
+  }
+};
+
+/* ── CHECKLIST RENDERER ── */
+let _clActive = null;
+const _clChecked = {};
+function renderChecklists(id) {
+  const sidebar = document.getElementById('cl-sidebar');
+  const main    = document.getElementById('cl-main');
+  if (!sidebar || !main) return;
+  const lists = FM.checklists || [];
+  const categories = [...new Set(lists.map(c => c.category))];
+  if (!_clActive && lists.length) _clActive = lists[0].id;
+  if (id) _clActive = id;
+  sidebar.innerHTML = `
+    <div class="logbook-sidebar-hdr">
+      <span>Library</span>
+      <button class="btn btn-primary btn-sm" onclick="showToast('Custom checklist editor coming soon')">+ Create</button>
+    </div>
+    ${categories.map(cat => `
+      <div class="sec-lbl" style="padding:12px 12px 4px">${cat}</div>
+      ${lists.filter(c => c.category === cat).map(c => `
+        <div class="logbook-entry-row${c.id === _clActive ? ' active' : ''}" onclick="renderChecklists('${c.id}')" style="display:flex;align-items:center;gap:10px">
+          ${c.photo ? `<div style="font-size:18px;flex-shrink:0;width:24px;text-align:center">${c.photo}</div>` : ''}
+          <div style="min-width:0">
+            <div style="font-size:12px;font-weight:500;color:var(--txt);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+            <div style="font-size:10px;color:var(--txt3)">${c.steps.length} steps${c.estimatedTime?' · '+c.estimatedTime:''}</div>
+          </div>
+        </div>`).join('')}
+    `).join('')}
+    <div class="sec-lbl" style="padding:12px 12px 4px">My saved</div>
+    <div style="padding:12px 16px;font-size:12px;color:var(--txt3)">No custom checklists yet.<br>Duplicate a library checklist to start.</div>`;
+  const checklist = lists.find(c => c.id === _clActive);
+  if (!checklist) return;
+  const checked = _clChecked[checklist.id] || {};
+  const doneCount = checklist.steps.filter((_, i) => checked[i]).length;
+  const pct = checklist.steps.length ? Math.round(doneCount / checklist.steps.length * 100) : 0;
+  main.innerHTML = `
+    <div class="logbook-main-hdr" style="align-items:center">
+      <div>
+        <div class="logbook-main-date">${checklist.name}</div>
+        <div class="logbook-main-loc">${checklist.category} · ${checklist.steps.length} steps · ${checklist.scope==='charter'?'Charter only':'All vessels'}</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Checklist added to work order')">+ Work order</button>
+        <button class="btn btn-ghost btn-sm" onclick="showToast('Duplicated to My saved')">Duplicate</button>
+        <button class="btn btn-ghost btn-sm" onclick="delete _clChecked['${checklist.id}'];renderChecklists('${checklist.id}')">Reset</button>
+        <button class="btn btn-primary btn-sm" onclick="showToast('Exported to PDF')">Export PDF</button>
+      </div>
+    </div>
+    ${(checklist.photo||checklist.partNumber||checklist.estimatedTime) ? `
+    <div style="display:flex;align-items:center;gap:16px;padding:12px 24px;background:var(--bg2);border-bottom:.5px solid var(--bd)">
+      ${checklist.photo ? `<div style="width:48px;height:48px;border-radius:var(--r8);background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0">${checklist.photo}</div>` : ''}
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        ${checklist.estimatedTime ? `<div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Est. time</div><div style="font-size:12px;color:var(--txt)">${checklist.estimatedTime}</div></div>` : ''}
+        ${checklist.partNumber ? `<div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Part number</div><div style="font-size:12px;color:var(--txt);font-family:var(--mono)">${checklist.partNumber}</div></div>` : ''}
+        <div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Scope</div><div style="font-size:12px;color:var(--txt)">${checklist.scope==='charter'?'Charter only':'All vessels'}</div></div>
+      </div>
+    </div>` : ''}
+    <div style="padding:16px 24px 0">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+        <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${pct===100?'var(--grn)':'var(--or)'};border-radius:3px;transition:width .3s"></div>
+        </div>
+        <span style="font-size:12px;color:${pct===100?'var(--grn)':'var(--txt2)'};font-weight:500;white-space:nowrap">${doneCount} / ${checklist.steps.length}</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:5px;padding-bottom:24px">
+        ${checklist.steps.map((step, i) => `
+          <div onclick="clToggle('${checklist.id}',${i})" style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:${checked[i]?'var(--bg2)':'var(--bg3)'};border:.5px solid ${checked[i]?'var(--grn-bd)':'var(--bd)'};border-radius:var(--r8);cursor:pointer;transition:all .15s">
+            <div style="width:18px;height:18px;border-radius:4px;border:.5px solid ${checked[i]?'var(--grn)':'var(--bd3)'};background:${checked[i]?'var(--grn)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">
+              ${checked[i] ? '<svg viewBox="0 0 12 12" fill="none" stroke="#080808" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>' : ''}
+            </div>
+            <span style="font-size:13px;color:${checked[i]?'var(--txt3)':'var(--txt)'};${checked[i]?'text-decoration:line-through;':''}flex:1;line-height:1.5">${step}</span>
+          </div>`).join('')}
+      </div>
+    </div>`;
+}
+function clToggle(clId, idx) {
+  if (!_clChecked[clId]) _clChecked[clId] = {};
+  _clChecked[clId][idx] = !_clChecked[clId][idx];
+  renderChecklists(_clActive);
+}
+window.renderChecklists = renderChecklists;
+window.clToggle = clToggle;
+
+/* ── NOTIFICATIONS ── */
+function toggleNotifPanel(e) {
+  if (e) e.stopPropagation();
+  const panel = document.getElementById('notif-panel');
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  if (!isOpen) {
+    renderNotifPanel();
+    setTimeout(() => document.addEventListener('click', _closeNotif, {once:true}), 0);
+  }
+}
+function _closeNotif(e) {
+  const panel = document.getElementById('notif-panel');
+  const btn   = document.getElementById('notif-btn');
+  if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  } else {
+    document.addEventListener('click', _closeNotif, {once:true});
+  }
+}
+function renderNotifPanel() {
+  const list = document.getElementById('notif-list');
+  if (!list) return;
+  const notifs = FM.notifications || [];
+  if (!notifs.length) { list.innerHTML = '<div style="padding:20px;text-align:center;color:var(--txt3);font-size:12px">No notifications</div>'; return; }
+  list.innerHTML = notifs.map(n => `
+    <div class="notif-item${n.read ? '' : ' unread'}">
+      <div class="notif-item-icon ${n.type==='alert'?'notif-alert':'notif-info'}">${n.type==='alert'?'⚠':'ℹ'}</div>
+      <div class="notif-item-body">
+        <div class="notif-item-title">${n.title}</div>
+        <div class="notif-item-sub">${n.sub}</div>
+        <div class="notif-item-time">${n.time}</div>
+      </div>
+    </div>`).join('');
+}
+function markAllRead() {
+  (FM.notifications||[]).forEach(n => n.read = true);
+  const ct = document.getElementById('notif-count');
+  if (ct) ct.style.display = 'none';
+  renderNotifPanel();
+}
+window.toggleNotifPanel = toggleNotifPanel;
+window.markAllRead = markAllRead;
+document.addEventListener('DOMContentLoaded', () => {
+  const unread = (FM.notifications||[]).filter(n => !n.read).length;
+  const ct = document.getElementById('notif-count');
+  if (ct) { ct.textContent = unread; ct.style.display = unread ? '' : 'none'; }
+});
+
+/* ── PMS DETAIL DRAWER ── */
+function openPMSDetail(id) {
+  const t = (FM.pms||[]).find(x => x.id === id);
+  if (!t) return;
+  const sc = t.status==='overdue'?'pms-status-overdue':t.status==='due-soon'?'pms-status-duesoon':'pms-status-upcoming';
+  const sl = t.status==='overdue'?'Overdue':t.status==='due-soon'?'Due soon':'Upcoming';
+  const assigneeName = FM.crewName ? FM.crewName(t.assignee) : t.assignee;
+  const hasHours = t.dueHours != null && t.currentHours != null && t.lastHours != null;
+  const hoursLeft = hasHours ? t.dueHours - t.currentHours : null;
+  const dueStr = hoursLeft != null ? (hoursLeft >= 0 ? hoursLeft+' hrs remaining' : Math.abs(hoursLeft)+' hrs overdue') : (t.dueDate ? 'Due '+t.dueDate : '');
+  openModal(`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+      <div class="pms-task-dot ${sc}" style="width:12px;height:12px;flex-shrink:0"></div>
+      <div>
+        <div style="font-size:17px;font-weight:500;color:var(--txt)">${t.task}</div>
+        <div style="font-size:12px;color:var(--txt3)">${t.system} · ${t.asset}</div>
+      </div>
+      <span class="badge ${sc}" style="margin-left:auto">${sl}</span>
+    </div>
+    <div class="part-detail-grid" style="margin-bottom:18px">
+      <div class="part-detail-item"><div class="part-detail-lbl">Interval</div><div>${t.interval}</div></div>
+      <div class="part-detail-item"><div class="part-detail-lbl">Assignee</div><div>${assigneeName}</div></div>
+      ${t.lastDate?`<div class="part-detail-item"><div class="part-detail-lbl">Last done</div><div>${t.lastDate}</div></div>`:''}
+      ${hasHours?`<div class="part-detail-item"><div class="part-detail-lbl">Current hrs</div><div>${t.currentHours?.toLocaleString()}</div></div>`:''}
+      ${hasHours?`<div class="part-detail-item"><div class="part-detail-lbl">Due at hrs</div><div>${t.dueHours?.toLocaleString()}</div></div>`:''}
+      <div class="part-detail-item"><div class="part-detail-lbl">Due</div><div style="color:${t.status==='overdue'?'var(--red)':t.status==='due-soon'?'var(--yel)':'var(--txt)'}">${dueStr}</div></div>
+      ${t.wo?`<div class="part-detail-item"><div class="part-detail-lbl">Work order</div><div style="color:var(--or);cursor:pointer" onclick="closeModal();setTimeout(()=>WO.openPanel('${t.wo}'),80)">${t.wo} ↗</div></div>`:''}
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="closeModal();showToast('Work order created from PMS task')">Create work order</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal();showToast('Marked as complete')">Mark complete</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+    </div>`);
+}
+window.openPMSDetail = openPMSDetail;
+
+/* ── LOGBOOK ENTRY MODAL ── */
+function openLogbookEntry() {
+  const today = new Date().toISOString().split('T')[0];
+  const crew = FM.crew || [];
+  openModal(`
+    <div style="font-size:17px;font-weight:500;color:var(--txt);margin-bottom:18px">New logbook entry</div>
+    <div class="inp-row">
+      <div class="inp-group"><label class="inp-lbl">Date</label><input class="inp" type="date" id="lb-date" value="${today}"></div>
+      <div class="inp-group"><label class="inp-lbl">Watch officer</label>
+        <select class="inp" id="lb-watch">
+          ${crew.map(c=>`<option value="${c.id}">${c.name} — ${c.role}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group"><label class="inp-lbl">Status</label>
+        <select class="inp" id="lb-status">
+          <option value="at-anchor">At anchor</option>
+          <option value="berthed">Berthed</option>
+          <option value="underway">Underway</option>
+        </select>
+      </div>
+      <div class="inp-group"><label class="inp-lbl">Location</label><input class="inp" id="lb-location" placeholder="e.g. Gustavia, St. Barths — harbour"></div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group"><label class="inp-lbl">Position</label><input class="inp" id="lb-pos" placeholder="17°54'N 62°51'W"></div>
+      <div class="inp-group"><label class="inp-lbl">Weather</label><input class="inp" id="lb-weather" placeholder="NE 12kt, sunny, 29°C"></div>
+    </div>
+    <div class="inp-row" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="inp-group"><label class="inp-lbl">Port eng hrs</label><input class="inp" type="number" id="lb-port" placeholder="3047"></div>
+      <div class="inp-group"><label class="inp-lbl">Stbd eng hrs</label><input class="inp" type="number" id="lb-stbd" placeholder="3041"></div>
+      <div class="inp-group"><label class="inp-lbl">Generator hrs</label><input class="inp" type="number" id="lb-gen" placeholder="8847"></div>
+    </div>
+    <div class="inp-group" style="margin-bottom:18px"><label class="inp-lbl">Notes</label><textarea class="inp" id="lb-notes" style="min-height:90px" placeholder="Daily summary, events, observations..."></textarea></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="saveLogbookEntry()">Save entry</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+    </div>`);
+}
+function saveLogbookEntry() {
+  const entry = {
+    id: 'lb'+(Date.now()),
+    vessel: App.currentVesselId === 'all' ? 'v1' : App.currentVesselId,
+    date: document.getElementById('lb-date').value,
+    watch: document.getElementById('lb-watch').value,
+    portHrs: parseFloat(document.getElementById('lb-port').value)||0,
+    stbdHrs: parseFloat(document.getElementById('lb-stbd').value)||0,
+    genHrs: parseFloat(document.getElementById('lb-gen').value)||0,
+    position: document.getElementById('lb-pos').value,
+    location: document.getElementById('lb-location').value,
+    weather: document.getElementById('lb-weather').value,
+    status: document.getElementById('lb-status').value,
+    notes: document.getElementById('lb-notes').value,
+  };
+  FM.logbook.unshift(entry);
+  closeModal();
+  _logActive = entry.id;
+  renderLogbook();
+  showToast('Logbook entry saved', 'ok');
+}
+window.openLogbookEntry = openLogbookEntry;
+window.saveLogbookEntry = saveLogbookEntry;
+
+/* ── GENERIC MODAL ── */
+function openModal(html) {
+  let overlay = document.getElementById('app-modal-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'app-modal-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px';
+    overlay.onclick = e => { if (e.target === overlay) closeModal(); };
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `<div style="background:var(--bg3);border:.5px solid var(--bd2);border-radius:var(--r12);padding:24px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.7)">${html}</div>`;
+  overlay.style.display = 'flex';
+}
+function closeModal() {
+  const o = document.getElementById('app-modal-overlay');
+  if (o) o.style.display = 'none';
+}
+window.openModal = openModal;
+window.closeModal = closeModal;
+
+/* ── WO TEMPLATES ── */
+FM.woTemplates = [
+  { id:'wt1', system:'Propulsion',   icon:'⚙️', name:'Engine oil & filter change',       team:'engineering', priority:'medium', steps:['Warm engine to operating temp','Drain oil — port/stbd sump','Replace oil filter','Refill with specified grade oil','Run engine and check for leaks','Log hours and date in maintenance record'] },
+  { id:'wt2', system:'Propulsion',   icon:'⚙️', name:'Raw water impeller replacement',    team:'engineering', priority:'medium', steps:['Close raw water sea cock','Remove pump cover','Extract old impeller — inspect for damage','Install new impeller with lubrication','Replace gasket/cover','Open sea cock — check flow','Log replacement date and hours'] },
+  { id:'wt3', system:'Propulsion',   icon:'⚙️', name:'Fuel filter replacement',           team:'engineering', priority:'medium', steps:['Isolate fuel supply','Remove primary and secondary filters','Bleed air from fuel system','Reinstall new filters','Prime and restart engine','Check for leaks','Log in maintenance record'] },
+  { id:'wt4', system:'PWC / Tender', icon:'🚤', name:'Sea-Doo fuel filter change',        team:'deck',        priority:'low',    steps:['Remove seat and access fuel tank','Disconnect fuel lines from filter','Remove filter bracket screws','Install new fuel filter — note flow direction','Reconnect fuel lines — check for leaks','Reinstall seat','Run engine — confirm operation','Log at:__hrs'] },
+  { id:'wt5', system:'PWC / Tender', icon:'🚤', name:'Sea-Doo 100-hour service',          team:'deck',        priority:'low',    steps:['Flush engine with fresh water (5 min)','Change oil and oil filter','Replace spark plugs (2x BRP part)','Inspect and clean wear ring','Check hull and hull drain plugs','Inspect handlebar connections','Test all functions — forward, reverse, trim','Log service date and hours'] },
+  { id:'wt6', system:'PWC / Tender', icon:'🚤', name:'Tender annual service — outboard',  team:'deck',        priority:'low',    steps:['Flush with fresh water 15 min','Change lower unit gear oil','Replace water pump impeller','Replace fuel filter','Inspect throttle and steering cables','Check and torque propeller nut','Service and lubricate throttle body','Full systems test on water','Update service sticker'] },
+  { id:'wt7', system:'Electrical',   icon:'⚡', name:'Generator service — 250hr',         team:'engineering', priority:'medium', steps:['Change oil and filter','Replace fuel filter','Check and clean air filter','Inspect zinc anodes (if raw-water cooled)','Test load bank or run at full load 30 min','Check exhaust backpressure','Log hours and date'] },
+  { id:'wt8', system:'Systems',      icon:'💧', name:'Watermaker membrane flush',         team:'engineering', priority:'low',    steps:['Bypass production output to drain','Flush membranes with fresh water 20 min','Apply pickling solution if idle >72h','Close all valves','Log flush date'] },
+  { id:'wt9', system:'Safety',       icon:'🧯', name:'Monthly safety equipment check',    team:'deck',        priority:'high',   steps:['EPIRB: check hydrostatic release date and battery','Life raft: check hydrostatic release date','Flares: inspect quantity and expiry','Fire extinguishers: check pressure gauges','Life jackets: inspect lights and whistle','Smoke / CO detectors: test all units','First aid kit: check and restock if needed','Log in safety record book'] },
+  { id:'wt10',system:'Deck',         icon:'🪣', name:'Teak deck recaulk — board repair',  team:'deck',        priority:'low',    steps:['Sand damaged seam clean and dry','Remove old caulk completely','Mask adjacent teak boards','Apply new marine caulk — Sikaflex or equivalent','Tool to smooth finish','Allow 24h cure before use','Inspect and mark any other boards needing attention'] },
+];
+
+function renderWOTemplates() {
+  const sidebar = document.getElementById('cl-sidebar');
+  const main    = document.getElementById('cl-main');
+  if (!sidebar || !main) return;
+  // We render this in the checklists tab as a sub-view, triggered separately
+  // Actually just use the existing modal pattern
+  const systems = [...new Set(FM.woTemplates.map(t => t.system))];
+  openModal(`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div style="font-size:17px;font-weight:500;color:var(--txt)">Work order templates</div>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    ${systems.map(sys => `
+      <div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px">${sys}</div>
+      ${FM.woTemplates.filter(t=>t.system===sys).map(t=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r8);margin-bottom:4px">
+          <span style="font-size:20px">${t.icon}</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:500;color:var(--txt)">${t.name}</div>
+            <div style="font-size:10px;color:var(--txt3)">${t.team} · ${t.steps.length} steps</div>
+          </div>
+          <span class="badge b-${t.priority}">${FM.priorityLabel(t.priority)}</span>
+          <button class="btn btn-ghost btn-xs" onclick="closeModal();createWOFromTemplate('${t.id}')">Use</button>
+        </div>`).join('')}
+    `).join('')}`);
+}
+function createWOFromTemplate(id) {
+  const t = FM.woTemplates.find(x => x.id === id);
+  if (!t) return;
+  // Pre-fill the new WO modal if it exists, else just show toast
+  showToast('Template loaded — complete work order details');
+}
+window.renderWOTemplates = renderWOTemplates;
+window.createWOFromTemplate = createWOFromTemplate;
+</script>
+
+</body>
+</html>

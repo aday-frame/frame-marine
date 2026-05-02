@@ -1,0 +1,810 @@
+/* ── FRAME MARINE — CHARTER MODULE ── */
+'use strict';
+
+const Charter = window.Charter = {};
+
+Charter.selectedId = null;
+Charter.activeTab  = 'overview';
+
+/* ── ENTRY POINT ── */
+Charter.render = function() {
+  const charters = Charter._visible();
+  if (!Charter.selectedId || !charters.find(c => c.id === Charter.selectedId)) {
+    Charter.selectedId = charters.length ? charters[0].id : null;
+  }
+  Charter.renderSidebar();
+  Charter.renderDetail();
+};
+
+Charter._visible = function() {
+  const all = FM.charters.filter(c =>
+    App.currentVesselId === 'all' || c.vessel === App.currentVesselId
+  );
+  const order = { active: 0, upcoming: 1, completed: 2 };
+  return all.sort((a, b) =>
+    (order[a.status] - order[b.status]) || new Date(b.start) - new Date(a.start)
+  );
+};
+
+/* ── SIDEBAR: charter list ── */
+Charter.renderSidebar = function() {
+  const wrap = document.getElementById('charter-sb');
+  if (!wrap) return;
+
+  const charters = Charter._visible();
+
+  wrap.innerHTML = `
+    <div style="padding:0 4px 8px">
+      <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"
+              onclick="showToast('New charter — contact your broker to begin')">+ New charter</button>
+    </div>
+    ${charters.map(c => {
+      const sel = Charter.selectedId === c.id;
+      const statusColor = c.status === 'active' ? 'var(--pur)' : c.status === 'upcoming' ? 'var(--or)' : 'var(--txt4)';
+      const statusLabel = c.status === 'active' ? '● Active' : c.status === 'upcoming' ? 'Upcoming' : 'Done';
+      const [title] = c.name.split(' — ');
+      return `
+        <div class="ni${sel ? ' active' : ''}" onclick="Charter.select('${c.id}')"
+             style="flex-direction:column;align-items:stretch;gap:3px;height:auto;padding:10px 10px;cursor:pointer">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+            <span style="font-size:12px;font-weight:500;color:var(--txt);line-height:1.3;flex:1;min-width:0"
+                  class="truncate">${escHtml(title)}</span>
+            <span style="font-size:9px;font-weight:600;color:${statusColor};white-space:nowrap;flex-shrink:0">${statusLabel}</span>
+          </div>
+          <div style="font-size:10px;color:var(--txt3)">${_fmtMD(c.start)} – ${_fmtMD(c.end)}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:10px;color:var(--txt4)">$${(c.fee / 1000).toFixed(0)}k · ${c.broker.split(' ')[0]}</span>
+            ${c.guests.length ? `<span style="font-size:10px;color:var(--txt4)">${c.guests.length} guests</span>` : ''}
+          </div>
+        </div>`;
+    }).join('')}
+  `;
+};
+
+Charter.select = function(id) {
+  Charter.selectedId = id;
+  Charter.activeTab  = 'overview';
+  Charter.renderSidebar();
+  Charter.renderDetail();
+};
+
+/* ── DETAIL PANEL ── */
+Charter.renderDetail = function() {
+  const wrap = document.getElementById('charter-detail');
+  if (!wrap) return;
+
+  const c = Charter.selectedId ? FM.charters.find(x => x.id === Charter.selectedId) : null;
+  if (!c) {
+    wrap.innerHTML = `<div class="empty" style="padding:80px 0"><div class="empty-title">Select a charter</div></div>`;
+    return;
+  }
+
+  const openReqs = FM.guestRequests.filter(r => r.charter === c.id && r.status === 'open').length;
+
+  const outstandingPayments = c.quote ? c.quote.payments.filter(p => !p.paid).length : 0;
+  const tabs = [
+    { id: 'overview',   label: 'Overview' },
+    { id: 'guests',     label: c.guests.length ? `Guests (${c.guests.length})` : 'Guests' },
+    { id: 'itinerary',  label: 'Itinerary' },
+    { id: 'requests',   label: openReqs ? `Requests (${openReqs})` : 'Requests' },
+    { id: 'documents',  label: `Documents (${c.documents.length})` },
+    { id: 'booking',    label: outstandingPayments ? `Booking (${outstandingPayments} due)` : 'Booking' },
+  ];
+
+  const statusStyle = c.status === 'active'
+    ? 'background:var(--pur-bg);color:var(--pur);border-color:var(--pur-bd)'
+    : '';
+  const statusLabel = c.status === 'active' ? '● Active' : c.status === 'upcoming' ? 'Upcoming' : 'Completed';
+  const badgeClass  = c.status === 'active' ? '' : c.status === 'upcoming' ? 'b-open' : 'b-done';
+
+  wrap.innerHTML = `
+    <!-- Header -->
+    <div style="border-bottom:.5px solid var(--bd);padding:18px 24px 0;flex-shrink:0">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px">
+        <div style="min-width:0;flex:1">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+            <span class="badge ${badgeClass}" style="${statusStyle}">${statusLabel}</span>
+            <span style="font-size:11px;color:var(--txt3)">${escHtml(c.broker)}</span>
+          </div>
+          <div style="font-size:20px;font-weight:500;color:var(--txt);margin-bottom:4px">${escHtml(c.name)}</div>
+          <div style="font-size:12px;color:var(--txt3)">
+            ${_fmtDateLong(c.start)} → ${_fmtDateLong(c.end)}
+            <span style="color:var(--bd2);margin:0 4px">·</span>
+            <span style="color:var(--txt2)">${escHtml(c.embark)}</span>
+            <span style="color:var(--txt3);margin:0 4px">→</span>
+            <span style="color:var(--txt2)">${escHtml(c.disembark)}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0">
+          <div style="text-align:right">
+            <div style="font-size:22px;font-weight:300;color:var(--pur)">$${(c.fee / 1000).toFixed(0)}k</div>
+            <div style="font-size:10px;color:var(--txt3)">charter fee</div>
+          </div>
+          ${c.status === 'active'
+            ? `<button class="btn btn-sm" style="background:var(--pur);color:#080808;font-weight:600"
+                       onclick="window.open('guest.html','_blank')">Guest portal ↗</button>`
+            : ''}
+        </div>
+      </div>
+      <!-- Tab bar -->
+      <div style="display:flex;gap:0;margin:0 -24px;padding:0 24px">
+        ${tabs.map(t => `
+          <button onclick="Charter.switchTab('${t.id}')"
+                  style="padding:7px 14px;font-size:12px;
+                         font-weight:${Charter.activeTab === t.id ? '600' : '400'};
+                         color:${Charter.activeTab === t.id ? 'var(--txt)' : 'var(--txt3)'};
+                         border:none;background:none;cursor:pointer;white-space:nowrap;
+                         border-bottom:2px solid ${Charter.activeTab === t.id ? 'var(--or)' : 'transparent'};
+                         margin-bottom:-1px">
+            ${t.label}
+          </button>`).join('')}
+      </div>
+    </div>
+    <!-- Tab content -->
+    <div id="charter-tab-content" style="padding:20px 24px;overflow-y:auto;flex:1"></div>
+  `;
+
+  Charter._renderTab();
+};
+
+Charter.switchTab = function(tab) {
+  Charter.activeTab = tab;
+  Charter.renderDetail();
+};
+
+Charter._renderTab = function() {
+  const fn = {
+    overview:  Charter.renderOverview,
+    guests:    Charter.renderGuests,
+    itinerary: Charter.renderItinerary,
+    requests:  Charter.renderRequests,
+    documents: Charter.renderDocuments,
+    booking:   Charter.renderBooking,
+  }[Charter.activeTab];
+  if (fn) fn();
+};
+
+/* ── OVERVIEW TAB ── */
+Charter.renderOverview = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  const openReqs  = FM.guestRequests.filter(r => r.charter === c.id && r.status === 'open').length;
+  const totalDays = Math.round((new Date(c.end) - new Date(c.start)) / 86400000);
+  const pctSpent  = c.apa > 0 ? Math.min(100, Math.round(c.apaSpent / c.apa * 100)) : 0;
+
+  const apaBreakdown = c.apaSpent > 0 ? [
+    { cat: 'Fuel',                   pct: 0.50 },
+    { cat: 'Provisioning',           pct: 0.31 },
+    { cat: 'Port fees',              pct: 0.10 },
+    { cat: 'Watersports equipment',  pct: 0.05 },
+    { cat: 'Crew gratuity advance',  pct: 0.04 },
+  ].map(e => ({ ...e, amount: Math.round(c.apaSpent * e.pct) })) : [];
+
+  wrap.innerHTML = `
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+      ${[
+        { lbl: 'Guests', val: c.guests.length || '—', sub: 'on board' },
+        { lbl: 'Days', val: totalDays, sub: 'total' },
+        { lbl: 'Open requests', val: openReqs || '—', sub: 'from guests', hi: openReqs > 0 },
+        { lbl: 'APA remaining',
+          val: '$' + ((c.apa - c.apaSpent) / 1000).toFixed(1) + 'k',
+          sub: 'of $' + (c.apa / 1000).toFixed(0) + 'k' },
+      ].map(s => `
+        <div class="stat" style="border:.5px solid var(--bd);border-radius:10px">
+          <div class="stat-lbl">${s.lbl}</div>
+          <div class="stat-val" style="${s.hi ? 'color:var(--or)' : ''}">${s.val}</div>
+          <div class="stat-lbl">${s.sub}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- APA tracker -->
+    <div class="dash-section-title">APA tracker</div>
+    <div class="card" style="padding:16px;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div>
+          <span style="font-size:20px;font-weight:300;color:var(--txt)">$${c.apaSpent.toLocaleString()}</span>
+          <span style="font-size:12px;color:var(--txt3)"> spent of $${c.apa.toLocaleString()} APA</span>
+        </div>
+        <span style="font-size:13px;color:var(--pur)">$${(c.apa - c.apaSpent).toLocaleString()} remaining</span>
+      </div>
+      <div style="background:var(--bg4);border-radius:4px;height:6px;margin-bottom:14px">
+        <div style="width:${pctSpent}%;height:6px;border-radius:4px;background:var(--pur)"></div>
+      </div>
+      ${apaBreakdown.length ? apaBreakdown.map(e => `
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    padding:7px 0;border-bottom:.5px solid var(--bd);font-size:12px">
+          <span class="c-txt2">${e.cat}</span>
+          <span style="font-family:var(--mono);color:var(--txt)">$${e.amount.toLocaleString()}</span>
+        </div>
+      `).join('') : `<div style="font-size:12px;color:var(--txt3);text-align:center;padding:6px">No APA expenses logged yet</div>`}
+    </div>
+
+    <!-- Details -->
+    <div class="dash-section-title">Charter details</div>
+    <div class="card" style="padding:0 16px">
+      ${[
+        { lbl: 'Embark port',    val: c.embark },
+        { lbl: 'Disembark port', val: c.disembark },
+        { lbl: 'Broker',         val: c.broker },
+        { lbl: 'Broker contact', val: c.brokerContact.replace(/<[^>]+>/g, '').trim() },
+      ].map(r => `
+        <div style="display:flex;gap:16px;padding:9px 0;border-bottom:.5px solid var(--bd);font-size:12px">
+          <span style="width:110px;color:var(--txt3);flex-shrink:0">${r.lbl}</span>
+          <span class="c-txt2">${escHtml(r.val)}</span>
+        </div>
+      `).join('')}
+    </div>
+  `;
+};
+
+/* ── GUESTS TAB ── */
+Charter.renderGuests = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  if (!c.guests.length) {
+    wrap.innerHTML = `<div class="empty"><div class="empty-title">No guests added yet</div>
+      <div class="empty-sub">Guest preference sheets will appear here once submitted</div></div>`;
+    return;
+  }
+
+  const guests = c.guests.map(id => FM.charterGuest(id)).filter(Boolean);
+
+  const dietRows = [
+    { label: 'Vegetarian',      test: g => g.dietary.toLowerCase().includes('vegetarian') },
+    { label: 'Vegan',           test: g => g.dietary.toLowerCase().includes('vegan') },
+    { label: 'Pescatarian',     test: g => g.dietary.toLowerCase().includes('pescatarian') },
+    { label: 'No alcohol',      test: g => g.preferences.toLowerCase().includes('no alcohol') },
+    { label: 'Nut allergy',     test: g => g.allergies.toLowerCase().includes('nut') },
+    { label: 'Shellfish allergy', test: g => g.allergies.toLowerCase().includes('shellfish') },
+    { label: 'Gluten-free',     test: g => g.allergies.toLowerCase().includes('gluten') },
+    { label: 'Dairy-free',      test: g => g.allergies.toLowerCase().includes('dairy') },
+  ].map(r => ({ ...r, guests: guests.filter(r.test).map(g => g.name) }))
+   .filter(r => r.guests.length);
+
+  wrap.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:24px">
+      ${guests.map(g => `
+        <div class="card" style="padding:16px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="width:40px;height:40px;border-radius:50%;background:${g.color};
+                 display:flex;align-items:center;justify-content:center;
+                 font-size:13px;font-weight:700;color:#080808;flex-shrink:0">${g.initials}</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--txt)">${escHtml(g.name)}</div>
+              <div style="font-size:11px;color:var(--txt3)">${escHtml(g.relation)} · ${escHtml(g.cabin)}</div>
+            </div>
+          </div>
+          ${[
+            { lbl: 'Dietary',   val: g.dietary,     warn: false },
+            { lbl: 'Allergies', val: g.allergies,    warn: g.allergies !== 'None' },
+            { lbl: 'Notes',     val: g.preferences,  warn: false },
+          ].map(row => `
+            <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-top:.5px solid var(--bd)">
+              <span style="font-size:10px;width:56px;color:var(--txt3);flex-shrink:0;padding-top:1px">${row.lbl}</span>
+              <span style="font-size:11px;color:${row.warn ? 'var(--red)' : 'var(--txt2)'};line-height:1.5">${escHtml(row.val)}</span>
+            </div>
+          `).join('')}
+        </div>
+      `).join('')}
+    </div>
+
+    ${dietRows.length ? `
+      <div class="dash-section-title">Dietary summary</div>
+      <div class="card" style="padding:0 16px">
+        ${dietRows.map(r => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;
+                      border-bottom:.5px solid var(--bd);font-size:12px">
+            <span class="badge" style="background:var(--pur-bg);color:var(--pur);flex-shrink:0">${r.label}</span>
+            <span class="c-txt2">${r.guests.join(', ')}</span>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+  `;
+};
+
+/* ── ITINERARY TAB ── */
+Charter.renderItinerary = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  if (!c.itinerary.length) {
+    wrap.innerHTML = `<div class="empty"><div class="empty-title">No itinerary confirmed yet</div>
+      <div class="empty-sub">Itinerary will appear here once agreed with the broker</div></div>`;
+    return;
+  }
+
+  const today = '2026-05-01';
+
+  wrap.innerHTML = `
+    <div style="max-width:660px">
+      ${c.itinerary.map((day, i) => {
+        const isPast    = day.date < today;
+        const isCurrent = day.date === today;
+        return `
+          <div style="display:flex;gap:16px">
+            <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:28px">
+              <div style="width:11px;height:11px;border-radius:50%;flex-shrink:0;margin-top:18px;
+                   background:${isCurrent ? 'var(--pur)' : isPast ? 'var(--grn)' : 'var(--bg5)'};
+                   border:.5px solid ${isCurrent ? 'var(--pur-bd)' : isPast ? 'var(--grn-bd)' : 'var(--bd2)'};
+                   box-shadow:${isCurrent ? '0 0 0 3px var(--pur-bg)' : 'none'}"></div>
+              ${i < c.itinerary.length - 1
+                ? `<div style="width:1px;flex:1;min-height:8px;background:${isPast ? 'var(--grn-bd)' : 'var(--bd2)'};margin:3px 0"></div>`
+                : ''}
+            </div>
+            <div style="flex:1;padding:12px 0 ${i < c.itinerary.length - 1 ? '4px' : '0'}">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                <span style="font-size:10px;font-family:var(--mono);color:${isCurrent ? 'var(--pur)' : 'var(--txt3)'}">
+                  ${_fmtDateFull(day.date)}
+                </span>
+                ${isCurrent ? `<span class="badge" style="background:var(--pur-bg);color:var(--pur);font-size:9px">TODAY</span>` : ''}
+                ${isPast ? `<span style="font-size:10px;color:var(--grn)">✓</span>` : ''}
+              </div>
+              <div style="font-size:14px;font-weight:500;color:${isPast ? 'var(--txt2)' : 'var(--txt)'};margin-bottom:4px">
+                ${escHtml(day.location)}
+              </div>
+              <div style="font-size:12px;color:var(--txt3);line-height:1.6">${escHtml(day.notes)}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>
+  `;
+};
+
+/* ── REQUESTS TAB ── */
+Charter.renderRequests = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  const reqs = FM.guestRequests.filter(r => r.charter === c.id);
+  if (!reqs.length) {
+    wrap.innerHTML = `<div class="empty"><div class="empty-title">No guest requests</div>
+      <div class="empty-sub">Requests from guests via the portal will appear here</div></div>`;
+    return;
+  }
+
+  const open = reqs.filter(r => r.status === 'open');
+  const done = reqs.filter(r => r.status === 'done');
+  const typeColors = {
+    'F&B': 'var(--pur)', 'Watersports': 'var(--blu)',
+    'Wellness': 'var(--grn)', 'Excursion': 'var(--yel)', 'Other': 'var(--txt3)',
+  };
+
+  const reqHTML = list => list.map(r => {
+    const g    = FM.charterGuest(r.guest);
+    const crew = FM.getCrew(r.assignee);
+    const tc   = typeColors[r.type] || 'var(--txt3)';
+    return `
+      <div class="card" style="padding:14px 16px;margin-bottom:8px;${r.status === 'open' ? 'border-color:var(--pur-bd)' : ''}">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="width:32px;height:32px;border-radius:50%;background:${g?.color || '#555'};
+               display:flex;align-items:center;justify-content:center;
+               font-size:10px;font-weight:700;color:#080808;flex-shrink:0">${g?.initials || '?'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+              <span style="font-size:12px;font-weight:500;color:var(--txt)">${g?.name || 'Guest'}</span>
+              <span style="font-size:10px;color:var(--txt3)">${r.time}</span>
+              <span class="badge" style="background:${tc}20;color:${tc};font-size:9px">${r.type}</span>
+            </div>
+            <div style="font-size:13px;color:var(--txt2);line-height:1.6;margin-bottom:8px">${escHtml(r.text)}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              ${crew ? `<span style="font-size:11px;color:var(--txt3)">→ ${crew.name}</span>` : ''}
+              <div style="margin-left:auto;display:flex;gap:6px">
+                ${r.status === 'open' ? `
+                  <button class="btn btn-ghost btn-xs" onclick="Charter.resolveRequest('${r.id}')">Mark done</button>
+                  <button class="btn btn-xs" style="background:var(--pur);color:#080808;font-weight:600"
+                          onclick="WO.openNewModal()">Create WO</button>
+                ` : `<span style="font-size:11px;color:var(--grn)">✓ Done</span>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  wrap.innerHTML = `
+    ${open.length ? `<div class="dash-section-title">Open — needs action</div>${reqHTML(open)}` : ''}
+    ${done.length ? `<div class="dash-section-title"${open.length ? ' style="margin-top:16px"' : ''}>Resolved</div>${reqHTML(done)}` : ''}
+  `;
+};
+
+Charter.resolveRequest = function(id) {
+  const r = FM.guestRequests.find(x => x.id === id);
+  if (r) r.status = 'done';
+  Charter.renderRequests();
+  showToast('Request marked done', 'ok');
+};
+
+/* ── DOCUMENTS TAB ── */
+Charter.renderDocuments = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  const iconMap = {
+    contract:    `<path d="M4 1h8a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V3a2 2 0 012-2zm1 4h6v1H5V5zm0 3h6v1H5V8zm0 3h4v1H5v-1z"/>`,
+    finance:     `<path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 4v.75H10a.75.75 0 010 1.5H8.75V9h1a.75.75 0 010 1.5H8.75V11a.75.75 0 01-1.5 0v-.5H6a.75.75 0 010-1.5h1.25V7.25H6a.75.75 0 010-1.5h1.25V5a.75.75 0 011.5 0z"/>`,
+    regulatory:  `<path d="M8 1l1.5 3.5L13 5l-2.5 2.5.5 3.5L8 9l-3 2 .5-3.5L3 5l3.5-.5L8 1z"/>`,
+    safety:      `<path d="M8 1L2 4v5c0 3.5 2.5 6.5 6 7.5C14 15.5 14 9 14 9V4L8 1z"/>`,
+    preferences: `<path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/>`,
+  };
+
+  wrap.innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:8px;max-width:540px">
+      ${c.documents.map(doc => `
+        <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color var(--t1)"
+             onmouseenter="this.style.borderColor='var(--pur-bd)'" onmouseleave="this.style.borderColor=''">
+          <div style="width:34px;height:34px;border-radius:8px;background:var(--pur-bg);border:.5px solid var(--pur-bd);
+               display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 16 16" fill="var(--pur)" style="width:13px;height:13px">
+              ${iconMap[doc.type] || iconMap.contract}
+            </svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div class="truncate" style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px">${escHtml(doc.name)}</div>
+            <div style="font-size:11px;color:var(--txt3)">
+              ${doc.date
+                ? _fmtDateLong(doc.date)
+                : `<span style="color:var(--or)">Pending</span>`}
+            </div>
+          </div>
+          <div style="flex-shrink:0">
+            ${doc.date
+              ? `<span style="font-size:10px;color:var(--grn)">✓ Filed</span>`
+              : `<button class="btn btn-ghost btn-xs" onclick="showToast('Upload — coming soon')">Upload</button>`}
+          </div>
+        </div>
+      `).join('')}
+      <button class="btn btn-ghost btn-sm" style="margin-top:4px;width:100%;justify-content:center"
+              onclick="showToast('Add document — coming soon')">+ Add document</button>
+    </div>
+
+    <div style="margin-top:24px;max-width:540px">
+      <div class="dash-section-title">Broker</div>
+      <div class="card" style="padding:14px 16px">
+        <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px">${escHtml(c.broker)}</div>
+        <div style="font-size:12px;color:var(--txt3)">${escHtml(c.brokerContact)}</div>
+      </div>
+    </div>
+  `;
+};
+
+/* ── BOOKING TAB ── */
+Charter.renderBooking = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  const q = c.quote;
+  if (!q) {
+    wrap.innerHTML = `<div class="empty"><div class="empty-title">No quote yet</div>
+      <div class="empty-sub">Create a quote to start the booking process</div>
+      <button class="btn btn-sm" style="margin-top:12px" onclick="showToast('Quote builder — coming soon')">+ Create quote</button></div>`;
+    return;
+  }
+
+  const statuses = ['draft','sent','accepted','deposit_paid','confirmed','completed'];
+  const statusLabels = { draft:'Draft', sent:'Sent', accepted:'Accepted', deposit_paid:'Deposit In', confirmed:'Confirmed', completed:'Complete' };
+  const statusColors = { draft:'var(--txt4)', sent:'var(--or)', accepted:'var(--pur)', deposit_paid:'var(--blu)', confirmed:'var(--grn)', completed:'var(--grn)' };
+  const currentIdx = statuses.indexOf(q.status);
+
+  const apaAlloc = [
+    { cat: 'Fuel & lubricants',              pct: 45 },
+    { cat: 'Provisioning & beverages',       pct: 30 },
+    { cat: 'Port dues & marina fees',        pct: 12 },
+    { cat: 'Water toys & watersports hire',  pct:  5 },
+    { cat: 'Communications & satellite',     pct:  4 },
+    { cat: 'Miscellaneous / crew advance',   pct:  4 },
+  ].map(a => ({ ...a, amount: Math.round(c.apa * a.pct / 100) }));
+
+  const totalPaid       = q.payments.filter(p => p.paid).reduce((s, p) => s + p.amount, 0);
+  const totalOutstanding = q.payments.filter(p => !p.paid).reduce((s, p) => s + p.amount, 0);
+  const pendingCharter  = q.payments.filter(p => !p.paid && p.wire === 'charter').reduce((s, p) => s + p.amount, 0);
+  const pendingAPA      = q.payments.filter(p => !p.paid && p.wire === 'apa').reduce((s, p) => s + p.amount, 0);
+  const vessel          = FM.vessels.find(v => v.id === c.vessel) || {};
+
+  const actionBtn = () => {
+    if (q.status === 'draft')        return `<button class="btn btn-sm" style="background:var(--or);color:#080808;font-weight:600" onclick="Charter.sendQuote()">Send quote →</button>`;
+    if (q.status === 'sent')         return `<button class="btn btn-sm" style="background:var(--pur);color:#080808;font-weight:600" onclick="Charter.acceptQuote()">Mark accepted</button>`;
+    if (q.status === 'accepted')     return `<button class="btn btn-sm" style="background:var(--blu);color:#080808;font-weight:600" onclick="Charter.markDepositPaid()">Mark deposit received</button>`;
+    if (q.status === 'deposit_paid') return `<button class="btn btn-sm" style="background:var(--grn);color:#080808;font-weight:600" onclick="Charter.markConfirmed()">Mark balance received</button>`;
+    return '';
+  };
+
+  wrap.innerHTML = `
+    <!-- Status workflow -->
+    <div class="card" style="padding:14px 18px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:0">
+          ${statuses.filter(s => s !== 'completed').map((s, i) => {
+            const done = i <= currentIdx && q.status !== 'draft' || s === q.status;
+            const past = i < currentIdx;
+            const curr = s === q.status;
+            const col  = past || curr ? statusColors[s] : 'var(--bd2)';
+            return `
+              ${i > 0 ? `<div style="flex-shrink:0;width:24px;height:1px;background:${past ? statusColors[statuses[i-1]] : 'var(--bd2)'}"></div>` : ''}
+              <div style="display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0">
+                <div style="width:8px;height:8px;border-radius:50%;
+                     background:${past || curr ? col : 'var(--bg4)'};
+                     border:.5px solid ${col};
+                     ${curr ? 'box-shadow:0 0 0 3px '+col+'25' : ''}"></div>
+                <span style="font-size:9px;font-weight:${curr?'700':'400'};color:${past||curr?col:'var(--txt4)'};white-space:nowrap">${statusLabels[s]}</span>
+              </div>`;
+          }).join('')}
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          ${actionBtn()}
+          <button class="btn btn-ghost btn-sm" onclick="Charter._emailQuote()">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:12px;height:12px"><path d="M1 3.5l7 4.5 7-4.5M1 3.5h14v9H1z"/></svg>
+            Email
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('PDF export — coming soon')">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:12px;height:12px"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
+            PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quote document -->
+    <div class="quote-doc" style="margin-bottom:16px;max-width:700px">
+
+      <!-- Doc header -->
+      <div class="quote-doc-hdr">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px">
+          <div>
+            <div style="font-size:9px;font-weight:700;color:var(--pur);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Charter Quotation</div>
+            <div style="font-size:19px;font-weight:500;color:var(--txt)">${escHtml(c.name)}</div>
+            <div style="font-size:12px;color:var(--txt3);margin-top:3px">${_fmtDateLong(c.start)} – ${_fmtDateLong(c.end)}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:1px">${escHtml(c.embark)} → ${escHtml(c.disembark)} · ${c.guests.length || '?'} guests</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-size:10px;color:var(--txt3)">Ref: <span style="font-family:var(--mono)">${q.ref}</span></div>
+            <div style="font-size:10px;color:var(--txt3);margin-top:1px">Issued ${_fmtDateLong(q.issued)}</div>
+            <div style="font-size:10px;color:var(--txt3);margin-top:8px;font-weight:500">${escHtml(vessel.name || '')}</div>
+            <div style="font-size:10px;color:var(--txt3)">${escHtml(vessel.type || '')} · ${escHtml(vessel.loa || '')}</div>
+            <div style="font-size:10px;color:var(--txt3)">Flag: ${escHtml(vessel.flag || '')}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fee breakdown -->
+      <div class="quote-doc-section">
+        <div class="quote-section-lbl">Charter fee breakdown</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--bd)">
+          <span style="font-size:12px;color:var(--txt2)">Charter fee — gross, MYBA standard terms</span>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--txt)">$${c.fee.toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:.5px solid var(--bd)">
+          <div>
+            <div style="font-size:12px;color:var(--txt2)">APA — Advance Provisioning Allowance</div>
+            <div style="font-size:10px;color:var(--txt3);margin-top:2px">${Math.round(c.apa / c.fee * 100)}% of charter fee · spent at cost, unused portion refunded</div>
+          </div>
+          <span style="font-family:var(--mono);font-size:13px;color:var(--txt)">$${c.apa.toLocaleString()}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0">
+          <span style="font-size:14px;font-weight:600;color:var(--txt)">Total charter package</span>
+          <span style="font-family:var(--mono);font-size:18px;font-weight:300;color:var(--pur)">$${(c.fee + c.apa).toLocaleString()}</span>
+        </div>
+      </div>
+
+      <!-- APA breakdown -->
+      <div class="quote-doc-section">
+        <div class="quote-section-lbl">APA allocation — estimated at time of quote ($${c.apa.toLocaleString()} total)</div>
+        <div style="font-size:10px;color:var(--txt3);margin-bottom:10px;line-height:1.5">
+          The APA is advanced to the captain and held in a dedicated account. All expenditure is receipted.
+          A full APA statement is provided within 48 hours of disembarkation. Unspent balance is refunded directly to the charter party.
+        </div>
+        ${apaAlloc.map(a => `
+          <div style="display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:.5px solid var(--bd)">
+            <span style="font-size:11px;color:var(--txt2);flex:1">${escHtml(a.cat)}</span>
+            <div style="width:70px;height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;flex-shrink:0">
+              <div style="height:100%;width:${a.pct}%;background:var(--pur);border-radius:2px"></div>
+            </div>
+            <span style="font-size:10px;color:var(--txt3);width:26px;text-align:right;flex-shrink:0">${a.pct}%</span>
+            <span style="font-family:var(--mono);font-size:11px;color:var(--txt);width:62px;text-align:right;flex-shrink:0">~$${a.amount.toLocaleString()}</span>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Payment schedule -->
+      <div class="quote-doc-section">
+        <div class="quote-section-lbl">Payment schedule</div>
+        ${q.payments.map(p => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--bd);gap:10px">
+            <div style="flex:1">
+              <div style="font-size:12px;color:var(--txt2)">${escHtml(p.label)}</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:1px">
+                Due: ${_fmtDateLong(p.due)}${p.paid && p.paidDate ? ` · Received ${_fmtDateLong(p.paidDate)}` : ''}
+              </div>
+            </div>
+            <span style="font-family:var(--mono);font-size:13px;color:var(--txt);flex-shrink:0">$${p.amount.toLocaleString()}</span>
+            ${p.paid
+              ? `<span style="font-size:10px;color:var(--grn);font-weight:600;flex-shrink:0">✓ Paid</span>`
+              : `<span class="badge b-open" style="flex-shrink:0">Outstanding</span>`}
+          </div>
+        `).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
+          <span style="font-size:11px;color:var(--txt3)">Total outstanding</span>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:500;color:${totalOutstanding > 0 ? 'var(--or)' : 'var(--grn)'}">
+            ${totalOutstanding > 0 ? '$' + totalOutstanding.toLocaleString() : '✓ All received'}
+          </span>
+        </div>
+      </div>
+
+      <!-- Terms -->
+      <div class="quote-doc-section" style="border-bottom:none;padding-bottom:20px">
+        <div class="quote-section-lbl">Terms & conditions</div>
+        <div style="font-size:10px;color:var(--txt3);line-height:1.7">
+          ${[
+            'Governed by the MYBA Charter Agreement (latest edition). All amounts in USD.',
+            '50% deposit due within 7 days of signing to secure the booking.',
+            'Balance due no later than 30 days before embarkation date.',
+            'APA advance transferred to captain\'s account no later than embarkation date.',
+            'Cancellation: 50% of charter fee retained within 60 days; 100% within 30 days of charter start.',
+            'The vessel carries full P&I, hull & machinery, and passenger liability insurance.',
+            'Applicable port taxes and local dues charged to APA at cost.',
+            'This quotation is valid for 21 days from the date of issue.',
+          ].map(t => `<div style="display:flex;gap:8px;padding:2px 0"><span style="color:var(--pur);flex-shrink:0">·</span>${escHtml(t)}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <!-- Wire transfer instructions -->
+    <div class="quote-section-lbl" style="margin-bottom:10px">Wire transfer instructions</div>
+
+    <div class="wire-box" style="margin-bottom:10px;max-width:700px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px">
+        <div>
+          <div style="font-size:9px;font-weight:700;color:var(--pur);text-transform:uppercase;letter-spacing:.12em">Wire 1 — Charter fee</div>
+          ${pendingCharter > 0
+            ? `<div style="font-size:12px;color:var(--or);font-weight:500;margin-top:3px">$${pendingCharter.toLocaleString()} outstanding</div>`
+            : `<div style="font-size:11px;color:var(--grn);margin-top:3px">✓ All payments received</div>`}
+        </div>
+        <button class="btn btn-ghost btn-xs" onclick="Charter._copyWire(1)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:10px;height:10px"><path d="M10 2H3v10h7V2zM6 2V1h7v10h-2"/></svg>
+          Copy
+        </button>
+      </div>
+      ${[
+        { lbl: 'Pay to',          val: q.wireCharter.accountName, mono: false },
+        { lbl: 'Bank',            val: q.wireCharter.bank + ', ' + q.wireCharter.city, mono: false },
+        { lbl: 'IBAN',            val: q.wireCharter.iban,         mono: true },
+        { lbl: 'SWIFT / BIC',     val: q.wireCharter.swift,        mono: true },
+        { lbl: 'Reference',       val: q.wireCharter.ref,          mono: true },
+      ].map(r => `
+        <div style="display:flex;gap:14px;padding:5px 0;border-top:.5px solid var(--bd)">
+          <span style="font-size:10px;color:var(--txt3);width:90px;flex-shrink:0;padding-top:1px">${r.lbl}</span>
+          <span style="font-size:11px;color:var(--txt);font-family:${r.mono ? 'var(--mono)' : 'inherit'};letter-spacing:${r.mono ? '.02em' : 'normal'}">${escHtml(r.val)}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="wire-box" style="max-width:700px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:10px">
+        <div>
+          <div style="font-size:9px;font-weight:700;color:var(--pur);text-transform:uppercase;letter-spacing:.12em">Wire 2 — APA advance</div>
+          ${pendingAPA > 0
+            ? `<div style="font-size:12px;color:var(--or);font-weight:500;margin-top:3px">$${pendingAPA.toLocaleString()} outstanding</div>`
+            : `<div style="font-size:11px;color:var(--grn);margin-top:3px">✓ APA advance received</div>`}
+        </div>
+        <button class="btn btn-ghost btn-xs" onclick="Charter._copyWire(2)">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:10px;height:10px"><path d="M10 2H3v10h7V2zM6 2V1h7v10h-2"/></svg>
+          Copy
+        </button>
+      </div>
+      ${[
+        { lbl: 'Pay to',      val: q.wireAPA.accountName,              mono: false },
+        { lbl: 'Bank',        val: q.wireAPA.bank + ', ' + q.wireAPA.city, mono: false },
+        { lbl: 'IBAN',        val: q.wireAPA.iban,                     mono: true },
+        { lbl: 'SWIFT / BIC', val: q.wireAPA.swift,                    mono: true },
+        { lbl: 'Reference',   val: q.wireAPA.ref,                      mono: true },
+      ].map(r => `
+        <div style="display:flex;gap:14px;padding:5px 0;border-top:.5px solid var(--bd)">
+          <span style="font-size:10px;color:var(--txt3);width:90px;flex-shrink:0;padding-top:1px">${r.lbl}</span>
+          <span style="font-size:11px;color:var(--txt);font-family:${r.mono ? 'var(--mono)' : 'inherit'};letter-spacing:${r.mono ? '.02em' : 'normal'}">${escHtml(r.val)}</span>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Acceptance banner for 'sent' status -->
+    ${q.status === 'sent' ? `
+    <div style="margin-top:16px;max-width:700px;padding:20px 24px;background:var(--pur-bg);border:.5px solid var(--pur-bd);border-radius:12px;text-align:center">
+      <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px">Charter party ready to confirm?</div>
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:14px">Clicking accept acknowledges agreement to all terms above and triggers the deposit payment schedule.</div>
+      <button class="btn" style="background:var(--pur);color:#080808;font-weight:700;padding:10px 28px;font-size:13px;border-radius:8px" onclick="Charter.acceptQuote()">
+        Accept charter agreement ✓
+      </button>
+    </div>
+    ` : ''}
+  `;
+};
+
+/* ── BOOKING ACTIONS ── */
+Charter.sendQuote = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c?.quote) return;
+  c.quote.status = 'sent';
+  c.quote.sentDate = '2026-05-01';
+  Charter.renderDetail();
+  showToast(`Quote ${c.quote.ref} sent to ${c.broker}`, 'ok');
+};
+
+Charter._emailQuote = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c) return;
+  const email = c.brokerContact.match(/<([^>]+)>/)?.[1] || c.broker;
+  showToast(`Quote emailed to ${email}`);
+};
+
+Charter.acceptQuote = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c?.quote) return;
+  c.quote.status = 'accepted';
+  c.quote.acceptedDate = '2026-05-01';
+  Charter.renderDetail();
+  Charter.renderSidebar();
+  showToast('Charter accepted — awaiting deposit', 'ok');
+};
+
+Charter.markDepositPaid = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c?.quote) return;
+  const dep = c.quote.payments.find(p => p.id === 'dep');
+  if (dep) { dep.paid = true; dep.paidDate = '2026-05-01'; }
+  c.quote.status = 'deposit_paid';
+  Charter.renderDetail();
+  Charter.renderSidebar();
+  showToast('Deposit marked received', 'ok');
+};
+
+Charter.markConfirmed = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c?.quote) return;
+  const bal = c.quote.payments.find(p => p.id === 'bal');
+  if (bal) { bal.paid = true; bal.paidDate = '2026-05-01'; }
+  c.quote.status = 'confirmed';
+  Charter.renderDetail();
+  Charter.renderSidebar();
+  showToast('Charter confirmed — balance received', 'ok');
+};
+
+Charter._copyWire = function(num) {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c?.quote) return;
+  const w = num === 1 ? c.quote.wireCharter : c.quote.wireAPA;
+  const text = [
+    `Pay to: ${w.accountName}`,
+    `Bank: ${w.bank}, ${w.city}`,
+    `IBAN: ${w.iban}`,
+    `SWIFT/BIC: ${w.swift}`,
+    `Reference: ${w.ref}`,
+  ].join('\n');
+  navigator.clipboard?.writeText(text)
+    .then(() => showToast('Wire details copied to clipboard', 'ok'))
+    .catch(() => showToast('Copy not available — please copy manually'));
+};
+
+/* ── PRIVATE HELPERS ── */
+function _fmtDateLong(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function _fmtDateFull(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
+}
+
+function _fmtMD(d) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
