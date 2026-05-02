@@ -2198,36 +2198,34 @@ function clToggle(clId, idx) {
 function clRaiseIssue(itemLabel) {
   const newId = 'WO-' + String(FM.workOrders.length + 1).padStart(3, '0');
   openModal(`
-    <div style="display:flex;flex-direction:column;gap:16px">
-      <div>
-        <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Checklist item</div>
-        <div style="font-size:13px;color:var(--txt2);background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r8);padding:10px 12px;line-height:1.5">${escHtml(itemLabel)}</div>
+    <div class="inp-group">
+      <div class="inp-lbl">Checklist item</div>
+      <div style="font-size:13px;color:var(--txt2);background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r8);padding:10px 12px;line-height:1.5">${escHtml(itemLabel)}</div>
+    </div>
+    <div class="inp-group">
+      <label class="inp-lbl" for="cl-issue-title">Work order title</label>
+      <input id="cl-issue-title" class="inp" value="Issue: ${escHtml(itemLabel)}">
+    </div>
+    <div class="inp-group">
+      <label class="inp-lbl" for="cl-issue-comment">Comment / description</label>
+      <textarea id="cl-issue-comment" class="inp" rows="3" placeholder="Describe the issue…"></textarea>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group" style="margin-bottom:0">
+        <label class="inp-lbl" for="cl-issue-priority">Priority</label>
+        <select id="cl-issue-priority" class="inp">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
       </div>
-      <div>
-        <label style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">Work order title</label>
-        <input id="cl-issue-title" class="form-input" value="Issue: ${escHtml(itemLabel)}" style="font-size:13px">
-      </div>
-      <div>
-        <label style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">Comment / description</label>
-        <textarea id="cl-issue-comment" class="form-input" rows="3" placeholder="Describe the issue…" style="font-size:13px;resize:vertical"></textarea>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <div>
-          <label style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">Priority</label>
-          <select id="cl-issue-priority" class="form-input" style="font-size:13px">
-            <option value="high">High</option>
-            <option value="medium" selected>Medium</option>
-            <option value="low">Low</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">Team</label>
-          <select id="cl-issue-team" class="form-input" style="font-size:13px">
-            <option value="engineering">Engineering</option>
-            <option value="deck" selected>Deck</option>
-            <option value="interior">Interior</option>
-          </select>
-        </div>
+      <div class="inp-group" style="margin-bottom:0">
+        <label class="inp-lbl" for="cl-issue-team">Team</label>
+        <select id="cl-issue-team" class="inp">
+          <option value="engineering">Engineering</option>
+          <option value="deck" selected>Deck</option>
+          <option value="interior">Interior</option>
+        </select>
       </div>
     </div>
   `, 'Raise issue as work order');
