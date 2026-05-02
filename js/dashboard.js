@@ -252,7 +252,7 @@ Dash.renderVessels = function() {
         const fc = fuelColor(t.fuelPct);
         const hoursToSvc = t.nextServiceHours - t.hours;
         const svcUrgent  = hoursToSvc <= 30;
-        const tWOs = (FM.wos || []).filter(w => w.vessel === v.id && w.status !== 'done' && w.zone === 'Tender Garage');
+        const tWOs = (FM.workOrders || []).filter(w => w.vessel === v.id && w.status !== 'done' && w.zone === 'Tender Garage');
         return `
         <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);overflow:hidden">
           <div style="padding:12px 14px 11px">
