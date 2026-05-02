@@ -248,6 +248,8 @@ function openModal(content, title) {
 
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
+  const footer = document.getElementById('modal-footer');
+  if (footer) footer.style.display = '';
   App.modalOpen = false;
 }
 

@@ -2353,9 +2353,9 @@ function clRaiseIssue(itemLabel) {
     </div>
     <div class="inp-group">
       <label class="inp-lbl" for="cl-issue-comment">Description</label>
-      <textarea id="cl-issue-comment" class="inp" rows="3" placeholder="Describe the issue…"></textarea>
+      <textarea id="cl-issue-comment" class="inp" rows="2" placeholder="Describe the issue…" style="min-height:60px"></textarea>
     </div>
-    <div class="inp-row">
+    <div class="inp-row" style="margin-bottom:20px">
       <div class="inp-group" style="margin-bottom:0">
         <label class="inp-lbl" for="cl-issue-priority">Priority</label>
         <select id="cl-issue-priority" class="inp">
@@ -2373,24 +2373,29 @@ function clRaiseIssue(itemLabel) {
         </select>
       </div>
     </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;padding-top:4px;border-top:.5px solid var(--bd)">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="clSubmitIssue('${newId}')">Create work order</button>
+    </div>
   `, 'Create work order');
-  document.getElementById('modal-submit').textContent = 'Create work order';
-  document.getElementById('modal-submit').onclick = () => {
-    const title    = document.getElementById('cl-issue-title').value.trim();
-    const comment  = document.getElementById('cl-issue-comment').value.trim();
-    const priority = document.getElementById('cl-issue-priority').value;
-    const team     = document.getElementById('cl-issue-team').value;
-    if (!title) { document.getElementById('cl-issue-title').style.borderColor='var(--red)'; return; }
-    FM.workOrders.push({
-      id: newId, title, status: 'open', priority, team,
-      vessel: App.currentVesselId === 'all' ? 'v1' : App.currentVesselId,
-      zone: 'General', assignees: [],
-      description: comment || ('Raised from checklist: ' + itemLabel),
-      created: new Date().toISOString().slice(0,10), due: '', tags: [],
-    });
-    closeModal();
-    showToast(newId + ' created');
-  };
+  document.getElementById('modal-footer').style.display = 'none';
+}
+
+function clSubmitIssue(newId) {
+  const title    = document.getElementById('cl-issue-title').value.trim();
+  const comment  = document.getElementById('cl-issue-comment').value.trim();
+  const priority = document.getElementById('cl-issue-priority').value;
+  const team     = document.getElementById('cl-issue-team').value;
+  if (!title) { document.getElementById('cl-issue-title').style.borderColor = 'var(--red)'; return; }
+  FM.workOrders.push({
+    id: newId, title, status: 'open', priority, team,
+    vessel: App.currentVesselId === 'all' ? 'v1' : App.currentVesselId,
+    zone: 'General', assignees: [],
+    description: comment || title,
+    created: new Date().toISOString().slice(0,10), due: '', tags: [],
+  });
+  closeModal();
+  showToast(newId + ' created');
 }
 
 function exportChecklist(clId, runId) {
@@ -2471,6 +2476,7 @@ window.clReset          = clReset;
 window.clArchive        = clArchive;
 window.clViewArchive    = clViewArchive;
 window.clRaiseIssue     = clRaiseIssue;
+window.clSubmitIssue    = clSubmitIssue;
 window.exportChecklist  = exportChecklist;
 
 /* ── NOTIFICATIONS ── */
