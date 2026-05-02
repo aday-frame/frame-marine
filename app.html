@@ -370,10 +370,8 @@
       <!-- DASHBOARD -->
       <div id="page-dashboard" class="page active">
         <div class="dash-wrap">
-          <!-- Vessel hero -->
+          <!-- Vessel hero (includes alerts panel on right) -->
           <div id="dash-hero"></div>
-          <!-- Active alerts -->
-          <div id="dash-alerts" style="display:flex;flex-direction:column;gap:8px"></div>
           <!-- Two-column: tenders | calendar -->
           <div id="dash-body-grid" style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start">
             <div id="dash-vessels"></div>
@@ -517,6 +515,7 @@
       <!-- FLEET -->
       <div id="page-fleet" class="page">
         <div class="fleet-grid" id="fleet-grid"></div>
+        <div id="fleet-wos" style="padding:0 24px 20px"></div>
         <div id="fleet-activity" style="padding:0 24px 32px"></div>
       </div>
 
@@ -970,6 +969,58 @@ function renderFleet() {
 }
 window.renderFleet = renderFleet;
 
+function renderFleetWOs() {
+  const wrap = document.getElementById('fleet-wos');
+  if (!wrap) return;
+  const vessel = FM.currentVessel();
+  if (!vessel) return;
+
+  // Open WOs for this vessel, sorted: overdue first, then by priority weight
+  const now = '2026-05-01';
+  const priW = { high: 0, medium: 1, low: 2 };
+  const wos = (FM.wos || [])
+    .filter(w => w.vessel === vessel.id && w.status !== 'done')
+    .sort((a, b) => {
+      const aOver = a.due && a.due < now ? 0 : 1;
+      const bOver = b.due && b.due < now ? 0 : 1;
+      if (aOver !== bOver) return aOver - bOver;
+      return (priW[a.priority] ?? 9) - (priW[b.priority] ?? 9);
+    })
+    .slice(0, 5);
+
+  if (!wos.length) { wrap.innerHTML = ''; return; }
+
+  wrap.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Open work orders</div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th style="width:80px">ID</th>
+          <th>Title</th>
+          <th style="width:110px">Zone</th>
+          <th style="width:80px">Priority</th>
+          <th style="width:90px">Status</th>
+          <th style="width:80px">Due</th>
+        </tr></thead>
+        <tbody>
+          ${wos.map(w => {
+            const overdue = w.due && w.status !== 'done' && w.due < now;
+            const dueStr  = w.due ? `<span style="color:${overdue ? 'var(--red)' : 'var(--txt2)'}">${w.due.slice(5).replace('-','/')}</span>` : '<span class="c-txt3">—</span>';
+            return `<tr onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)" style="cursor:pointer">
+              <td class="tbl-mono">${w.id}</td>
+              <td><div class="tbl-title">${escHtml(w.title)}</div></td>
+              <td class="c-txt2 t-11">${w.zone}</td>
+              <td><span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span></td>
+              <td>${WO.statusBadge(w.status)}</td>
+              <td>${dueStr}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+window.renderFleetWOs = renderFleetWOs;
+
 function renderFleetLog() {
   const wrap = document.getElementById('fleet-activity');
   if (!wrap) return;
@@ -1045,6 +1096,7 @@ function submitFleetHours(craftId) {
   FM.fleetLog.unshift({ id: 'fl' + Date.now(), craftId, type: 'hours', date: today, crew: 'c5', hours, note });
   closeModal();
   renderFleet();
+  renderFleetWOs();
   renderFleetLog();
   showToast('Hours logged');
 }
@@ -1089,6 +1141,7 @@ function submitFleetFuel(craftId) {
   FM.fleetLog.unshift({ id: 'fl' + Date.now(), craftId, type: 'fuel', date: today, crew: 'c5', litres, cost, fuelPct: isNaN(fuelPct) ? (craft ? craft.fuelPct : 0) : fuelPct, note });
   closeModal();
   renderFleet();
+  renderFleetWOs();
   renderFleetLog();
   showToast('Fuel logged');
 }
@@ -1124,6 +1177,7 @@ function submitFleetCharge(craftId) {
   FM.fleetLog.unshift({ id: 'fl' + Date.now(), craftId, type: 'charge', date: today, crew: 'c5', fuelPct: isNaN(fuelPct) ? 100 : fuelPct, note });
   closeModal();
   renderFleet();
+  renderFleetWOs();
   renderFleetLog();
   showToast('Charge logged');
 }
@@ -1831,7 +1885,7 @@ window.Chat = {
       if (pageId === 'files')       renderFiles(activeFilesFolder);
       if (pageId === 'pms')         renderPMS();
       if (pageId === 'logbook')     renderLogbook();
-      if (pageId === 'fleet')       { renderFleet(); renderFleetLog(); }
+      if (pageId === 'fleet')       { renderFleet(); renderFleetWOs(); renderFleetLog(); }
       if (pageId === 'checklists')  renderChecklists();
     };
   });

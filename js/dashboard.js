@@ -48,52 +48,58 @@ Dash.renderHero = function() {
 
   const hasAlert = critSensors > 0;
 
-  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg2').trim() || '#111';
-
   wrap.innerHTML = `
-    <div class="vessel-hero">
-      <div class="vessel-hero-img-wrap">
-        ${v.photo ? `<img class="vessel-hero-img" src="${v.photo}" alt="${v.name}" onerror="this.style.display='none'">` : ''}
-        <div class="vessel-hero-gradient"></div>
-        <div class="vessel-hero-meta">
-          <div style="display:flex;align-items:center;gap:7px;margin-bottom:auto">
-            <span style="width:7px;height:7px;border-radius:50%;background:${v.color};display:inline-block;flex-shrink:0"></span>
-            <span style="font-size:11px;color:rgba(255,255,255,.5)">${v.flag} · ${v.mmsi} · ${v.status}</span>
+    <div style="display:flex;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;height:195px">
+
+      <!-- Photo -->
+      ${v.photo ? `
+      <div style="width:260px;flex-shrink:0;overflow:hidden">
+        <img src="${v.photo}" alt="${v.name}" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block" onerror="this.parentElement.style.display='none'">
+      </div>` : ''}
+
+      <!-- Center: name + stats + crew -->
+      <div style="flex:1;min-width:0;padding:18px 22px;display:flex;flex-direction:column;justify-content:space-between;border-left:.5px solid var(--bd)">
+        <div>
+          <div style="font-size:22px;font-weight:600;color:var(--txt);letter-spacing:-.02em;line-height:1;margin-bottom:4px">${v.name}</div>
+          <div style="font-size:12px;color:var(--txt3)">${v.type} · ${v.loa} · ${v.port}</div>
+        </div>
+        <div style="display:flex;gap:22px">
+          <div>
+            <div style="font-size:20px;font-weight:300;color:${high ? 'var(--red)' : 'var(--txt)'};line-height:1;margin-bottom:3px">${wos.length}</div>
+            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">Open WOs</div>
           </div>
-          <span class="badge ${hasAlert ? 'b-critical' : 'b-done'}" style="position:absolute;top:18px;right:20px">
-            ${hasAlert ? '● ' + critSensors + ' alert' + (critSensors > 1 ? 's' : '') : '● All clear'}
-          </span>
-          <div style="margin-bottom:6px">
-            <div class="vessel-hero-name">${v.name}</div>
-            <div class="vessel-hero-sub">${v.type} · ${v.loa} · ${v.port}</div>
+          <div>
+            <div style="font-size:20px;font-weight:300;color:${high ? 'var(--or)' : 'var(--txt)'};line-height:1;margin-bottom:3px">${high}</div>
+            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">High priority</div>
           </div>
+          <div>
+            <div style="font-size:15px;font-weight:500;color:var(--txt);line-height:1;margin-bottom:3px">${nextEv ? fmtShort(nextEv.start) : '—'}</div>
+            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">Next charter</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
           ${crew.length ? `
-          <div style="display:flex;align-items:center;gap:10px">
+          <div style="display:flex;align-items:center;gap:8px">
             <div style="display:flex">
               ${crew.slice(0, 6).map(c => `<div class="vessel-hero-av" style="background:${c.color}" title="${c.name} — ${c.role}">${c.initials}</div>`).join('')}
             </div>
-            <span style="font-size:11px;color:rgba(255,255,255,.5)">${crew.length} onboard</span>
-          </div>` : ''}
+            <span style="font-size:11px;color:var(--txt3)">${crew.length} onboard</span>
+          </div>` : '<div></div>'}
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="width:6px;height:6px;border-radius:50%;background:${v.color};display:inline-block"></span>
+            <span style="font-size:10px;color:var(--txt4)">${v.flag} · ${v.mmsi}</span>
+          </div>
         </div>
       </div>
-      <div class="vessel-hero-stats">
-        <div class="vessel-hero-stat">
-          <div class="vessel-hero-stat-val${wos.length && high ? ' red' : ''}">${wos.length}</div>
-          <div class="vessel-hero-stat-lbl">Open WOs</div>
+
+      <!-- Right: alerts panel -->
+      <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-left:.5px solid var(--red-bd);background:var(--red-bg)">
+        <div style="padding:10px 14px 9px;border-bottom:.5px solid var(--red-bd);flex-shrink:0">
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--red)">Active alerts</div>
         </div>
-        <div class="vessel-hero-stat">
-          <div class="vessel-hero-stat-val${high ? ' or' : ''}">${high}</div>
-          <div class="vessel-hero-stat-lbl">High priority</div>
-        </div>
-        <div class="vessel-hero-stat">
-          <div class="vessel-hero-stat-val${critSensors ? ' red' : ''}">${critSensors || '—'}</div>
-          <div class="vessel-hero-stat-lbl">Sensor alerts</div>
-        </div>
-        <div class="vessel-hero-stat" style="border-right:none">
-          <div class="vessel-hero-stat-val" style="font-size:15px;font-weight:500">${nextEv ? fmtShort(nextEv.start) : '—'}</div>
-          <div class="vessel-hero-stat-lbl">Next charter</div>
-        </div>
+        <div id="dash-alerts" style="flex:1;overflow-y:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px"></div>
       </div>
+
     </div>`;
 };
 
@@ -145,27 +151,26 @@ Dash.renderAlerts = function() {
 
   if (alerts.length === 0) {
     wrap.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;
-           background:var(--grn-bg);border:.5px solid var(--grn-bd);border-radius:10px">
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center">
         <span class="dot dot-grn dot-pulse"></span>
-        <span style="font-size:13px;color:var(--grn)">All systems nominal</span>
+        <span style="font-size:11px;color:var(--grn);font-weight:500">All systems nominal</span>
       </div>`;
     return;
   }
 
   wrap.innerHTML = alerts.map(a => `
-    <div class="card-alert" style="justify-content:space-between;align-items:flex-start">
-      <div style="flex:1">
-        <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:2px">${a.title}</div>
-        <div class="alert-strip-sub">${a.sub}</div>
-        <div class="alert-strip-time" style="margin-top:3px">${a.time}</div>
+    <div style="background:rgba(239,68,68,.1);border:.5px solid var(--red-bd);border-radius:8px;padding:8px 10px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
+        <div style="min-width:0;flex:1">
+          <div style="font-size:11px;font-weight:600;color:var(--red);margin-bottom:2px;line-height:1.3">${a.title}</div>
+          <div style="font-size:10px;color:var(--txt2);line-height:1.3">${a.sub}</div>
+          <div style="font-size:9px;color:var(--txt3);margin-top:2px">${a.time}</div>
+        </div>
+        <button onclick="Dash.acknowledge('${a.key}')"
+                style="flex-shrink:0;padding:3px 8px;font-size:9px;font-weight:600;
+                       background:var(--red-bg);border:.5px solid var(--red-bd);border-radius:5px;
+                       color:var(--red);cursor:pointer;white-space:nowrap">Ack</button>
       </div>
-      <button onclick="Dash.acknowledge('${a.key}')"
-              style="flex-shrink:0;margin-left:12px;padding:4px 10px;font-size:10px;font-weight:600;
-                     background:var(--red-bg);border:.5px solid var(--red-bd);border-radius:6px;
-                     color:var(--red);cursor:pointer;white-space:nowrap">
-        Acknowledge
-      </button>
     </div>
   `).join('');
 };
