@@ -2100,33 +2100,39 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
   const isOpen  = _clNoteOpen === noteKey && !readonly;
   const esc     = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-  const metaHtml = done && entry.name
-    ? `<div style="font-size:10px;color:var(--grn);margin-top:3px;font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</div>`
-    : '';
-  const noteHtml = note && !isOpen
-    ? `<div style="font-size:11px;color:var(--txt2);background:var(--bg4);border-radius:5px;padding:5px 8px;margin-top:6px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
-    : '';
+  // Sign-off line with inline note trigger — only on checked items
+  let signOffHtml = '';
+  if (done && entry && entry.name) {
+    const noteChip = readonly ? '' : (note
+      ? `<button onclick="clOpenNote('${noteKey}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--or);font-weight:500;text-decoration:underline;text-underline-offset:2px;flex-shrink:0">✎ edit note</button>`
+      : `<button onclick="clOpenNote('${noteKey}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--txt3);font-weight:500;flex-shrink:0">+ note</button>`);
+    const noteText = note && !isOpen
+      ? `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+      : '';
+    signOffHtml = `
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
+        <span style="font-size:10px;color:var(--grn);font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</span>
+        ${noteChip}
+      </div>
+      ${noteText}`;
+  }
+
+  // Inline note editor (no event bubbling to toggle)
   const noteEditor = isOpen
     ? `<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
-        <textarea id="cl-note-${key}" class="inp" rows="2" placeholder="Add a note to this item…" style="font-size:12px;resize:none">${escHtml(note||'')}</textarea>
+        <textarea id="cl-note-${key}" class="inp" rows="2" placeholder="Add a note…" style="font-size:12px;min-height:52px;resize:none">${escHtml(note||'')}</textarea>
         <div style="display:flex;gap:6px">
-          <button onclick="clSaveNote('${clId}','${key}')" class="btn btn-primary btn-sm">Save note</button>
-          <button onclick="_clNoteOpen=null;renderChecklists(_clActive)" class="btn btn-ghost btn-sm">Cancel</button>
+          <button onclick="clSaveNote('${clId}','${key}')" class="btn btn-primary btn-sm">Save</button>
+          <button onclick="clCancelNote()" class="btn btn-ghost btn-sm">Cancel</button>
         </div>
        </div>`
     : '';
 
-  const actions = readonly ? '' : `
-    <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;margin-top:1px">
-      <button onclick="_clNoteOpen='${noteKey}';renderChecklists(_clActive)" title="Add note"
-        style="background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 8px;cursor:pointer;color:${note?'var(--or)':'var(--txt3)'};font-size:10px;font-weight:600;white-space:nowrap;transition:color .15s">
-        ${note ? 'Note ✎' : '+ Note'}
-      </button>
-      <button onclick="clRaiseIssue('${esc}')" title="Create work order"
-        style="background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--txt3);font-size:10px;font-weight:600;white-space:nowrap;transition:color .15s"
-        onmouseover="this.style.color='var(--or)';this.style.borderColor='var(--or)'"
-        onmouseout="this.style.color='var(--txt3)';this.style.borderColor='var(--bd)'">WO ↗</button>
-    </div>`;
+  // Right-side WO button only
+  const woBtn = readonly ? '' : `<button onclick="clRaiseIssue('${esc}')" title="Create work order"
+    style="flex-shrink:0;background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--txt3);font-size:10px;font-weight:600;white-space:nowrap;margin-top:1px"
+    onmouseover="this.style.color='var(--or)';this.style.borderColor='var(--or)'"
+    onmouseout="this.style.color='var(--txt3)';this.style.borderColor='var(--bd)'">WO ↗</button>`;
 
   const toggleCall = readonly ? '' : `clToggle('${clId}','${key}')`;
   return `<div style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:${done?'var(--bg2)':'var(--bg3)'};border:.5px solid ${done?'var(--grn-bd)':'var(--bd)'};border-radius:var(--r8);transition:background .15s">
@@ -2136,13 +2142,10 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
     <div style="flex:1;min-width:0">
       <div style="${readonly?'':'cursor:pointer'}" onclick="${toggleCall}">
         <span style="font-size:13px;color:${done?'var(--txt3)':'var(--txt)'};${done?'text-decoration:line-through;':''}line-height:1.5">${label}</span>
-        ${metaHtml}
       </div>
-      <div onclick="event.stopPropagation()">
-        ${noteHtml}${noteEditor}
-      </div>
+      <div onclick="event.stopPropagation()">${signOffHtml}${noteEditor}</div>
     </div>
-    ${actions}
+    ${woBtn}
   </div>`;
 }
 
@@ -2469,9 +2472,14 @@ function exportChecklist(clId, runId) {
   win.document.close();
 }
 
+function clOpenNote(noteKey)  { _clNoteOpen = noteKey; renderChecklists(_clActive); }
+function clCancelNote()       { _clNoteOpen = null;    renderChecklists(_clActive); }
+
 window.renderChecklists = renderChecklists;
 window.clToggle         = clToggle;
 window.clSaveNote       = clSaveNote;
+window.clOpenNote       = clOpenNote;
+window.clCancelNote     = clCancelNote;
 window.clReset          = clReset;
 window.clArchive        = clArchive;
 window.clViewArchive    = clViewArchive;
