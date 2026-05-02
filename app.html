@@ -2065,8 +2065,8 @@ window.Assets = {
 
 /* ── CHECKLIST RENDERER ── */
 let _clActive = null;
-let _clUser = localStorage.getItem('fm_cl_user') || '';
 const _clChecked = {};
+function _clCurrentUser() { return (FM.currentUser && FM.currentUser.name) || 'Unknown'; }
 
 function _clStepCount(c) {
   if (c.sections) return c.sections.reduce((n, s) => n + s.items.length, 0);
@@ -2189,35 +2189,9 @@ function clToggle(clId, idx) {
   if (!_clChecked[clId]) _clChecked[clId] = {};
   if (_clChecked[clId][idx]) {
     delete _clChecked[clId][idx];
-    renderChecklists(_clActive);
-    return;
+  } else {
+    _clChecked[clId][idx] = { name: _clCurrentUser(), time: new Date().toISOString() };
   }
-  const doCheck = () => {
-    _clChecked[clId][idx] = { name: _clUser, time: new Date().toISOString() };
-    renderChecklists(_clActive);
-  };
-  if (_clUser) { doCheck(); return; }
-  openModal(`
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <p style="font-size:13px;color:var(--txt2);margin:0;line-height:1.5">Enter your name so it appears beside each item you sign off.</p>
-      <input id="cl-name-inp" class="form-input" placeholder="e.g. Captain, Chief Officer…" style="font-size:14px"
-        onkeydown="if(event.key==='Enter')clNameConfirm('${clId}','${idx}')">
-    </div>
-  `, 'Sign in to checklist');
-  document.getElementById('modal-submit').textContent = 'Confirm';
-  document.getElementById('modal-submit').onclick = () => clNameConfirm(clId, idx);
-  setTimeout(() => document.getElementById('cl-name-inp')?.focus(), 80);
-}
-
-function clNameConfirm(clId, idx) {
-  const inp = document.getElementById('cl-name-inp');
-  const name = inp ? inp.value.trim() : '';
-  if (!name) { inp && (inp.style.borderColor = 'var(--red)'); return; }
-  _clUser = name;
-  localStorage.setItem('fm_cl_user', name);
-  closeModal();
-  if (!_clChecked[clId]) _clChecked[clId] = {};
-  _clChecked[clId][idx] = { name: _clUser, time: new Date().toISOString() };
   renderChecklists(_clActive);
 }
 
@@ -2356,7 +2330,6 @@ function exportChecklist(clId) {
 window.renderChecklists = renderChecklists;
 window.clToggle = clToggle;
 window.exportChecklist = exportChecklist;
-window.clNameConfirm = clNameConfirm;
 window.clRaiseIssue = clRaiseIssue;
 
 /* ── NOTIFICATIONS ── */

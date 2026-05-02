@@ -3,6 +3,8 @@
 
 const FM = window.FM = {};
 
+FM.currentUser = { name: 'Albert Day', initials: 'AJ', role: 'Owner' };
+
 /* ── VESSELS ── */
 FM.vessels = [
   {
