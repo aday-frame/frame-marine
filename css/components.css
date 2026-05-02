@@ -1,14 +1,33 @@
 /* ── FRAME MARINE — COMPONENTS ── */
 
 /* ── DASHBOARD ── */
-.dash-wrap { padding: 18px 20px; display: flex; flex-direction: column; gap: 24px; overflow-y: auto; }
-.dash-main-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
+.dash-wrap { padding: 18px 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
 .dash-section-title {
   font-size: 11px; font-weight: 600; color: var(--txt3);
   text-transform: uppercase; letter-spacing: .08em;
   margin-bottom: 12px; display: flex; align-items: center; gap: 10px;
 }
 .dash-section-title::after { content: ''; flex: 1; height: .5px; background: var(--bd); }
+
+/* Vessel hero card */
+.vessel-hero { background: var(--bg2); border: .5px solid var(--bd); border-radius: var(--r12); overflow: hidden; }
+.vessel-hero-img { position: relative; height: 240px; background-size: cover; background-position: center; }
+.vessel-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,.08) 30%, rgba(0,0,0,.65) 100%); }
+.vessel-hero-top { position: absolute; top: 14px; left: 18px; right: 18px; display: flex; justify-content: space-between; align-items: center; z-index: 1; }
+.vessel-hero-bottom { position: absolute; bottom: 18px; left: 18px; right: 18px; z-index: 1; }
+.vessel-hero-name { font-size: 26px; font-weight: 600; color: #fff; letter-spacing: -.02em; line-height: 1; text-shadow: 0 1px 8px rgba(0,0,0,.4); }
+.vessel-hero-sub { font-size: 12px; color: rgba(255,255,255,.65); margin-top: 5px; }
+.vessel-hero-stats { display: flex; align-items: center; padding: 14px 20px; }
+.vessel-hero-stat { flex: 1; padding: 0 18px; border-right: .5px solid var(--bd); }
+.vessel-hero-stat:first-child { padding-left: 0; }
+.vessel-hero-stat-val { font-size: 22px; font-weight: 300; line-height: 1; color: var(--txt); margin-bottom: 4px; }
+.vessel-hero-stat-val.red { color: var(--red); }
+.vessel-hero-stat-val.or  { color: var(--or); }
+.vessel-hero-stat-lbl { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--txt3); }
+.vessel-hero-crew { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; padding-left: 20px; }
+.vessel-hero-av { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #080808; margin-left: -10px; border: 2px solid var(--bg2); flex-shrink: 0; }
+.vessel-hero-av:first-child { margin-left: 0; }
+.vessel-hero-crew-lbl { font-size: 10px; color: var(--txt3); white-space: nowrap; }
 
 /* Alert strip */
 .alert-strip {

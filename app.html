@@ -370,23 +370,19 @@
       <!-- DASHBOARD -->
       <div id="page-dashboard" class="page active">
         <div class="dash-wrap">
-          <!-- Alerts — full width -->
-          <div>
-            <div class="dash-section-title">Active alerts</div>
-            <div id="dash-alerts" style="display:flex;flex-direction:column;gap:8px"></div>
-          </div>
-          <!-- Two-column: vessels+tenders / calendar -->
-          <div class="dash-main-grid">
-            <div>
-              <div class="dash-section-title">Vessels</div>
-              <div class="vessel-cards" id="dash-vessels"></div>
-            </div>
+          <!-- Vessel hero -->
+          <div id="dash-hero"></div>
+          <!-- Active alerts -->
+          <div id="dash-alerts" style="display:flex;flex-direction:column;gap:8px"></div>
+          <!-- Two-column: tenders | calendar -->
+          <div id="dash-body-grid" style="display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start">
+            <div id="dash-vessels"></div>
             <div id="dash-upcoming"></div>
           </div>
-          <!-- Work orders — full width -->
+          <!-- Open work orders -->
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-              <div class="dash-section-title" style="margin-bottom:0">Open work orders — Lady M</div>
+              <div class="dash-section-title" style="margin-bottom:0">Open work orders</div>
               <button class="btn btn-ghost btn-xs" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'))">View all</button>
             </div>
             <div id="dash-recent-wos" class="tbl-wrap"></div>
