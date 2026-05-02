@@ -69,14 +69,25 @@ function navTo(pageId, clickedEl) {
   };
   if (inits[pageId]) inits[pageId]();
 
-  // Close mobile sidebar
+  // Close mobile sidebar + backdrop
   document.getElementById('mob-sb')?.classList.remove('mob-open');
+  document.getElementById('mob-backdrop')?.classList.remove('open');
+
   // Sync mobile bottom nav active state
   document.querySelectorAll('.mob-nav-item[id^="mobnav-"]').forEach(b => b.classList.remove('active'));
   const mobNavBtn = document.getElementById('mobnav-' + pageId);
   if (mobNavBtn) mobNavBtn.classList.add('active');
-  // Close backdrop
-  document.getElementById('mob-backdrop')?.classList.remove('open');
+
+  // Update WO badge count
+  const woCount = (FM.openWOs(App.currentVesselId) || []).length;
+  ['sb-wo-count', 'mobnav-wo-badge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = woCount; el.style.display = woCount ? '' : 'none'; }
+  });
+
+  // Show FAB only on work-orders page
+  const fab = document.getElementById('mob-fab');
+  if (fab) fab.style.display = pageId === 'work-orders' ? '' : 'none';
 }
 
 /* ── MOBILE SIDEBAR TOGGLE ── */

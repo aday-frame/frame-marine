@@ -335,7 +335,7 @@ Dash.renderDashCal = function() {
 
   wrap.innerHTML = `
     <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;padding:14px">
-    <div style="display:grid;grid-template-columns:1fr 200px;border:.5px solid var(--bd);border-radius:var(--r10);overflow:hidden;background:var(--bg)">
+    <div class="dash-cal-inner" style="display:grid;grid-template-columns:1fr 200px;border:.5px solid var(--bd);border-radius:var(--r10);overflow:hidden;background:var(--bg)">
       <div style="display:flex;flex-direction:column;border-right:.5px solid var(--bd);overflow:hidden">
         <div class="cal-month-hdr">
           <div class="cal-month-nav">
