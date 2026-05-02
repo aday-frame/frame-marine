@@ -933,7 +933,6 @@ function renderFleet() {
     const hoursLeft = c.nextServiceHours - c.hours;
     const svcPct    = Math.max(0, Math.min(100, c.hours / c.nextServiceHours * 100));
     const svcColor  = hoursLeft <= 0 ? 'var(--red)' : hoursLeft <= 30 ? 'var(--yel)' : 'var(--or)';
-    const typeIcon  = c.type === 'PWC' ? '🚤' : c.type === 'Seabob' ? '🤿' : '⛵';
     const statusMap = { 'in-water': 'b-done', 'davits': 'b-progress', 'swim-platform': 'b-done', 'charged': 'b-done' };
     const labelMap  = { 'in-water': 'In water', 'davits': 'On davits', 'swim-platform': 'Deployed', 'charged': 'Charged' };
 
@@ -947,7 +946,6 @@ function renderFleet() {
 
     return `<div class="fleet-card">
       <div class="fleet-card-photo" style="background:linear-gradient(145deg,${c.color}22,${c.color}08)">
-        <span style="font-size:36px">${typeIcon}</span>
         <span class="badge ${statusMap[c.status] || 'b-hold'}" style="position:absolute;top:10px;right:10px;font-size:9px">${labelMap[c.status] || c.status}</span>
       </div>
       <div class="fleet-card-body">
@@ -983,8 +981,8 @@ function renderFleet() {
         </div>
 
         <!-- Work orders -->
-        <div style="border-top:.5px solid var(--bd);padding-top:10px;margin-bottom:12px">
-          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:6px">Work orders</div>
+        <div style="background:var(--bg);border:.5px solid var(--bd);border-radius:8px;padding:8px 10px;margin-bottom:12px">
+          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:7px">Work orders</div>
           ${craftWOs.length ? craftWOs.map(w => `
             <div onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)"
                  style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--bd);cursor:pointer">

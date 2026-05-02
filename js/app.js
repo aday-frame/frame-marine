@@ -351,8 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initOffline();
   navTo('dashboard');
 
-  // Register service worker
+  // Unregister any existing service workers so files always load fresh
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
   }
 });

@@ -1,7 +1,17 @@
 /* ── FRAME MARINE — SERVICE WORKER ── */
 'use strict';
 
-const CACHE = 'frame-marine-v1';
+// Self-destruct: unregister and delete all caches so fresh files always load
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll()).then(clients => clients.forEach(c => c.navigate(c.url)))
+  );
+});
+
+const CACHE = 'frame-marine-v3';
 
 const PRECACHE = [
   '/',
@@ -37,25 +47,30 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  // Network-first for API calls (future)
-  if (e.request.url.includes('/api/')) {
+  // Network-first for fonts (cache fallback)
+  if (e.request.url.includes('fonts.googleapis.com') || e.request.url.includes('fonts.gstatic.com')) {
     e.respondWith(
-      fetch(e.request)
-        .catch(() => caches.match(e.request))
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(resp => {
+          const clone = resp.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone));
+          return resp;
+        });
+      })
     );
     return;
   }
 
-  // Cache-first for everything else (shell, assets, fonts)
+  // Network-first for all local app files — always serve fresh
   e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(resp => {
+    fetch(e.request)
+      .then(resp => {
         if (!resp || resp.status !== 200 || resp.type === 'opaque') return resp;
         const clone = resp.clone();
         caches.open(CACHE).then(c => c.put(e.request, clone));
         return resp;
-      });
-    })
+      })
+      .catch(() => caches.match(e.request))
   );
 });
