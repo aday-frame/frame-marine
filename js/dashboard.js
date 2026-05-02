@@ -226,7 +226,7 @@ Dash.renderVessels = function() {
   // Single vessel: show tenders only (vessel itself is in the hero)
   if (upcoming) upcoming.style.display = '';
   const grid = document.getElementById('dash-body-grid');
-  if (grid) grid.style.gridTemplateColumns = '300px 1fr';
+  if (grid) grid.style.gridTemplateColumns = '340px 1fr';
 
   const v = FM.currentVessel();
   if (!v) { wrap.innerHTML = ''; return; }
@@ -234,7 +234,7 @@ Dash.renderVessels = function() {
   const tenders = (FM.fleet || []).filter(f => f.vessel === v.id);
   if (!tenders.length) { wrap.innerHTML = ''; return; }
 
-  const typeIcon  = t => t.type === 'PWC' ? '🚤' : t.type === 'Seabob' ? '🤿' : '⛵';
+  const typeIcon  = t => t.type === 'PWC' ? '🚤' : t.type === 'Seabob' ? '🤿' : t.type === 'Tender' ? '⛵' : '🛥️';
   const fuelColor = pct => pct < 30 ? 'var(--red)' : pct < 60 ? 'var(--yel)' : 'var(--grn)';
   const statusMap = { 'in-water': 'b-done', 'davits': 'b-progress', 'swim-platform': 'b-done', 'charged': 'b-done' };
   const labelMap  = { 'in-water': 'In water', 'davits': 'On davits', 'swim-platform': 'Deployed', 'charged': 'Charged' };
@@ -245,29 +245,48 @@ Dash.renderVessels = function() {
     <div style="display:flex;flex-direction:column;gap:8px">
       ${tenders.map(t => {
         const fc = fuelColor(t.fuelPct);
+        const hoursToSvc = t.nextServiceHours - t.hours;
+        const svcUrgent  = hoursToSvc <= 30;
+        const tWOs = (FM.wos || []).filter(w => w.vessel === v.id && w.status !== 'done' && w.zone === 'Tender Garage');
         return `
-        <div onclick="navTo('fleet',document.querySelector('[data-page=fleet]'))"
-             style="padding:14px;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);cursor:pointer;transition:background var(--t1)"
-             onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <span style="font-size:24px;flex-shrink:0">${typeIcon(t)}</span>
-            <div style="min-width:0;flex:1">
-              <div style="font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
-              <span class="badge ${statusMap[t.status] || 'b-hold'}" style="font-size:9px;margin-top:3px;display:inline-block">${labelMap[t.status] || t.status}</span>
+        <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);overflow:hidden">
+          <div style="padding:12px 14px 11px">
+            <div style="display:flex;align-items:flex-start;gap:9px;margin-bottom:9px">
+              <span style="font-size:18px;flex-shrink:0;margin-top:1px">${typeIcon(t)}</span>
+              <div style="min-width:0;flex:1">
+                <div style="font-size:13px;font-weight:600;color:var(--txt);line-height:1.2">${t.name}</div>
+                <div style="font-size:10px;color:var(--txt3);margin-top:2px">${t.year} ${t.make} ${t.model}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-top:1px">
+                ${tWOs.length ? `<span style="font-size:9px;font-weight:700;background:var(--or-bg);color:var(--or);border:.5px solid var(--or-bd);border-radius:5px;padding:2px 6px;cursor:pointer" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'))">${tWOs.length} WO</span>` : ''}
+                <span class="badge ${statusMap[t.status] || 'b-hold'}" style="font-size:9px">${labelMap[t.status] || t.status}</span>
+              </div>
             </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div style="font-size:9px;color:var(--txt4);margin-bottom:2px">Hours</div>
-              <div style="font-size:17px;font-weight:600;color:var(--txt);line-height:1">${t.hours.toLocaleString()}</div>
+            <div style="display:flex;align-items:flex-end;gap:12px">
+              <div style="flex-shrink:0">
+                <div style="font-size:18px;font-weight:600;color:var(--txt);line-height:1">${t.hours.toLocaleString()}</div>
+                <div style="font-size:9px;color:var(--txt4);text-transform:uppercase;letter-spacing:.05em;margin-top:2px">Hrs${svcUrgent ? ` · <span style="color:var(--yel)">Svc in ${hoursToSvc}h</span>` : ''}</div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--txt3);margin-bottom:4px">
+                  <span>${fl(t.fuel)}</span><span style="color:${fc};font-weight:600">${t.fuelPct}%</span>
+                </div>
+                <div style="height:4px;background:var(--bg4);border-radius:3px;overflow:hidden">
+                  <div style="height:100%;width:${t.fuelPct}%;background:${fc};border-radius:3px;transition:width .3s"></div>
+                </div>
+              </div>
             </div>
           </div>
-          <div style="font-size:10px;color:var(--txt3);margin-bottom:8px">${t.year} ${t.make} ${t.model}</div>
-          <div>
-            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--txt3);margin-bottom:4px">
-              <span>${fl(t.fuel)}</span><span style="color:${fc};font-weight:600">${t.fuelPct}%</span>
-            </div>
-            <div style="height:4px;background:var(--bg4);border-radius:3px;overflow:hidden">
-              <div style="height:100%;width:${t.fuelPct}%;background:${fc};border-radius:3px"></div>
-            </div>
+          <div style="display:flex;border-top:.5px solid var(--bd)">
+            <button onclick="fleetLogHours('${t.id}','${t.name}')"
+                    style="flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--txt2);background:transparent;border:none;border-right:.5px solid var(--bd);cursor:pointer;transition:background var(--t1)"
+                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">Log hours</button>
+            <button onclick="${t.fuel === 'electric' ? `fleetCharge('${t.id}','${t.name}')` : `fleetFuelUp('${t.id}','${t.name}')`}"
+                    style="flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--txt2);background:transparent;border:none;border-right:.5px solid var(--bd);cursor:pointer;transition:background var(--t1)"
+                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">${t.fuel === 'electric' ? 'Charge' : 'Fuel up'}</button>
+            <button onclick="WO.openNewModal()"
+                    style="flex:1;padding:8px 4px;font-size:10px;font-weight:500;color:var(--or);background:transparent;border:none;cursor:pointer;transition:background var(--t1)"
+                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">+ Work order</button>
           </div>
         </div>`;
       }).join('')}
