@@ -370,21 +370,26 @@
       <!-- DASHBOARD -->
       <div id="page-dashboard" class="page active">
         <div class="dash-wrap">
+          <!-- Alerts — full width -->
           <div>
             <div class="dash-section-title">Active alerts</div>
             <div id="dash-alerts" style="display:flex;flex-direction:column;gap:8px"></div>
           </div>
-          <div>
-            <div class="dash-section-title">Vessels</div>
-            <div class="vessel-cards" id="dash-vessels"></div>
-          </div>
-          <div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-              <div class="dash-section-title" style="margin-bottom:0">Upcoming</div>
-              <button class="btn btn-ghost btn-xs" onclick="navTo('calendar',document.querySelector('[data-page=calendar]'))">View calendar</button>
+          <!-- Two-column: vessels+tenders / calendar -->
+          <div class="dash-main-grid">
+            <div>
+              <div class="dash-section-title">Vessels</div>
+              <div class="vessel-cards" id="dash-vessels"></div>
             </div>
-            <div id="dash-upcoming" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px"></div>
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+                <div class="dash-section-title" style="margin-bottom:0">Upcoming</div>
+                <button class="btn btn-ghost btn-xs" onclick="navTo('calendar',document.querySelector('[data-page=calendar]'))">View calendar</button>
+              </div>
+              <div id="dash-upcoming"></div>
+            </div>
           </div>
+          <!-- Work orders — full width -->
           <div>
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div class="dash-section-title" style="margin-bottom:0">Open work orders — Lady M</div>

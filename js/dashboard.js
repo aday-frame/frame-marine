@@ -140,37 +140,44 @@ Dash.renderVessels = function() {
     const fuelColor = pct => pct < 30 ? 'var(--red)' : pct < 60 ? 'var(--yel)' : 'var(--grn)';
     const statusMap = {'in-water':'b-done','davits':'b-progress','swim-platform':'b-done','charged':'b-done'};
     const labelMap  = {'in-water':'In water','davits':'On davits','swim-platform':'Deployed','charged':'Charged'};
+    const fl = (n) => n === 'electric' ? 'Battery' : 'Fuel';
     wrap.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:12px;max-width:700px">
+      <div style="display:flex;flex-direction:column;gap:16px">
         ${_vesselCardHTML(v)}
-        ${tenders.length ? `<div>
-          <div style="font-size:9px;font-weight:600;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Tender & small craft</div>
-          <div style="display:flex;flex-direction:column;gap:6px">
-            ${tenders.map(t => `
-              <div onclick="navTo('fleet',document.querySelector('[data-page=fleet]'))" style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);cursor:pointer;transition:background var(--t1)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
-                <div style="font-size:28px;width:40px;text-align:center;flex-shrink:0">${typeIcon(t)}</div>
-                <div style="flex:1;min-width:0">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
-                    <span style="font-size:13px;font-weight:500;color:var(--txt)">${t.name}</span>
-                    <span class="badge ${statusMap[t.status]||'b-hold'}" style="font-size:9px">${labelMap[t.status]||t.status}</span>
-                  </div>
-                  <div style="font-size:11px;color:var(--txt3)">${t.year} ${t.make} ${t.model} · ${t.engine}</div>
-                </div>
-                <div style="display:flex;gap:20px;flex-shrink:0;align-items:center">
-                  <div style="text-align:right">
-                    <div style="font-size:11px;color:var(--txt3);margin-bottom:2px">Hours</div>
-                    <div style="font-size:14px;font-weight:500;color:var(--txt)">${t.hours.toLocaleString()}</div>
-                  </div>
-                  <div style="width:80px">
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:4px">
-                      <span>${fuelLabel(t)}</span><span style="color:${fuelColor(t.fuelPct)}">${t.fuelPct}%</span>
-                    </div>
-                    <div style="height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">
-                      <div style="height:100%;width:${t.fuelPct}%;background:${fuelColor(t.fuelPct)};border-radius:2px"></div>
-                    </div>
+        ${tenders.length ? `
+        <div>
+          <div style="font-size:9px;font-weight:600;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Tender &amp; small craft</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            ${tenders.map(t => {
+              const fc = fuelColor(t.fuelPct);
+              return `
+              <div onclick="navTo('fleet',document.querySelector('[data-page=fleet]'))"
+                   style="padding:14px;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);cursor:pointer;transition:background var(--t1)"
+                   onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                  <span style="font-size:26px;flex-shrink:0">${typeIcon(t)}</span>
+                  <div style="min-width:0;flex:1">
+                    <div style="font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
+                    <span class="badge ${statusMap[t.status]||'b-hold'}" style="font-size:9px;margin-top:3px;display:inline-block">${labelMap[t.status]||t.status}</span>
                   </div>
                 </div>
-              </div>`).join('')}
+                <div style="font-size:10px;color:var(--txt3);margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.year} ${t.make} ${t.model}</div>
+                <div style="display:flex;align-items:flex-end;gap:12px">
+                  <div style="flex-shrink:0">
+                    <div style="font-size:9px;color:var(--txt4);margin-bottom:2px">Hours</div>
+                    <div style="font-size:16px;font-weight:600;color:var(--txt);line-height:1">${t.hours.toLocaleString()}</div>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--txt3);margin-bottom:4px">
+                      <span>${fl(t.fuel)}</span><span style="color:${fc};font-weight:600">${t.fuelPct}%</span>
+                    </div>
+                    <div style="height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
+                      <div style="height:100%;width:${t.fuelPct}%;background:${fc};border-radius:3px"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+            }).join('')}
           </div>
         </div>` : ''}
       </div>`;
@@ -180,9 +187,10 @@ Dash.renderVessels = function() {
 Dash.renderUpcoming = function() {
   const wrap = document.getElementById('dash-upcoming');
   if (!wrap) return;
-  wrap.style.cssText = 'max-width:400px';
+  wrap.style.cssText = 'width:100%';
 
   const colorMap = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
+  const typeLabel = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics' };
   const now   = new Date('2026-05-01T00:00:00');
   const year  = now.getFullYear();
   const month = now.getMonth();
@@ -192,7 +200,7 @@ Dash.renderUpcoming = function() {
 
   function eventsForDay(d) {
     const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    return (FM.events||[]).filter(e => e.start <= ds && e.end >= ds);
+    return (FM.events||[]).filter(e => e.vessel === App.currentVesselId && e.start <= ds && e.end >= ds);
   }
 
   const cells = [];
@@ -200,34 +208,52 @@ Dash.renderUpcoming = function() {
   for (let d = 1; d <= lastDay.getDate(); d++) cells.push(d);
 
   const monthLabel = firstDay.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
+  const monthEvents = (FM.events||[]).filter(e => e.vessel === App.currentVesselId && e.start.startsWith('2026-05'));
 
   wrap.innerHTML = `
-    <div style="font-size:12px;font-weight:500;color:var(--txt);margin-bottom:10px">${monthLabel}</div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
-      ${['M','T','W','T','F','S','S'].map(d=>`<div style="text-align:center;font-size:9px;color:var(--txt3);font-weight:600;padding:2px 0">${d}</div>`).join('')}
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:14px">
-      ${cells.map(d => {
-        if (!d) return `<div></div>`;
-        const dayEvts = eventsForDay(d);
-        const isToday = d === now.getDate();
-        const dots = dayEvts.slice(0,3).map(e=>`<div style="width:4px;height:4px;border-radius:50%;background:${colorMap[e.color]||'var(--txt3)'}"></div>`).join('');
-        return `<div style="padding:3px 2px;text-align:center;border-radius:4px;${isToday?'background:var(--or);':dayEvts.length?'background:var(--bg3);':''}">
-          <div style="font-size:11px;color:${isToday?'#080808':'var(--txt)'};font-weight:${isToday?'600':'400'};line-height:1.4">${d}</div>
-          <div style="display:flex;justify-content:center;gap:2px;margin-top:1px">${dots}</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div style="font-size:9px;font-weight:600;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">This month</div>
-    <div style="display:flex;flex-direction:column;gap:6px">
-      ${(FM.events||[]).filter(e=>e.start.startsWith('2026-05')).slice(0,5).map(e=>`
-        <div style="display:flex;align-items:flex-start;gap:8px;cursor:pointer" onclick="${e.wo?`WO&&WO.openPanel&&WO.openPanel('${e.wo}')`:``}">
-          <div style="width:6px;height:6px;border-radius:50%;background:${colorMap[e.color]||'var(--txt3)'};flex-shrink:0;margin-top:4px"></div>
-          <div>
-            <div style="font-size:12px;color:var(--txt2)">${e.title}</div>
-            <div style="font-size:10px;color:var(--txt3)">${fmtDateLong(e.start)}${e.end!==e.start?' → '+fmtDateLong(e.end):''}</div>
-          </div>
-        </div>`).join('')}
+    <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden">
+      <!-- Month header -->
+      <div style="padding:14px 16px 10px;border-bottom:.5px solid var(--bd)">
+        <div style="font-size:14px;font-weight:600;color:var(--txt)">${monthLabel}</div>
+      </div>
+      <!-- Day headers -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:8px 10px 4px">
+        ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div style="text-align:center;font-size:10px;color:var(--txt4);font-weight:600">${d}</div>`).join('')}
+      </div>
+      <!-- Day cells -->
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 10px 10px">
+        ${cells.map(d => {
+          if (!d) return `<div></div>`;
+          const dayEvts = eventsForDay(d);
+          const isToday = d === now.getDate();
+          const hasBg = dayEvts.length > 0;
+          return `<div style="padding:6px 4px;text-align:center;border-radius:6px;
+                       background:${isToday ? 'var(--or)' : hasBg ? 'var(--bg4)' : 'transparent'};
+                       position:relative">
+            <div style="font-size:12px;font-weight:${isToday?'700':'400'};color:${isToday?'#080808':'var(--txt)'};">${d}</div>
+            <div style="display:flex;justify-content:center;gap:2px;margin-top:3px;min-height:5px">
+              ${dayEvts.slice(0,3).map(e=>`<div style="width:5px;height:5px;border-radius:50%;background:${isToday?'rgba(8,8,8,.5)':colorMap[e.color]||'var(--txt3)'}"></div>`).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <!-- Event list -->
+      <div style="border-top:.5px solid var(--bd);padding:12px 16px">
+        <div style="font-size:9px;font-weight:700;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">This month · ${monthEvents.length} events</div>
+        <div style="display:flex;flex-direction:column;gap:1px">
+          ${monthEvents.length ? monthEvents.map(e => `
+            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background var(--t1)"
+                 onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"
+                 onclick="${e.wo ? `WO&&WO.openPanel&&WO.openPanel('${e.wo}')` : `navTo('calendar',document.querySelector('[data-page=calendar]'))`}">
+              <div style="width:8px;height:8px;border-radius:50%;background:${colorMap[e.color]||'var(--txt3)'};flex-shrink:0"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div>
+                <div style="font-size:10px;color:var(--txt3)">${fmtDateLong(e.start)}${e.end!==e.start?' → '+fmtDateLong(e.end):''}</div>
+              </div>
+              <span style="font-size:9px;font-weight:600;color:${colorMap[e.color]||'var(--txt4)'};white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em">${typeLabel[e.type]||e.type}</span>
+            </div>`).join('') : `<div style="padding:16px;text-align:center;font-size:12px;color:var(--txt4)">No events this month</div>`}
+        </div>
+      </div>
     </div>`;
 };
 

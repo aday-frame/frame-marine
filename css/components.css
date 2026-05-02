@@ -1,7 +1,8 @@
 /* ── FRAME MARINE — COMPONENTS ── */
 
 /* ── DASHBOARD ── */
-.dash-wrap { padding: 18px 20px; display: flex; flex-direction: column; gap: 20px; }
+.dash-wrap { padding: 18px 20px; display: flex; flex-direction: column; gap: 24px; overflow-y: auto; }
+.dash-main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 28px; align-items: start; }
 .dash-section-title {
   font-size: 11px; font-weight: 600; color: var(--txt3);
   text-transform: uppercase; letter-spacing: .08em;
