@@ -53,7 +53,7 @@ Dash.renderHero = function() {
 
       <!-- Photo -->
       ${v.photo ? `
-      <div style="width:260px;flex-shrink:0;overflow:hidden">
+      <div style="width:312px;flex-shrink:0;overflow:hidden">
         <img src="${v.photo}" alt="${v.name}" style="width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block" onerror="this.parentElement.style.display='none'">
       </div>` : ''}
 
@@ -93,7 +93,7 @@ Dash.renderHero = function() {
       </div>
 
       <!-- Right: alerts panel -->
-      <div style="width:240px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-left:.5px solid var(--red-bd);background:var(--red-bg)">
+      <div style="width:288px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;border-left:.5px solid var(--red-bd);background:var(--red-bg)">
         <div style="padding:10px 14px 9px;border-bottom:.5px solid var(--red-bd);flex-shrink:0">
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--red)">Active alerts</div>
         </div>
