@@ -50,27 +50,33 @@ Dash.renderHero = function() {
 
   wrap.innerHTML = `
     <div class="vessel-hero">
-      ${v.photo ? `
-      <div class="vessel-hero-img" style="background-image:url('${v.photo}')">
-        <div class="vessel-hero-overlay"></div>
-        <div class="vessel-hero-top">
-          <div style="display:flex;align-items:center;gap:7px">
-            <span style="width:8px;height:8px;border-radius:50%;background:${v.color};display:inline-block;flex-shrink:0;box-shadow:0 0 8px ${v.color}88"></span>
-            <span style="font-size:11px;font-weight:500;color:rgba(255,255,255,.7);letter-spacing:.03em">${v.flag} · ${v.mmsi}</span>
+      <div class="vessel-hero-body">
+        ${v.photo ? `<div class="vessel-hero-photo"><img src="${v.photo}" alt="${v.name}" onerror="this.parentElement.style.display='none'"></div>` : ''}
+        <div class="vessel-hero-info">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div>
+              <div class="vessel-hero-name">${v.name}</div>
+              <div class="vessel-hero-sub">${v.type} · ${v.loa} · ${v.port}</div>
+            </div>
+            <span class="badge ${hasAlert ? 'b-critical' : 'b-done'}" style="flex-shrink:0;margin-top:2px">
+              ${hasAlert ? '● ' + critSensors + ' alert' + (critSensors > 1 ? 's' : '') : '● All clear'}
+            </span>
           </div>
-          <span class="badge ${hasAlert ? 'b-critical' : 'b-done'}" style="backdrop-filter:blur(10px);background:rgba(0,0,0,.35);border-color:rgba(255,255,255,.15);color:${hasAlert ? 'var(--red)' : 'var(--grn)'}">
-            ${hasAlert ? '● ' + critSensors + ' alert' + (critSensors > 1 ? 's' : '') : '● All clear'}
-          </span>
+          <div>
+            <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px">
+              <span style="width:7px;height:7px;border-radius:50%;background:${v.color};display:inline-block;flex-shrink:0"></span>
+              <span style="font-size:11px;color:var(--txt3)">${v.flag} · ${v.mmsi} · ${v.status}</span>
+            </div>
+            ${crew.length ? `
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="display:flex">
+                ${crew.slice(0, 6).map(c => `<div class="vessel-hero-av" style="background:${c.color}" title="${c.name} — ${c.role}">${c.initials}</div>`).join('')}
+              </div>
+              <span style="font-size:11px;color:var(--txt3)">${crew.length} onboard</span>
+            </div>` : ''}
+          </div>
         </div>
-        <div class="vessel-hero-bottom">
-          <div class="vessel-hero-name">${v.name}</div>
-          <div class="vessel-hero-sub">${v.type} · ${v.loa} · ${v.port}</div>
-        </div>
-      </div>` : `
-      <div style="padding:20px 20px 0">
-        <div style="font-size:22px;font-weight:600;color:var(--txt)">${v.name}</div>
-        <div style="font-size:12px;color:var(--txt3);margin-top:3px">${v.type} · ${v.loa} · ${v.port}</div>
-      </div>`}
+      </div>
       <div class="vessel-hero-stats">
         <div class="vessel-hero-stat">
           <div class="vessel-hero-stat-val${wos.length && high ? ' red' : ''}">${wos.length}</div>
@@ -88,13 +94,6 @@ Dash.renderHero = function() {
           <div class="vessel-hero-stat-val" style="font-size:15px;font-weight:500">${nextEv ? fmtShort(nextEv.start) : '—'}</div>
           <div class="vessel-hero-stat-lbl">Next charter</div>
         </div>
-        ${crew.length ? `
-        <div class="vessel-hero-crew">
-          <div style="display:flex">
-            ${crew.slice(0, 6).map(c => `<div class="vessel-hero-av" style="background:${c.color}" title="${c.name} — ${c.role}">${c.initials}</div>`).join('')}
-          </div>
-          <span class="vessel-hero-crew-lbl">${crew.length} onboard</span>
-        </div>` : ''}
       </div>
     </div>`;
 };
@@ -324,7 +323,8 @@ Dash.renderDashCal = function() {
     .sort((a, b) => a.start.localeCompare(b.start));
 
   wrap.innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 200px;border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;background:var(--bg)">
+    <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;padding:14px">
+    <div style="display:grid;grid-template-columns:1fr 200px;border:.5px solid var(--bd);border-radius:var(--r10);overflow:hidden;background:var(--bg)">
       <div style="display:flex;flex-direction:column;border-right:.5px solid var(--bd);overflow:hidden">
         <div class="cal-month-hdr">
           <div class="cal-month-nav">
@@ -359,6 +359,7 @@ Dash.renderDashCal = function() {
           }).join('') || '<div style="padding:16px;font-size:12px;color:var(--txt4)">No upcoming events</div>'}
         </div>
       </div>
+    </div>
     </div>`;
 };
 
