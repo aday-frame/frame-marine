@@ -101,7 +101,7 @@ WO.renderList = function(wos) {
           <span class="badge b-${t}">${FM.teamLabel(t)}</span>
           <span style="font-size:11px;color:var(--txt3);margin-left:8px">${grouped[t].length} work order${grouped[t].length!==1?'s':''}</span>
         </div>
-        <table class="tbl"><${thead}<tbody>${grouped[t].map(w=>WO.rowHTML(w)).join('')}</tbody></table>`).join('') +
+        <table class="tbl">${thead}<tbody>${grouped[t].map(w=>WO.rowHTML(w)).join('')}</tbody></table>`).join('') +
       `</div>`;
   }
 
