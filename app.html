@@ -60,17 +60,87 @@
         <span class="module-tab-dot" style="background:#A78BFA"></span>
         Charter
       </div>
-      <div class="module-tab locked" onclick="showToast('Contact us at hello@framemarine.io to add Build')" title="Contact us to add this module — hello@framemarine.io">
+      <!-- BUILD -->
+      <div class="module-tab locked">
         <span class="module-tab-dot" style="background:#F59E0B"></span>
         Build
+        <div class="module-preview" onclick="event.stopPropagation()">
+          <div class="mp-tag">Add-on module</div>
+          <div class="mp-title">Build</div>
+          <div class="mp-sub">Refit &amp; new build project management from shipyard to launch</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#F59E0B">→</span>Project timeline with phases, milestones &amp; contractor scheduling</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#F59E0B">→</span>Live budget tracker — spend vs. estimate with variance alerts</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#F59E0B">→</span>Snag list &amp; sign-off workflow with photo attachments</div>
+          <div class="mp-screen">
+            <div style="font-size:8px;font-weight:700;color:var(--txt4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Project timeline</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px">
+              <div><div style="font-size:9px;color:var(--txt3);margin-bottom:2px">Hull &amp; structure</div><div style="height:7px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="width:82%;height:100%;background:#F59E0B;border-radius:4px"></div></div></div>
+              <div><div style="font-size:9px;color:var(--txt3);margin-bottom:2px">Systems &amp; machinery</div><div style="height:7px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="width:55%;height:100%;background:#F59E0B90;border-radius:4px"></div></div></div>
+              <div><div style="font-size:9px;color:var(--txt3);margin-bottom:2px">Interior fit-out</div><div style="height:7px;background:var(--bg3);border-radius:4px;overflow:hidden"><div style="width:22%;height:100%;background:#F59E0B50;border-radius:4px"></div></div></div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:#F59E0B">$2.4M</div><div style="font-size:8px;color:var(--txt4)">Committed</div></div>
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--txt)">47</div><div style="font-size:8px;color:var(--txt4)">Days left</div></div>
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--grn)">8</div><div style="font-size:8px;color:var(--txt4)">Open snags</div></div>
+            </div>
+          </div>
+          <a class="mp-cta" href="mailto:hello@framemarine.io?subject=Build module enquiry">Contact us to add →</a>
+        </div>
       </div>
-      <div class="module-tab locked" onclick="showToast('Contact us at hello@framemarine.io to add Insights')" title="Contact us to add this module — hello@framemarine.io">
+
+      <!-- INSIGHTS -->
+      <div class="module-tab locked">
         <span class="module-tab-dot" style="background:#4ADE80"></span>
         Insights
+        <div class="module-preview" onclick="event.stopPropagation()">
+          <div class="mp-tag">Add-on module</div>
+          <div class="mp-title">Insights</div>
+          <div class="mp-sub">Fleet analytics, charter performance &amp; maintenance cost intelligence</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#4ADE80">→</span>Fleet performance — fuel burn, hours &amp; efficiency trends over time</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#4ADE80">→</span>Charter revenue analytics — booking pace, revenue per night, seasonal trends</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#4ADE80">→</span>Maintenance cost analysis — spend by system, predictive service windows</div>
+          <div class="mp-screen">
+            <div style="font-size:8px;font-weight:700;color:var(--txt4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">Charter revenue — 2026</div>
+            <svg viewBox="0 0 260 50" style="width:100%;height:44px;display:block;margin-bottom:8px">
+              <defs><linearGradient id="ig" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ADE8035"/><stop offset="100%" stop-color="#4ADE8000"/></linearGradient></defs>
+              <polyline points="0,42 40,35 80,25 120,30 160,12 220,8 260,18" fill="none" stroke="#4ADE80" stroke-width="1.5" stroke-linecap="round"/>
+              <polygon points="0,42 40,35 80,25 120,30 160,12 220,8 260,18 260,50 0,50" fill="url(#ig)"/>
+            </svg>
+            <div style="display:flex;gap:6px">
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:#4ADE80">$186k</div><div style="font-size:8px;color:var(--txt4)">YTD revenue</div></div>
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--txt)">42</div><div style="font-size:8px;color:var(--txt4)">Charter days</div></div>
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--or)">94%</div><div style="font-size:8px;color:var(--txt4)">Utilization</div></div>
+            </div>
+          </div>
+          <a class="mp-cta" href="mailto:hello@framemarine.io?subject=Insights module enquiry" style="background:#4ADE80">Contact us to add →</a>
+        </div>
       </div>
-      <div class="module-tab locked" onclick="showToast('Contact us at hello@framemarine.io to add Finance')" title="Contact us to add this module — hello@framemarine.io">
+
+      <!-- FINANCE -->
+      <div class="module-tab locked" style="position:relative">
         <span class="module-tab-dot" style="background:#60A5FA"></span>
         Finance
+        <div class="module-preview" onclick="event.stopPropagation()" style="left:auto;right:0">
+          <div class="mp-tag">Add-on module</div>
+          <div class="mp-title">Finance</div>
+          <div class="mp-sub">Charter invoicing, operating budget &amp; full APA accounting</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#60A5FA">→</span>Charter fee collection — invoice generation, payment tracking, wire reconciliation</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#60A5FA">→</span>Operating budget — monthly OPEX vs. budget with department breakdown</div>
+          <div class="mp-feat"><span class="mp-feat-icon" style="color:#60A5FA">→</span>APA accounting — advance reconciliation, receipts &amp; captain's final report</div>
+          <div class="mp-screen">
+            <div style="font-size:8px;font-weight:700;color:var(--txt4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">OPEX — May 2026</div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:.5px solid var(--bd)"><span style="font-size:9px;color:var(--txt3)">Fuel &amp; lubricants</span><span style="font-size:9px;font-weight:600;color:var(--red)">+11% over</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:.5px solid var(--bd)"><span style="font-size:9px;color:var(--txt3)">Crew salaries</span><span style="font-size:9px;font-weight:600;color:var(--grn)">On budget</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0"><span style="font-size:9px;color:var(--txt3)">Marina &amp; port dues</span><span style="font-size:9px;font-weight:600;color:var(--grn)">−8% under</span></div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:#60A5FA">$48k</div><div style="font-size:8px;color:var(--txt4)">OPEX this month</div></div>
+              <div style="flex:1;background:var(--bg3);border-radius:5px;padding:6px;text-align:center"><div style="font-size:14px;font-weight:600;color:var(--grn)">91%</div><div style="font-size:8px;color:var(--txt4)">Budget efficiency</div></div>
+            </div>
+          </div>
+          <a class="mp-cta" href="mailto:hello@framemarine.io?subject=Finance module enquiry" style="background:#60A5FA">Contact us to add →</a>
+        </div>
       </div>
     </nav>
 

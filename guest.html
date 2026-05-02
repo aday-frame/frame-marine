@@ -1110,14 +1110,14 @@
         <div class="pref-section">
           <div class="pref-section-title" style="border-top:none;padding-top:0">Dietary requirements</div>
           <div class="pref-check-grid" id="dietary-checks">
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Vegetarian</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Vegan</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Gluten-free</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Dairy-free</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>No shellfish</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>No nuts</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Halal</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Kosher</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Vegetarian</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Vegan</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Gluten-free</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Dairy-free</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>No shellfish</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>No nuts</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Halal</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Kosher</label>
           </div>
         </div>
 
@@ -1159,14 +1159,14 @@
         <div class="pref-section">
           <div class="pref-section-title">Activities interest</div>
           <div class="pref-check-grid" id="activity-checks">
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Watersports</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Fishing</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Snorkeling / diving</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Massage / spa</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Shore excursions</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Yoga / fitness</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Stargazing</label>
-            <label class="pref-check" onclick="toggleCheck(this)"><input type="checkbox"><span class="pref-check-box"></span>Movie night</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Watersports</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Fishing</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Snorkeling / diving</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Massage / spa</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Shore excursions</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Yoga / fitness</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Stargazing</label>
+            <label class="pref-check" onclick="toggleCheck(this,event)"><input type="checkbox"><span class="pref-check-box"></span>Movie night</label>
           </div>
         </div>
 
@@ -1190,13 +1190,17 @@
           </div>
         </div>
 
-        <button class="submit-btn" style="margin-top:8px" onclick="submitPreferences()">Save preferences →</button>
+        <div id="pref-err" style="display:none;margin-top:8px;padding:10px 14px;background:var(--red-bg);border:.5px solid var(--red-bd);border-radius:8px;font-size:12px;color:var(--red)">
+          Please select your name before saving.
+        </div>
+        <button class="submit-btn" style="margin-top:12px" onclick="submitPreferences()">Save preferences →</button>
       </div>
 
       <div class="submit-success" id="pref-success">
         <div class="submit-success-icon">&#10003;</div>
-        <div style="font-size:18px;font-weight:300;color:var(--txt)">Preferences saved</div>
-        <div style="font-size:13px;color:var(--txt2);text-align:center;max-width:300px">Your crew has been updated. Marie will incorporate these into your daily schedule.</div>
+        <div style="font-size:18px;font-weight:300;color:var(--txt)">Preferences saved, <span id="pref-success-name"></span></div>
+        <div id="pref-summary" style="font-size:12px;color:var(--txt3);text-align:center;max-width:340px;line-height:1.6;margin-top:2px"></div>
+        <div style="font-size:13px;color:var(--txt2);text-align:center;max-width:300px">Your crew has been notified. Marie will incorporate these into your daily schedule.</div>
         <button class="pref-btn-ghost" onclick="resetPreferences()">Update preferences</button>
       </div>
     </div>
@@ -1412,20 +1416,46 @@ function switchMenu(tab, id) {
 }
 
 /* ── PREFERENCE CHECKS ── */
-function toggleCheck(el) {
+function toggleCheck(el, evt) {
+  if (evt) evt.preventDefault();
   el.classList.toggle('checked');
 }
 
 /* ── SUBMIT PREFERENCES ── */
 function submitPreferences() {
   const guest = document.getElementById('pref-guest').value;
-  if (!guest) { alert('Please select your name.'); return; }
+  const errEl = document.getElementById('pref-err');
+  if (!guest) {
+    errEl.style.display = 'block';
+    document.getElementById('pref-guest').focus();
+    return;
+  }
+  errEl.style.display = 'none';
+
+  const dietary = [...document.querySelectorAll('#dietary-checks .pref-check.checked')]
+    .map(el => el.textContent.trim());
+  const activities = [...document.querySelectorAll('#activity-checks .pref-check.checked')]
+    .map(el => el.textContent.trim());
+  const notes = (document.getElementById('pref-notes').value || '').trim();
+
+  const parts = [];
+  if (dietary.length) parts.push(dietary.join(', '));
+  if (activities.length) parts.push(activities.join(', '));
+  if (notes) parts.push('"' + notes.substring(0, 100) + (notes.length > 100 ? '…' : '') + '"');
+
+  document.getElementById('pref-success-name').textContent = guest.split(' ')[0];
+  document.getElementById('pref-summary').textContent =
+    parts.length ? parts.join(' · ') : 'No specific preferences noted.';
+
   document.getElementById('pref-form').style.display = 'none';
   const succ = document.getElementById('pref-success');
   succ.style.display = 'flex';
+  succ.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
+
 function resetPreferences() {
   document.getElementById('pref-form').style.display = '';
+  document.getElementById('pref-err').style.display = 'none';
   document.getElementById('pref-success').style.display = 'none';
 }
 
