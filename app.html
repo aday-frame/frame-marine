@@ -2080,18 +2080,25 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('.module-tab.locked').forEach(tab => {
     const popup = tab.querySelector('.module-preview');
     if (!popup) return;
-    tab.addEventListener('mouseenter', () => {
+    let hideTimer;
+
+    const show = () => {
+      clearTimeout(hideTimer);
       const rect = tab.getBoundingClientRect();
-      // Position left-aligned with tab, but don't clip right edge
       let left = rect.left;
-      const popW = 300;
-      if (left + popW > window.innerWidth - 12) left = window.innerWidth - popW - 12;
+      if (left + 300 > window.innerWidth - 12) left = window.innerWidth - 312;
       popup.style.left = left + 'px';
       popup.style.display = 'block';
-    });
-    tab.addEventListener('mouseleave', () => {
-      popup.style.display = 'none';
-    });
+    };
+
+    const hide = () => {
+      hideTimer = setTimeout(() => { popup.style.display = 'none'; }, 120);
+    };
+
+    tab.addEventListener('mouseenter', show);
+    tab.addEventListener('mouseleave', hide);
+    popup.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    popup.addEventListener('mouseleave', hide);
   });
 });
 
