@@ -11,12 +11,12 @@
 
 /* Vessel hero card */
 .vessel-hero { background: var(--bg2); border: .5px solid var(--bd); border-radius: var(--r12); overflow: hidden; }
-.vessel-hero-body { display: flex; height: 200px; }
-.vessel-hero-photo { width: 42%; flex-shrink: 0; overflow: hidden; }
-.vessel-hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
-.vessel-hero-info { flex: 1; padding: 20px 22px; display: flex; flex-direction: column; justify-content: space-between; border-left: .5px solid var(--bd); }
-.vessel-hero-name { font-size: 22px; font-weight: 600; color: var(--txt); letter-spacing: -.02em; line-height: 1; margin-bottom: 5px; }
-.vessel-hero-sub { font-size: 12px; color: var(--txt3); }
+.vessel-hero-img-wrap { position: relative; height: 230px; overflow: hidden; background: #0c0c0c; }
+.vessel-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block; }
+.vessel-hero-gradient { position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0) 30%, rgba(12,12,12,.75) 58%, rgba(12,12,12,.97) 75%); }
+.vessel-hero-meta { position: absolute; inset: 0; padding: 18px 20px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-end; }
+.vessel-hero-name { font-size: 24px; font-weight: 600; color: #fff; letter-spacing: -.02em; line-height: 1; margin-bottom: 4px; text-align: right; }
+.vessel-hero-sub { font-size: 12px; color: rgba(255,255,255,.55); text-align: right; }
 .vessel-hero-stats { display: flex; align-items: center; padding: 14px 20px; border-top: .5px solid var(--bd); }
 .vessel-hero-stat { flex: 1; padding: 0 18px; border-right: .5px solid var(--bd); }
 .vessel-hero-stat:first-child { padding-left: 0; }
@@ -24,7 +24,7 @@
 .vessel-hero-stat-val.red { color: var(--red); }
 .vessel-hero-stat-val.or  { color: var(--or); }
 .vessel-hero-stat-lbl { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--txt3); }
-.vessel-hero-av { width: 27px; height: 27px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #080808; margin-left: -9px; border: 2px solid var(--bg2); flex-shrink: 0; }
+.vessel-hero-av { width: 27px; height: 27px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #080808; margin-left: -9px; border: 2px solid rgba(12,12,12,.8); flex-shrink: 0; }
 .vessel-hero-av:first-child { margin-left: 0; }
 
 /* Alert strip */

@@ -48,33 +48,32 @@ Dash.renderHero = function() {
 
   const hasAlert = critSensors > 0;
 
+  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg2').trim() || '#111';
+
   wrap.innerHTML = `
     <div class="vessel-hero">
-      <div class="vessel-hero-body">
-        ${v.photo ? `<div class="vessel-hero-photo"><img src="${v.photo}" alt="${v.name}" onerror="this.parentElement.style.display='none'"></div>` : ''}
-        <div class="vessel-hero-info">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-            <div>
-              <div class="vessel-hero-name">${v.name}</div>
-              <div class="vessel-hero-sub">${v.type} · ${v.loa} · ${v.port}</div>
-            </div>
-            <span class="badge ${hasAlert ? 'b-critical' : 'b-done'}" style="flex-shrink:0;margin-top:2px">
-              ${hasAlert ? '● ' + critSensors + ' alert' + (critSensors > 1 ? 's' : '') : '● All clear'}
-            </span>
+      <div class="vessel-hero-img-wrap">
+        ${v.photo ? `<img class="vessel-hero-img" src="${v.photo}" alt="${v.name}" onerror="this.style.display='none'">` : ''}
+        <div class="vessel-hero-gradient"></div>
+        <div class="vessel-hero-meta">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:auto">
+            <span style="width:7px;height:7px;border-radius:50%;background:${v.color};display:inline-block;flex-shrink:0"></span>
+            <span style="font-size:11px;color:rgba(255,255,255,.5)">${v.flag} · ${v.mmsi} · ${v.status}</span>
           </div>
-          <div>
-            <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px">
-              <span style="width:7px;height:7px;border-radius:50%;background:${v.color};display:inline-block;flex-shrink:0"></span>
-              <span style="font-size:11px;color:var(--txt3)">${v.flag} · ${v.mmsi} · ${v.status}</span>
-            </div>
-            ${crew.length ? `
-            <div style="display:flex;align-items:center;gap:10px">
-              <div style="display:flex">
-                ${crew.slice(0, 6).map(c => `<div class="vessel-hero-av" style="background:${c.color}" title="${c.name} — ${c.role}">${c.initials}</div>`).join('')}
-              </div>
-              <span style="font-size:11px;color:var(--txt3)">${crew.length} onboard</span>
-            </div>` : ''}
+          <span class="badge ${hasAlert ? 'b-critical' : 'b-done'}" style="position:absolute;top:18px;right:20px">
+            ${hasAlert ? '● ' + critSensors + ' alert' + (critSensors > 1 ? 's' : '') : '● All clear'}
+          </span>
+          <div style="margin-bottom:6px">
+            <div class="vessel-hero-name">${v.name}</div>
+            <div class="vessel-hero-sub">${v.type} · ${v.loa} · ${v.port}</div>
           </div>
+          ${crew.length ? `
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="display:flex">
+              ${crew.slice(0, 6).map(c => `<div class="vessel-hero-av" style="background:${c.color}" title="${c.name} — ${c.role}">${c.initials}</div>`).join('')}
+            </div>
+            <span style="font-size:11px;color:rgba(255,255,255,.5)">${crew.length} onboard</span>
+          </div>` : ''}
         </div>
       </div>
       <div class="vessel-hero-stats">
