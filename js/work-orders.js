@@ -9,7 +9,7 @@ WO.activeId = null;
 
 /* ── RENDER LIST ── */
 WO.allWOs = function() {
-  return App.currentVesselId === 'all' ? FM.workOrders : WO.allWOs();
+  return App.currentVesselId === 'all' ? FM.workOrders : FM.vesselWOs(App.currentVesselId);
 };
 
 WO.render = function() {
