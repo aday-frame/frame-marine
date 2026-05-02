@@ -13,7 +13,9 @@
 frame-build.html
 frame-unified.html
 Frame.html
-*.webp
+
+# Large root-level images (not app assets)
+/*.webp
 
 # Secrets (never commit these)
 .env
