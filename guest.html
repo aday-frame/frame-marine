@@ -492,18 +492,19 @@
     }
     .section-nav-inner {
       max-width: 760px; margin: 0 auto;
-      display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 4px;
+      display: flex; overflow-x: auto; scrollbar-width: none; padding: 0 8px;
     }
     .section-nav-inner::-webkit-scrollbar { display: none; }
     .snav-item {
       display: flex; align-items: center;
-      padding: 9px 13px; font-size: 11px; font-weight: 500;
+      padding: 12px 16px; font-size: 13px; font-weight: 500;
       color: var(--txt3); text-decoration: none; white-space: nowrap;
       border-bottom: 1.5px solid transparent; margin-bottom: -1px;
       transition: color .15s, border-color .15s;
     }
     .snav-item:hover { color: var(--txt2); }
     .snav-item.active { color: var(--pur); border-bottom-color: var(--pur); }
+    section[id] { scroll-margin-top: 88px; }
 
     /* ── VOYAGE MAP 3D ── */
     #voyage-map { height: 440px; }
