@@ -2112,10 +2112,10 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
 
     if (done && entry && entry.name) {
       const noteChip = note
-        ? `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--or);font-weight:500;text-decoration:underline;text-underline-offset:2px;flex-shrink:0">✎ edit note</button>`
+        ? `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--red);font-weight:500;text-decoration:underline;text-underline-offset:2px;flex-shrink:0">✎ edit note</button>`
         : `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--txt3);font-weight:500;flex-shrink:0">+ note</button>`;
       const noteText = note
-        ? `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+        ? `<div style="font-size:11px;color:var(--red);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
         : '';
       infoHtml = `
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
@@ -2126,10 +2126,10 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
         ${noteEditor}`;
     } else {
       const noteChip = note
-        ? `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--or);font-weight:500;text-decoration:underline;text-underline-offset:2px">✎ edit note</button>`
+        ? `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--red);font-weight:500;text-decoration:underline;text-underline-offset:2px">✎ edit note</button>`
         : `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--txt3);font-weight:500">+ note</button>`;
       const noteText = note
-        ? `<div style="font-size:11px;color:var(--or);margin-bottom:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+        ? `<div style="font-size:11px;color:var(--red);margin-bottom:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
         : '';
       infoHtml = `
         <div style="margin-top:4px">${noteText}${noteChip}</div>
@@ -2138,7 +2138,7 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
   } else {
     if (done && entry && entry.name) {
       const noteText = note
-        ? `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+        ? `<div style="font-size:11px;color:var(--red);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
         : '';
       infoHtml = `
         <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
@@ -2146,7 +2146,7 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
         </div>
         ${noteText}`;
     } else if (note) {
-      infoHtml = `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`;
+      infoHtml = `<div style="font-size:11px;color:var(--red);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`;
     }
   }
 
