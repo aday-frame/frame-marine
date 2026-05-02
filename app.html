@@ -2064,10 +2064,15 @@ window.Assets = {
 };
 
 /* ── CHECKLIST RENDERER ── */
-let _clActive = null;
-const _clChecked = {};
-function _clCurrentUser() { return (FM.currentUser && FM.currentUser.name) || 'Unknown'; }
+let _clActive   = null;   // current checklist template id
+let _clViewRun  = null;   // if set, viewing a completed archive run id
+let _clNoteOpen = null;   // 'clId:key' of item with open note editor
+const _clChecked = {};    // [clId][key] = { name, time }
+const _clNotes   = {};    // [clId][key] = 'text'
+const _clArchive = JSON.parse(localStorage.getItem('fm_cl_archive') || '[]');
+// archive entry: { id, checklistId, name, completedAt, done, total, checked, notes }
 
+function _clCurrentUser() { return (FM.currentUser && FM.currentUser.name) || 'Crew'; }
 function _clStepCount(c) {
   if (c.sections) return c.sections.reduce((n, s) => n + s.items.length, 0);
   return (c.steps || []).length;
@@ -2080,26 +2085,58 @@ function _clDoneCount(c, checked) {
   }
   return (c.steps || []).filter((_, i) => checked[i]).length;
 }
-
 function _clFmtTime(iso) {
   const d = new Date(iso);
-  return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) + ' · ' +
-         d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  return d.toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit'}) +
+         ' · ' + d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+}
+function _clFmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
 }
 
-function _clItemRow(clId, key, label, entry) {
-  const done = !!entry;
-  const meta = done && entry.name ? `<div style="font-size:10px;color:var(--grn);margin-top:3px;font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</div>` : '';
-  const esc = label.replace(/'/g, "\\'");
-  return `<div style="display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:${done?'var(--bg2)':'var(--bg3)'};border:.5px solid ${done?'var(--grn-bd)':'var(--bd)'};border-radius:var(--r8);transition:all .15s">
-    <div onclick="clToggle('${clId}','${key}')" style="width:18px;height:18px;border-radius:4px;border:.5px solid ${done?'var(--grn)':'var(--bd3)'};background:${done?'var(--grn)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;cursor:pointer">
+function _clItemRow(clId, key, label, entry, note, readonly) {
+  const done    = !!entry;
+  const noteKey = clId + ':' + key;
+  const isOpen  = _clNoteOpen === noteKey && !readonly;
+  const esc     = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+  const metaHtml = done && entry.name
+    ? `<div style="font-size:10px;color:var(--grn);margin-top:3px;font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</div>`
+    : '';
+  const noteHtml = note && !isOpen
+    ? `<div style="font-size:11px;color:var(--txt2);background:var(--bg4);border-radius:5px;padding:5px 8px;margin-top:6px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+    : '';
+  const noteEditor = isOpen
+    ? `<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+        <textarea id="cl-note-${key}" class="inp" rows="2" placeholder="Add a note to this item…" style="font-size:12px;resize:none">${escHtml(note||'')}</textarea>
+        <div style="display:flex;gap:6px">
+          <button onclick="clSaveNote('${clId}','${key}')" class="btn btn-primary btn-sm">Save note</button>
+          <button onclick="_clNoteOpen=null;renderChecklists(_clActive)" class="btn btn-ghost btn-sm">Cancel</button>
+        </div>
+       </div>`
+    : '';
+
+  const actions = readonly ? '' : `
+    <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;margin-top:1px">
+      <button onclick="_clNoteOpen='${noteKey}';renderChecklists(_clActive)" title="Add note"
+        style="background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 8px;cursor:pointer;color:${note?'var(--or)':'var(--txt3)'};font-size:10px;font-weight:600;white-space:nowrap;transition:color .15s">
+        ${note ? 'Note ✎' : '+ Note'}
+      </button>
+      <button onclick="clRaiseIssue('${esc}')" title="Create work order"
+        style="background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--txt3);font-size:10px;font-weight:600;white-space:nowrap;transition:color .15s"
+        onmouseover="this.style.color='var(--or)';this.style.borderColor='var(--or)'"
+        onmouseout="this.style.color='var(--txt3)';this.style.borderColor='var(--bd)'">WO ↗</button>
+    </div>`;
+
+  return `<div style="display:flex;align-items:flex-start;gap:10px;padding:11px 12px;background:${done?'var(--bg2)':'var(--bg3)'};border:.5px solid ${done?'var(--grn-bd)':'var(--bd)'};border-radius:var(--r8);transition:background .15s">
+    <div onclick="${readonly?'':("clToggle('"+clId+"','"+key+"')")}" style="width:18px;height:18px;border-radius:4px;border:.5px solid ${done?'var(--grn)':'var(--bd3)'};background:${done?'var(--grn)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;${readonly?'':'cursor:pointer'}">
       ${done ? '<svg viewBox="0 0 12 12" fill="none" stroke="#080808" stroke-width="2.2" stroke-linecap="round"><path d="M2 6l3 3 5-5"/></svg>' : ''}
     </div>
-    <div style="flex:1;min-width:0;cursor:pointer" onclick="clToggle('${clId}','${key}')">
+    <div style="flex:1;min-width:0;${readonly?'':'cursor:pointer'}" onclick="${readonly?'':("clToggle('"+clId+"','"+key+"')")}">
       <span style="font-size:13px;color:${done?'var(--txt3)':'var(--txt)'};${done?'text-decoration:line-through;':''}line-height:1.5">${label}</span>
-      ${meta}
+      ${metaHtml}${noteHtml}${noteEditor}
     </div>
-    <button onclick="clRaiseIssue('${esc}')" title="Raise issue" style="flex-shrink:0;background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 7px;cursor:pointer;color:var(--txt3);font-size:10px;font-weight:600;letter-spacing:.03em;white-space:nowrap;margin-top:1px;transition:all .15s" onmouseover="this.style.color='var(--or)';this.style.borderColor='var(--or)'" onmouseout="this.style.color='var(--txt3)';this.style.borderColor='var(--bd)'">Issue</button>
+    ${actions}
   </div>`;
 }
 
@@ -2107,36 +2144,101 @@ function renderChecklists(id) {
   const sidebar = document.getElementById('cl-sidebar');
   const main    = document.getElementById('cl-main');
   if (!sidebar || !main) return;
+
   const lists = FM.checklists || [];
-  const categories = [...new Set(lists.map(c => c.category))];
   if (!_clActive && lists.length) _clActive = lists[0].id;
-  if (id) _clActive = id;
+  if (id) { _clActive = id; _clViewRun = null; _clNoteOpen = null; }
+
+  // Sidebar: active runs + completed archive
+  const activeLists = lists.filter(c => Object.keys(_clChecked[c.id] || {}).length > 0);
+  const categories  = [...new Set(lists.map(c => c.category))];
 
   sidebar.innerHTML = `
-    <div class="logbook-sidebar-hdr">
-      <span>Library</span>
-      <button class="btn btn-primary btn-sm" onclick="showToast('Custom checklist editor coming soon')">+ Create</button>
-    </div>
+    <div class="logbook-sidebar-hdr"><span>Checklists</span></div>
+
+    ${activeLists.length ? `
+      <div class="sec-lbl" style="padding:12px 12px 4px">In progress</div>
+      ${activeLists.map(c => {
+        const ch = _clChecked[c.id] || {};
+        const tot = _clStepCount(c);
+        const dn  = _clDoneCount(c, ch);
+        const pct = Math.round(dn/tot*100);
+        return `<div class="logbook-entry-row${c.id === _clActive && !_clViewRun ? ' active' : ''}" onclick="renderChecklists('${c.id}')" style="display:flex;align-items:center;gap:10px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:500;color:var(--txt);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+            <div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin-bottom:3px"><div style="height:100%;width:${pct}%;background:var(--or);border-radius:2px"></div></div>
+            <div style="font-size:10px;color:var(--txt3)">${dn} / ${tot} items</div>
+          </div>
+        </div>`;
+      }).join('')}` : ''}
+
+    <div class="sec-lbl" style="padding:12px 12px 4px">Library</div>
     ${categories.map(cat => `
-      <div class="sec-lbl" style="padding:12px 12px 4px">${cat}</div>
+      <div style="padding:4px 12px 2px;font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em">${cat}</div>
       ${lists.filter(c => c.category === cat).map(c => `
-        <div class="logbook-entry-row${c.id === _clActive ? ' active' : ''}" onclick="renderChecklists('${c.id}')" style="display:flex;align-items:center;gap:10px">
-          ${c.photo ? `<div style="font-size:18px;flex-shrink:0;width:24px;text-align:center">${c.photo}</div>` : ''}
+        <div class="logbook-entry-row${c.id === _clActive && !_clViewRun ? ' active' : ''}" onclick="renderChecklists('${c.id}')" style="display:flex;align-items:center;gap:10px">
+          ${c.photo ? `<div style="font-size:16px;flex-shrink:0;width:20px;text-align:center">${c.photo}</div>` : ''}
           <div style="min-width:0">
-            <div style="font-size:12px;font-weight:500;color:var(--txt);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
-            <div style="font-size:10px;color:var(--txt3)">${_clStepCount(c)} steps${c.estimatedTime?' · '+c.estimatedTime:''}</div>
+            <div style="font-size:12px;font-weight:500;color:var(--txt);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+            <div style="font-size:10px;color:var(--txt3)">${_clStepCount(c)} items${c.estimatedTime?' · '+c.estimatedTime:''}</div>
           </div>
         </div>`).join('')}
     `).join('')}
-    <div class="sec-lbl" style="padding:12px 12px 4px">My saved</div>
-    <div style="padding:12px 16px;font-size:12px;color:var(--txt3)">No custom checklists yet.<br>Duplicate a library checklist to start.</div>`;
 
+    ${_clArchive.length ? `
+      <div class="sec-lbl" style="padding:12px 12px 4px">Completed</div>
+      ${[..._clArchive].reverse().map(run => `
+        <div class="logbook-entry-row${_clViewRun === run.id ? ' active' : ''}" onclick="clViewArchive('${run.id}')" style="display:flex;align-items:center;gap:10px">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--grn);flex-shrink:0"></div>
+          <div style="min-width:0">
+            <div style="font-size:12px;font-weight:500;color:var(--txt);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${run.name}</div>
+            <div style="font-size:10px;color:var(--txt3)">${run.done}/${run.total} · ${_clFmtDate(run.completedAt)}</div>
+          </div>
+        </div>`).join('')}` : ''}`;
+
+  // Main area: completed run view
+  if (_clViewRun) {
+    const run = _clArchive.find(r => r.id === _clViewRun);
+    if (!run) return;
+    const cl = lists.find(c => c.id === run.checklistId);
+    if (!cl) return;
+    let stepsHtml = '';
+    if (cl.sections) {
+      stepsHtml = cl.sections.map((sec, si) => `
+        <div style="margin-bottom:20px">
+          <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px">${sec.team}</div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            ${sec.items.map((item, ii) => _clItemRow(cl.id, si+'-'+ii, item, run.checked[si+'-'+ii], run.notes[si+'-'+ii], true)).join('')}
+          </div>
+        </div>`).join('');
+    } else {
+      stepsHtml = `<div style="display:flex;flex-direction:column;gap:5px">
+        ${(cl.steps||[]).map((s, i) => _clItemRow(cl.id, i, s, run.checked[i], run.notes[i], true)).join('')}
+      </div>`;
+    }
+    main.innerHTML = `
+      <div class="logbook-main-hdr" style="align-items:center">
+        <div>
+          <div class="logbook-main-date">${run.name}</div>
+          <div class="logbook-main-loc" style="color:var(--grn)">Completed · ${_clFmtDate(run.completedAt)} · ${run.done}/${run.total} items</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="exportChecklist('${cl.id}','${run.id}')">Print / Export</button>
+        </div>
+      </div>
+      <div style="padding:20px 24px 40px"><div style="display:flex;flex-direction:column;gap:5px">${stepsHtml}</div></div>`;
+    return;
+  }
+
+  // Main area: active checklist
   const checklist = lists.find(c => c.id === _clActive);
   if (!checklist) return;
-  const checked  = _clChecked[checklist.id] || {};
-  const total    = _clStepCount(checklist);
-  const done     = _clDoneCount(checklist, checked);
-  const pct      = total ? Math.round(done / total * 100) : 0;
+  const checked = _clChecked[checklist.id] || {};
+  const notes   = _clNotes[checklist.id]   || {};
+  const total   = _clStepCount(checklist);
+  const done    = _clDoneCount(checklist, checked);
+  const pct     = total ? Math.round(done / total * 100) : 0;
+  const allDone = pct === 100;
 
   let stepsHtml = '';
   if (checklist.sections) {
@@ -2144,16 +2246,15 @@ function renderChecklists(id) {
       <div style="margin-bottom:20px">
         <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:8px;padding:0 2px">${sec.team}</div>
         <div style="display:flex;flex-direction:column;gap:5px">
-          ${sec.items.map((item, ii) => _clItemRow(checklist.id, si+'-'+ii, item, checked[si+'-'+ii])).join('')}
+          ${sec.items.map((item, ii) => _clItemRow(checklist.id, si+'-'+ii, item, checked[si+'-'+ii], notes[si+'-'+ii], false)).join('')}
         </div>
       </div>`).join('');
   } else {
     stepsHtml = `<div style="display:flex;flex-direction:column;gap:5px">
-      ${(checklist.steps||[]).map((step, i) => _clItemRow(checklist.id, i, step, checked[i])).join('')}
+      ${(checklist.steps||[]).map((s, i) => _clItemRow(checklist.id, i, s, checked[i], notes[i], false)).join('')}
     </div>`;
   }
 
-  const allDone = pct === 100;
   main.innerHTML = `
     <div class="logbook-main-hdr" style="align-items:center">
       <div>
@@ -2161,37 +2262,75 @@ function renderChecklists(id) {
         <div class="logbook-main-loc">${checklist.category} · ${total} items · ${checklist.scope==='charter'?'Charter only':'All vessels'}</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-ghost btn-sm" onclick="delete _clChecked['${checklist.id}'];renderChecklists('${checklist.id}')">Reset</button>
-        <button class="btn btn-primary btn-sm" onclick="exportChecklist('${checklist.id}')">Print / Export</button>
+        <button class="btn btn-ghost btn-sm" onclick="clReset('${checklist.id}')">Reset</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportChecklist('${checklist.id}')">Print / Export</button>
+        ${allDone ? `<button class="btn btn-primary btn-sm" onclick="clArchive('${checklist.id}')">Mark complete ✓</button>` : ''}
       </div>
     </div>
-    ${checklist.estimatedTime ? `
-    <div style="display:flex;align-items:center;gap:16px;padding:10px 24px;background:var(--bg2);border-bottom:.5px solid var(--bd)">
-      <div style="display:flex;gap:20px;flex-wrap:wrap">
-        ${checklist.estimatedTime ? `<div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Est. time</div><div style="font-size:12px;color:var(--txt)">${checklist.estimatedTime}</div></div>` : ''}
-        ${checklist.partNumber ? `<div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Part no.</div><div style="font-size:12px;color:var(--txt);font-family:var(--mono)">${checklist.partNumber}</div></div>` : ''}
-        <div><div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px">Scope</div><div style="font-size:12px;color:var(--txt)">${checklist.scope==='charter'?'Charter only':'All vessels'}</div></div>
-      </div>
+    ${checklist.estimatedTime ? `<div style="display:flex;gap:20px;flex-wrap:wrap;padding:10px 24px;background:var(--bg2);border-bottom:.5px solid var(--bd)">
+      <div><div class="sec-lbl" style="margin-bottom:2px">Est. time</div><div style="font-size:12px;color:var(--txt)">${checklist.estimatedTime}</div></div>
+      <div><div class="sec-lbl" style="margin-bottom:2px">Scope</div><div style="font-size:12px;color:var(--txt)">${checklist.scope==='charter'?'Charter only':'All vessels'}</div></div>
     </div>` : ''}
     <div style="padding:16px 24px 0">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:${allDone?'6px':'16px'}">
         <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden">
           <div style="height:100%;width:${pct}%;background:${allDone?'var(--grn)':'var(--or)'};border-radius:3px;transition:width .3s"></div>
         </div>
         <span style="font-size:12px;color:${allDone?'var(--grn)':'var(--txt2)'};font-weight:500;white-space:nowrap">${done} / ${total}</span>
       </div>
-      ${allDone ? `<div style="font-size:12px;color:var(--grn);margin-bottom:16px;font-weight:500">All items complete — ready for export</div>` : `<div style="height:16px"></div>`}
+      ${allDone ? `<div style="font-size:12px;color:var(--grn);margin-bottom:16px;font-weight:500">All items complete — click "Mark complete" to archive this run</div>` : ''}
       <div style="padding-bottom:40px">${stepsHtml}</div>
     </div>`;
 }
 
 function clToggle(clId, idx) {
   if (!_clChecked[clId]) _clChecked[clId] = {};
-  if (_clChecked[clId][idx]) {
-    delete _clChecked[clId][idx];
-  } else {
-    _clChecked[clId][idx] = { name: _clCurrentUser(), time: new Date().toISOString() };
-  }
+  if (_clChecked[clId][idx]) delete _clChecked[clId][idx];
+  else _clChecked[clId][idx] = { name: _clCurrentUser(), time: new Date().toISOString() };
+  renderChecklists(_clActive);
+}
+
+function clSaveNote(clId, key) {
+  const el = document.getElementById('cl-note-' + key);
+  if (!el) return;
+  if (!_clNotes[clId]) _clNotes[clId] = {};
+  const val = el.value.trim();
+  if (val) _clNotes[clId][key] = val;
+  else delete _clNotes[clId][key];
+  _clNoteOpen = null;
+  renderChecklists(_clActive);
+}
+
+function clReset(clId) {
+  delete _clChecked[clId];
+  delete _clNotes[clId];
+  _clNoteOpen = null;
+  renderChecklists(_clActive);
+}
+
+function clArchive(clId) {
+  const checklist = (FM.checklists || []).find(c => c.id === clId);
+  if (!checklist) return;
+  const checked = _clChecked[clId] || {};
+  const notes   = _clNotes[clId]   || {};
+  const total   = _clStepCount(checklist);
+  const done    = _clDoneCount(checklist, checked);
+  _clArchive.push({
+    id: 'run-' + Date.now(), checklistId: clId, name: checklist.name,
+    completedAt: new Date().toISOString(), done, total,
+    checked: JSON.parse(JSON.stringify(checked)),
+    notes:   JSON.parse(JSON.stringify(notes)),
+  });
+  localStorage.setItem('fm_cl_archive', JSON.stringify(_clArchive));
+  delete _clChecked[clId];
+  delete _clNotes[clId];
+  _clNoteOpen = null;
+  showToast('Checklist archived');
+  renderChecklists(_clActive);
+}
+
+function clViewArchive(runId) {
+  _clViewRun = runId;
   renderChecklists(_clActive);
 }
 
@@ -2207,7 +2346,7 @@ function clRaiseIssue(itemLabel) {
       <input id="cl-issue-title" class="inp" value="Issue: ${escHtml(itemLabel)}">
     </div>
     <div class="inp-group">
-      <label class="inp-lbl" for="cl-issue-comment">Comment / description</label>
+      <label class="inp-lbl" for="cl-issue-comment">Description</label>
       <textarea id="cl-issue-comment" class="inp" rows="3" placeholder="Describe the issue…"></textarea>
     </div>
     <div class="inp-row">
@@ -2228,107 +2367,105 @@ function clRaiseIssue(itemLabel) {
         </select>
       </div>
     </div>
-  `, 'Raise issue as work order');
+  `, 'Create work order');
   document.getElementById('modal-submit').textContent = 'Create work order';
   document.getElementById('modal-submit').onclick = () => {
     const title    = document.getElementById('cl-issue-title').value.trim();
     const comment  = document.getElementById('cl-issue-comment').value.trim();
     const priority = document.getElementById('cl-issue-priority').value;
     const team     = document.getElementById('cl-issue-team').value;
-    if (!title) return;
+    if (!title) { document.getElementById('cl-issue-title').style.borderColor='var(--red)'; return; }
     FM.workOrders.push({
       id: newId, title, status: 'open', priority, team,
       vessel: App.currentVesselId === 'all' ? 'v1' : App.currentVesselId,
       zone: 'General', assignees: [],
-      description: comment || ('Raised from pre-departure checklist: ' + itemLabel),
-      created: new Date().toISOString().slice(0,10),
-      due: '', tags: [],
+      description: comment || ('Raised from checklist: ' + itemLabel),
+      created: new Date().toISOString().slice(0,10), due: '', tags: [],
     });
     closeModal();
-    showToast(newId + ' created', 'success');
+    showToast(newId + ' created');
   };
 }
 
-function exportChecklist(clId) {
+function exportChecklist(clId, runId) {
   const checklist = (FM.checklists || []).find(c => c.id === clId);
   if (!checklist) return;
-  const checked = _clChecked[clId] || {};
+  let checked, notes;
+  if (runId) {
+    const run = _clArchive.find(r => r.id === runId);
+    checked = run ? run.checked : {};
+    notes   = run ? run.notes   : {};
+  } else {
+    checked = _clChecked[clId] || {};
+    notes   = _clNotes[clId]   || {};
+  }
   const vessel  = FM.vessels.find(v => v.id === App.currentVesselId);
   const vName   = vessel ? vessel.name : 'Lady M';
   const dateStr = new Date().toLocaleDateString('en-US', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-  let bodyHtml = '';
-  const printItem = (item, entry) => {
+  const printItem = (item, entry, note) => {
     const done = !!entry;
-    const sig = done && entry.name ? `<span class="sig">${entry.name} · ${_clFmtTime(entry.time)}</span>` : '';
-    return `<div class="item${done?' done':''}"><span class="cb">${done?'✓':'○'}</span><span class="itxt">${item}${sig}</span></div>`;
+    const sig  = done && entry.name ? `<span class="sig">${entry.name} · ${_clFmtTime(entry.time)}</span>` : '';
+    const nt   = note ? `<span class="note">${note}</span>` : '';
+    return `<div class="item${done?' done':''}"><span class="cb">${done?'✓':'○'}</span><span class="itxt">${item}${sig}${nt}</span></div>`;
   };
+
+  let bodyHtml = '';
   if (checklist.sections) {
     checklist.sections.forEach((sec, si) => {
       bodyHtml += `<div class="team-block"><div class="team-label">${sec.team}</div><div class="items">`;
-      sec.items.forEach((item, ii) => { bodyHtml += printItem(item, checked[si+'-'+ii]); });
+      sec.items.forEach((item, ii) => { bodyHtml += printItem(item, checked[si+'-'+ii], notes[si+'-'+ii]); });
       bodyHtml += `</div></div>`;
     });
   } else {
     bodyHtml += `<div class="items">`;
-    (checklist.steps||[]).forEach((item, i) => { bodyHtml += printItem(item, checked[i]); });
+    (checklist.steps||[]).forEach((item, i) => { bodyHtml += printItem(item, checked[i], notes[i]); });
     bodyHtml += `</div>`;
   }
 
   const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>${checklist.name} — ${vName}</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #111; background: #fff; padding: 48px 52px; max-width: 760px; margin: 0 auto; }
-    .doc-hdr { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; padding-bottom: 20px; border-bottom: 2px solid #111; }
-    .doc-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin-bottom: 4px; }
-    .doc-meta { font-size: 12px; color: #666; }
-    .doc-logo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: #111; text-align: right; }
-    .team-block { margin-bottom: 24px; page-break-inside: avoid; }
-    .team-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: #888; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #eee; }
-    .items { display: flex; flex-direction: column; gap: 4px; }
-    .item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border: 1px solid #e8e8e8; border-radius: 6px; font-size: 12.5px; line-height: 1.4; }
-    .item.done { background: #f9fdf9; border-color: #c3e6cb; color: #555; }
-    .cb { font-size: 13px; font-weight: 700; width: 16px; flex-shrink: 0; color: #ccc; margin-top: 1px; }
-    .item.done .cb { color: #28a745; }
-    .itxt { display: flex; flex-direction: column; gap: 2px; }
-    .sig { font-size: 10px; color: #28a745; font-weight: 600; }
-    .sign-block { margin-top: 40px; padding-top: 24px; border-top: 1px solid #eee; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-    .sign-field { display: flex; flex-direction: column; gap: 6px; }
-    .sign-label { font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: .08em; }
-    .sign-line { border-bottom: 1px solid #bbb; height: 32px; }
-    .footer { margin-top: 24px; font-size: 10px; color: #bbb; display: flex; justify-content: space-between; }
-    @media print { body { padding: 24px 28px; } @page { margin: 16mm; } }
-  </style>
-</head>
-<body>
-  <div class="doc-hdr">
-    <div>
-      <div class="doc-title">${checklist.name}</div>
-      <div class="doc-meta">${vName} &nbsp;·&nbsp; ${dateStr}</div>
-    </div>
-    <div class="doc-logo">Frame Marine</div>
-  </div>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111;background:#fff;padding:48px 52px;max-width:760px;margin:0 auto}
+    .doc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;padding-bottom:20px;border-bottom:2px solid #111}
+    .doc-title{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+    .doc-meta{font-size:12px;color:#666}
+    .doc-logo{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#111;text-align:right}
+    .team-block{margin-bottom:24px;page-break-inside:avoid}
+    .team-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid #eee}
+    .items{display:flex;flex-direction:column;gap:4px}
+    .item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border:1px solid #e8e8e8;border-radius:6px;font-size:12.5px;line-height:1.4}
+    .item.done{background:#f9fdf9;border-color:#c3e6cb;color:#555}
+    .cb{font-size:13px;font-weight:700;width:16px;flex-shrink:0;color:#ccc;margin-top:1px}
+    .item.done .cb{color:#28a745}
+    .itxt{display:flex;flex-direction:column;gap:3px}
+    .sig{font-size:10px;color:#28a745;font-weight:600}
+    .note{font-size:10px;color:#666;font-style:italic}
+    .sign-block{margin-top:40px;padding-top:24px;border-top:1px solid #eee;display:grid;grid-template-columns:1fr 1fr;gap:40px}
+    .sign-field{display:flex;flex-direction:column;gap:6px}
+    .sign-label{font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.08em}
+    .sign-line{border-bottom:1px solid #bbb;height:32px}
+    .footer{margin-top:24px;font-size:10px;color:#bbb;display:flex;justify-content:space-between}
+    @media print{body{padding:24px 28px} @page{margin:16mm}}
+  </style></head><body>
+  <div class="doc-hdr"><div><div class="doc-title">${checklist.name}</div><div class="doc-meta">${vName} &nbsp;·&nbsp; ${dateStr}</div></div><div class="doc-logo">Frame Marine</div></div>
   ${bodyHtml}
-  <div class="sign-block">
-    <div class="sign-field"><div class="sign-label">Officer / Captain</div><div class="sign-line"></div></div>
-    <div class="sign-field"><div class="sign-label">Date &amp; Time</div><div class="sign-line"></div></div>
-  </div>
-  <div class="footer"><span>Frame Marine — Pre-departure Operations</span><span>Generated ${dateStr}</span></div>
-  <script>window.onload=()=>{window.print();}<\/script>
-</body>
-</html>`);
+  <div class="sign-block"><div class="sign-field"><div class="sign-label">Officer / Captain</div><div class="sign-line"></div></div><div class="sign-field"><div class="sign-label">Date &amp; Time</div><div class="sign-line"></div></div></div>
+  <div class="footer"><span>Frame Marine</span><span>Generated ${dateStr}</span></div>
+  <script>window.onload=()=>{window.print();}<\/script></body></html>`);
   win.document.close();
 }
 
 window.renderChecklists = renderChecklists;
-window.clToggle = clToggle;
-window.exportChecklist = exportChecklist;
-window.clRaiseIssue = clRaiseIssue;
+window.clToggle         = clToggle;
+window.clSaveNote       = clSaveNote;
+window.clReset          = clReset;
+window.clArchive        = clArchive;
+window.clViewArchive    = clViewArchive;
+window.clRaiseIssue     = clRaiseIssue;
+window.exportChecklist  = exportChecklist;
 
 /* ── NOTIFICATIONS ── */
 function toggleNotifPanel(e) {
