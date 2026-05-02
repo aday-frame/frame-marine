@@ -2064,11 +2064,10 @@ window.Assets = {
 };
 
 /* ── CHECKLIST RENDERER ── */
-let _clActive   = null;   // current checklist template id
-let _clViewRun  = null;   // if set, viewing a completed archive run id
-let _clNoteOpen = null;   // 'clId:key' of item with open note editor
-const _clChecked = {};    // [clId][key] = { name, time }
-const _clNotes   = {};    // [clId][key] = 'text'
+let _clActive  = null;   // current checklist template id
+let _clViewRun = null;   // if set, viewing a completed archive run id
+const _clChecked = {};   // [clId][key] = { name, time }
+const _clNotes   = {};   // [clId][key] = 'text'
 const _clArchive = JSON.parse(localStorage.getItem('fm_cl_archive') || '[]');
 // archive entry: { id, checklistId, name, completedAt, done, total, checked, notes }
 
@@ -2095,40 +2094,62 @@ function _clFmtDate(iso) {
 }
 
 function _clItemRow(clId, key, label, entry, note, readonly) {
-  const done    = !!entry;
-  const noteKey = clId + ':' + key;
-  const isOpen  = _clNoteOpen === noteKey && !readonly;
-  const esc     = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  const done = !!entry;
+  const esc  = label.replace(/'/g, "\\'").replace(/"/g, '&quot;');
 
-  // Sign-off line with inline note trigger — only on checked items
-  let signOffHtml = '';
-  if (done && entry && entry.name) {
-    const noteChip = readonly ? '' : (note
-      ? `<button onclick="clOpenNote('${noteKey}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--or);font-weight:500;text-decoration:underline;text-underline-offset:2px;flex-shrink:0">✎ edit note</button>`
-      : `<button onclick="clOpenNote('${noteKey}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--txt3);font-weight:500;flex-shrink:0">+ note</button>`);
-    const noteText = note && !isOpen
-      ? `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
-      : '';
-    signOffHtml = `
-      <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
-        <span style="font-size:10px;color:var(--grn);font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</span>
-        ${noteChip}
-      </div>
-      ${noteText}`;
+  let infoHtml = '';
+
+  if (!readonly) {
+    // Note editor always in DOM, hidden by default — shown via clShowNote()
+    const noteEditor = `
+      <div id="cl-note-wrap-${key}" style="display:none;flex-direction:column;gap:6px;margin-top:8px">
+        <textarea id="cl-note-${key}" class="inp" rows="2" placeholder="Add a note about this item…" style="font-size:12px;min-height:52px;resize:none">${escHtml(note||'')}</textarea>
+        <div style="display:flex;gap:6px">
+          <button onclick="clSaveNote('${clId}','${key}')" class="btn btn-primary btn-sm">Save note</button>
+          <button onclick="clHideNote('${key}')" class="btn btn-ghost btn-sm">Cancel</button>
+        </div>
+      </div>`;
+
+    if (done && entry && entry.name) {
+      const noteChip = note
+        ? `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--or);font-weight:500;text-decoration:underline;text-underline-offset:2px;flex-shrink:0">✎ edit note</button>`
+        : `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--txt3);font-weight:500;flex-shrink:0">+ note</button>`;
+      const noteText = note
+        ? `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+        : '';
+      infoHtml = `
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap">
+          <span style="font-size:10px;color:var(--grn);font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</span>
+          ${noteChip}
+        </div>
+        ${noteText}
+        ${noteEditor}`;
+    } else {
+      const noteChip = note
+        ? `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--or);font-weight:500;text-decoration:underline;text-underline-offset:2px">✎ edit note</button>`
+        : `<button onclick="clShowNote('${key}')" style="background:none;border:none;padding:0;cursor:pointer;font-size:10px;color:var(--txt3);font-weight:500">+ note</button>`;
+      const noteText = note
+        ? `<div style="font-size:11px;color:var(--or);margin-bottom:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+        : '';
+      infoHtml = `
+        <div style="margin-top:4px">${noteText}${noteChip}</div>
+        ${noteEditor}`;
+    }
+  } else {
+    if (done && entry && entry.name) {
+      const noteText = note
+        ? `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`
+        : '';
+      infoHtml = `
+        <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+          <span style="font-size:10px;color:var(--grn);font-weight:500">${escHtml(entry.name)} · ${_clFmtTime(entry.time)}</span>
+        </div>
+        ${noteText}`;
+    } else if (note) {
+      infoHtml = `<div style="font-size:11px;color:var(--or);margin-top:4px;line-height:1.5;white-space:pre-wrap">${escHtml(note)}</div>`;
+    }
   }
 
-  // Inline note editor (no event bubbling to toggle)
-  const noteEditor = isOpen
-    ? `<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
-        <textarea id="cl-note-${key}" class="inp" rows="2" placeholder="Add a note…" style="font-size:12px;min-height:52px;resize:none">${escHtml(note||'')}</textarea>
-        <div style="display:flex;gap:6px">
-          <button onclick="clSaveNote('${clId}','${key}')" class="btn btn-primary btn-sm">Save</button>
-          <button onclick="clCancelNote()" class="btn btn-ghost btn-sm">Cancel</button>
-        </div>
-       </div>`
-    : '';
-
-  // Right-side WO button only
   const woBtn = readonly ? '' : `<button onclick="clRaiseIssue('${esc}')" title="Create work order"
     style="flex-shrink:0;background:none;border:.5px solid var(--bd);border-radius:5px;padding:3px 8px;cursor:pointer;color:var(--txt3);font-size:10px;font-weight:600;white-space:nowrap;margin-top:1px"
     onmouseover="this.style.color='var(--or)';this.style.borderColor='var(--or)'"
@@ -2143,7 +2164,7 @@ function _clItemRow(clId, key, label, entry, note, readonly) {
       <div style="${readonly?'':'cursor:pointer'}" onclick="${toggleCall}">
         <span style="font-size:13px;color:${done?'var(--txt3)':'var(--txt)'};${done?'text-decoration:line-through;':''}line-height:1.5">${label}</span>
       </div>
-      <div onclick="event.stopPropagation()">${signOffHtml}${noteEditor}</div>
+      <div onclick="event.stopPropagation()">${infoHtml}</div>
     </div>
     ${woBtn}
   </div>`;
@@ -2156,7 +2177,7 @@ function renderChecklists(id) {
 
   const lists = FM.checklists || [];
   if (!_clActive && lists.length) _clActive = lists[0].id;
-  if (id) { _clActive = id; _clViewRun = null; _clNoteOpen = null; }
+  if (id) { _clActive = id; _clViewRun = null; }
 
   // Sidebar: active runs + completed archive
   const activeLists = lists.filter(c => Object.keys(_clChecked[c.id] || {}).length > 0);
@@ -2306,14 +2327,12 @@ function clSaveNote(clId, key) {
   const val = el.value.trim();
   if (val) _clNotes[clId][key] = val;
   else delete _clNotes[clId][key];
-  _clNoteOpen = null;
   renderChecklists(_clActive);
 }
 
 function clReset(clId) {
   delete _clChecked[clId];
   delete _clNotes[clId];
-  _clNoteOpen = null;
   renderChecklists(_clActive);
 }
 
@@ -2333,7 +2352,6 @@ function clArchive(clId) {
   localStorage.setItem('fm_cl_archive', JSON.stringify(_clArchive));
   delete _clChecked[clId];
   delete _clNotes[clId];
-  _clNoteOpen = null;
   showToast('Checklist archived');
   renderChecklists(_clActive);
 }
@@ -2472,14 +2490,23 @@ function exportChecklist(clId, runId) {
   win.document.close();
 }
 
-function clOpenNote(noteKey)  { _clNoteOpen = noteKey; renderChecklists(_clActive); }
-function clCancelNote()       { _clNoteOpen = null;    renderChecklists(_clActive); }
+function clShowNote(key) {
+  const wrap = document.getElementById('cl-note-wrap-' + key);
+  if (!wrap) return;
+  wrap.style.display = 'flex';
+  const ta = document.getElementById('cl-note-' + key);
+  if (ta) { ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }
+}
+function clHideNote(key) {
+  const wrap = document.getElementById('cl-note-wrap-' + key);
+  if (wrap) wrap.style.display = 'none';
+}
 
 window.renderChecklists = renderChecklists;
 window.clToggle         = clToggle;
 window.clSaveNote       = clSaveNote;
-window.clOpenNote       = clOpenNote;
-window.clCancelNote     = clCancelNote;
+window.clShowNote       = clShowNote;
+window.clHideNote       = clHideNote;
 window.clReset          = clReset;
 window.clArchive        = clArchive;
 window.clViewArchive    = clViewArchive;
