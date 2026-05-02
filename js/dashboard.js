@@ -49,7 +49,7 @@ Dash.renderHero = function() {
   const hasAlert = critSensors > 0;
 
   wrap.innerHTML = `
-    <div style="display:flex;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;height:195px">
+    <div id="dash-hero-card" style="display:flex;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;height:195px">
 
       <!-- Photo -->
       ${v.photo ? `
@@ -242,7 +242,7 @@ Dash.renderVessels = function() {
 
   wrap.innerHTML = `
     <div class="dash-section-title">Tender &amp; small craft</div>
-    <div style="display:grid;grid-template-columns:repeat(${tenders.length},1fr);gap:10px">
+    <div class="dash-tender-grid" style="display:grid;grid-template-columns:repeat(${tenders.length},1fr);gap:10px">
       ${tenders.map(t => {
         const fc = fuelColor(t.fuelPct);
         const hoursToSvc = t.nextServiceHours - t.hours;

@@ -346,3 +346,70 @@
   .vessel-picker-type { display: none; }
   .panel { width: 100%; max-width: 100%; }
 }
+
+/* ── TABLET ── */
+@media (max-width: 1080px) and (min-width: 769px) {
+  .shell { grid-template-columns: 168px 1fr; }
+}
+
+/* ── MOBILE BOTTOM NAV ── */
+.mob-nav {
+  display: none;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg2); border-top: .5px solid var(--bd);
+  z-index: 110;
+}
+.mob-nav-inner {
+  display: flex; height: 56px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mob-nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px; cursor: pointer; border: none;
+  background: transparent; color: var(--txt3);
+  font-size: 9px; font-weight: 500; font-family: var(--font);
+  transition: color .15s; position: relative;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.mob-nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.mob-nav-item.active { color: var(--or); }
+.mob-nav-badge {
+  position: absolute; top: 4px; left: calc(50% + 4px);
+  background: var(--red); color: #fff;
+  font-size: 8px; font-weight: 700; line-height: 1.4;
+  padding: 0 4px; border-radius: 6px; min-width: 14px;
+  text-align: center;
+}
+
+/* Hamburger */
+.mob-hamburger {
+  display: none;
+  width: 34px; height: 34px; border-radius: 7px;
+  align-items: center; justify-content: center;
+  border: none; background: transparent;
+  color: var(--txt2); cursor: pointer; flex-shrink: 0;
+}
+.mob-hamburger:hover { background: var(--bg3); }
+.mob-hamburger svg { width: 16px; height: 16px; }
+
+/* Sidebar backdrop */
+.mob-backdrop {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 140;
+  backdrop-filter: blur(2px);
+}
+.mob-backdrop.open { display: block; }
+
+@media (max-width: 768px) {
+  .mob-nav { display: block; }
+  .mob-hamburger { display: flex; }
+  .page-body { padding-bottom: 72px; }
+  .page-hdr { height: 46px; padding: 0 14px; }
+  .page-title { font-size: 14px; }
+  #new-btn { display: none !important; }
+  #template-btn { display: none !important; }
+  .tb-right .btn-icon:not(#notif-btn) { display: none !important; }
+  .tb-avatar { display: none !important; }
+  .sb-foot { display: none; }
+}

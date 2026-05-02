@@ -71,7 +71,24 @@ function navTo(pageId, clickedEl) {
 
   // Close mobile sidebar
   document.getElementById('mob-sb')?.classList.remove('mob-open');
+  // Sync mobile bottom nav active state
+  document.querySelectorAll('.mob-nav-item[id^="mobnav-"]').forEach(b => b.classList.remove('active'));
+  const mobNavBtn = document.getElementById('mobnav-' + pageId);
+  if (mobNavBtn) mobNavBtn.classList.add('active');
+  // Close backdrop
+  document.getElementById('mob-backdrop')?.classList.remove('open');
 }
+
+/* ── MOBILE SIDEBAR TOGGLE ── */
+function toggleMobSidebar() {
+  const sb = document.getElementById('mob-sb');
+  const bd = document.getElementById('mob-backdrop');
+  if (!sb) return;
+  const isOpen = sb.classList.contains('mob-open');
+  sb.classList.toggle('mob-open', !isOpen);
+  bd?.classList.toggle('open', !isOpen);
+}
+window.toggleMobSidebar = toggleMobSidebar;
 
 /* ── VESSEL SWITCHER ── */
 function initVesselPicker() {

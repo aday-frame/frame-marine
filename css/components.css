@@ -897,3 +897,67 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
   border-radius: 10px;
 }
 .wire-box:hover { border-color: var(--pur); }
+
+/* ── RESPONSIVE — MOBILE ── */
+@media (max-width: 768px) {
+  /* Dashboard hero stacks vertically */
+  #dash-hero-card {
+    flex-direction: column !important;
+    height: auto !important;
+  }
+  #dash-hero-card > div:first-child {
+    width: 100% !important;
+    height: 180px !important;
+  }
+  #dash-hero-card > div:nth-child(2) {
+    border-left: none !important;
+    border-top: .5px solid var(--bd) !important;
+    padding: 14px 16px !important;
+  }
+  #dash-hero-card > div:last-child {
+    width: 100% !important;
+    border-left: none !important;
+    border-top: .5px solid var(--red-bd) !important;
+    max-height: 160px;
+  }
+
+  /* Tender grid: single column */
+  .dash-tender-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Fleet cards: single column */
+  #fleet-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Work orders table: horizontal scroll */
+  .wo-list-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .wo-list-wrap table { min-width: 580px; }
+
+  /* Monitoring: scroll */
+  #page-monitoring .page-body { overflow-x: hidden; }
+
+  /* Panel footer: stack buttons */
+  .panel-footer { flex-wrap: wrap; }
+
+  /* Topbar vessel picker: hide subtype text */
+  .vessel-picker-type { display: none; }
+
+  /* Section heading strip */
+  .dash-section-title { font-size: 9px; }
+
+  /* Calendar full width */
+  #dash-upcoming { flex-direction: column !important; }
+  #dash-upcoming > div { width: 100% !important; }
+}
+
+/* ── RESPONSIVE — TABLET ── */
+@media (max-width: 1080px) and (min-width: 769px) {
+  .dash-tender-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  #fleet-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
