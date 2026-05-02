@@ -10,19 +10,25 @@ Dash.render = function() {
   Dash.renderRecentWOs();
 };
 
+Dash._ack = Dash._ack || new Set();
+
+Dash.acknowledge = function(key) {
+  Dash._ack.add(key);
+  Dash.renderAlerts();
+};
+
 Dash.renderAlerts = function() {
   const wrap = document.getElementById('dash-alerts');
   if (!wrap) return;
 
-  const alerts = [];
+  const all = [];
 
-  // Check sensor alerts for current vessel
   const sensors = FM.sensors[App.currentVesselId];
   if (sensors) {
     sensors.engines.forEach(e => {
       if (e.status === 'warn' || e.status === 'crit') {
-        alerts.push({
-          type: e.status,
+        all.push({
+          key: 'engine-' + e.name,
           title: e.name + ' — ' + (e.coolant > 88 ? `High coolant temp ${e.coolant}°C` : 'Warning'),
           sub: 'WO-001 open · Dmitri Koval assigned',
           time: '2 min ago',
@@ -32,8 +38,8 @@ Dash.renderAlerts = function() {
 
     sensors.climate.forEach(c => {
       if (c.status === 'crit') {
-        alerts.push({
-          type: 'warn',
+        all.push({
+          key: 'climate-' + c.zone,
           title: c.zone + ' — A/C not cooling (' + c.temp + '°C / set ' + c.setpt + '°C)',
           sub: 'WO-003 in progress',
           time: '1h ago',
@@ -43,8 +49,8 @@ Dash.renderAlerts = function() {
 
     sensors.bilge.forEach(b => {
       if (b.status === 'warn') {
-        alerts.push({
-          type: 'warn',
+        all.push({
+          key: 'bilge-' + b.zone,
           title: 'Bilge elevated — ' + b.zone + ' (' + b.level + '%)',
           sub: 'Source investigation needed',
           time: '30 min ago',
@@ -52,6 +58,8 @@ Dash.renderAlerts = function() {
       }
     });
   }
+
+  const alerts = all.filter(a => !Dash._ack.has(a.key));
 
   if (alerts.length === 0) {
     wrap.innerHTML = `
@@ -64,15 +72,18 @@ Dash.renderAlerts = function() {
   }
 
   wrap.innerHTML = alerts.map(a => `
-    <div class="${a.type === 'crit' ? 'card-alert' : 'card-warn'}">
-      <div>
-        <div class="${a.type === 'crit' ? 'alert-strip-title' : ''}"
-             style="font-size:12px;font-weight:600;color:${a.type === 'crit' ? 'var(--red)' : 'var(--or)'};margin-bottom:2px">
-          ${a.title}
-        </div>
+    <div class="card-alert" style="justify-content:space-between;align-items:flex-start">
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--red);margin-bottom:2px">${a.title}</div>
         <div class="alert-strip-sub">${a.sub}</div>
+        <div class="alert-strip-time" style="margin-top:3px">${a.time}</div>
       </div>
-      <div class="alert-strip-time">${a.time}</div>
+      <button onclick="Dash.acknowledge('${a.key}')"
+              style="flex-shrink:0;margin-left:12px;padding:4px 10px;font-size:10px;font-weight:600;
+                     background:var(--red-bg);border:.5px solid var(--red-bd);border-radius:6px;
+                     color:var(--red);cursor:pointer;white-space:nowrap">
+        Acknowledge
+      </button>
     </div>
   `).join('');
 };
@@ -130,10 +141,10 @@ Dash.renderVessels = function() {
     const statusMap = {'in-water':'b-done','davits':'b-progress','swim-platform':'b-done','charged':'b-done'};
     const labelMap  = {'in-water':'In water','davits':'On davits','swim-platform':'Deployed','charged':'Charged'};
     wrap.innerHTML = `
-      <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:12px;max-width:700px">
         ${_vesselCardHTML(v)}
-        <div>
-          <div style="font-size:9px;font-weight:600;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">Tender & small craft</div>
+        ${tenders.length ? `<div>
+          <div style="font-size:9px;font-weight:600;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px">Tender & small craft</div>
           <div style="display:flex;flex-direction:column;gap:6px">
             ${tenders.map(t => `
               <div onclick="navTo('fleet',document.querySelector('[data-page=fleet]'))" style="display:flex;align-items:center;gap:14px;padding:12px 16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r10);cursor:pointer;transition:background var(--t1)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
@@ -161,7 +172,7 @@ Dash.renderVessels = function() {
                 </div>
               </div>`).join('')}
           </div>
-        </div>
+        </div>` : ''}
       </div>`;
   }
 };
@@ -169,6 +180,7 @@ Dash.renderVessels = function() {
 Dash.renderUpcoming = function() {
   const wrap = document.getElementById('dash-upcoming');
   if (!wrap) return;
+  wrap.style.cssText = 'max-width:400px';
 
   const colorMap = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
   const now   = new Date('2026-05-01T00:00:00');

@@ -36,7 +36,7 @@ Charter.renderSidebar = function() {
   wrap.innerHTML = `
     <div style="padding:0 4px 8px">
       <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:center"
-              onclick="showToast('New charter — contact your broker to begin')">+ New charter</button>
+              onclick="Charter.openNewModal()">+ New charter</button>
     </div>
     ${charters.map(c => {
       const sel = Charter.selectedId === c.id;
@@ -88,7 +88,7 @@ Charter.renderDetail = function() {
     { id: 'itinerary',  label: 'Itinerary' },
     { id: 'requests',   label: openReqs ? `Requests (${openReqs})` : 'Requests' },
     { id: 'documents',  label: `Documents (${c.documents.length})` },
-    { id: 'booking',    label: outstandingPayments ? `Booking (${outstandingPayments} due)` : 'Booking' },
+    { id: 'booking',    label: outstandingPayments ? `Booking <span style="color:var(--red);font-weight:700">(${outstandingPayments} due)</span>` : 'Booking' },
   ];
 
   const statusStyle = c.status === 'active'
@@ -546,7 +546,7 @@ Charter.renderBooking = function() {
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:12px;height:12px"><path d="M1 3.5l7 4.5 7-4.5M1 3.5h14v9H1z"/></svg>
             Email
           </button>
-          <button class="btn btn-ghost btn-sm" onclick="showToast('PDF export — coming soon')">
+          <button class="btn btn-ghost btn-sm" onclick="Charter.exportPDF()">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:12px;height:12px"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>
             PDF
           </button>
@@ -629,12 +629,12 @@ Charter.renderBooking = function() {
             <span style="font-family:var(--mono);font-size:13px;color:var(--txt);flex-shrink:0">$${p.amount.toLocaleString()}</span>
             ${p.paid
               ? `<span style="font-size:10px;color:var(--grn);font-weight:600;flex-shrink:0">✓ Paid</span>`
-              : `<span class="badge b-open" style="flex-shrink:0">Outstanding</span>`}
+              : `<span class="badge b-critical" style="flex-shrink:0">Outstanding</span>`}
           </div>
         `).join('')}
         <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">
           <span style="font-size:11px;color:var(--txt3)">Total outstanding</span>
-          <span style="font-family:var(--mono);font-size:14px;font-weight:500;color:${totalOutstanding > 0 ? 'var(--or)' : 'var(--grn)'}">
+          <span style="font-family:var(--mono);font-size:14px;font-weight:500;color:${totalOutstanding > 0 ? 'var(--red)' : 'var(--grn)'}">
             ${totalOutstanding > 0 ? '$' + totalOutstanding.toLocaleString() : '✓ All received'}
           </span>
         </div>
@@ -666,7 +666,7 @@ Charter.renderBooking = function() {
         <div>
           <div style="font-size:9px;font-weight:700;color:var(--pur);text-transform:uppercase;letter-spacing:.12em">Wire 1 — Charter fee</div>
           ${pendingCharter > 0
-            ? `<div style="font-size:12px;color:var(--or);font-weight:500;margin-top:3px">$${pendingCharter.toLocaleString()} outstanding</div>`
+            ? `<div style="font-size:12px;color:var(--red);font-weight:500;margin-top:3px">$${pendingCharter.toLocaleString()} outstanding</div>`
             : `<div style="font-size:11px;color:var(--grn);margin-top:3px">✓ All payments received</div>`}
         </div>
         <button class="btn btn-ghost btn-xs" onclick="Charter._copyWire(1)">
@@ -693,7 +693,7 @@ Charter.renderBooking = function() {
         <div>
           <div style="font-size:9px;font-weight:700;color:var(--pur);text-transform:uppercase;letter-spacing:.12em">Wire 2 — APA advance</div>
           ${pendingAPA > 0
-            ? `<div style="font-size:12px;color:var(--or);font-weight:500;margin-top:3px">$${pendingAPA.toLocaleString()} outstanding</div>`
+            ? `<div style="font-size:12px;color:var(--red);font-weight:500;margin-top:3px">$${pendingAPA.toLocaleString()} outstanding</div>`
             : `<div style="font-size:11px;color:var(--grn);margin-top:3px">✓ APA advance received</div>`}
         </div>
         <button class="btn btn-ghost btn-xs" onclick="Charter._copyWire(2)">
@@ -791,6 +791,177 @@ Charter._copyWire = function(num) {
   navigator.clipboard?.writeText(text)
     .then(() => showToast('Wire details copied to clipboard', 'ok'))
     .catch(() => showToast('Copy not available — please copy manually'));
+};
+
+/* ── NEW CHARTER ── */
+Charter.openNewModal = function() {
+  const vesselOptions = (FM.vessels || []).map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+  const inp = 'padding:8px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--bg);color:var(--txt);font-size:13px;width:100%';
+  const lbl = 'display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--txt2)';
+  openModal(`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <span style="font-weight:600;font-size:15px">New charter</span>
+      <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <label style="${lbl}">Charter name / principal guest
+        <input id="nc-name" type="text" style="${inp}" placeholder="e.g. Smith Family Charter">
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label style="${lbl}">Start date
+          <input id="nc-start" type="date" style="${inp}">
+        </label>
+        <label style="${lbl}">End date
+          <input id="nc-end" type="date" style="${inp}">
+        </label>
+      </div>
+      <label style="${lbl}">Vessel
+        <select id="nc-vessel" style="${inp}">${vesselOptions}</select>
+      </label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label style="${lbl}">Charter fee (USD)
+          <input id="nc-fee" type="number" style="${inp}" placeholder="0" min="0">
+        </label>
+        <label style="${lbl}">Est. guests
+          <input id="nc-guests" type="number" style="${inp}" placeholder="0" min="1" max="24">
+        </label>
+      </div>
+      <label style="${lbl}">Broker / agent
+        <input id="nc-broker" type="text" style="${inp}" placeholder="e.g. Fraser Yachts">
+      </label>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" onclick="Charter.submitNew()">Create charter</button>
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>`);
+};
+
+Charter.submitNew = function() {
+  const name   = document.getElementById('nc-name').value.trim();
+  const start  = document.getElementById('nc-start').value;
+  const end    = document.getElementById('nc-end').value;
+  const vessel = document.getElementById('nc-vessel').value;
+  const fee    = parseFloat(document.getElementById('nc-fee').value) || 0;
+  const broker = document.getElementById('nc-broker').value.trim() || 'Direct';
+  if (!name || !start || !end) { showToast('Name, start and end date required'); return; }
+  if (start >= end) { showToast('End date must be after start date'); return; }
+  const id = 'ch-' + Date.now();
+  FM.charters.push({
+    id, vessel, name, status: 'upcoming',
+    start, end, embark: 'TBD', disembark: 'TBD',
+    fee, apa: Math.round(fee * 0.20),
+    broker, brokerContact: '',
+    guests: [], itinerary: [], documents: [],
+    quote: null,
+  });
+  closeModal();
+  Charter.selectedId = id;
+  Charter.renderSidebar();
+  Charter.renderDetail();
+  showToast('Charter created', 'ok');
+};
+
+/* ── PDF EXPORT ── */
+Charter.exportPDF = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  if (!c?.quote) { showToast('No booking quote to export'); return; }
+  const q = c.quote;
+  const vessel = FM.vessels.find(v => v.id === c.vessel) || {};
+  const outstanding = q.payments.filter(p => !p.paid).reduce((s, p) => s + p.amount, 0);
+  const apaAlloc = [
+    { cat: 'Fuel & lubricants',             pct: 45 },
+    { cat: 'Provisioning & beverages',      pct: 30 },
+    { cat: 'Port dues & marina fees',       pct: 12 },
+    { cat: 'Water toys & watersports hire', pct:  5 },
+    { cat: 'Communications & satellite',    pct:  4 },
+    { cat: 'Miscellaneous / crew advance',  pct:  4 },
+  ].map(a => ({ ...a, amount: Math.round(c.apa * a.pct / 100) }));
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head>
+    <title>Booking — ${c.name}</title>
+    <style>
+      *{margin:0;padding:0;box-sizing:border-box}
+      body{font-family:system-ui,-apple-system,sans-serif;color:#111;background:#fff;padding:40px;font-size:12px;line-height:1.5}
+      h2{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#888;margin:18px 0 10px}
+      .hdr{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:1px solid #e0e0e0;margin-bottom:6px}
+      .section{border:1px solid #e0e0e0;border-radius:8px;padding:14px 18px;margin-bottom:14px}
+      .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:.5px solid #eee;gap:16px}
+      .row:last-child{border-bottom:none}
+      .lbl{color:#777;flex-shrink:0}
+      .val{font-weight:500;text-align:right}
+      .mono{font-family:'SF Mono',Consolas,monospace;letter-spacing:.02em}
+      .wire-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:#7c3aed;margin-bottom:10px}
+      .badge-paid{color:#16a34a;font-weight:700;font-size:10px}
+      .badge-due{background:#fee2e2;color:#dc2626;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+      .tc{font-size:10px;color:#888;line-height:1.7;margin-top:8px}
+      .print-btn{margin-top:20px;padding:8px 20px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px}
+      @media print{.print-btn{display:none}}
+    </style>
+  </head><body>
+    <div class="hdr">
+      <div>
+        <div style="font-size:20px;font-weight:600;margin-bottom:4px">${c.name}</div>
+        <div style="color:#666;font-size:11px">${vessel.name || ''} · ${vessel.type || ''} · ${vessel.loa || ''}</div>
+        <div style="color:#666;font-size:11px">${c.embark} → ${c.disembark}</div>
+        <div style="color:#666;font-size:11px">Broker: ${c.broker}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:24px;font-weight:600;color:#7c3aed">$${c.fee.toLocaleString()}</div>
+        <div style="font-size:10px;color:#888">charter fee</div>
+        <div style="font-size:11px;color:#888;margin-top:4px">Ref: ${q.ref} · Issued: ${q.issued}</div>
+      </div>
+    </div>
+    <div class="section">
+      <h2>Charter details</h2>
+      <div class="row"><span class="lbl">Charter period</span><span class="val">${c.start} – ${c.end}</span></div>
+      <div class="row"><span class="lbl">Guests</span><span class="val">${c.guests.length}</span></div>
+      <div class="row"><span class="lbl">Charter fee</span><span class="val mono">$${c.fee.toLocaleString()}</span></div>
+      <div class="row"><span class="lbl">APA (${Math.round(c.apa / c.fee * 100)}%)</span><span class="val mono">$${c.apa.toLocaleString()}</span></div>
+      <div class="row" style="font-weight:600;font-size:13px"><span class="lbl" style="color:#111">Total</span><span class="val mono">$${(c.fee + c.apa).toLocaleString()}</span></div>
+    </div>
+    <div class="section">
+      <h2>APA allocation</h2>
+      ${apaAlloc.map(a => `<div class="row"><span class="lbl">${a.cat} (${a.pct}%)</span><span class="val mono">$${a.amount.toLocaleString()}</span></div>`).join('')}
+    </div>
+    <div class="section">
+      <h2>Payment schedule</h2>
+      ${q.payments.map(p => `
+        <div class="row" style="align-items:center">
+          <div style="flex:1"><div style="font-weight:500">${p.label}</div>
+            <div style="font-size:10px;color:#888">Due: ${p.due}${p.paid && p.paidDate ? ' · Received: ' + p.paidDate : ''}</div></div>
+          <span class="mono" style="font-size:13px;margin-right:12px">$${p.amount.toLocaleString()}</span>
+          ${p.paid ? '<span class="badge-paid">✓ Paid</span>' : '<span class="badge-due">Outstanding</span>'}
+        </div>`).join('')}
+      <div class="row" style="font-weight:600;font-size:13px;border-bottom:none;margin-top:4px">
+        <span class="lbl" style="color:#111">Total outstanding</span>
+        <span class="mono" style="color:${outstanding > 0 ? '#dc2626' : '#16a34a'}">${outstanding > 0 ? '$' + outstanding.toLocaleString() : '✓ All received'}</span>
+      </div>
+    </div>
+    <div class="section">
+      <div class="wire-lbl">Wire 1 — Charter fee</div>
+      <div class="row"><span class="lbl">Pay to</span><span class="val">${q.wireCharter.accountName}</span></div>
+      <div class="row"><span class="lbl">Bank</span><span class="val">${q.wireCharter.bank}, ${q.wireCharter.city}</span></div>
+      <div class="row"><span class="lbl">IBAN</span><span class="val mono">${q.wireCharter.iban}</span></div>
+      <div class="row"><span class="lbl">SWIFT/BIC</span><span class="val mono">${q.wireCharter.swift}</span></div>
+      <div class="row"><span class="lbl">Reference</span><span class="val mono">${q.wireCharter.ref}</span></div>
+    </div>
+    <div class="section">
+      <div class="wire-lbl">Wire 2 — APA advance</div>
+      <div class="row"><span class="lbl">Pay to</span><span class="val">${q.wireAPA.accountName}</span></div>
+      <div class="row"><span class="lbl">Bank</span><span class="val">${q.wireAPA.bank}, ${q.wireAPA.city}</span></div>
+      <div class="row"><span class="lbl">IBAN</span><span class="val mono">${q.wireAPA.iban}</span></div>
+      <div class="row"><span class="lbl">SWIFT/BIC</span><span class="val mono">${q.wireAPA.swift}</span></div>
+      <div class="row"><span class="lbl">Reference</span><span class="val mono">${q.wireAPA.ref}</span></div>
+    </div>
+    <div class="tc">
+      Governed by the MYBA Charter Agreement (latest edition). All amounts in USD. 50% deposit due within 7 days of signing.
+      Balance due no later than 30 days before embarkation. APA advance transferred to captain no later than embarkation.
+      Cancellation: 50% retained within 60 days; 100% within 30 days of charter start. Valid 21 days from issue.
+    </div>
+    <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </body></html>`);
+  win.document.close();
 };
 
 /* ── PRIVATE HELPERS ── */
