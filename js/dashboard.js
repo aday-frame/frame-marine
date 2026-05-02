@@ -184,77 +184,95 @@ Dash.renderVessels = function() {
   }
 };
 
-Dash.renderUpcoming = function() {
+Dash._calYear  = 2026;
+Dash._calMonth = 4; // May
+
+Dash.renderUpcoming = function() { Dash.renderDashCal(); };
+
+Dash.renderDashCal = function() {
   const wrap = document.getElementById('dash-upcoming');
   if (!wrap) return;
-  wrap.style.cssText = 'width:100%';
 
-  const colorMap = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
-  const typeLabel = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics' };
-  const now   = new Date('2026-05-01T00:00:00');
-  const year  = now.getFullYear();
-  const month = now.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay  = new Date(year, month + 1, 0);
-  const startDow = (firstDay.getDay() + 6) % 7; // Mon-first
+  const year  = Dash._calYear;
+  const month = Dash._calMonth;
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const todayStr   = '2026-05-01';
 
-  function eventsForDay(d) {
-    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    return (FM.events||[]).filter(e => e.vessel === App.currentVesselId && e.start <= ds && e.end >= ds);
+  const firstDow   = new Date(year, month, 1).getDay();
+  const offset     = firstDow === 0 ? 6 : firstDow - 1;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevDays   = new Date(year, month, 0).getDate();
+  const padZ = n => String(n).padStart(2,'0');
+  const dateStr = d => `${year}-${padZ(month+1)}-${padZ(d)}`;
+
+  let gridHtml = '';
+  for (let i = offset - 1; i >= 0; i--) {
+    gridHtml += `<div class="cal-month-cell other-month"><div class="cal-day-num">${prevDays - i}</div></div>`;
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = dateStr(d);
+    const dayEvts = (FM.events||[]).filter(e => e.vessel === App.currentVesselId && e.start <= ds && e.end >= ds);
+    const isToday = ds === todayStr;
+    gridHtml += `<div class="cal-month-cell${isToday ? ' today' : ''}">
+      <div class="cal-day-num">${d}</div>
+      ${dayEvts.map(e => `<div class="cal-pill cal-pill-${e.color}" title="${e.title}">${e.title}</div>`).join('')}
+    </div>`;
+  }
+  const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
+  for (let i = 1; i <= totalCells - offset - daysInMonth; i++) {
+    gridHtml += `<div class="cal-month-cell other-month"><div class="cal-day-num">${i}</div></div>`;
   }
 
-  const cells = [];
-  for (let i = 0; i < startDow; i++) cells.push(null);
-  for (let d = 1; d <= lastDay.getDate(); d++) cells.push(d);
-
-  const monthLabel = firstDay.toLocaleDateString('en-GB', { month:'long', year:'numeric' });
-  const monthEvents = (FM.events||[]).filter(e => e.vessel === App.currentVesselId && e.start.startsWith('2026-05'));
+  const colorVars = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
+  const typeLabels = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics' };
+  const upEvents = (FM.events||[])
+    .filter(e => e.vessel === App.currentVesselId && e.end >= todayStr)
+    .sort((a,b) => a.start.localeCompare(b.start));
 
   wrap.innerHTML = `
-    <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden">
-      <!-- Month header -->
-      <div style="padding:14px 16px 10px;border-bottom:.5px solid var(--bd)">
-        <div style="font-size:14px;font-weight:600;color:var(--txt)">${monthLabel}</div>
+    <div style="display:grid;grid-template-columns:1fr 220px;border:.5px solid var(--bd);border-radius:var(--r12);overflow:hidden;background:var(--bg)">
+      <div style="display:flex;flex-direction:column;border-right:.5px solid var(--bd);overflow:hidden">
+        <div class="cal-month-hdr">
+          <div class="cal-month-nav">
+            <button class="cal-nav-btn" onclick="dashCalNav(-1)">&#8249;</button>
+            <button class="cal-nav-btn" onclick="dashCalNav(1)">&#8250;</button>
+          </div>
+          <span class="cal-month-title">${monthNames[month]} ${year}</span>
+          <div class="cal-month-legend">
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--or)"></div>Charter</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--eng)"></div>Maintenance</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red)"></div>Regulatory</div>
+            <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--grn)"></div>Logistics</div>
+          </div>
+        </div>
+        <div class="cal-month-dow">
+          ${['MON','TUE','WED','THU','FRI','SAT','SUN'].map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+        </div>
+        <div class="cal-month-grid" style="flex:none">${gridHtml}</div>
       </div>
-      <!-- Day headers -->
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:8px 10px 4px">
-        ${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div style="text-align:center;font-size:10px;color:var(--txt4);font-weight:600">${d}</div>`).join('')}
-      </div>
-      <!-- Day cells -->
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:0 10px 10px">
-        ${cells.map(d => {
-          if (!d) return `<div></div>`;
-          const dayEvts = eventsForDay(d);
-          const isToday = d === now.getDate();
-          const hasBg = dayEvts.length > 0;
-          return `<div style="padding:6px 4px;text-align:center;border-radius:6px;
-                       background:${isToday ? 'var(--or)' : hasBg ? 'var(--bg4)' : 'transparent'};
-                       position:relative">
-            <div style="font-size:12px;font-weight:${isToday?'700':'400'};color:${isToday?'#080808':'var(--txt)'};">${d}</div>
-            <div style="display:flex;justify-content:center;gap:2px;margin-top:3px;min-height:5px">
-              ${dayEvts.slice(0,3).map(e=>`<div style="width:5px;height:5px;border-radius:50%;background:${isToday?'rgba(8,8,8,.5)':colorMap[e.color]||'var(--txt3)'}"></div>`).join('')}
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-      <!-- Event list -->
-      <div style="border-top:.5px solid var(--bd);padding:12px 16px">
-        <div style="font-size:9px;font-weight:700;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px">This month · ${monthEvents.length} events</div>
-        <div style="display:flex;flex-direction:column;gap:1px">
-          ${monthEvents.length ? monthEvents.map(e => `
-            <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:7px;cursor:pointer;transition:background var(--t1)"
-                 onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''"
-                 onclick="${e.wo ? `WO&&WO.openPanel&&WO.openPanel('${e.wo}')` : `navTo('calendar',document.querySelector('[data-page=calendar]'))`}">
-              <div style="width:8px;height:8px;border-radius:50%;background:${colorMap[e.color]||'var(--txt3)'};flex-shrink:0"></div>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:12px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.title}</div>
-                <div style="font-size:10px;color:var(--txt3)">${fmtDateLong(e.start)}${e.end!==e.start?' → '+fmtDateLong(e.end):''}</div>
-              </div>
-              <span style="font-size:9px;font-weight:600;color:${colorMap[e.color]||'var(--txt4)'};white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:.06em">${typeLabel[e.type]||e.type}</span>
-            </div>`).join('') : `<div style="padding:16px;text-align:center;font-size:12px;color:var(--txt4)">No events this month</div>`}
+      <div class="cal-upcoming-panel">
+        <div class="cal-upcoming-hdr">Upcoming</div>
+        <div class="cal-upcoming-list">
+          ${upEvents.map(e => {
+            const s = new Date(e.start+'T00:00'), en = new Date(e.end+'T00:00');
+            const fmt = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+            const range = e.start===e.end ? fmt(s) : `${fmt(s)} – ${fmt(en)}`;
+            return `<div class="cal-up-item">
+              <div class="cal-up-date" style="color:${colorVars[e.color]}">${range}</div>
+              <div class="cal-up-title">${e.title}</div>
+              <div class="cal-up-meta">${typeLabels[e.type]||e.type}${e.wo?' · '+e.wo:''}</div>
+            </div>`;
+          }).join('') || '<div style="padding:16px;font-size:12px;color:var(--txt4)">No upcoming events</div>'}
         </div>
       </div>
     </div>`;
+};
+
+window.dashCalNav = function(dir) {
+  Dash._calMonth += dir;
+  if (Dash._calMonth < 0)  { Dash._calMonth = 11; Dash._calYear--; }
+  if (Dash._calMonth > 11) { Dash._calMonth = 0;  Dash._calYear++; }
+  Dash.renderDashCal();
 };
 
 Dash.renderRecentWOs = function() {

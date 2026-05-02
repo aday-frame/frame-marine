@@ -88,6 +88,9 @@
   font-size: 12px;
   text-align: left;
   color: var(--txt);
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 /* popup shown via JS mouseenter */
 .mp-tag { font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--txt4);margin-bottom:10px; }
