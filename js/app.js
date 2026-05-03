@@ -10,7 +10,7 @@ const App = window.App = {
 };
 
 /* ── ROUTER ── */
-function navTo(pageId, clickedEl) {
+function navTo(pageId, clickedEl, skipPush) {
   // Hide all pages
   document.querySelectorAll('.page, .page-flex').forEach(p => p.classList.remove('active'));
 
@@ -50,6 +50,7 @@ function navTo(pageId, clickedEl) {
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
 
   App.currentPage = pageId;
+  if (!skipPush) history.pushState(null, '', '/' + pageId);
 
   // Page-specific init
   const inits = {
@@ -379,7 +380,14 @@ function initOffline() {
 document.addEventListener('DOMContentLoaded', () => {
   initVesselPicker();
   initOffline();
-  navTo('dashboard');
+
+  const startPage = window.location.pathname.replace(/^\//, '').replace(/\/$/, '') || 'dashboard';
+  navTo(startPage, null, true);
+
+  window.addEventListener('popstate', () => {
+    const p = window.location.pathname.replace(/^\//, '').replace(/\/$/, '') || 'dashboard';
+    navTo(p, null, true);
+  });
 
   // Unregister any existing service workers so files always load fresh
   if ('serviceWorker' in navigator) {
