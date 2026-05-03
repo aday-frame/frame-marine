@@ -184,7 +184,8 @@ function switchVessel(vesselId) {
   };
   if (inits[App.currentPage]) inits[App.currentPage]();
 
-  showToast('Switched to ' + v.name);
+  const vLabel = vesselId === 'all' ? 'All vessels' : FM.vessels.find(x => x.id === vesselId)?.name || vesselId;
+  showToast('Switched to ' + vLabel);
 }
 
 /* ── MODULE TABS ── */

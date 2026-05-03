@@ -303,7 +303,8 @@ WO.setStatus = function(woId, status) {
 
 /* ── NEW WORK ORDER MODAL ── */
 WO.openNewModal = function() {
-  const vessel = FM.currentVessel();
+  const vessel = FM.currentVessel() || FM.vessels[0];
+  if (!vessel) return;
   const zoneOpts = vessel.zones.map(z => `<option>${z}</option>`).join('');
   const sysOpts  = vessel.systems.map(s => `<option>${s}</option>`).join('');
   const crewOpts = FM.crew.filter(c => c.vessel === vessel.id)

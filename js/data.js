@@ -443,6 +443,12 @@ FM.charters = [
     ],
     apa: 37000,
     apaSpent: 12400,
+    costs: [
+      { id: 'cost-ch1-1', category: 'Fuel',          desc: 'Pre-charter fill — Gustavia',            amount: 4200, date: '2026-05-04', notes: '' },
+      { id: 'cost-ch1-2', category: 'Provisioning',  desc: 'Day family provisions — Palate Foods',  amount: 8400, date: '2026-05-03', notes: '' },
+      { id: 'cost-ch1-3', category: 'Port / marina', desc: 'Gustavia harbour fees',                 amount: 1200, date: '2026-05-05', notes: '' },
+      { id: 'cost-ch1-4', category: 'Broker',        desc: 'Burgess commission 15%',               amount: 27750, date: '2026-05-05', notes: 'Invoiced on charter fee' },
+    ],
     quote: {
       ref: 'Q-2026-001',
       status: 'confirmed',
@@ -514,6 +520,7 @@ FM.charters = [
     ],
     apa: 44000,
     apaSpent: 0,
+    costs: [],
     quote: {
       ref: 'Q-2026-002',
       status: 'deposit_paid',
@@ -578,6 +585,13 @@ FM.charters = [
     ],
     apa: 42000,
     apaSpent: 39800,
+    costs: [
+      { id: 'cost-ch3-1', category: 'Fuel',          desc: 'Palma Marina fill-up',                  amount: 6800, date: '2026-01-14', notes: '' },
+      { id: 'cost-ch3-2', category: 'Provisioning',  desc: 'Charter provisions',                    amount: 9200, date: '2026-01-13', notes: '' },
+      { id: 'cost-ch3-3', category: 'Port / marina', desc: 'Palma, Portofino, Portopino fees',      amount: 3400, date: '2026-01-14', notes: '' },
+      { id: 'cost-ch3-4', category: 'Broker',        desc: 'Northrop & Johnson commission 15%',    amount: 31500, date: '2026-01-14', notes: '' },
+      { id: 'cost-ch3-5', category: 'Crew',          desc: 'Crew gratuity advance',                 amount: 4000, date: '2026-01-21', notes: 'From APA' },
+    ],
     quote: {
       ref: 'Q-2025-003',
       status: 'completed',

@@ -82,10 +82,12 @@ Charter.renderDetail = function() {
   const openReqs = FM.guestRequests.filter(r => r.charter === c.id && r.status === 'open').length;
 
   const outstandingPayments = c.quote ? c.quote.payments.filter(p => !p.paid).length : 0;
+  const totalCosts = (c.costs || []).reduce((s, e) => s + e.amount, 0);
   const tabs = [
     { id: 'overview',   label: 'Overview' },
     { id: 'guests',     label: c.guests.length ? `Guests (${c.guests.length})` : 'Guests' },
     { id: 'itinerary',  label: 'Itinerary' },
+    { id: 'costs',      label: totalCosts ? `Costs ($${(totalCosts/1000).toFixed(0)}k)` : 'Costs' },
     { id: 'requests',   label: openReqs ? `Requests (${openReqs})` : 'Requests' },
     { id: 'documents',  label: `Documents (${c.documents.length})` },
     { id: 'booking',    label: outstandingPayments ? `Booking <span style="color:var(--red);font-weight:700">(${outstandingPayments} due)</span>` : 'Booking' },
@@ -157,6 +159,7 @@ Charter._renderTab = function() {
     overview:  Charter.renderOverview,
     guests:    Charter.renderGuests,
     itinerary: Charter.renderItinerary,
+    costs:     Charter.renderCosts,
     requests:  Charter.renderRequests,
     documents: Charter.renderDocuments,
     booking:   Charter.renderBooking,
@@ -240,6 +243,151 @@ Charter.renderOverview = function() {
     </div>
   `;
 };
+
+/* ── COSTS TAB ── */
+Charter.renderCosts = function() {
+  const c = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+  if (!c.costs) c.costs = [];
+
+  const costs = c.costs;
+  const totalCosts = costs.reduce((s, e) => s + e.amount, 0);
+  const net = c.fee - totalCosts;
+  const cats = ['Fuel','Provisioning','Port / marina','Broker','Crew','APA expenses','Other'];
+
+  const fmtAmt = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 0 });
+  const fmtDate = d => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+
+  wrap.innerHTML = `
+    <div style="padding:18px 24px">
+
+      <!-- Add cost button -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:500;color:var(--txt)">Cost ledger</div>
+        <button class="btn btn-ghost btn-sm" onclick="Charter.openAddCost()">+ Add cost</button>
+      </div>
+
+      <!-- Cost rows -->
+      ${costs.length === 0 ? `
+        <div class="empty" style="padding:40px 0">
+          <div class="empty-title">No costs logged</div>
+          <div class="empty-sub">Add fuel, provisioning, broker fees and other expenses</div>
+        </div>
+      ` : `
+        <div style="border:.5px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:20px">
+          <div style="display:grid;grid-template-columns:120px 1fr 90px 70px 24px;gap:0;border-bottom:.5px solid var(--bd);padding:8px 14px;background:var(--bg2)">
+            <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Category</div>
+            <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Description</div>
+            <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;text-align:right">Amount</div>
+            <div style="font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Date</div>
+            <div></div>
+          </div>
+          ${costs.map(e => `
+            <div style="display:grid;grid-template-columns:120px 1fr 90px 70px 24px;gap:0;padding:10px 14px;border-bottom:.5px solid var(--bd);align-items:center"
+                 onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background=''">
+              <div style="font-size:11px;color:var(--txt3)">${escHtml(e.category)}</div>
+              <div>
+                <div style="font-size:12px;color:var(--txt)">${escHtml(e.desc)}</div>
+                ${e.notes ? `<div style="font-size:10px;color:var(--txt3);margin-top:1px">${escHtml(e.notes)}</div>` : ''}
+              </div>
+              <div style="font-size:12px;font-family:var(--mono);color:var(--txt);text-align:right">${fmtAmt(e.amount)}</div>
+              <div style="font-size:11px;color:var(--txt3)">${fmtDate(e.date)}</div>
+              <button onclick="Charter.deleteCost('${c.id}','${e.id}')"
+                style="background:none;border:none;cursor:pointer;color:var(--txt4);padding:0;font-size:14px;line-height:1"
+                onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--txt4)'"
+                title="Remove">×</button>
+            </div>
+          `).join('')}
+        </div>
+      `}
+
+      <!-- Summary -->
+      <div style="border:.5px solid var(--bd);border-radius:10px;overflow:hidden">
+        <div style="padding:10px 16px;display:flex;justify-content:space-between;border-bottom:.5px solid var(--bd)">
+          <span style="font-size:12px;color:var(--txt3)">Charter fee</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--txt)">${fmtAmt(c.fee)}</span>
+        </div>
+        ${c.apa > 0 ? `
+        <div style="padding:10px 16px;display:flex;justify-content:space-between;border-bottom:.5px solid var(--bd)">
+          <span style="font-size:12px;color:var(--txt3)">APA received</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--txt)">${fmtAmt(c.apa)}</span>
+        </div>` : ''}
+        <div style="padding:10px 16px;display:flex;justify-content:space-between;border-bottom:.5px solid var(--bd)">
+          <span style="font-size:12px;color:var(--txt3)">Total costs logged</span>
+          <span style="font-size:12px;font-family:var(--mono);color:var(--red)">−${fmtAmt(totalCosts)}</span>
+        </div>
+        <div style="padding:12px 16px;display:flex;justify-content:space-between;background:var(--bg2)">
+          <span style="font-size:13px;font-weight:600;color:var(--txt)">Net (fee − costs)</span>
+          <span style="font-size:13px;font-weight:600;font-family:var(--mono);color:${net >= 0 ? 'var(--grn)' : 'var(--red)'}">${net >= 0 ? '' : '−'}${fmtAmt(Math.abs(net))}</span>
+        </div>
+      </div>
+
+    </div>
+  `;
+};
+
+Charter.openAddCost = function() {
+  const cats = ['Fuel','Provisioning','Port / marina','Broker','Crew','APA expenses','Other'];
+  const body = `
+    <div class="inp-group">
+      <label class="inp-lbl">Category</label>
+      <select class="inp" id="cost-cat">${cats.map(c => `<option>${c}</option>`).join('')}</select>
+    </div>
+    <div class="inp-group">
+      <label class="inp-lbl">Description</label>
+      <input class="inp" id="cost-desc" placeholder="e.g. Pre-charter fuel fill — Gustavia">
+    </div>
+    <div class="inp-row">
+      <div class="inp-group" style="margin-bottom:0">
+        <label class="inp-lbl">Amount (USD)</label>
+        <input class="inp" id="cost-amount" type="number" min="0" placeholder="0">
+      </div>
+      <div class="inp-group" style="margin-bottom:0">
+        <label class="inp-lbl">Date</label>
+        <input class="inp" id="cost-date" type="date" value="${new Date().toISOString().slice(0,10)}">
+      </div>
+    </div>
+    <div class="inp-group" style="margin-top:14px">
+      <label class="inp-lbl">Notes</label>
+      <input class="inp" id="cost-notes" placeholder="Optional note">
+    </div>
+  `;
+  openModal(body, 'Add cost');
+  document.getElementById('modal-submit').textContent = 'Add cost';
+  document.getElementById('modal-submit').onclick = () => Charter.saveCost(Charter.selectedId);
+};
+
+Charter.saveCost = function(charterId) {
+  const c = FM.charters.find(x => x.id === charterId);
+  if (!c) return;
+  const desc = document.getElementById('cost-desc')?.value.trim();
+  const amount = parseFloat(document.getElementById('cost-amount')?.value) || 0;
+  if (!desc) { showToast('Description required', 'err'); return; }
+  if (!c.costs) c.costs = [];
+  c.costs.push({
+    id: 'cost-' + Date.now(),
+    category: document.getElementById('cost-cat')?.value || 'Other',
+    desc,
+    amount,
+    date: document.getElementById('cost-date')?.value || '',
+    notes: document.getElementById('cost-notes')?.value.trim() || '',
+  });
+  closeModal();
+  Charter.renderDetail();
+  Charter.activeTab = 'costs';
+  Charter._renderTab();
+  showToast('Cost added', 'ok');
+};
+
+Charter.deleteCost = function(charterId, costId) {
+  const c = FM.charters.find(x => x.id === charterId);
+  if (!c || !c.costs) return;
+  c.costs = c.costs.filter(e => e.id !== costId);
+  Charter._renderTab();
+  showToast('Cost removed');
+};
+window.Charter = Charter;
 
 /* ── GUESTS TAB ── */
 Charter.renderGuests = function() {
