@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Frame Marine</title>
   <link rel="manifest" href="manifest.json">
@@ -34,7 +35,7 @@
 
   <!-- ── TOPBAR ── -->
   <header class="topbar">
-    <a class="logo-wordmark" href="app.html">
+    <a class="logo-wordmark" href="/">
       <svg class="logo-mark" viewBox="0 0 58 77" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0 54H23V77H0V54Z" fill="var(--or)"/>
         <path d="M0 27H40V50H0V27Z" fill="var(--or)" opacity=".75"/>
@@ -712,8 +713,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // Show/hide chrome per page
 (function() {
   const origNav = navTo;
-  window.navTo = function(pageId, el) {
-    origNav(pageId, el);
+  window.navTo = function(pageId, el, skipPush) {
+    origNav(pageId, el, skipPush);
     const hasStats   = ['work-orders'].includes(pageId);
     const hasFilters = ['work-orders'].includes(pageId);
     const hasSearch  = ['work-orders'].includes(pageId);
