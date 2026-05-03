@@ -694,7 +694,7 @@ FM.fleet = [
     loa: '7.2m', beam: '2.5m', engine: 'Twin Castoldi 4-stroke 300hp total', fuel: 'petrol',
     hours: 847, fuelPct: 85, status: 'in-water',
     lastService: '2026-02-10', nextServiceHours: 950,
-    color: '#60A5FA', reg: 'KYA-TDR-001',
+    color: '#60A5FA', reg: 'KYA-TDR-001', photo: 'img/castoldi-jet-12.jpg',
     notes: 'Primary guest tender. Equipped with VHF, nav lights, fire extinguisher, 6× life jackets.',
   },
   {
@@ -702,7 +702,7 @@ FM.fleet = [
     loa: '4.85m', beam: '1.9m', engine: 'Yanmar 4JH57 57hp', fuel: 'diesel',
     hours: 234, fuelPct: 92, status: 'davits',
     lastService: '2026-03-15', nextServiceHours: 450,
-    color: '#4ADE80', reg: 'KYA-TDR-002',
+    color: '#4ADE80', reg: 'KYA-TDR-002', photo: 'img/williams-turbojet-485.jpg',
     notes: 'Crew and provisions tender. Stored on aft davits. Monthly impeller check required.',
   },
   {
@@ -710,7 +710,7 @@ FM.fleet = [
     loa: '3.4m', beam: '1.2m', engine: 'Rotax 1630 ACE 230hp', fuel: 'petrol',
     hours: 312, fuelPct: 70, status: 'swim-platform',
     lastService: '2026-01-20', nextServiceHours: 400,
-    color: '#FACC15', reg: 'KYA-PWC-001',
+    color: '#FACC15', reg: 'KYA-PWC-001', photo: 'img/jet-ski-1.avif',
     notes: 'Guest use only. Helmet stored in starboard watersports locker. Max 2 riders.',
   },
   {
@@ -718,7 +718,7 @@ FM.fleet = [
     loa: '3.4m', beam: '1.2m', engine: 'Rotax 1630 ACE 230hp', fuel: 'petrol',
     hours: 298, fuelPct: 65, status: 'swim-platform',
     lastService: '2026-01-20', nextServiceHours: 400,
-    color: '#F97316', reg: 'KYA-PWC-002',
+    color: '#F97316', reg: 'KYA-PWC-002', photo: 'img/jet-ski-2.avif',
     notes: 'Guest use only. Inspect hull and wear ring every 50 hours.',
   },
   {
@@ -726,7 +726,7 @@ FM.fleet = [
     loa: '1.6m', beam: '0.5m', engine: 'Electric motor 10kW', fuel: 'electric',
     hours: 88, fuelPct: 100, status: 'charged',
     lastService: '2026-02-01', nextServiceHours: 200,
-    color: '#A78BFA', reg: null,
+    color: '#A78BFA', reg: null, photo: 'img/seabob-f5.webp',
     notes: 'Charge takes 3.5 hours. Max depth 40m. Inspect impeller o-rings monthly.',
   },
 ];
