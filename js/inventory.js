@@ -40,57 +40,42 @@ const Inventory = (() => {
           <button class="btn btn-primary btn-sm" onclick="Inventory.openAdd()">+ Add item</button>
         </div>
 
-        <!-- Items table -->
-        <div class="tbl-wrap">
-          <table class="tbl">
-            <thead><tr>
-              <th>Item</th>
-              <th>Category</th>
-              <th>Quantity</th>
-              <th>Reorder at</th>
-              <th>Location</th>
-              <th>Unit cost</th>
-              <th></th>
-            </tr></thead>
-            <tbody>
-              ${visible.length ? visible.map(i => {
-                const isLow  = i.qty <= i.reorderAt;
-                const isOut  = i.qty === 0;
-                const col    = isOut ? 'var(--red)' : isLow ? 'var(--yel)' : 'var(--grn)';
-                const catCol = CAT_COLORS[i.category] || '#9CA3AF';
-                return `<tr>
-                  <td>
-                    <div style="font-weight:500;color:var(--txt);font-size:12px">${escHtml(i.name)}</div>
-                    ${isOut ? `<div style="font-size:10px;color:var(--red);font-weight:600">OUT OF STOCK</div>`
-                            : isLow ? `<div style="font-size:10px;color:var(--yel);font-weight:600">Low stock — reorder</div>` : ''}
-                  </td>
-                  <td>
-                    <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:${catCol}20;color:${catCol}">
-                      ${escHtml(i.category)}
-                    </span>
-                  </td>
-                  <td>
-                    <span style="font-size:14px;font-weight:600;color:${col}">${i.qty}</span>
-                    <span style="font-size:11px;color:var(--txt3)"> ${escHtml(i.unit)}</span>
-                  </td>
-                  <td style="font-size:12px;color:var(--txt3)">${i.reorderAt} ${escHtml(i.unit)}</td>
-                  <td style="font-size:11px;color:var(--txt2)">${escHtml(i.location)}</td>
-                  <td style="font-size:12px;color:var(--txt2)">${_fmt(i.cost)}</td>
-                  <td>
-                    <div style="display:flex;gap:6px">
-                      <button class="btn btn-ghost btn-xs" onclick="Inventory.use('${i.id}')" title="Use one">Use</button>
-                      <button class="btn btn-ghost btn-xs" onclick="Inventory.openEdit('${i.id}')">Edit</button>
-                    </div>
-                  </td>
-                </tr>`;
-              }).join('') : `
-              <tr><td colspan="7" style="text-align:center;padding:32px;color:var(--txt3);font-size:12px">
-                No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}items on record.
-                <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Inventory.openAdd()">Add item →</button>
-              </td></tr>`}
-            </tbody>
-          </table>
-        </div>
+        ${(() => {
+          function invRow(i) {
+            const isLow = i.qty <= i.reorderAt;
+            const isOut = i.qty === 0;
+            const col   = isOut ? 'var(--red)' : isLow ? 'var(--yel)' : 'var(--grn)';
+            return `<tr>
+              <td style="font-weight:500;color:var(--txt)">${escHtml(i.name)}
+                ${isOut ? `<div style="font-size:10px;color:var(--red);font-weight:600">Out of stock</div>`
+                        : isLow ? `<div style="font-size:10px;color:var(--yel);font-weight:600">Low stock — reorder</div>` : ''}
+              </td>
+              <td><span style="font-size:14px;font-weight:600;color:${col}">${i.qty}</span> <span style="font-size:11px;color:var(--txt3)">${escHtml(i.unit)}</span></td>
+              <td style="color:var(--txt3)">${i.reorderAt} ${escHtml(i.unit)}</td>
+              <td style="color:var(--txt2)">${escHtml(i.location)}</td>
+              <td style="color:var(--txt2)">${_fmt(i.cost)}</td>
+              <td><div style="display:flex;gap:6px">
+                <button class="btn btn-ghost btn-xs" onclick="Inventory.use('${i.id}')">Use</button>
+                <button class="btn btn-ghost btn-xs" onclick="Inventory.openEdit('${i.id}')">Edit</button>
+              </div></td>
+            </tr>`;
+          }
+          function invTable(rows) {
+            return `<div class="tbl-wrap"><table class="tbl">
+              <thead><tr><th>Item</th><th>Quantity</th><th>Reorder at</th><th>Location</th><th>Unit cost</th><th></th></tr></thead>
+              <tbody>${rows.length ? rows.map(invRow).join('') : `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--txt3);font-size:12px">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}items on record. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Inventory.openAdd()">Add item →</button></td></tr>`}</tbody>
+            </table></div>`;
+          }
+          if (!visible.length) return `<div style="color:var(--txt3);font-size:13px;padding:20px 0">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}items on record. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Inventory.openAdd()">Add item →</button></div>`;
+          if (_tab === 'All') {
+            return [...new Set(items.map(i => i.category))].map(cat => `
+              <div style="margin-bottom:20px">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">${escHtml(cat)}</div>
+                ${invTable(items.filter(i => i.category === cat))}
+              </div>`).join('');
+          }
+          return invTable(visible);
+        })()}
 
         <!-- Value summary -->
         ${items.length ? `

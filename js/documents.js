@@ -15,11 +15,37 @@ const Documents = (() => {
   }
   function _expStatus(expires) {
     const d = _daysUntil(expires);
-    if (d === null) return { label:'No expiry', color:'var(--txt3)' };
-    if (d < 0)      return { label:'Expired',   color:'var(--red)' };
-    if (d <= 30)    return { label:d+'d left',   color:'var(--red)' };
-    if (d <= 90)    return { label:d+'d left',   color:'var(--yel)' };
-    return               { label:'Valid',        color:'var(--grn)' };
+    if (d === null) return { label:'No expiry', color:'var(--txt3)', cls:'b-done' };
+    if (d < 0)      return { label:'Expired',   color:'var(--red)', cls:'b-high' };
+    if (d <= 30)    return { label:d+'d left',  color:'var(--red)', cls:'b-high' };
+    if (d <= 90)    return { label:d+'d left',  color:'var(--yel)', cls:'b-medium' };
+    return               { label:'Valid',       color:'var(--grn)', cls:'b-done' };
+  }
+
+  function _docRow(d) {
+    const exp = _expStatus(d.expires);
+    return `<tr>
+      <td style="font-weight:500;color:var(--txt)">${escHtml(d.name)}${d.notes ? `<div style="font-size:10px;color:var(--txt3);font-weight:400;margin-top:1px">${escHtml(d.notes)}</div>` : ''}</td>
+      <td style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(d.docRef || '—')}</td>
+      <td style="color:var(--txt3)">${d.uploadedAt || '—'}</td>
+      <td style="color:${exp.color};font-weight:${d.expires ? '500' : '400'}">${_fmtDate(d.expires)}</td>
+      <td><span class="badge ${exp.cls}" style="font-size:9px">${exp.label}</span></td>
+      <td>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-ghost btn-xs" onclick="Documents.openEdit('${d.id}')">Edit</button>
+          <button class="btn btn-ghost btn-xs" onclick="Documents.view('${d.id}')">View ↗</button>
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  function _docTable(rows) {
+    return `<div class="tbl-wrap"><table class="tbl">
+      <thead><tr>
+        <th>Document</th><th>Doc ref</th><th>Uploaded</th><th>Expires</th><th>Status</th><th></th>
+      </tr></thead>
+      <tbody>${rows.map(_docRow).join('')}</tbody>
+    </table></div>`;
   }
   function _fmtDate(s) {
     if (!s) return '—';
@@ -56,45 +82,18 @@ const Documents = (() => {
           <button class="btn btn-primary btn-sm" onclick="Documents.openAdd()">+ Add document</button>
         </div>
 
-        <!-- Documents grid -->
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${visible.length ? visible.map(d => {
-            const exp    = _expStatus(d.expires);
-            const catCol = CAT_COLORS[d.category] || '#9CA3AF';
-            return `
-            <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;padding:14px 16px;display:flex;align-items:center;gap:14px">
-              <!-- Icon -->
-              <div style="width:38px;height:38px;border-radius:8px;background:${catCol}18;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-                <svg viewBox="0 0 16 16" fill="${catCol}" style="width:18px;height:18px">
-                  <path d="M4 1a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V4.5L9.5 1H4zm5 0v3.5H13M5 7h6M5 9h6M5 11h4"/>
-                </svg>
-              </div>
-              <!-- Info -->
-              <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:3px">${escHtml(d.name)}</div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-                  <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px;background:${catCol}18;color:${catCol}">${escHtml(d.category)}</span>
-                  <span style="font-size:10px;color:var(--txt3)">${escHtml(d.docRef)}</span>
-                  ${d.notes ? `<span style="font-size:10px;color:var(--txt3)">· ${escHtml(d.notes)}</span>` : ''}
-                </div>
-              </div>
-              <!-- Expiry -->
-              <div style="text-align:right;flex-shrink:0;min-width:90px">
-                <div style="font-size:11px;font-weight:600;color:${exp.color}">${exp.label}</div>
-                ${d.expires ? `<div style="font-size:10px;color:var(--txt3)">${_fmtDate(d.expires)}</div>` : ''}
-              </div>
-              <!-- Actions -->
-              <div style="display:flex;gap:6px;flex-shrink:0">
-                <button class="btn btn-ghost btn-xs" onclick="Documents.openEdit('${d.id}')">Edit</button>
-                <button class="btn btn-ghost btn-xs" onclick="Documents.view('${d.id}')">View ↗</button>
-              </div>
-            </div>`;
-          }).join('') : `
-          <div style="text-align:center;padding:40px;color:var(--txt3);font-size:12px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px">
-            No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}documents on file.
-            <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Documents.openAdd()">Add document →</button>
-          </div>`}
-        </div>
+        ${visible.length ? (_tab === 'All'
+          ? [...new Set(visible.map(d => d.category))].map(cat => `
+              <div style="margin-bottom:20px">
+                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">${escHtml(cat)}</div>
+                ${_docTable(visible.filter(d => d.category === cat))}
+              </div>`).join('')
+          : _docTable(visible)
+        ) : `
+        <div style="color:var(--txt3);font-size:13px;padding:20px 0">
+          No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}documents on file.
+          <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Documents.openAdd()">Add document →</button>
+        </div>`}
 
       </div>
     `;
