@@ -373,8 +373,73 @@
     .btn-print:hover { background: var(--navy3); }
     .print-note { font-size: 11px; color: var(--txt3); }
 
+    /* ── ANCHOR NAV ── */
+    .anchor-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #fff;
+      border-bottom: 1px solid var(--bd);
+      display: flex;
+      overflow-x: auto;
+      scrollbar-width: none;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    .anchor-nav::-webkit-scrollbar { display: none; }
+    .anchor-nav a {
+      flex-shrink: 0;
+      padding: 11px 16px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--txt3);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .anchor-nav a:hover { color: var(--txt); border-bottom-color: var(--bd); }
+    .anchor-nav a.anav-active { color: var(--blu); border-bottom-color: var(--blu); }
+
+    /* ── TABLE COLUMN FIXES ── */
+    .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { table-layout: fixed; min-width: 540px; }
+    th, td { overflow: hidden; text-overflow: ellipsis; }
+    /* per-table column widths via nth-child on th */
+    .tbl-vc   th:nth-child(1){ width:24% } .tbl-vc   th:nth-child(2){ width:11% } .tbl-vc   th:nth-child(3){ width:17% } .tbl-vc   th:nth-child(4){ width:11% } .tbl-vc   th:nth-child(5){ width:11% } .tbl-vc   th:nth-child(6){ width:13% } .tbl-vc   th:nth-child(7){ width:13% }
+    .tbl-cc   th:nth-child(1){ width:27% } .tbl-cc   th:nth-child(2){ width:11% } .tbl-cc   th:nth-child(3){ width:18% } .tbl-cc   th:nth-child(4){ width:11% } .tbl-cc   th:nth-child(5){ width:14% } .tbl-cc   th:nth-child(6){ width:19% }
+    .tbl-dr   th:nth-child(1){ width:11% } .tbl-dr   th:nth-child(2){ width:14% } .tbl-dr   th:nth-child(3){ width:17% } .tbl-dr   th:nth-child(4){ width:9%  } .tbl-dr   th:nth-child(5){ width:14% } .tbl-dr   th:nth-child(6){ width:25% } .tbl-dr   th:nth-child(7){ width:10% }
+    .tbl-nc   th:nth-child(1){ width:8%  } .tbl-nc   th:nth-child(2){ width:9%  } .tbl-nc   th:nth-child(3){ width:11% } .tbl-nc   th:nth-child(4){ width:37% } .tbl-nc   th:nth-child(5){ width:11% } .tbl-nc   th:nth-child(6){ width:24% }
+    .tbl-mt   th:nth-child(1){ width:12% } .tbl-mt   th:nth-child(2){ width:30% } .tbl-mt   th:nth-child(3){ width:20% } .tbl-mt   th:nth-child(4){ width:10% } .tbl-mt   th:nth-child(5){ width:28% }
+    .tbl-pm   th:nth-child(1){ width:27% } .tbl-pm   th:nth-child(2){ width:17% } .tbl-pm   th:nth-child(3){ width:13% } .tbl-pm   th:nth-child(4){ width:16% } .tbl-pm   th:nth-child(5){ width:13% } .tbl-pm   th:nth-child(6){ width:14% }
+    /* description cells should wrap */
+    .td-desc { white-space: normal !important; overflow: visible !important; text-overflow: unset !important; }
+    /* date / status / mono cells: no wrap */
+    td.td-date, td.td-status, td.td-mono, td.td-dur { white-space: nowrap; }
+
+    /* ── SECTION SCROLL OFFSET ── */
+    .section { scroll-margin-top: 48px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 680px) {
+      .header { padding: 28px 20px 24px; }
+      .body { padding: 24px 16px 40px; }
+      .footer { padding: 16px 20px; flex-direction: column; gap: 6px; align-items: flex-start; }
+      .no-print { padding: 16px 20px; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .particulars { grid-template-columns: repeat(2, 1fr); }
+      .part-item:nth-child(4n)       { border-right: 1px solid var(--bd); }
+      .part-item:nth-last-child(-n+4){ border-bottom: 1px solid var(--bd); }
+      .part-item:nth-child(2n)       { border-right: none; }
+      .part-item:nth-last-child(-n+2){ border-bottom: none; }
+      .header-title { font-size: 20px; }
+      .seal-ring { width: 68px; height: 68px; }
+    }
+
     @media print {
       .no-print { display: none !important; }
+      .anchor-nav { display: none !important; }
       .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       thead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .crew-member-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -491,10 +556,21 @@ document.getElementById('h-ref').textContent = 'Report ref: ' + reportRef + ' ·
 document.getElementById('seal-status').textContent = complianceIssues === 0 ? '✓ Verified' : complianceIssues + ' item' + (complianceIssues > 1 ? 's' : '') + ' open';
 </script>
 
+<nav class="anchor-nav no-print">
+  <a href="#sec-compliance">Compliance</a>
+  <a href="#sec-particulars">Particulars</a>
+  <a href="#sec-vc">Vessel Certs</a>
+  <a href="#sec-crew">Crew Certs</a>
+  <a href="#sec-drills">Drills</a>
+  <a href="#sec-nc">Non-Conformances</a>
+  <a href="#sec-meetings">Meetings</a>
+  <a href="#sec-pms">Maintenance</a>
+</nav>
+
 <div class="body">
 
 <!-- ── COMPLIANCE SUMMARY ── -->
-<div class="section">
+<div class="section" id="sec-compliance">
   <div class="section-title">Compliance Summary</div>
 
   <div class="compliance-wrap" id="compliance-wrap">
@@ -557,7 +633,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── VESSEL PARTICULARS ── -->
-<div class="section">
+<div class="section" id="sec-particulars">
   <div class="section-title">Vessel Particulars</div>
   <div class="particulars" id="particulars"></div>
   <script>
@@ -578,10 +654,10 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── VESSEL CERTIFICATES ── -->
-<div class="section">
+<div class="section" id="sec-vc">
   <div class="section-title">Vessel Certificates</div>
   <div class="tbl-wrap">
-    <table>
+    <table class="tbl-vc">
       <thead>
         <tr><th>Certificate</th><th>Category</th><th>Issuer</th><th>Doc ref</th><th>Issued</th><th>Expires</th><th>Status</th></tr>
       </thead>
@@ -605,7 +681,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── CREW CERTIFICATIONS ── -->
-<div class="section">
+<div class="section" id="sec-crew">
   <div class="section-title">Crew Certifications</div>
   <div id="crew-certs-wrap"></div>
   <script>
@@ -623,7 +699,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
           </div>
           ${expCount ? `<span style="margin-left:auto;font-size:9px;font-weight:700;background:rgba(220,38,38,.2);color:#FCA5A5;padding:3px 8px;border-radius:10px">${expCount} expiring</span>` : `<span style="margin-left:auto;font-size:9px;font-weight:700;background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:10px">✓ All valid</span>`}
         </div>
-        <table>
+        <table class="tbl-cc">
           <thead><tr><th>Certificate</th><th>Category</th><th>Issuer</th><th>Doc ref</th><th>Expires</th><th>Status</th></tr></thead>
           <tbody>
             ${certs.map(c => {
@@ -645,7 +721,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── SAFETY DRILLS ── -->
-<div class="section">
+<div class="section" id="sec-drills">
   <div class="section-title">Safety Drills — Last 12 Months</div>
   <div id="drills-wrap"></div>
   <script>
@@ -663,7 +739,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
         </tr>`;
       }).join('');
       document.getElementById('drills-wrap').innerHTML =
-        `<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Conducted by</th><th>Duration</th><th>Location</th><th>Crew present</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        `<div class="tbl-wrap"><table class="tbl-dr"><thead><tr><th>Date</th><th>Type</th><th>Conducted by</th><th>Duration</th><th>Location</th><th>Crew present</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     } else {
       document.getElementById('drills-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No drills recorded in the past 12 months.</p>';
     }
@@ -671,7 +747,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── NON-CONFORMANCES ── -->
-<div class="section">
+<div class="section" id="sec-nc">
   <div class="section-title">Non-Conformances &amp; Incidents</div>
   <div id="nc-wrap"></div>
   <script>
@@ -682,13 +758,13 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
           <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(n.ref)}</td>
           <td style="color:var(--txt3)">${fmtDate(n.date)}</td>
           <td><span class="tag">${escHtml(n.type.replace('-',' '))}</span></td>
-          <td><strong>${escHtml(n.title)}</strong><br><span style="color:var(--txt3);font-size:10px">${escHtml(n.description)}</span></td>
+          <td class="td-desc"><strong>${escHtml(n.title)}</strong><br><span style="color:var(--txt3);font-size:10px">${escHtml(n.description)}</span></td>
           <td class="${isOpen?'status-open':'status-closed'}">${isOpen?'Open':'Closed'}</td>
-          <td style="font-size:10px;color:var(--txt3)">${n.correctiveAction ? escHtml(n.correctiveAction) : isOpen ? 'Pending' : '—'}</td>
+          <td class="td-desc" style="font-size:10px;color:var(--txt3)">${n.correctiveAction ? escHtml(n.correctiveAction) : isOpen ? 'Pending' : '—'}</td>
         </tr>`;
       }).join('');
       document.getElementById('nc-wrap').innerHTML =
-        `<div class="tbl-wrap"><table><thead><tr><th>Ref</th><th>Date</th><th>Type</th><th>Description</th><th>Status</th><th>Corrective action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        `<div class="tbl-wrap"><table class="tbl-nc"><thead><tr><th>Ref</th><th>Date</th><th>Type</th><th>Description</th><th>Status</th><th>Corrective action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     } else {
       document.getElementById('nc-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No non-conformances or incidents recorded.</p>';
     }
@@ -696,7 +772,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── SAFETY MEETINGS ── -->
-<div class="section">
+<div class="section" id="sec-meetings">
   <div class="section-title">Safety Meetings</div>
   <div id="meetings-wrap"></div>
   <script>
@@ -712,7 +788,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
         </tr>`;
       }).join('');
       document.getElementById('meetings-wrap').innerHTML =
-        `<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Topic</th><th>Conducted by</th><th>Duration</th><th>Attendees</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        `<div class="tbl-wrap"><table class="tbl-mt"><thead><tr><th>Date</th><th>Topic</th><th>Conducted by</th><th>Duration</th><th>Attendees</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     } else {
       document.getElementById('meetings-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No safety meetings recorded.</p>';
     }
@@ -720,7 +796,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
 </div>
 
 <!-- ── PLANNED MAINTENANCE ── -->
-<div class="section">
+<div class="section" id="sec-pms">
   <div class="section-title">Planned Maintenance Schedule</div>
   <div id="pms-wrap"></div>
   <script>
@@ -741,7 +817,7 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
         </tr>`;
       }).join('');
       document.getElementById('pms-wrap').innerHTML =
-        `<div class="tbl-wrap"><table><thead><tr><th>Task</th><th>System</th><th>Interval</th><th>Last completed</th><th>Due at</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        `<div class="tbl-wrap"><table class="tbl-pm"><thead><tr><th>Task</th><th>System</th><th>Interval</th><th>Last completed</th><th>Due at</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     } else {
       document.getElementById('pms-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No maintenance schedule data on file.</p>';
     }
@@ -759,7 +835,22 @@ document.getElementById('seal-status').textContent = complianceIssues === 0 ? '�
   </div>
   <span class="footer-conf">Confidential · For insurance purposes only</span>
 </div>
-<script>document.getElementById('footer-info').textContent = 'Vessel Risk & Compliance Report · ' + reportRef + ' · Generated ' + reportDateStr;</script>
+<script>
+document.getElementById('footer-info').textContent = 'Vessel Risk & Compliance Report · ' + reportRef + ' · Generated ' + reportDateStr;
+
+// Anchor nav active state
+document.documentElement.style.scrollBehavior = 'smooth';
+const _sections = document.querySelectorAll('.section[id]');
+const _navLinks = document.querySelectorAll('.anchor-nav a');
+const _io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      _navLinks.forEach(a => a.classList.toggle('anav-active', a.getAttribute('href') === '#' + e.target.id));
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+_sections.forEach(s => _io.observe(s));
+</script>
 
 <!-- ── PRINT BUTTON ── -->
 <div class="no-print">
