@@ -343,6 +343,9 @@
     width: 220px; z-index: 150;
     border-right: .5px solid var(--bd2);
   }
+  /* critical: main was grid-column:2, which becomes an implicit off-screen
+     column when the sidebar is hidden and the grid collapses to 1 track */
+  .main { grid-column: 1; }
   .module-tabs { display: none; }
   .vessel-picker-type { display: none; }
   .panel { width: 100%; max-width: 100%; }

@@ -76,7 +76,7 @@ Dash.render = function () {
 
   /* ── HTML ─────────────────────────────────────────────── */
   wrap.innerHTML = `
-    <div style="max-width:1060px;padding:0 22px 60px;margin:0 auto">
+    <div class="_dashwrap" style="max-width:1060px;padding:0 22px 60px;margin:0 auto">
 
       <!-- Brief header -->
       <div style="padding:22px 0 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:.5px solid var(--bd);margin-bottom:20px">
@@ -203,7 +203,7 @@ Dash.render = function () {
           const ass  = crewAll.find(c => c.id === w.assignee);
           const late = w.due && w.due < _T;
           const pc   = w.priority==='high'?'var(--red)':w.priority==='medium'?'var(--yel)':'var(--txt4)';
-          return `<div onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'))" style="display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:12px;padding:10px 14px;border-bottom:.5px solid var(--bd);cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
+          return `<div onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'))" class="_wogrid" style="display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:12px;padding:10px 14px;border-bottom:.5px solid var(--bd);cursor:pointer" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
             <div style="width:6px;height:6px;border-radius:50%;background:${pc}"></div>
             <div style="min-width:0">
               <div style="font-size:12px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(w.title)}</div>
@@ -225,7 +225,11 @@ Dash.render = function () {
   if (!document.getElementById('_dash_css')) {
     const s = document.createElement('style');
     s.id = '_dash_css';
-    s.textContent = '@media(max-width:900px){._briefgrid{grid-template-columns:1fr!important}}';
+    s.textContent = [
+      '@media(max-width:900px){._briefgrid{grid-template-columns:1fr!important}}',
+      '@media(max-width:768px){._dashwrap{padding:0 14px 60px!important}}',
+      '@media(max-width:768px){._wogrid{grid-template-columns:auto 1fr auto!important}}',
+    ].join('');
     document.head.appendChild(s);
   }
 };
