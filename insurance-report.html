@@ -438,16 +438,58 @@
     }
 
     @media print {
-      .no-print { display: none !important; }
+      /* ── hide interactive chrome ── */
+      .no-print  { display: none !important; }
       .anchor-nav { display: none !important; }
-      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      thead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .crew-member-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      body { font-size: 10px; }
-      .body { padding: 24px 32px 40px; }
-      .header { padding: 28px 32px; }
-      .footer { padding: 14px 32px; }
+
+      /* ── base ── */
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { font-size: 10px; background: #fff; }
+
+      /* ── header: flip dark → white ── */
+      .header {
+        background: #fff !important;
+        border-bottom: 1.5px solid #111827;
+        padding: 28px 32px;
+      }
+      .header::before, .header::after { display: none !important; }
+      .wordmark-icon  { background: transparent !important; }
+      .wordmark-text  { color: #111827 !important; }
+      .header-title   { color: #111827 !important; font-size: 22px; }
+      .header-vessel  { color: #374151 !important; }
+      .header-ref     { color: #6B7280 !important; }
+      .seal-ring      { border-color: #374151 !important; background: transparent !important; }
+      .seal-ring::before { border-color: rgba(0,0,0,.2) !important; }
+      .seal-text      { color: #374151 !important; }
+      .seal-sub       { color: #6B7280 !important; }
+
+      /* ── table headers: dark → light gray ── */
+      thead           { background: #F3F4F6 !important; }
+      th              { color: #374151 !important; }
+
+      /* ── crew member headers: dark → light gray ── */
+      .crew-member-header { background: #F3F4F6 !important; }
+      .crew-name      { color: #111827 !important; }
+      .crew-role      { color: #6B7280 !important; }
+      .crew-avatar    { background: #E5E7EB !important; border-color: #D1D5DB !important; color: #374151 !important; }
+
+      /* ── footer: dark → white ── */
+      .footer {
+        background: #fff !important;
+        border-top: 1px solid #E5E7EB;
+        padding: 14px 32px;
+      }
+      .footer-mark    { color: #111827 !important; }
+      .footer-divider { background: #D1D5DB !important; }
+      .footer-info    { color: #374151 !important; }
+      .footer-conf    { color: #374151 !important; }
+
+      /* ── section titles ── */
+      .section-title  { color: #374151 !important; }
+      .section-title-line { background: #D1D5DB !important; }
+
+      /* ── layout ── */
+      .body    { padding: 24px 32px 40px; }
       .section { break-inside: avoid; margin-bottom: 28px; }
       .stats-grid { grid-template-columns: repeat(6, 1fr); }
     }
