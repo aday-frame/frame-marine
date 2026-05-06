@@ -39,15 +39,10 @@ const Budget = (() => {
     wrap.innerHTML = `
       <div style="max-width:760px;padding:18px 20px 48px">
 
-        <!-- Header -->
+        <!-- Actions -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-          <div>
-            <div style="font-size:20px;font-weight:500;color:var(--txt)">Budget</div>
-            <div style="font-size:11px;color:var(--txt3);margin-top:2px">YTD ${year} · ${v ? v.name : 'All vessels'}</div>
-          </div>
-          <div style="display:flex;gap:8px">
-            <button class="btn btn-ghost btn-sm" onclick="Budget.toggleEdit()">${_editing ? '✓ Done' : 'Edit budget'}</button>
-          </div>
+          <span style="font-size:11px;color:var(--txt3)">YTD ${year} · ${v ? v.name : 'All vessels'}</span>
+          <button class="btn btn-ghost btn-sm" onclick="Budget.toggleEdit()">${_editing ? '✓ Done' : 'Edit budget'}</button>
         </div>
 
         <!-- KPIs -->

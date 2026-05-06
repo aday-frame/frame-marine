@@ -52,10 +52,9 @@ const Hours = (() => {
     wrap.innerHTML = `
       <div style="max-width:860px;padding:18px 20px 48px">
 
-        <!-- Header -->
+        <!-- Context -->
         <div style="margin-bottom:24px">
-          <div style="font-size:20px;font-weight:500;color:var(--txt)">Hours of Rest</div>
-          <div style="font-size:11px;color:var(--txt3);margin-top:2px">IMO/STCW compliance · Last 7 days</div>
+          <div style="font-size:11px;color:var(--txt3)">IMO/STCW compliance · Last 7 days</div>
         </div>
 
         <!-- IMO rules banner -->
