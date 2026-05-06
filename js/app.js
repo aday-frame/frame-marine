@@ -198,6 +198,12 @@ function switchVessel(vesselId) {
   document.getElementById('vessel-dropdown').classList.remove('open');
   renderVesselDropdown();
 
+  // "All vessels" → fleet page is the natural fleet overview
+  if (vesselId === 'all') {
+    navTo('fleet', document.querySelector('.ni[data-page="fleet"]'));
+    return;
+  }
+
   // Re-render current page for new vessel
   const inits = {
     'work-orders': () => WO?.render(),

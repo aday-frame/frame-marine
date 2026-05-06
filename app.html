@@ -350,7 +350,7 @@
       </button>
       <button class="mob-nav-item" id="mobnav-work-orders" onclick="navTo('work-orders',document.querySelector('.ni[data-page=work-orders]'))">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/></svg>
-        <span class="mob-nav-badge" id="mobnav-wo-badge">5</span>
+        <span class="mob-nav-badge" id="mobnav-wo-badge" style="display:none"></span>
         Work orders
       </button>
       <button class="mob-nav-item" id="mobnav-fleet" onclick="navTo('fleet',document.querySelector('.ni[data-page=fleet]'))">
@@ -908,46 +908,80 @@ function renderPMS() {
   const summary = document.getElementById('pms-summary');
   const body = document.getElementById('pms-body');
   if (!summary || !body) return;
-  const items = FM.pms || [];
-  const overdue   = items.filter(i => i.status === 'overdue');
-  const dueSoon   = items.filter(i => i.status === 'due-soon');
-  const upcoming  = items.filter(i => i.status === 'upcoming');
-  summary.innerHTML = `
-    <div class="stat"><div class="stat-lbl">Overdue</div><div class="stat-val red">${overdue.length}</div></div>
-    <div class="stat"><div class="stat-lbl">Due soon</div><div class="stat-val yel">${dueSoon.length}</div></div>
-    <div class="stat"><div class="stat-lbl">Upcoming</div><div class="stat-val">${upcoming.length}</div></div>
-    <div class="stat"><div class="stat-lbl">Total tasks</div><div class="stat-val">${items.length}</div></div>`;
-  // Group by system
-  const groups = {};
-  items.forEach(i => { (groups[i.system] = groups[i.system]||[]).push(i); });
-  body.innerHTML = Object.entries(groups).map(([sys, tasks]) => `
-    <div class="pms-group">
-      <div class="pms-group-hdr">${sys}</div>
-      ${tasks.map(t => {
-        const sc = t.status==='overdue'?'pms-status-overdue':t.status==='due-soon'?'pms-status-duesoon':'pms-status-upcoming';
-        const sl = t.status==='overdue'?'Overdue':t.status==='due-soon'?'Due soon':'Upcoming';
-        const assigneeName = FM.crewName ? FM.crewName(t.assignee) : t.assignee;
-        const hasHours = t.dueHours != null && t.currentHours != null && t.lastHours != null;
-        const hoursLeft = hasHours ? t.dueHours - t.currentHours : null;
-        const pct = hasHours ? Math.max(0, Math.min(100, (t.currentHours - t.lastHours) / (t.dueHours - t.lastHours) * 100)) : 50;
-        const dueStr = hoursLeft != null ? (hoursLeft >= 0 ? '+'+hoursLeft+' hrs' : Math.abs(hoursLeft)+' hrs overdue') : (t.dueDate || '');
-        return `<div class="pms-task" onclick="openPMSDetail('${t.id}')">
-          <div class="pms-task-left">
-            <div class="pms-task-dot ${sc}"></div>
-          </div>
-          <div class="pms-task-body">
-            <div class="pms-task-name">${t.task}</div>
-            <div class="pms-task-meta">${t.asset} · ${assigneeName} · ${t.interval}</div>
-            <div class="pms-bar-wrap"><div class="pms-bar-fill ${sc}" style="width:${pct}%"></div></div>
-          </div>
-          <div class="pms-task-right">
-            <span class="badge ${sc}">${sl}</span>
-            <div class="pms-task-hours">${dueStr}</div>
-            ${t.wo ? `<div class="pms-task-wo">${t.wo}</div>` : ''}
-          </div>
-        </div>`;
-      }).join('')}
+
+  const vessel  = FM.currentVessel();
+  const items   = (FM.pms || []).filter(i => !vessel || i.vessel === vessel.id);
+  const overdue  = items.filter(i => i.status === 'overdue');
+  const dueSoon  = items.filter(i => i.status === 'due-soon');
+  const upcoming = items.filter(i => i.status === 'upcoming');
+
+  // ── Summary strip — big numbers
+  summary.innerHTML = [
+    { val: overdue.length,  lbl: 'Overdue',     color: overdue.length ? 'var(--red)' : 'var(--txt4)', bg: overdue.length ? 'rgba(248,113,113,.08)' : '' },
+    { val: dueSoon.length,  lbl: 'Due soon',    color: dueSoon.length ? 'var(--yel)' : 'var(--txt4)', bg: '' },
+    { val: upcoming.length, lbl: 'Upcoming',    color: 'var(--txt)',   bg: '' },
+    { val: items.length,    lbl: 'Total tasks', color: 'var(--txt3)',  bg: '' },
+  ].map(s => `
+    <div class="pms-stat" style="${s.bg ? 'background:' + s.bg + ';' : ''}">
+      <div class="pms-stat-val" style="color:${s.color}">${s.val}</div>
+      <div class="pms-stat-lbl">${s.lbl}</div>
     </div>`).join('');
+
+  // ── Alert banner
+  let alertHtml = '';
+  if (overdue.length) {
+    alertHtml = `<div style="display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(248,113,113,.08);border-bottom:.5px solid rgba(248,113,113,.25);flex-shrink:0">
+      <svg viewBox="0 0 16 16" fill="var(--red)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
+      <span style="font-size:12px;color:var(--red);font-weight:500">${overdue.length} task${overdue.length > 1 ? 's' : ''} overdue — immediate attention required</span>
+    </div>`;
+  } else if (dueSoon.length) {
+    alertHtml = `<div style="display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(251,191,36,.08);border-bottom:.5px solid rgba(251,191,36,.25);flex-shrink:0">
+      <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
+      <span style="font-size:12px;color:var(--yel);font-weight:500">${dueSoon.length} task${dueSoon.length > 1 ? 's' : ''} coming due — schedule maintenance soon</span>
+    </div>`;
+  }
+
+  // ── Task row builder
+  function taskRow(t) {
+    const isOverdue = t.status === 'overdue';
+    const isDue     = t.status === 'due-soon';
+    const sc = isOverdue ? 'pms-status-overdue' : isDue ? 'pms-status-duesoon' : 'pms-status-upcoming';
+    const sl = isOverdue ? 'Overdue' : isDue ? 'Due soon' : 'Upcoming';
+    const assigneeName = FM.crewName ? FM.crewName(t.assignee) : t.assignee;
+    const hasHours  = t.dueHours != null && t.currentHours != null && t.lastHours != null;
+    const hoursLeft = hasHours ? t.dueHours - t.currentHours : null;
+    const pct       = hasHours ? Math.max(0, Math.min(100, (t.currentHours - t.lastHours) / (t.dueHours - t.lastHours) * 100)) : 50;
+    const dueStr    = hoursLeft != null
+      ? (hoursLeft >= 0 ? '+' + hoursLeft + ' hrs' : Math.abs(hoursLeft) + ' hrs overdue')
+      : (t.dueDate || '');
+    const border    = isOverdue ? 'var(--red)' : isDue ? 'var(--yel)' : 'transparent';
+    const rowBg     = isOverdue ? 'rgba(248,113,113,.04)' : '';
+    return `<div class="pms-task" onclick="openPMSDetail('${t.id}')"
+        style="border-left:3px solid ${border};${rowBg ? 'background:' + rowBg + ';' : ''}">
+      <div class="pms-task-body">
+        <div class="pms-task-name" style="${isOverdue ? 'color:var(--red)' : ''}">${t.task}</div>
+        <div class="pms-task-meta">${t.asset} · ${t.system} · ${assigneeName} · ${t.interval}</div>
+        <div class="pms-bar-wrap"><div class="pms-bar-fill ${sc}" style="width:${pct}%"></div></div>
+      </div>
+      <div class="pms-task-right">
+        <span class="badge ${sc}">${sl}</span>
+        <div class="pms-task-hours" style="${isOverdue ? 'color:var(--red);font-weight:600' : isDue ? 'color:var(--yel)' : ''}">${dueStr}</div>
+        ${t.wo ? `<div class="pms-task-wo">${t.wo}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  // ── Section builder
+  function section(label, tasks, color) {
+    if (!tasks.length) return '';
+    return `<div class="pms-group-hdr" style="${color ? 'color:' + color : ''}">${label} <span style="font-weight:400;color:var(--txt4)">${tasks.length}</span></div>
+      ${tasks.map(taskRow).join('')}`;
+  }
+
+  body.innerHTML = alertHtml
+    + section('Overdue', overdue, 'var(--red)')
+    + section('Due soon', dueSoon, 'var(--yel)')
+    + section('Upcoming', upcoming, '');
 }
 window.renderPMS = renderPMS;
 

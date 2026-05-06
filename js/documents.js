@@ -33,38 +33,28 @@ const Documents = (() => {
     const docs    = _docs();
     const visible = _tab === 'All' ? docs : docs.filter(d => d.category === _tab);
     const expiring = docs.filter(d => { const dd = _daysUntil(d.expires); return dd !== null && dd <= 90; });
-    const v = _vessel();
 
     wrap.innerHTML = `
-      <div style="max-width:900px;padding:18px 20px 48px">
-
-        <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
-          <div>
-            <div style="font-size:20px;font-weight:500;color:var(--txt)">Documents</div>
-            <div style="font-size:11px;color:var(--txt3);margin-top:2px">${docs.length} files · ${v ? v.name : 'All vessels'}</div>
-          </div>
-          <button class="btn btn-primary btn-sm" onclick="Documents.openAdd()">+ Add document</button>
-        </div>
+      <div style="max-width:1100px;padding:18px 20px 48px">
 
         <!-- Expiry alert -->
         ${expiring.length ? `
-        <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px">
-          <span style="font-size:16px;line-height:1">⚠</span>
-          <div>
-            <div style="font-size:12px;font-weight:600;color:var(--yel);margin-bottom:3px">${expiring.length} document${expiring.length > 1 ? 's' : ''} expiring within 90 days</div>
-            <div style="font-size:11px;color:var(--txt3)">${expiring.map(d => escHtml(d.name)).join(' · ')}</div>
-          </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:8px;margin-bottom:20px">
+          <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
+          <span style="font-size:12px;color:var(--yel);font-weight:500">${expiring.length} document${expiring.length > 1 ? 's' : ''} expiring within 90 days — review required</span>
         </div>` : ''}
 
-        <!-- Category tabs -->
-        <div style="display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap">
+        <!-- Tabs -->
+        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd)">
           ${CATS.map(c => `
-            <button onclick="Documents.setTab('${c}')"
-              style="padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid;transition:all .15s;
-                     ${_tab===c ? 'background:var(--txt);color:var(--bg);border-color:var(--txt)' : 'background:transparent;color:var(--txt2);border-color:var(--bd)'}">
-              ${c} ${c !== 'All' ? `<span style="font-size:10px;opacity:.7">${docs.filter(d=>d.category===c).length}</span>` : ''}
+            <button onclick="Documents.setTab('${c}')" class="tab-btn ${_tab===c ? 'tab-btn-active' : ''}">
+              ${c}${c !== 'All' ? ` (${docs.filter(d=>d.category===c).length})` : ''}
             </button>`).join('')}
+        </div>
+
+        <!-- Add button -->
+        <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+          <button class="btn btn-primary btn-sm" onclick="Documents.openAdd()">+ Add document</button>
         </div>
 
         <!-- Documents grid -->
