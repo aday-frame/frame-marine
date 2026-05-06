@@ -41,6 +41,10 @@ const Inventory = (() => {
         </div>
 
         ${(() => {
+          const GRP_HDR = n => `<tr><td colspan="6" style="padding:10px 12px 6px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;background:var(--bg);border-bottom:.5px solid var(--bd)">${escHtml(n)}</td></tr>`;
+          const THEAD   = `<thead><tr><th>Item</th><th>Quantity</th><th>Reorder at</th><th>Location</th><th>Unit cost</th><th></th></tr></thead>`;
+          const EMPTY   = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--txt3);font-size:12px">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}items on record. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Inventory.openAdd()">Add item →</button></td></tr>`;
+
           function invRow(i) {
             const isLow = i.qty <= i.reorderAt;
             const isOut = i.qty === 0;
@@ -60,21 +64,15 @@ const Inventory = (() => {
               </div></td>
             </tr>`;
           }
-          function invTable(rows) {
-            return `<div class="tbl-wrap"><table class="tbl">
-              <thead><tr><th>Item</th><th>Quantity</th><th>Reorder at</th><th>Location</th><th>Unit cost</th><th></th></tr></thead>
-              <tbody>${rows.length ? rows.map(invRow).join('') : `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--txt3);font-size:12px">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}items on record. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Inventory.openAdd()">Add item →</button></td></tr>`}</tbody>
-            </table></div>`;
-          }
+
           if (!visible.length) return `<div style="color:var(--txt3);font-size:13px;padding:20px 0">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}items on record. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Inventory.openAdd()">Add item →</button></div>`;
-          if (_tab === 'All') {
-            return [...new Set(items.map(i => i.category))].map(cat => `
-              <div style="margin-bottom:20px">
-                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">${escHtml(cat)}</div>
-                ${invTable(items.filter(i => i.category === cat))}
-              </div>`).join('');
-          }
-          return invTable(visible);
+
+          const cats = _tab === 'All' ? [...new Set(items.map(i => i.category))] : null;
+          const tbody = cats
+            ? cats.map(cat => GRP_HDR(cat) + items.filter(i => i.category === cat).map(invRow).join('')).join('')
+            : visible.map(invRow).join('');
+
+          return `<div class="tbl-wrap"><table class="tbl">${THEAD}<tbody>${tbody || EMPTY}</tbody></table></div>`;
         })()}
 
         <!-- Value summary -->

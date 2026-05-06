@@ -30,23 +30,15 @@ const Documents = (() => {
       <td style="color:var(--txt3)">${d.uploadedAt || '—'}</td>
       <td style="color:${exp.color};font-weight:${d.expires ? '500' : '400'}">${_fmtDate(d.expires)}</td>
       <td><span class="badge ${exp.cls}" style="font-size:9px">${exp.label}</span></td>
-      <td>
-        <div style="display:flex;gap:6px">
-          <button class="btn btn-ghost btn-xs" onclick="Documents.openEdit('${d.id}')">Edit</button>
-          <button class="btn btn-ghost btn-xs" onclick="Documents.view('${d.id}')">View ↗</button>
-        </div>
-      </td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-xs" onclick="Documents.openEdit('${d.id}')">Edit</button>
+        <button class="btn btn-ghost btn-xs" onclick="Documents.view('${d.id}')">View ↗</button>
+      </div></td>
     </tr>`;
   }
 
-  function _docTable(rows) {
-    return `<div class="tbl-wrap"><table class="tbl">
-      <thead><tr>
-        <th>Document</th><th>Doc ref</th><th>Uploaded</th><th>Expires</th><th>Status</th><th></th>
-      </tr></thead>
-      <tbody>${rows.map(_docRow).join('')}</tbody>
-    </table></div>`;
-  }
+  const _THEAD = `<thead><tr><th>Document</th><th>Doc ref</th><th>Uploaded</th><th>Expires</th><th>Status</th><th></th></tr></thead>`;
+  const _GRP   = n => `<tr><td colspan="6" style="padding:10px 12px 6px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;background:var(--bg);border-bottom:.5px solid var(--bd)">${escHtml(n)}</td></tr>`;
   function _fmtDate(s) {
     if (!s) return '—';
     const [y, m, d] = s.split('-');
@@ -82,18 +74,14 @@ const Documents = (() => {
           <button class="btn btn-primary btn-sm" onclick="Documents.openAdd()">+ Add document</button>
         </div>
 
-        ${visible.length ? (_tab === 'All'
-          ? [...new Set(visible.map(d => d.category))].map(cat => `
-              <div style="margin-bottom:20px">
-                <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">${escHtml(cat)}</div>
-                ${_docTable(visible.filter(d => d.category === cat))}
-              </div>`).join('')
-          : _docTable(visible)
-        ) : `
-        <div style="color:var(--txt3);font-size:13px;padding:20px 0">
-          No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}documents on file.
-          <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Documents.openAdd()">Add document →</button>
-        </div>`}
+        ${(() => {
+          if (!visible.length) return `<div style="color:var(--txt3);font-size:13px;padding:20px 0">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}documents on file. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Documents.openAdd()">Add document →</button></div>`;
+          const cats = _tab === 'All' ? [...new Set(visible.map(d => d.category))] : null;
+          const tbody = cats
+            ? cats.map(cat => _GRP(cat) + visible.filter(d => d.category === cat).map(_docRow).join('')).join('')
+            : visible.map(_docRow).join('');
+          return `<div class="tbl-wrap"><table class="tbl">${_THEAD}<tbody>${tbody}</tbody></table></div>`;
+        })()}
 
       </div>
     `;
