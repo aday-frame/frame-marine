@@ -242,64 +242,118 @@ footer{padding:48px 52px 36px;border-top:.5px solid var(--bd)}
 
 /* ── MOBILE ── */
 @media(max-width:768px){
-  nav{padding:0 20px}
+  /* Nav */
+  nav{padding:0 20px;z-index:201}
   .nav-links{display:none}
   .nav-cta .btn-ghost{display:none}
-  .ham{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:transparent}
-  .ham span{width:22px;height:1.5px;background:var(--txt2);border-radius:2px;transition:all .25s;display:block}
-  .ham.open span:nth-child(1){transform:rotate(45deg) translate(4.5px,4.5px)}
-  .ham.open span:nth-child(2){opacity:0;transform:translateX(-8px)}
-  .ham.open span:nth-child(3){transform:rotate(-45deg) translate(4.5px,-4.5px)}
-  .mob-menu{position:fixed;top:64px;left:0;right:0;background:var(--bg2);border-bottom:.5px solid var(--bd2);z-index:99;padding:16px 20px;display:flex;flex-direction:column;gap:4px;transform:translateY(-110%);transition:transform .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px)}
-  .mob-menu.open{transform:translateY(0)}
-  .mob-menu a{font-size:15px;color:var(--txt2);text-decoration:none;padding:11px 0;border-bottom:.5px solid var(--bd);display:block}
-  .mob-menu a:last-child{border-bottom:none}
-  .mob-menu .btn-pri{margin-top:8px;display:block;text-align:center;padding:12px;border-radius:9px;font-size:15px}
+  .nav-cta .btn-pri{display:none}
+
+  /* Hamburger — turns to X */
+  .ham{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:8px;border:none;background:transparent}
+  .ham span{width:24px;height:1.5px;background:var(--txt2);border-radius:2px;transition:all .28s cubic-bezier(.4,0,.2,1);display:block}
+  .ham.open span:nth-child(1){transform:rotate(45deg) translate(4.5px,4.5px);background:var(--txt)}
+  .ham.open span:nth-child(2){opacity:0;transform:translateX(-10px)}
+  .ham.open span:nth-child(3){transform:rotate(-45deg) translate(4.5px,-4.5px);background:var(--txt)}
+
+  /* Full-screen mobile menu */
+  .mob-menu{
+    position:fixed;inset:0;z-index:200;
+    background:rgba(8,8,8,.97);
+    backdrop-filter:blur(24px);
+    padding:100px 40px 56px;
+    display:flex;flex-direction:column;gap:0;
+    transform:translateX(100%);
+    transition:transform .38s cubic-bezier(.4,0,.2,1);
+    border-bottom:none;
+  }
+  .mob-menu.open{transform:translateX(0)}
+  .mob-menu a{
+    font-size:38px;font-weight:200;letter-spacing:-.03em;
+    color:var(--txt);text-decoration:none;
+    padding:20px 0;border-bottom:.5px solid var(--bd);display:block;
+    transition:color .15s;
+  }
+  .mob-menu a:hover{color:var(--blu)}
+  .mob-menu a:last-of-type{border-bottom:none}
+  .mob-menu .btn-pri{
+    margin-top:auto;display:block;text-align:center;
+    padding:18px;border-radius:12px;font-size:17px;font-weight:600;
+    letter-spacing:.01em;
+  }
+
+  /* Hero */
   .hero{padding:100px 22px 56px;min-height:auto}
-  h1{font-size:44px;letter-spacing:-.03em;margin-bottom:18px}
+  h1{font-size:42px;letter-spacing:-.03em;margin-bottom:18px}
   .hero-sub{font-size:16px;margin-bottom:34px}
   .hero-btns{flex-direction:column;gap:10px;margin-bottom:36px}
   .btn-hero-pri,.btn-hero-sec{width:100%;justify-content:center;padding:14px 20px}
   .hero-trust{flex-wrap:wrap;justify-content:center;gap:6px}
   .ts{display:none}
+
+  /* Hero app window */
   .awrap{padding:0 16px 70px}
   .ashell{grid-template-columns:1fr;height:auto}
   .asb{display:none}
-  .amain{padding:14px 16px}
+  .amain{padding:14px 16px;overflow:hidden}
+  ._hgrid{grid-template-columns:1fr !important;height:auto !important}
+  ._hright{display:none !important}
+
+  /* Marquee */
   .mwrap{padding:28px 0}
+
+  /* Pillars */
   .pillars{padding:60px 20px}
-  .stitle{font-size:36px}
+  .stitle{font-size:34px}
   .ssub{font-size:15px}
   .pillar-grid{grid-template-columns:1fr;border-radius:14px}
   .pillar{padding:28px 24px}
   .pillar-num{font-size:48px}
+
+  /* Modules */
   .modules{padding:0 20px 70px}
   .mod-grid{grid-template-columns:1fr 1fr;gap:8px}
+
+  /* Features */
   .feat-section{padding:60px 20px}
-  .feat-block{grid-template-columns:1fr;gap:40px;margin-bottom:70px}
+  .feat-block{grid-template-columns:1fr;gap:36px;margin-bottom:64px}
   .feat-block.flip{direction:ltr}
-  .feat-title{font-size:30px}
+  .feat-title{font-size:28px}
+  .feat-screen{overflow:hidden;max-width:100%}
+
+  /* Screenshots */
   .shots{padding:0 20px 70px}
   .shots-tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:0;scrollbar-width:none}
   .shots-tabs::-webkit-scrollbar{display:none}
+
+  /* Who */
   .who{padding:60px 20px}
   .who-grid{grid-template-columns:1fr;gap:10px}
+
+  /* Why */
   .why{padding:60px 20px}
   .why-grid{grid-template-columns:1fr;border-radius:12px}
   .why-item{padding:26px 22px}
+
+  /* Pricing */
   .psec{padding:60px 20px}
   .pcards{grid-template-columns:1fr;gap:10px}
   .pcard{padding:28px 22px}
   .pprice{font-size:44px}
+
+  /* CTA */
   .ctasec{padding:70px 20px}
-  .ctasec h2{font-size:38px}
+  .ctasec h2{font-size:36px}
   .ctasec p{font-size:15px}
   .cta-btns{flex-direction:column;gap:10px}
   .cta-btns .btn-hero-pri,.cta-btns .btn-ghost{width:100%;justify-content:center}
+
+  /* Footer */
   footer{padding:36px 20px 28px}
   .footer-top{grid-template-columns:1fr 1fr;gap:28px}
   .footer-brand{grid-column:span 2}
   .footer-btm{flex-direction:column;gap:12px;text-align:center}
+
+  /* Modal */
   .mbox{padding:28px 22px}
   .frow{grid-template-columns:1fr}
 }
@@ -405,7 +459,7 @@ footer{padding:48px 52px 36px;border-top:.5px solid var(--bd)}
           </div>
         </div>
         <!-- 2-col grid -->
-        <div style="display:grid;grid-template-columns:1fr 220px;gap:12px;height:370px;overflow:hidden">
+        <div class="_hgrid" style="display:grid;grid-template-columns:1fr 220px;gap:12px;height:370px;overflow:hidden">
           <div style="display:flex;flex-direction:column;gap:8px">
             <!-- Alerts -->
             <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:9px;padding:10px 13px">
@@ -442,7 +496,7 @@ footer{padding:48px 52px 36px;border-top:.5px solid var(--bd)}
             </div>
           </div>
           <!-- Right column: health tiles + crew -->
-          <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="_hright" style="display:flex;flex-direction:column;gap:8px">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
               <div style="background:var(--bg3);border:.5px solid rgba(248,113,113,.25);border-radius:8px;padding:10px">
                 <div style="font-size:8px;color:var(--txt3);margin-bottom:4px">Engines</div>
