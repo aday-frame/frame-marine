@@ -39,7 +39,7 @@ const Safety = (() => {
     const scheduledD = drills.filter(d => d.status === 'scheduled').length;
 
     wrap.innerHTML = `
-      <div style="max-width:1100px;padding:0 0 40px">
+      <div style="max-width:1100px;padding:18px 20px 40px">
 
         <!-- Summary pills -->
         <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
