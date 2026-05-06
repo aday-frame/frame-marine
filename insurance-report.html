@@ -373,6 +373,47 @@
     .btn-print:hover { background: var(--navy3); }
     .print-note { font-size: 11px; color: var(--txt3); }
 
+    /* ── INSURANCE BANNER ── */
+    .ins-banner {
+      background: var(--blu-lt);
+      border-bottom: 1px solid var(--blu-bd);
+      padding: 14px 48px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+    .ins-banner-lbl {
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--blu);
+      margin-bottom: 3px;
+    }
+    .ins-banner-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--txt);
+      letter-spacing: -.01em;
+    }
+    .ins-banner-item { flex: 1; }
+    .ins-banner-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--blu-bd);
+      flex-shrink: 0;
+    }
+    .ins-banner-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--blu-bd);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
     /* ── ANCHOR NAV ── */
     .anchor-nav {
       position: sticky;
@@ -445,6 +486,10 @@
       /* ── base ── */
       * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       body { font-size: 10px; background: #fff; }
+
+      /* ── insurance banner ── */
+      .ins-banner { padding: 12px 32px; }
+      .ins-banner-val { color: #111827 !important; }
 
       /* ── header: flip dark → white ── */
       .header {
@@ -596,6 +641,39 @@ const DRILL_LABELS = { fire: 'Fire', 'abandon-ship': 'Abandon Ship', 'man-overbo
 document.getElementById('h-vessel').textContent = vessel.name + ' · ' + vessel.type + ' · ' + vessel.loa + ' · Flag: ' + (vessel.flag === 'CYM' ? 'Cayman Islands' : vessel.flag);
 document.getElementById('h-ref').textContent = 'Report ref: ' + reportRef + ' · Prepared: ' + reportDateStr + ' · For insurance purposes only';
 document.getElementById('seal-status').textContent = complianceIssues === 0 ? '✓ Verified' : complianceIssues + ' item' + (complianceIssues > 1 ? 's' : '') + ' open';
+</script>
+
+<div class="ins-banner" id="ins-banner">
+  <div class="ins-banner-icon">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M8 1L2 3.5V8c0 3.3 2.5 5.7 6 6.5C14.5 13.7 14 9.7 14 8V3.5L8 1z" fill="#BFDBFE" stroke="#60A5FA" stroke-width="1"/>
+    </svg>
+  </div>
+  <div class="ins-banner-item">
+    <div class="ins-banner-lbl">Insurer</div>
+    <div class="ins-banner-val" id="ins-name">—</div>
+  </div>
+  <div class="ins-banner-divider"></div>
+  <div class="ins-banner-item">
+    <div class="ins-banner-lbl">Policy number</div>
+    <div class="ins-banner-val" id="ins-policy">—</div>
+  </div>
+  <div class="ins-banner-divider"></div>
+  <div class="ins-banner-item">
+    <div class="ins-banner-lbl">Policy expires</div>
+    <div class="ins-banner-val" id="ins-expiry">—</div>
+  </div>
+  <div class="ins-banner-divider"></div>
+  <div class="ins-banner-item">
+    <div class="ins-banner-lbl">Insured value</div>
+    <div class="ins-banner-val" id="ins-value">—</div>
+  </div>
+</div>
+<script>
+document.getElementById('ins-name').textContent   = vessel.insurer       || '—';
+document.getElementById('ins-policy').textContent = vessel.policyNumber   || '—';
+document.getElementById('ins-expiry').textContent = vessel.policyExpiry   ? fmtDate(vessel.policyExpiry) : '—';
+document.getElementById('ins-value').textContent  = vessel.insuredValue   || '—';
 </script>
 
 <nav class="anchor-nav no-print">
