@@ -121,7 +121,10 @@ const Certs = (() => {
                   <td style="color:var(--txt3)">${fmtDate(c.issued)}</td>
                   <td style="color:${s.color};font-weight:${c.expires?'500':'400'}">${fmtDate(c.expires)}</td>
                   <td><span class="badge ${s.cls}" style="font-size:9px">${s.label}</span></td>
-                  <td><button class="btn btn-ghost btn-xs" onclick="Certs.del('${c.id}','vessel')">Remove</button></td>
+                  <td><div style="display:flex;gap:6px">
+                    <button class="btn btn-ghost btn-xs" onclick="Certs.view('${c.id}','vessel')">View</button>
+                    <button class="btn btn-ghost btn-xs" onclick="Certs.del('${c.id}','vessel')">Remove</button>
+                  </div></td>
                 </tr>`;
               }).join('')}
             </tbody>
@@ -169,7 +172,10 @@ const Certs = (() => {
                   <td style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
                   <td style="color:${s.color};font-weight:${c.expires?'500':'400'}">${fmtDate(c.expires)}</td>
                   <td><span class="badge ${s.cls}" style="font-size:9px">${s.label}</span></td>
-                  <td><button class="btn btn-ghost btn-xs" onclick="Certs.del('${c.id}','crew')">Remove</button></td>
+                  <td><div style="display:flex;gap:6px">
+                    <button class="btn btn-ghost btn-xs" onclick="Certs.view('${c.id}','crew')">View</button>
+                    <button class="btn btn-ghost btn-xs" onclick="Certs.del('${c.id}','crew')">Remove</button>
+                  </div></td>
                 </tr>`;
               }).join('')}
             </tbody>
@@ -279,10 +285,48 @@ const Certs = (() => {
     render();
   }
 
+  function view(id, type) {
+    const list = type === 'vessel' ? FM.vesselCerts : FM.crewCerts;
+    const c = (list || []).find(x => x.id === id);
+    if (!c) return;
+    const s = certStatus(c.expires);
+    const modal = document.getElementById('cert-modal');
+    if (!modal) return;
+    let crewRow = '';
+    if (type === 'crew') {
+      const cr = FM.getCrew ? FM.getCrew(c.crewId) : null;
+      if (cr) crewRow = `<div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Crew member</div><div style="font-size:12px;font-weight:500">${escHtml(cr.name)} — ${escHtml(cr.role)}</div></div>`;
+    }
+    document.getElementById('cert-modal-title').textContent = escHtml(c.name);
+    document.getElementById('cert-modal-body').innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          ${crewRow}
+          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Category</div><div style="font-size:12px">${escHtml(c.category)}</div></div>
+          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Issuer</div><div style="font-size:12px">${escHtml(c.issuer)}</div></div>
+          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Doc reference</div><div style="font-size:12px;font-family:var(--mono)">${escHtml(c.docRef||'—')}</div></div>
+          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Issued</div><div style="font-size:12px">${fmtDate(c.issued)}</div></div>
+          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Expires</div><div style="font-size:12px;color:${s.color};font-weight:500">${fmtDate(c.expires)}</div></div>
+          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Status</div><span class="badge ${s.cls}" style="font-size:9px">${s.label}</span></div>
+        </div>
+        <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:24px;text-align:center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" style="width:28px;height:28px;color:var(--txt4);margin:0 auto 8px;display:block"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <div style="font-size:12px;color:var(--txt3);margin-bottom:10px">No file attached</div>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('File upload coming soon')">Upload certificate</button>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="Certs.del('${c.id}','${type}')">Remove</button>
+          <button class="btn btn-ghost btn-sm" onclick="Certs.closeModal()">Close</button>
+        </div>
+      </div>`;
+    modal.style.display = 'flex';
+  }
+
   function del(id, type) {
     if (!confirm('Remove this certificate?')) return;
     if (type === 'vessel') FM.vesselCerts = FM.vesselCerts.filter(c => c.id !== id);
     else FM.crewCerts = FM.crewCerts.filter(c => c.id !== id);
+    closeModal();
     render();
   }
 
@@ -297,7 +341,7 @@ const Certs = (() => {
     if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
   }
 
-  return { render, tab, openAdd, closeModal, save, del, updateSidebarBadge, expiringCount };
+  return { render, tab, openAdd, closeModal, save, del, view, updateSidebarBadge, expiringCount };
 })();
 
 window.Certs = Certs;
