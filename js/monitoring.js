@@ -9,7 +9,7 @@ Mon.render = function() {
 
   wrap.innerHTML = `
     <div style="height:100%;overflow-y:auto;background:var(--bg)">
-    <div style="max-width:900px;margin:0 auto;padding:48px 28px 80px">
+    <div class="_mon_wrap" style="max-width:900px;margin:0 auto;padding:48px 28px 80px">
 
       <!-- Badge + headline -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
@@ -45,7 +45,7 @@ Mon.render = function() {
         </div>
 
         <!-- Stats bar -->
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);border-bottom:.5px solid var(--bd)">
+        <div class="_monstats" style="display:grid;grid-template-columns:repeat(5,1fr);border-bottom:.5px solid var(--bd)">
           <div style="padding:12px 16px;border-right:.5px solid var(--bd)">
             <div style="font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px">Shore power</div>
             <div style="font-size:18px;font-weight:600;color:#4ADE80">ON</div>
@@ -68,7 +68,7 @@ Mon.render = function() {
           </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:.5px solid var(--bd)">
+        <div class="_mongrid" style="display:grid;grid-template-columns:1fr 1fr;gap:0;border-bottom:.5px solid var(--bd)">
 
           <!-- ENGINE SECTION -->
           <div style="padding:16px 18px;border-right:.5px solid var(--bd)">
@@ -179,7 +179,7 @@ Mon.render = function() {
       </div>
 
       <!-- FEATURES GRID -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:36px">
+      <div class="_monfeat" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:36px">
         ${[
           { icon: '⚙️', title: 'Engine parameters', body: 'RPM, oil pressure, coolant temp, exhaust temp per engine. Thresholds auto-alert before problems escalate.' },
           { icon: '💧', title: 'Bilge monitoring', body: 'All bilge zones monitored continuously. Critical bilge high triggers an immediate call to the captain.' },
@@ -221,4 +221,17 @@ Mon.render = function() {
     </div>
     </div>
   `;
+
+  if (!document.getElementById('_mon_css')) {
+    const s = document.createElement('style');
+    s.id = '_mon_css';
+    s.textContent = [
+      '@media(max-width:768px){._mon_wrap{padding:24px 16px 60px!important}}',
+      '@media(max-width:768px){._monstats{grid-template-columns:repeat(3,1fr)!important}}',
+      '@media(max-width:768px){._mongrid{grid-template-columns:1fr!important}}',
+      '@media(max-width:768px){._mongrid>div:first-child{border-right:none!important;border-bottom:.5px solid var(--bd)}}',
+      '@media(max-width:768px){._monfeat{grid-template-columns:1fr!important}}',
+    ].join('');
+    document.head.appendChild(s);
+  }
 };
