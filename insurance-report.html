@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vessel Risk & Compliance Report — Frame Marine</title>
+  <script src="js/data.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #080808;
+      --navy2:  #111111;
+      --navy3:  #1a1a1a;
+      --blu:    #60A5FA;
+      --blu-lt: #EFF6FF;
+      --blu-bd: #BFDBFE;
+      --grn:    #16a34a;
+      --grn-lt: #f0fdf4;
+      --grn-bd: #bbf7d0;
+      --red:    #dc2626;
+      --red-lt: #fef2f2;
+      --red-bd: #fecaca;
+      --yel:    #d97706;
+      --yel-lt: #fffbeb;
+      --yel-bd: #fde68a;
+      --txt:    #111827;
+      --txt2:   #374151;
+      --txt3:   #6B7280;
+      --bd:     #E5E7EB;
+      --bg:     #F9FAFB;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      font-size: 12px; line-height: 1.6; color: var(--txt); background: #fff;
+    }
+
+    /* ── HEADER ── */
+    .header {
+      background: var(--navy);
+      padding: 40px 48px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(96,165,250,.1) 0%, transparent 70%);
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, var(--blu) 0%, rgba(96,165,250,.2) 40%, transparent 100%);
+    }
+    .header-inner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .wordmark-icon {
+      width: 28px; height: 28px;
+      background: var(--navy2);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .wordmark-icon svg { display: block; }
+    .wordmark-text {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.2px;
+    }
+    .header-title {
+      font-size: 26px;
+      font-weight: 300;
+      color: #fff;
+      letter-spacing: -.5px;
+      margin-bottom: 6px;
+    }
+    .header-vessel {
+      font-size: 13px;
+      color: rgba(255,255,255,.55);
+      margin-bottom: 2px;
+    }
+    .header-ref {
+      font-size: 10px;
+      color: rgba(255,255,255,.35);
+      margin-top: 8px;
+      letter-spacing: .04em;
+    }
+    .cert-seal {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .seal-ring {
+      width: 88px; height: 88px;
+      border-radius: 50%;
+      border: 2px solid var(--blu);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      position: relative;
+      background: rgba(96,165,250,.06);
+    }
+    .seal-ring::before {
+      content: '';
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 1px solid rgba(96,165,250,.3);
+    }
+    .seal-f {
+      position: relative;
+      z-index: 1;
+    }
+    .seal-text {
+      font-size: 7px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--blu);
+      text-align: center;
+      line-height: 1.3;
+      position: relative;
+      z-index: 1;
+    }
+    .seal-sub {
+      font-size: 9px;
+      color: rgba(255,255,255,.4);
+      text-align: center;
+      letter-spacing: .04em;
+    }
+
+    /* ── BODY ── */
+    .body { padding: 40px 48px 56px; }
+
+    /* ── SECTIONS ── */
+    .section { margin-bottom: 40px; break-inside: avoid; }
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--blu);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--bd);
+    }
+    .section-title-line {
+      flex: 1;
+      height: 1px;
+      background: var(--bd);
+    }
+
+    /* ── COMPLIANCE SUMMARY ── */
+    .compliance-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .compliance-wrap.pass { background: var(--grn-lt); border: 1px solid var(--grn-bd); }
+    .compliance-wrap.warn { background: var(--yel-lt); border: 1px solid var(--yel-bd); }
+    .compliance-wrap.fail { background: var(--red-lt); border: 1px solid var(--red-bd); }
+    .compliance-icon { font-size: 24px; }
+    .compliance-main { flex: 1; }
+    .compliance-label { font-size: 13px; font-weight: 700; }
+    .compliance-wrap.pass .compliance-label { color: var(--grn); }
+    .compliance-wrap.warn .compliance-label { color: var(--yel); }
+    .compliance-wrap.fail .compliance-label { color: var(--red); }
+    .compliance-desc { font-size: 11px; color: var(--txt3); margin-top: 2px; }
+    .compliance-badge-text {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .pass .compliance-badge-text { background: var(--grn-bd); color: var(--grn); }
+    .warn .compliance-badge-text { background: var(--yel-bd); color: var(--yel); }
+    .fail .compliance-badge-text { background: var(--red-bd); color: var(--red); }
+
+    /* ── STAT PILLS ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+      margin-bottom: 0;
+    }
+    .stat-card {
+      background: var(--bg);
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .stat-val { font-size: 20px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .stat-lbl { font-size: 9px; color: var(--txt3); letter-spacing: .02em; line-height: 1.3; }
+    .c-grn  { color: var(--grn); }
+    .c-red  { color: var(--red); }
+    .c-yel  { color: var(--yel); }
+    .c-grey { color: var(--txt2); }
+
+    /* ── PARTICULARS GRID ── */
+    .particulars {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .part-item {
+      padding: 12px 16px;
+      border-right: 1px solid var(--bd);
+      border-bottom: 1px solid var(--bd);
+    }
+    .part-item:nth-child(4n) { border-right: none; }
+    .part-item:nth-last-child(-n+4) { border-bottom: none; }
+    .part-item label {
+      display: block;
+      font-size: 9px;
+      color: var(--txt3);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 3px;
+    }
+    .part-item span { font-size: 12px; font-weight: 600; color: var(--txt); }
+
+    /* ── TABLES ── */
+    .tbl-wrap {
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    thead { background: var(--navy); }
+    th {
+      text-align: left;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: rgba(255,255,255,.5);
+      padding: 8px 12px;
+    }
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--bd);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: none; }
+    tbody tr:nth-child(even) { background: var(--bg); }
+    .status-valid    { color: var(--grn); font-weight: 700; font-size: 10px; }
+    .status-expiring { color: var(--yel); font-weight: 700; font-size: 10px; }
+    .status-expired  { color: var(--red); font-weight: 700; font-size: 10px; }
+    .status-ok       { color: var(--grn); font-weight: 700; font-size: 10px; }
+    .status-open     { color: var(--red); font-weight: 700; font-size: 10px; }
+    .status-closed   { color: var(--grn); font-weight: 700; font-size: 10px; }
+    .status-scheduled { color: var(--yel); font-weight: 700; font-size: 10px; }
+    .tag {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      background: #EEF2FF;
+      color: #4338CA;
+    }
+
+    /* ── CREW SECTION ── */
+    .crew-member {
+      border: 1px solid var(--bd);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .crew-member-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--navy2);
+      color: #fff;
+    }
+    .crew-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--navy3);
+      border: 1.5px solid rgba(96,165,250,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--blu);
+      flex-shrink: 0;
+    }
+    .crew-name { font-size: 12px; font-weight: 600; color: #fff; }
+    .crew-role { font-size: 10px; color: rgba(255,255,255,.45); margin-left: 4px; }
+
+    /* ── FOOTER ── */
+    .footer {
+      background: var(--navy);
+      padding: 20px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .footer-mark {
+      font-size: 11px;
+      font-weight: 700;
+      color: rgba(255,255,255,.7);
+    }
+    .footer-divider { width: 1px; height: 14px; background: rgba(255,255,255,.15); }
+    .footer-info { font-size: 10px; color: rgba(255,255,255,.35); }
+    .footer-conf { font-size: 10px; color: rgba(255,255,255,.35); }
+
+    /* ── PRINT BUTTON ── */
+    .no-print {
+      padding: 20px 48px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      background: var(--bg);
+      border-top: 1px solid var(--bd);
+    }
+    .btn-print {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--navy);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: -.1px;
+    }
+    .btn-print:hover { background: var(--navy3); }
+    .print-note { font-size: 11px; color: var(--txt3); }
+
+    @media print {
+      .no-print { display: none !important; }
+      .header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      thead { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .crew-member-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { font-size: 10px; }
+      .body { padding: 24px 32px 40px; }
+      .header { padding: 28px 32px; }
+      .footer { padding: 14px 32px; }
+      .section { break-inside: avoid; margin-bottom: 28px; }
+      .stats-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<script>
+const today = new Date();
+
+function fmtDate(s) {
+  if (!s) return '—';
+  const [y, m, d] = s.split('-');
+  return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + d + ', ' + y;
+}
+function daysUntil(s) {
+  if (!s) return null;
+  return Math.ceil((new Date(s) - today) / 86400000);
+}
+function certStatusClass(expires) {
+  const d = daysUntil(expires);
+  if (d === null)  return { cls: 'status-valid',    label: 'No expiry' };
+  if (d < 0)       return { cls: 'status-expired',  label: 'EXPIRED'   };
+  if (d <= 30)     return { cls: 'status-expired',  label: d + 'd'     };
+  if (d <= 90)     return { cls: 'status-expiring', label: d + 'd'     };
+  return               { cls: 'status-valid',    label: 'Valid'     };
+}
+function escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function initials(name) {
+  return (name || '').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+const vessel = FM.vessels[0];
+const vid    = vessel.id;
+
+const vc = (FM.vesselCerts || []).filter(c => c.vessel === vid);
+const cc = (FM.crewCerts  || []).filter(c => { const cr = FM.getCrew(c.crewId); return cr && cr.vessel === vid; });
+const expiringAll = [...vc, ...cc].filter(c => { const d = daysUntil(c.expires); return d !== null && d <= 90; });
+
+const twelveMonthsAgo = new Date(); twelveMonthsAgo.setFullYear(twelveMonthsAgo.getFullYear() - 1);
+const allDrills    = (FM.drills || []).filter(d => d.vessel === vid);
+const recentDrills = allDrills.filter(d => d.status === 'completed' && new Date(d.date) >= twelveMonthsAgo);
+
+const ncs     = (FM.nonConformances || []).filter(n => n.vessel === vid);
+const openNCs = ncs.filter(n => n.status === 'open');
+
+const wos     = (FM.workOrders || []).filter(w => w.vessel === vid);
+const openWOs = wos.filter(w => w.status !== 'done');
+
+const meetings = (FM.safetyMeetings || []).filter(m => m.vessel === vid);
+const pms      = (FM.pms || []).filter(p => p.vessel === vid);
+
+const complianceIssues = expiringAll.length + openNCs.length;
+const complianceCls    = complianceIssues === 0 ? 'pass' : complianceIssues <= 2 ? 'warn' : 'fail';
+const complianceIcon   = complianceIssues === 0 ? '✓' : complianceIssues <= 2 ? '!' : '✕';
+const complianceLbl    = complianceIssues === 0 ? 'Fully Compliant' : complianceIssues + ' item' + (complianceIssues > 1 ? 's' : '') + ' requiring attention';
+const complianceDesc   = complianceIssues === 0
+  ? 'All certificates valid · No open non-conformances · ISM documentation current'
+  : expiringAll.length + ' cert' + (expiringAll.length !== 1 ? 's' : '') + ' expiring within 90 days · ' + openNCs.length + ' open NC' + (openNCs.length !== 1 ? 's' : '');
+const complianceBadge  = complianceIssues === 0 ? 'Frame Marine Certified' : complianceIssues <= 2 ? 'Advisory items noted' : 'Action required';
+
+const reportDateStr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+const reportRef     = 'INS-' + today.getFullYear() + '-' + String(today.getMonth()+1).padStart(2,'0');
+
+const DRILL_LABELS = { fire: 'Fire', 'abandon-ship': 'Abandon Ship', 'man-overboard': 'Man Overboard', 'oil-spill': 'Oil Spill', security: 'Security' };
+</script>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="wordmark">
+        <div class="wordmark-icon">
+          <svg width="16" height="21" viewBox="0 0 58 77" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 54H23V77H0V54Z" fill="#60A5FA"/>
+            <path d="M0 27H40V50H0V27Z" fill="#60A5FA"/>
+            <path d="M0 0H58V23H0V0Z" fill="#60A5FA"/>
+          </svg>
+        </div>
+        <div class="wordmark-text">Frame Marine</div>
+      </div>
+      <div class="header-title">Vessel Risk &amp; Compliance Report</div>
+      <div class="header-vessel" id="h-vessel"></div>
+      <div class="header-ref" id="h-ref"></div>
+    </div>
+    <div class="cert-seal">
+      <div class="seal-ring">
+        <div class="seal-f">
+          <svg width="22" height="29" viewBox="0 0 58 77" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 54H23V77H0V54Z" fill="#60A5FA"/>
+            <path d="M0 27H40V50H0V27Z" fill="#60A5FA"/>
+            <path d="M0 0H58V23H0V0Z" fill="#60A5FA"/>
+          </svg>
+        </div>
+        <div class="seal-text">Certified</div>
+      </div>
+      <div class="seal-sub" id="seal-status"></div>
+    </div>
+  </div>
+</div>
+<script>
+document.getElementById('h-vessel').textContent = vessel.name + ' · ' + vessel.type + ' · ' + vessel.loa + ' · Flag: ' + (vessel.flag === 'CYM' ? 'Cayman Islands' : vessel.flag);
+document.getElementById('h-ref').textContent = 'Report ref: ' + reportRef + ' · Prepared: ' + reportDateStr + ' · For insurance purposes only';
+document.getElementById('seal-status').textContent = complianceIssues === 0 ? '✓ Verified' : complianceIssues + ' item' + (complianceIssues > 1 ? 's' : '') + ' open';
+</script>
+
+<div class="body">
+
+<!-- ── COMPLIANCE SUMMARY ── -->
+<div class="section">
+  <div class="section-title">Compliance Summary</div>
+
+  <div class="compliance-wrap" id="compliance-wrap">
+    <div class="compliance-icon" id="c-icon"></div>
+    <div class="compliance-main">
+      <div class="compliance-label" id="c-label"></div>
+      <div class="compliance-desc" id="c-desc"></div>
+    </div>
+    <div class="compliance-badge-text" id="c-badge"></div>
+  </div>
+  <script>
+    const cw = document.getElementById('compliance-wrap');
+    cw.classList.add(complianceCls);
+    document.getElementById('c-icon').textContent = complianceIcon;
+    document.getElementById('c-label').textContent = complianceLbl;
+    document.getElementById('c-desc').textContent = complianceDesc;
+    document.getElementById('c-badge').textContent = complianceBadge;
+  </script>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val c-grey" id="s-vc"></div>
+      <div class="stat-lbl">Vessel certificates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val c-grey" id="s-cc"></div>
+      <div class="stat-lbl">Crew certificates</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s-exp"></div>
+      <div class="stat-lbl">Expiring within 90 days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val c-grn" id="s-drills"></div>
+      <div class="stat-lbl">Safety drills (12 mo)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s-nc"></div>
+      <div class="stat-lbl">Open non-conformances</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="s-wo"></div>
+      <div class="stat-lbl">Open work orders</div>
+    </div>
+  </div>
+  <script>
+    document.getElementById('s-vc').textContent     = vc.length;
+    document.getElementById('s-cc').textContent     = cc.length;
+    const expEl = document.getElementById('s-exp');
+    expEl.textContent = expiringAll.length;
+    expEl.className   = 'stat-val ' + (expiringAll.length ? 'c-yel' : 'c-grn');
+    document.getElementById('s-drills').textContent = recentDrills.length;
+    const ncEl = document.getElementById('s-nc');
+    ncEl.textContent = openNCs.length;
+    ncEl.className   = 'stat-val ' + (openNCs.length ? 'c-red' : 'c-grn');
+    const woEl = document.getElementById('s-wo');
+    woEl.textContent = openWOs.length;
+    woEl.className   = 'stat-val ' + (openWOs.length ? 'c-yel' : 'c-grn');
+  </script>
+</div>
+
+<!-- ── VESSEL PARTICULARS ── -->
+<div class="section">
+  <div class="section-title">Vessel Particulars</div>
+  <div class="particulars" id="particulars"></div>
+  <script>
+    const crew = (FM.crew || []).filter(c => c.vessel === vid);
+    const cap  = crew.find(c => c.role === 'Captain');
+    const eng  = crew.find(c => c.role.includes('Engineer'));
+    document.getElementById('particulars').innerHTML = [
+      { label: 'Vessel name',    val: vessel.name },
+      { label: 'Type / class',   val: vessel.type },
+      { label: 'LOA',            val: vessel.loa },
+      { label: 'Flag state',     val: vessel.flag === 'CYM' ? 'Cayman Islands' : vessel.flag },
+      { label: 'Home port',      val: vessel.port || '—' },
+      { label: 'MMSI',           val: vessel.mmsi || '—' },
+      { label: 'Captain',        val: cap ? cap.name : '—' },
+      { label: 'Chief engineer', val: eng ? eng.name : '—' },
+    ].map(p => `<div class="part-item"><label>${p.label}</label><span>${escHtml(p.val)}</span></div>`).join('');
+  </script>
+</div>
+
+<!-- ── VESSEL CERTIFICATES ── -->
+<div class="section">
+  <div class="section-title">Vessel Certificates</div>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Certificate</th><th>Category</th><th>Issuer</th><th>Doc ref</th><th>Issued</th><th>Expires</th><th>Status</th></tr>
+      </thead>
+      <tbody id="vessel-cert-body"></tbody>
+    </table>
+  </div>
+  <script>
+    document.getElementById('vessel-cert-body').innerHTML = vc.map(c => {
+      const s = certStatusClass(c.expires);
+      return `<tr>
+        <td><strong>${escHtml(c.name)}</strong></td>
+        <td><span class="tag">${escHtml(c.category)}</span></td>
+        <td style="color:var(--txt2)">${escHtml(c.issuer)}</td>
+        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
+        <td style="color:var(--txt3)">${fmtDate(c.issued)}</td>
+        <td style="font-weight:600">${fmtDate(c.expires)}</td>
+        <td class="${s.cls}">${s.label}</td>
+      </tr>`;
+    }).join('');
+  </script>
+</div>
+
+<!-- ── CREW CERTIFICATIONS ── -->
+<div class="section">
+  <div class="section-title">Crew Certifications</div>
+  <div id="crew-certs-wrap"></div>
+  <script>
+    const crewList = (FM.crew || []).filter(c => c.vessel === vid);
+    document.getElementById('crew-certs-wrap').innerHTML = crewList.map(cr => {
+      const certs = (FM.crewCerts || []).filter(c => c.crewId === cr.id);
+      if (!certs.length) return '';
+      const expCount = certs.filter(c => { const d = daysUntil(c.expires); return d !== null && d <= 90; }).length;
+      return `<div class="crew-member">
+        <div class="crew-member-header">
+          <div class="crew-avatar">${initials(cr.name)}</div>
+          <div>
+            <span class="crew-name">${escHtml(cr.name)}</span>
+            <span class="crew-role">— ${escHtml(cr.role)}</span>
+          </div>
+          ${expCount ? `<span style="margin-left:auto;font-size:9px;font-weight:700;background:rgba(220,38,38,.2);color:#FCA5A5;padding:3px 8px;border-radius:10px">${expCount} expiring</span>` : `<span style="margin-left:auto;font-size:9px;font-weight:700;background:rgba(22,163,74,.15);color:#4ADE80;padding:3px 8px;border-radius:10px">✓ All valid</span>`}
+        </div>
+        <table>
+          <thead><tr><th>Certificate</th><th>Category</th><th>Issuer</th><th>Doc ref</th><th>Expires</th><th>Status</th></tr></thead>
+          <tbody>
+            ${certs.map(c => {
+              const s = certStatusClass(c.expires);
+              return `<tr>
+                <td>${escHtml(c.name)}</td>
+                <td><span class="tag">${escHtml(c.category)}</span></td>
+                <td style="color:var(--txt2)">${escHtml(c.issuer)}</td>
+                <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
+                <td style="font-weight:600">${fmtDate(c.expires)}</td>
+                <td class="${s.cls}">${s.label}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>`;
+    }).join('');
+  </script>
+</div>
+
+<!-- ── SAFETY DRILLS ── -->
+<div class="section">
+  <div class="section-title">Safety Drills — Last 12 Months</div>
+  <div id="drills-wrap"></div>
+  <script>
+    if (recentDrills.length) {
+      const rows = recentDrills.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(d => {
+        const crewNames = (d.crew||[]).map(id => FM.crewName(id)).filter(Boolean);
+        return `<tr>
+          <td style="color:var(--txt3)">${fmtDate(d.date)}</td>
+          <td><strong>${escHtml(DRILL_LABELS[d.type] || d.type)}</strong></td>
+          <td style="color:var(--txt2)">${escHtml(FM.crewName(d.conductor))}</td>
+          <td style="color:var(--txt3)">${d.duration ? d.duration + ' min' : '—'}</td>
+          <td style="color:var(--txt3)">${escHtml(d.location || '—')}</td>
+          <td style="font-size:10px;color:var(--txt3)">${crewNames.length ? crewNames.join(', ') : '—'}</td>
+          <td class="status-ok">Completed</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('drills-wrap').innerHTML =
+        `<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Conducted by</th><th>Duration</th><th>Location</th><th>Crew present</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else {
+      document.getElementById('drills-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No drills recorded in the past 12 months.</p>';
+    }
+  </script>
+</div>
+
+<!-- ── NON-CONFORMANCES ── -->
+<div class="section">
+  <div class="section-title">Non-Conformances &amp; Incidents</div>
+  <div id="nc-wrap"></div>
+  <script>
+    if (ncs.length) {
+      const rows = ncs.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(n => {
+        const isOpen = n.status === 'open';
+        return `<tr>
+          <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(n.ref)}</td>
+          <td style="color:var(--txt3)">${fmtDate(n.date)}</td>
+          <td><span class="tag">${escHtml(n.type.replace('-',' '))}</span></td>
+          <td><strong>${escHtml(n.title)}</strong><br><span style="color:var(--txt3);font-size:10px">${escHtml(n.description)}</span></td>
+          <td class="${isOpen?'status-open':'status-closed'}">${isOpen?'Open':'Closed'}</td>
+          <td style="font-size:10px;color:var(--txt3)">${n.correctiveAction ? escHtml(n.correctiveAction) : isOpen ? 'Pending' : '—'}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('nc-wrap').innerHTML =
+        `<div class="tbl-wrap"><table><thead><tr><th>Ref</th><th>Date</th><th>Type</th><th>Description</th><th>Status</th><th>Corrective action</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else {
+      document.getElementById('nc-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No non-conformances or incidents recorded.</p>';
+    }
+  </script>
+</div>
+
+<!-- ── SAFETY MEETINGS ── -->
+<div class="section">
+  <div class="section-title">Safety Meetings</div>
+  <div id="meetings-wrap"></div>
+  <script>
+    if (meetings.length) {
+      const rows = meetings.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(m => {
+        const att = (m.attendees||[]).map(id=>FM.crewName(id)).filter(Boolean);
+        return `<tr>
+          <td style="color:var(--txt3)">${fmtDate(m.date)}</td>
+          <td><strong>${escHtml(m.topic)}</strong></td>
+          <td style="color:var(--txt2)">${escHtml(FM.crewName(m.conductor))}</td>
+          <td style="color:var(--txt3)">${m.duration ? m.duration + ' min' : '—'}</td>
+          <td style="font-size:10px;color:var(--txt3)">${att.join(', ') || '—'}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('meetings-wrap').innerHTML =
+        `<div class="tbl-wrap"><table><thead><tr><th>Date</th><th>Topic</th><th>Conducted by</th><th>Duration</th><th>Attendees</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else {
+      document.getElementById('meetings-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No safety meetings recorded.</p>';
+    }
+  </script>
+</div>
+
+<!-- ── PLANNED MAINTENANCE ── -->
+<div class="section">
+  <div class="section-title">Planned Maintenance Schedule</div>
+  <div id="pms-wrap"></div>
+  <script>
+    if (pms.length) {
+      const rows = pms.slice().sort((a,b)=>{
+        const order = { overdue:0, due:1, 'due-soon':2, upcoming:3 };
+        return (order[a.status]??9) - (order[b.status]??9);
+      }).map(p => {
+        const statusCls = p.status==='overdue'||p.status==='due' ? 'status-expired' : p.status==='due-soon' ? 'status-expiring' : 'status-valid';
+        const statusLbl = p.status==='overdue'?'OVERDUE':p.status==='due'?'Due now':p.status==='due-soon'?'Due soon':'Upcoming';
+        return `<tr>
+          <td><strong>${escHtml(p.task||p.asset||'—')}</strong></td>
+          <td style="font-size:10px;color:var(--txt3)">${escHtml(p.system||'—')}</td>
+          <td style="color:var(--txt3)">${escHtml(p.interval||'—')}</td>
+          <td style="color:var(--txt3)">${p.lastDate ? fmtDate(p.lastDate) : '—'}</td>
+          <td style="color:var(--txt3)">${p.dueHours ? p.dueHours.toLocaleString()+'h' : '—'}</td>
+          <td class="${statusCls}">${statusLbl}</td>
+        </tr>`;
+      }).join('');
+      document.getElementById('pms-wrap').innerHTML =
+        `<div class="tbl-wrap"><table><thead><tr><th>Task</th><th>System</th><th>Interval</th><th>Last completed</th><th>Due at</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    } else {
+      document.getElementById('pms-wrap').innerHTML = '<p style="color:var(--txt3);font-size:11px;padding:8px 0">No maintenance schedule data on file.</p>';
+    }
+  </script>
+</div>
+
+</div><!-- /body -->
+
+<!-- ── FOOTER ── -->
+<div class="footer">
+  <div class="footer-left">
+    <span class="footer-mark">Frame Marine</span>
+    <div class="footer-divider"></div>
+    <span class="footer-info" id="footer-info"></span>
+  </div>
+  <span class="footer-conf">Confidential · For insurance purposes only</span>
+</div>
+<script>document.getElementById('footer-info').textContent = 'Vessel Risk & Compliance Report · ' + reportRef + ' · Generated ' + reportDateStr;</script>
+
+<!-- ── PRINT BUTTON ── -->
+<div class="no-print">
+  <button class="btn-print" onclick="window.print()">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5 1h6v3H5zM3 5a2 2 0 00-2 2v4h2v2h10v-2h2V7a2 2 0 00-2-2H3zm9 5H4v3h8v-3zm1-3a.75.75 0 110 1.5A.75.75 0 0113 7z"/></svg>
+    Print / Save as PDF
+  </button>
+  <span class="print-note">Use your browser's print dialog · Select "Save as PDF" for a digital copy</span>
+</div>
+
+</body>
+</html>

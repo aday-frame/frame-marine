@@ -353,6 +353,39 @@
   .shell { grid-template-columns: 168px 1fr; }
 }
 
+/* ── UPGRADE OVERLAY ── */
+#upgrade-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 90;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  backdrop-filter: blur(18px) saturate(0.5) brightness(0.55);
+  background: rgba(8,8,8,.55);
+  overflow-y: auto;
+}
+#upgrade-overlay.open { display: flex; }
+
+.upgrade-card {
+  background: var(--bg2);
+  border: .5px solid var(--bd2);
+  border-radius: 16px;
+  width: 480px;
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 40px 80px rgba(0,0,0,.85), 0 0 0 .5px rgba(255,255,255,.06);
+  flex-shrink: 0;
+}
+
+.upgrade-accent {
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+}
+
 /* ── MOBILE BOTTOM NAV ── */
 .mob-nav {
   display: none;

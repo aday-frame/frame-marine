@@ -82,11 +82,14 @@ Charter.renderDetail = function() {
   const openReqs = FM.guestRequests.filter(r => r.charter === c.id && r.status === 'open').length;
 
   const outstandingPayments = c.quote ? c.quote.payments.filter(p => !p.paid).length : 0;
-  const totalCosts = (c.costs || []).reduce((s, e) => s + e.amount, 0);
+  const totalCosts  = (c.costs || []).reduce((s, e) => s + e.amount, 0);
+  const apaExpenses = (c.apaExpenses || []).reduce((s, e) => s + e.amount, 0);
+  const apaBalance  = (c.apa || 0) - apaExpenses;
   const tabs = [
     { id: 'overview',   label: 'Overview' },
     { id: 'guests',     label: c.guests.length ? `Guests (${c.guests.length})` : 'Guests' },
     { id: 'itinerary',  label: 'Itinerary' },
+    { id: 'apa',        label: c.apa ? `APA ($${(apaBalance/1000).toFixed(0)}k left)` : 'APA' },
     { id: 'costs',      label: totalCosts ? `Costs ($${(totalCosts/1000).toFixed(0)}k)` : 'Costs' },
     { id: 'requests',   label: openReqs ? `Requests (${openReqs})` : 'Requests' },
     { id: 'documents',  label: `Documents (${c.documents.length})` },
@@ -159,6 +162,7 @@ Charter._renderTab = function() {
     overview:  Charter.renderOverview,
     guests:    Charter.renderGuests,
     itinerary: Charter.renderItinerary,
+    apa:       Charter.renderAPA,
     costs:     Charter.renderCosts,
     requests:  Charter.renderRequests,
     documents: Charter.renderDocuments,
@@ -1108,6 +1112,226 @@ Charter.exportPDF = function() {
       Cancellation: 50% retained within 60 days; 100% within 30 days of charter start. Valid 21 days from issue.
     </div>
     <button class="print-btn" onclick="window.print()">Print / Save as PDF</button>
+  </body></html>`);
+  win.document.close();
+};
+
+/* ── APA TAB ── */
+Charter.renderAPA = function() {
+  const c    = FM.charters.find(x => x.id === Charter.selectedId);
+  const wrap = document.getElementById('charter-tab-content');
+  if (!c || !wrap) return;
+
+  const expenses   = c.apaExpenses || [];
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0);
+  const received   = c.apa || 0;
+  const balance    = received - totalSpent;
+  const pct        = received > 0 ? Math.min(100, Math.round(totalSpent / received * 100)) : 0;
+  const balColor   = balance < 0 ? 'var(--red)' : balance < received * 0.15 ? 'var(--yel)' : 'var(--grn)';
+  const USD = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+  function fmtD(s) {
+    if (!s) return '—';
+    const [y, m, d] = s.split('-');
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + d;
+  }
+
+  // Category breakdown
+  const catMap = {};
+  expenses.forEach(e => { catMap[e.category] = (catMap[e.category] || 0) + e.amount; });
+
+  wrap.innerHTML = `
+    <!-- APA summary -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:10px;padding:14px">
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">APA Received</div>
+        <div style="font-size:22px;font-weight:500;color:var(--txt)">${USD(received)}</div>
+      </div>
+      <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:10px;padding:14px">
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Spent</div>
+        <div style="font-size:22px;font-weight:500;color:var(--or)">${USD(totalSpent)}</div>
+      </div>
+      <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:10px;padding:14px">
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Balance</div>
+        <div style="font-size:22px;font-weight:500;color:${balColor}">${balance >= 0 ? USD(balance) : '-'+USD(balance)}</div>
+      </div>
+    </div>
+
+    <!-- Progress bar -->
+    <div style="margin-bottom:20px">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--txt3);margin-bottom:5px">
+        <span>APA utilisation</span><span>${pct}%</span>
+      </div>
+      <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+        <div style="height:100%;width:${pct}%;background:${balColor};border-radius:3px;transition:width .3s"></div>
+      </div>
+    </div>
+
+    <!-- Category breakdown -->
+    ${Object.keys(catMap).length ? `<div style="margin-bottom:20px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">By category</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${Object.entries(catMap).sort((a,b)=>b[1]-a[1]).map(([cat,amt]) => `
+          <div style="padding:6px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:20px">
+            <span style="font-size:11px;color:var(--txt2)">${escHtml(cat)}</span>
+            <span style="font-size:11px;font-weight:600;color:var(--txt);margin-left:6px">${USD(amt)}</span>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- Expense table -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">Expense log</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="Charter.printAPAStatement('${c.id}')">Export statement</button>
+        <button class="btn btn-primary btn-sm" onclick="Charter.openAPAExpense('${c.id}')">+ Add expense</button>
+      </div>
+    </div>
+
+    ${expenses.length ? `<div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th style="text-align:right">Amount</th><th></th></tr></thead>
+        <tbody>
+          ${expenses.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(e => `<tr>
+            <td style="color:var(--txt3);white-space:nowrap">${fmtD(e.date)}</td>
+            <td><span style="font-size:10px;color:var(--txt2)">${escHtml(e.category)}</span></td>
+            <td style="color:var(--txt)">${escHtml(e.desc)}</td>
+            <td style="text-align:right;font-weight:500;color:var(--or)">${USD(e.amount)}</td>
+            <td><button class="btn btn-ghost btn-xs" onclick="Charter.delAPAExpense('${c.id}','${e.id}')">Remove</button></td>
+          </tr>`).join('')}
+        </tbody>
+        <tfoot>
+          <tr><td colspan="3" style="font-weight:600;color:var(--txt)">Total spent</td>
+              <td style="text-align:right;font-weight:700;color:var(--or)">${USD(totalSpent)}</td><td></td></tr>
+        </tfoot>
+      </table>
+    </div>` : `<div style="font-size:13px;color:var(--txt3);padding:16px 0">No expenses logged yet. Add the first one above.</div>`}
+
+    <!-- Add expense modal -->
+    <div id="apa-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
+      <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;width:440px;max-width:92vw;padding:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+          <div style="font-size:14px;font-weight:600;color:var(--txt)">Add APA expense</div>
+          <button onclick="document.getElementById('apa-modal').style.display='none'" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:18px">×</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+          <div><label class="inp-lbl">Category</label>
+            <select class="inp" id="apa-cat">
+              <option>Fuel</option><option>Provisioning</option><option>Port / marina</option>
+              <option>Crew</option><option>Watersports</option><option>Excursions</option><option>Other</option>
+            </select></div>
+          <div><label class="inp-lbl">Date</label><input class="inp" id="apa-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+        </div>
+        <div style="margin-bottom:12px"><label class="inp-lbl">Description</label><input class="inp" id="apa-desc" placeholder="e.g. Gustavia fuel dock top-up"></div>
+        <div style="margin-bottom:18px"><label class="inp-lbl">Amount (USD)</label><input class="inp" id="apa-amount" type="number" placeholder="0.00"></div>
+        <div style="display:flex;gap:8px;justify-content:flex-end">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('apa-modal').style.display='none'">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="apa-save-btn">Save expense</button>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+Charter.openAPAExpense = function(charterId) {
+  const modal = document.getElementById('apa-modal');
+  if (!modal) return;
+  document.getElementById('apa-save-btn').onclick = () => Charter.saveAPAExpense(charterId);
+  modal.style.display = 'flex';
+};
+
+Charter.saveAPAExpense = function(charterId) {
+  const c    = FM.charters.find(x => x.id === charterId);
+  if (!c) return;
+  const desc   = document.getElementById('apa-desc')?.value.trim();
+  const amount = parseFloat(document.getElementById('apa-amount')?.value);
+  if (!desc || isNaN(amount) || amount <= 0) { alert('Description and a valid amount are required.'); return; }
+
+  if (!c.apaExpenses) c.apaExpenses = [];
+  c.apaExpenses.push({
+    id:       'apa-' + Date.now(),
+    category: document.getElementById('apa-cat')?.value,
+    desc,
+    amount,
+    date:     document.getElementById('apa-date')?.value,
+  });
+  c.apaSpent = c.apaExpenses.reduce((s, e) => s + e.amount, 0);
+
+  document.getElementById('apa-modal').style.display = 'none';
+  Charter.renderAPA();
+  Charter.renderDetail();
+};
+
+Charter.delAPAExpense = function(charterId, expId) {
+  const c = FM.charters.find(x => x.id === charterId);
+  if (!c || !confirm('Remove this expense?')) return;
+  c.apaExpenses = (c.apaExpenses || []).filter(e => e.id !== expId);
+  c.apaSpent    = c.apaExpenses.reduce((s, e) => s + e.amount, 0);
+  Charter.renderAPA();
+  Charter.renderDetail();
+};
+
+Charter.printAPAStatement = function(charterId) {
+  const c = FM.charters.find(x => x.id === charterId);
+  if (!c) return;
+  const expenses   = c.apaExpenses || [];
+  const totalSpent = expenses.reduce((s, e) => s + e.amount, 0);
+  const balance    = (c.apa || 0) - totalSpent;
+  const USD = n => '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtD = s => { if (!s) return '—'; const [y,m,d]=s.split('-'); return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+d+', '+y; };
+  const vessel = FM.currentVessel();
+
+  const win = window.open('', '_blank');
+  win.document.write(`<!DOCTYPE html><html><head><title>APA Statement — ${c.name}</title>
+  <style>
+    * { margin:0;padding:0;box-sizing:border-box }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;color:#111;padding:48px;font-size:12px;line-height:1.5 }
+    h1 { font-size:22px;font-weight:400;margin-bottom:4px }
+    .sub { color:#666;font-size:12px;margin-bottom:32px }
+    .section { margin-bottom:28px }
+    .section-title { font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#999;margin-bottom:10px;border-bottom:1px solid #eee;padding-bottom:6px }
+    .meta { display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px }
+    .meta-item label { font-size:10px;color:#999;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:2px }
+    .meta-item span { font-size:14px;font-weight:500 }
+    table { width:100%;border-collapse:collapse }
+    th { text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;padding:6px 8px;border-bottom:1px solid #eee }
+    td { padding:8px;border-bottom:1px solid #f5f5f5;font-size:12px }
+    .amt { text-align:right;font-variant-numeric:tabular-nums }
+    tfoot td { font-weight:700;border-top:2px solid #111;border-bottom:none;padding-top:10px }
+    .summary { margin-top:24px;background:#f9f9f9;border:1px solid #eee;border-radius:8px;padding:16px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px }
+    .summary-item label { font-size:10px;color:#999;display:block;margin-bottom:2px }
+    .summary-item span { font-size:18px;font-weight:500 }
+    .balance-pos { color:#16a34a }
+    .balance-neg { color:#dc2626 }
+    @media print { body { padding:24px } button { display:none } }
+    button { margin-top:24px;padding:10px 20px;background:#111;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px }
+  </style></head><body>
+  <h1>APA Settlement Statement</h1>
+  <div class="sub">${escHtml(c.name)} · ${vessel ? escHtml(vessel.name) : ''} · Issued ${fmtD(new Date().toISOString().slice(0,10))}</div>
+  <div class="meta">
+    <div class="meta-item"><label>Charter dates</label><span>${fmtD(c.start)} – ${fmtD(c.end)}</span></div>
+    <div class="meta-item"><label>APA received</label><span>${USD(c.apa || 0)}</span></div>
+    <div class="meta-item"><label>Broker</label><span>${escHtml(c.broker)}</span></div>
+  </div>
+  <div class="section">
+    <div class="section-title">Expense log</div>
+    <table>
+      <thead><tr><th>Date</th><th>Category</th><th>Description</th><th class="amt">Amount</th></tr></thead>
+      <tbody>
+        ${expenses.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(e=>`<tr>
+          <td>${fmtD(e.date)}</td><td>${escHtml(e.category)}</td><td>${escHtml(e.desc)}</td><td class="amt">${USD(e.amount)}</td>
+        </tr>`).join('')}
+      </tbody>
+      <tfoot><tr><td colspan="3">Total expenses</td><td class="amt">${USD(totalSpent)}</td></tr></tfoot>
+    </table>
+  </div>
+  <div class="summary">
+    <div class="summary-item"><label>APA received</label><span>${USD(c.apa || 0)}</span></div>
+    <div class="summary-item"><label>Total spent</label><span>${USD(totalSpent)}</span></div>
+    <div class="summary-item"><label>Balance ${balance >= 0 ? 'to return' : 'due from charterer'}</label>
+      <span class="${balance >= 0 ? 'balance-pos' : 'balance-neg'}">${USD(Math.abs(balance))}</span></div>
+  </div>
+  <button onclick="window.print()">Print / Save as PDF</button>
   </body></html>`);
   win.document.close();
 };

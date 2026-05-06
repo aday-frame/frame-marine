@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Clearing cache…</title>
+<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#111;color:#fff;font-size:15px}</style>
+</head>
+<body>
+<p id="msg">Clearing service worker cache…</p>
+<script>
+(async () => {
+  const msg = document.getElementById('msg');
+  try {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map(r => r.unregister()));
+    const keys = await caches.keys();
+    await Promise.all(keys.map(k => caches.delete(k)));
+    msg.textContent = 'Done! Redirecting…';
+  } catch(e) {
+    msg.textContent = 'Done. Redirecting…';
+  }
+  setTimeout(() => location.href = '/app.html', 800);
+})();
+</script>
+</body>
+</html>

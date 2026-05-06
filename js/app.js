@@ -45,8 +45,13 @@ function navTo(pageId, clickedEl, skipPush) {
     pms:         'Planned maintenance',
     fleet:       'Tender & fleet',
     checklists:    'Checklists',
+    owner:         'Owner view',
     certificates:  'Certificates',
     safety:        'Safety & ISM',
+    inventory:     'Inventory',
+    budget:        'Budget',
+    hours:         'Hours of rest',
+    documents:     'Documents',
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -69,8 +74,13 @@ function navTo(pageId, clickedEl, skipPush) {
     pms:           () => window.renderPMS && renderPMS(),
     fleet:         () => window.renderFleet && renderFleet(),
     checklists:    () => window.renderChecklists && renderChecklists(),
+    owner:         () => window.Owner && Owner.render(),
     certificates:  () => window.Certs && Certs.render(),
     safety:        () => window.Safety && Safety.render(),
+    inventory:     () => window.Inventory && Inventory.render(),
+    budget:        () => window.Budget && Budget.render(),
+    hours:         () => window.Hours && Hours.render(),
+    documents:     () => window.Documents && Documents.render(),
   };
   if (inits[pageId]) inits[pageId]();
 

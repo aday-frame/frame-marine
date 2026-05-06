@@ -444,10 +444,16 @@ FM.charters = [
     apa: 37000,
     apaSpent: 12400,
     costs: [
-      { id: 'cost-ch1-1', category: 'Fuel',          desc: 'Pre-charter fill — Gustavia',            amount: 4200, date: '2026-05-04', notes: '' },
-      { id: 'cost-ch1-2', category: 'Provisioning',  desc: 'Day family provisions — Palate Foods',  amount: 8400, date: '2026-05-03', notes: '' },
-      { id: 'cost-ch1-3', category: 'Port / marina', desc: 'Gustavia harbour fees',                 amount: 1200, date: '2026-05-05', notes: '' },
-      { id: 'cost-ch1-4', category: 'Broker',        desc: 'Burgess commission 15%',               amount: 27750, date: '2026-05-05', notes: 'Invoiced on charter fee' },
+      { id: 'cost-ch1-1', category: 'Fuel',          desc: 'Pre-charter fill — Gustavia',            amount: 4200,  date: '2026-05-04', notes: '' },
+      { id: 'cost-ch1-2', category: 'Provisioning',  desc: 'Day family provisions — Palate Foods',  amount: 8400,  date: '2026-05-03', notes: '' },
+      { id: 'cost-ch1-3', category: 'Port / marina', desc: 'Gustavia harbour fees',                 amount: 1200,  date: '2026-05-05', notes: '' },
+      { id: 'cost-ch1-4', category: 'Broker',        desc: 'Burgess commission 15%',               amount: 27750,  date: '2026-05-05', notes: 'Invoiced on charter fee' },
+    ],
+    apaExpenses: [
+      { id: 'apa-ch1-1', category: 'Fuel',         desc: 'Pre-charter fill — Gustavia fuel dock',  amount: 4200, date: '2026-05-04' },
+      { id: 'apa-ch1-2', category: 'Provisioning', desc: 'Day family provisions — Palate Foods',   amount: 5800, date: '2026-05-03' },
+      { id: 'apa-ch1-3', category: 'Port / marina',desc: 'Gustavia harbour dues',                  amount: 1400, date: '2026-05-05' },
+      { id: 'apa-ch1-4', category: 'Watersports',  desc: 'Jet ski rentals shore excursion',        amount: 1000, date: '2026-05-08' },
     ],
     quote: {
       ref: 'Q-2026-001',
@@ -521,6 +527,7 @@ FM.charters = [
     apa: 44000,
     apaSpent: 0,
     costs: [],
+    apaExpenses: [],
     quote: {
       ref: 'Q-2026-002',
       status: 'deposit_paid',
@@ -586,11 +593,19 @@ FM.charters = [
     apa: 42000,
     apaSpent: 39800,
     costs: [
-      { id: 'cost-ch3-1', category: 'Fuel',          desc: 'Palma Marina fill-up',                  amount: 6800, date: '2026-01-14', notes: '' },
-      { id: 'cost-ch3-2', category: 'Provisioning',  desc: 'Charter provisions',                    amount: 9200, date: '2026-01-13', notes: '' },
-      { id: 'cost-ch3-3', category: 'Port / marina', desc: 'Palma, Portofino, Portopino fees',      amount: 3400, date: '2026-01-14', notes: '' },
-      { id: 'cost-ch3-4', category: 'Broker',        desc: 'Northrop & Johnson commission 15%',    amount: 31500, date: '2026-01-14', notes: '' },
-      { id: 'cost-ch3-5', category: 'Crew',          desc: 'Crew gratuity advance',                 amount: 4000, date: '2026-01-21', notes: 'From APA' },
+      { id: 'cost-ch3-1', category: 'Fuel',          desc: 'Gustavia fuel dock',                    amount: 6800,  date: '2025-12-28', notes: '' },
+      { id: 'cost-ch3-2', category: 'Provisioning',  desc: 'Chen family NYE provisions',            amount: 9200,  date: '2025-12-27', notes: '' },
+      { id: 'cost-ch3-3', category: 'Port / marina', desc: 'Gustavia harbour fees × 7 nights',     amount: 3400,  date: '2025-12-29', notes: '' },
+      { id: 'cost-ch3-4', category: 'Broker',        desc: 'Burgess commission 15%',               amount: 31500,  date: '2025-12-29', notes: 'Invoiced on charter fee' },
+      { id: 'cost-ch3-5', category: 'Crew',          desc: 'Crew gratuity advance',                 amount: 4000,  date: '2026-01-05', notes: 'From APA' },
+    ],
+    apaExpenses: [
+      { id: 'apa-ch3-1', category: 'Fuel',          desc: 'Pre-charter fill — Gustavia',            amount: 8200,  date: '2025-12-28' },
+      { id: 'apa-ch3-2', category: 'Provisioning',  desc: 'Chen family NYE provisions — gourmet',  amount: 14800, date: '2025-12-27' },
+      { id: 'apa-ch3-3', category: 'Port / marina', desc: 'Gustavia harbour dues × 7 nights',      amount: 3800,  date: '2025-12-29' },
+      { id: 'apa-ch3-4', category: 'Crew',          desc: 'Crew gratuity — NYE charter',            amount: 8400,  date: '2026-01-05' },
+      { id: 'apa-ch3-5', category: 'Watersports',   desc: 'Scuba guide, Seabob sessions',           amount: 2600,  date: '2026-01-02' },
+      { id: 'apa-ch3-6', category: 'Other',         desc: 'NYE fireworks & entertainment',          amount: 2000,  date: '2025-12-31' },
     ],
     quote: {
       ref: 'Q-2025-003',
@@ -777,6 +792,86 @@ FM.logbook = [
   { id: 'lb4', vessel: 'v1', date: '2026-05-05', watch: 'c2', portHrs: 3036, stbdHrs: 3030, genHrs: 8810, position: "17°54'N 62°51'W", location: 'Gustavia, St. Barths — harbour', weather: 'NE 10kt, partly cloudy, 29°C', status: 'berthed', notes: 'Guests embarked 18:00 — 6 pax, all crew aboard 16:00. Safety briefing completed 17:30. Welcome cocktails and dinner on aft deck. Port engine CAT thermostat replaced by Dmitri 14:00 (WO-001 partial resolution).' },
   { id: 'lb5', vessel: 'v1', date: '2026-05-04', watch: 'c2', portHrs: 3036, stbdHrs: 3030, genHrs: 8800, position: "17°54'N 62°51'W", location: 'Gustavia, St. Barths — harbour', weather: 'NE 15kt, clear, 27°C', status: 'berthed', notes: 'Charter preparation day. Blue Water Provisioning delivery received 10:00 — 100% complete. Fuel bunkered 1,200L diesel. Ana Costa (provisioner) on board 13:00–16:00. All bilge compartments checked — clear.' },
   { id: 'lb6', vessel: 'v1', date: '2026-05-02', watch: 'c2', portHrs: 3035, stbdHrs: 3029, genHrs: 8790, position: "17°54'N 62°51'W", location: 'Gustavia, St. Barths — harbour', weather: 'E 12kt, partly cloudy, 28°C', status: 'berthed', notes: 'CAT dealer Jim Farley on board 09:00–14:00 for port engine inspection. Thermostat confirmed faulty — replacement ordered. Generator load test completed — pass. AV system firmware update by YachtAV Solutions 15:00.' },
+];
+
+/* ── INVENTORY ── */
+FM.inventory = [
+  { id:'inv-01', vessel:'v1', name:'Engine Oil — CAT DEO-ULS 15W-40', category:'Engineering', qty:24, unit:'L',     reorderAt:10, location:'ER Locker A2',      cost:8.5  },
+  { id:'inv-02', vessel:'v1', name:'Hydraulic Oil — Repsol Telex 46',  category:'Engineering', qty:40, unit:'L',     reorderAt:15, location:'ER Locker A1',      cost:6.2  },
+  { id:'inv-03', vessel:'v1', name:'Coolant 50/50 Premix',             category:'Engineering', qty:4,  unit:'L',     reorderAt:10, location:'ER Shelf',          cost:12.0 },
+  { id:'inv-04', vessel:'v1', name:'Fuel Filter — Racor 1000FG',       category:'Engineering', qty:6,  unit:'units', reorderAt:2,  location:'ER Locker B1',      cost:42.0 },
+  { id:'inv-05', vessel:'v1', name:'Raw Water Impeller — CAT C32',     category:'Engineering', qty:2,  unit:'units', reorderAt:1,  location:'ER Locker B2',      cost:62.0 },
+  { id:'inv-06', vessel:'v1', name:'Life Jackets — Adult',             category:'Safety',      qty:18, unit:'units', reorderAt:18, location:'Crew Mess Locker',   cost:185  },
+  { id:'inv-07', vessel:'v1', name:'Life Jackets — Child',             category:'Safety',      qty:4,  unit:'units', reorderAt:4,  location:'Crew Mess Locker',   cost:120  },
+  { id:'inv-08', vessel:'v1', name:'EPIRB Batteries',                  category:'Safety',      qty:2,  unit:'units', reorderAt:2,  location:'Bridge Locker',      cost:95   },
+  { id:'inv-09', vessel:'v1', name:'Fire Extinguisher CO2 — 5kg',      category:'Safety',      qty:8,  unit:'units', reorderAt:8,  location:'Various',            cost:140  },
+  { id:'inv-10', vessel:'v1', name:'Sunscreen SPF50 — Guest',          category:'Provisions',  qty:12, unit:'bottles',reorderAt:4,  location:'Deck Box',          cost:22   },
+  { id:'inv-11', vessel:'v1', name:'Sparkling Water — San Pellegrino', category:'Provisions',  qty:48, unit:'bottles',reorderAt:24, location:'Galley Storage',    cost:3.5  },
+  { id:'inv-12', vessel:'v1', name:'Red Wine — Burgundy Pinot Noir',   category:'Provisions',  qty:24, unit:'bottles',reorderAt:12, location:'Wine Cellar',       cost:45   },
+  { id:'inv-13', vessel:'v1', name:'Champagne — Moët & Chandon',       category:'Provisions',  qty:6,  unit:'bottles',reorderAt:6,  location:'Wine Cellar',       cost:55   },
+  { id:'inv-14', vessel:'v1', name:'Deck Scrub Brushes',               category:'Deck',        qty:4,  unit:'units', reorderAt:2,  location:'Deck Locker',        cost:28   },
+  { id:'inv-15', vessel:'v1', name:'Teak Cleaner — 5L',                category:'Deck',        qty:2,  unit:'containers',reorderAt:1,location:'Deck Locker',      cost:45   },
+  { id:'inv-16', vessel:'v1', name:'Zinc Anodes — Shaft 40mm',         category:'Deck',        qty:4,  unit:'units', reorderAt:4,  location:'Aft Deck Locker',    cost:18   },
+];
+
+/* ── BUDGET ── */
+FM.budget = [
+  { id:'bud-01', vessel:'v1', year:2026, category:'Fuel & Lubricants',    budgeted:95000,  actualOverride:null },
+  { id:'bud-02', vessel:'v1', year:2026, category:'Crew Salaries',         budgeted:380000, actualOverride:168000 },
+  { id:'bud-03', vessel:'v1', year:2026, category:'Maintenance & Repairs', budgeted:85000,  actualOverride:22400  },
+  { id:'bud-04', vessel:'v1', year:2026, category:'Provisioning',          budgeted:45000,  actualOverride:null   },
+  { id:'bud-05', vessel:'v1', year:2026, category:'Port & Marina Fees',    budgeted:38000,  actualOverride:null   },
+  { id:'bud-06', vessel:'v1', year:2026, category:'Insurance',             budgeted:62000,  actualOverride:62000  },
+  { id:'bud-07', vessel:'v1', year:2026, category:'Communications & IT',   budgeted:12000,  actualOverride:5400   },
+  { id:'bud-08', vessel:'v1', year:2026, category:'Safety & Compliance',   budgeted:8000,   actualOverride:1200   },
+];
+
+/* ── HOURS OF REST ── */
+FM.hoursOfRest = [
+  { id:'hor-01', vessel:'v1', crewId:'c2', date:'2026-05-06', workHours:10, restHours:14 },
+  { id:'hor-02', vessel:'v1', crewId:'c2', date:'2026-05-05', workHours:8,  restHours:16 },
+  { id:'hor-03', vessel:'v1', crewId:'c2', date:'2026-05-04', workHours:12, restHours:12 },
+  { id:'hor-04', vessel:'v1', crewId:'c2', date:'2026-05-03', workHours:9,  restHours:15 },
+  { id:'hor-05', vessel:'v1', crewId:'c2', date:'2026-05-02', workHours:11, restHours:13 },
+  { id:'hor-06', vessel:'v1', crewId:'c2', date:'2026-05-01', workHours:8,  restHours:16 },
+  { id:'hor-07', vessel:'v1', crewId:'c2', date:'2026-04-30', workHours:14, restHours:10 },
+  { id:'hor-08', vessel:'v1', crewId:'c3', date:'2026-05-06', workHours:11, restHours:13 },
+  { id:'hor-09', vessel:'v1', crewId:'c3', date:'2026-05-05', workHours:10, restHours:14 },
+  { id:'hor-10', vessel:'v1', crewId:'c3', date:'2026-05-04', workHours:9,  restHours:15 },
+  { id:'hor-11', vessel:'v1', crewId:'c3', date:'2026-05-03', workHours:13, restHours:11 },
+  { id:'hor-12', vessel:'v1', crewId:'c3', date:'2026-05-02', workHours:8,  restHours:16 },
+  { id:'hor-13', vessel:'v1', crewId:'c3', date:'2026-05-01', workHours:10, restHours:14 },
+  { id:'hor-14', vessel:'v1', crewId:'c3', date:'2026-04-30', workHours:11, restHours:13 },
+  { id:'hor-15', vessel:'v1', crewId:'c5', date:'2026-05-06', workHours:15, restHours:9  },
+  { id:'hor-16', vessel:'v1', crewId:'c5', date:'2026-05-05', workHours:10, restHours:14 },
+  { id:'hor-17', vessel:'v1', crewId:'c5', date:'2026-05-04', workHours:9,  restHours:15 },
+  { id:'hor-18', vessel:'v1', crewId:'c5', date:'2026-05-03', workHours:11, restHours:13 },
+  { id:'hor-19', vessel:'v1', crewId:'c5', date:'2026-05-02', workHours:8,  restHours:16 },
+  { id:'hor-20', vessel:'v1', crewId:'c5', date:'2026-05-01', workHours:12, restHours:12 },
+  { id:'hor-21', vessel:'v1', crewId:'c5', date:'2026-04-30', workHours:10, restHours:14 },
+  { id:'hor-22', vessel:'v1', crewId:'c4', date:'2026-05-06', workHours:9,  restHours:15 },
+  { id:'hor-23', vessel:'v1', crewId:'c4', date:'2026-05-05', workHours:10, restHours:14 },
+  { id:'hor-24', vessel:'v1', crewId:'c4', date:'2026-05-04', workHours:11, restHours:13 },
+  { id:'hor-25', vessel:'v1', crewId:'c4', date:'2026-05-03', workHours:8,  restHours:16 },
+  { id:'hor-26', vessel:'v1', crewId:'c4', date:'2026-05-02', workHours:9,  restHours:15 },
+  { id:'hor-27', vessel:'v1', crewId:'c4', date:'2026-05-01', workHours:10, restHours:14 },
+  { id:'hor-28', vessel:'v1', crewId:'c4', date:'2026-04-30', workHours:11, restHours:13 },
+];
+
+/* ── VESSEL DOCUMENTS ── */
+FM.vesselDocs = [
+  { id:'vd-01', vessel:'v1', name:'Certificate of Registry',              category:'Registration', expires:'2027-06-30', docRef:'COR-2024-v1',    uploadedAt:'2024-01-15', notes:'Cayman Islands Shipping Registry' },
+  { id:'vd-02', vessel:'v1', name:'International Tonnage Certificate',    category:'Registration', expires:null,         docRef:'ITC-2019-v1',    uploadedAt:'2024-01-15', notes:'' },
+  { id:'vd-03', vessel:'v1', name:'Radio Station Licence',                category:'Registration', expires:'2027-03-01', docRef:'RSL-2024-4812',  uploadedAt:'2024-03-01', notes:'Cayman Islands — ship station' },
+  { id:'vd-04', vessel:'v1', name:'Hull & Machinery Insurance Policy',    category:'Insurance',    expires:'2026-12-31', docRef:'HM-2026-LM001',  uploadedAt:'2026-01-10', notes:'Pantaenius — $12.5M hull value' },
+  { id:'vd-05', vessel:'v1', name:'P&I Club Certificate',                 category:'Insurance',    expires:'2027-02-20', docRef:'PI-2026-789',    uploadedAt:'2026-02-10', notes:'West of England P&I — $100M liability' },
+  { id:'vd-06', vessel:'v1', name:'Charter Agreement — Day Family',       category:'Contracts',    expires:null,         docRef:'CH-2026-001',    uploadedAt:'2026-03-20', notes:'MYBA charter agreement — Bermuda' },
+  { id:'vd-07', vessel:'v1', name:'Charter Agreement — Rossi Group',      category:'Contracts',    expires:null,         docRef:'CH-2026-002',    uploadedAt:'2026-04-05', notes:'MYBA charter agreement — Mediterranean' },
+  { id:'vd-08', vessel:'v1', name:'VSAT Service Agreement — KVH',         category:'Contracts',    expires:'2027-01-01', docRef:'VSAT-2025-44',   uploadedAt:'2025-01-15', notes:'KVH — Iridium backup' },
+  { id:'vd-09', vessel:'v1', name:'Engine Room Manual — CAT C32 Vol 1',   category:'Manuals',      expires:null,         docRef:'MAN-CAT-C32-1',  uploadedAt:'2024-06-01', notes:'Operation & maintenance manual' },
+  { id:'vd-10', vessel:'v1', name:'Safety Management Manual',             category:'Manuals',      expires:null,         docRef:'SMM-v3-2025',    uploadedAt:'2025-11-01', notes:'ISM Code compliant — v3' },
+  { id:'vd-11', vessel:'v1', name:'Voyage & Emergency Plan',              category:'Manuals',      expires:null,         docRef:'VEP-2025-LM',    uploadedAt:'2025-09-01', notes:'Includes muster list & fire plan' },
+  { id:'vd-12', vessel:'v1', name:'Naiad Gyro Stabilizer Manual',         category:'Manuals',      expires:null,         docRef:'MAN-NAI-G300',   uploadedAt:'2024-06-01', notes:'Gyro-300 installation & ops manual' },
 ];
 
 /* ── NOTIFICATIONS ── */

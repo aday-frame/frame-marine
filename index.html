@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frame Marine — Vessel Operations Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080808;--bg2:#0d0d0c;--bg3:#141413;--bg4:#1c1c1b;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.12);
+  --txt:#F0F0EC;--txt2:#9A9A92;--txt3:#52524A;--txt4:#38382F;
+  --blu:#0077b6;--blu2:#0096c7;--blu3:#00b4d8;
+  --blu-bg:rgba(0,119,182,.1);--blu-bd:rgba(0,119,182,.28);
+  --grn:#4ADE80;--red:#F87171;--yel:#FACC15;--pur:#A78BFA;--or:#FB923C;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:'DM Sans',-apple-system,sans-serif;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");opacity:.03;pointer-events:none;z-index:1;animation:grain 8s steps(1) infinite}
+@keyframes grain{0%{background-position:0 0}10%{background-position:-5% -10%}20%{background-position:-15% 5%}30%{background-position:7% -25%}40%{background-position:-5% 25%}50%{background-position:-15% 10%}60%{background-position:15% 0}70%{background-position:0 15%}80%{background-position:3% 35%}90%{background-position:-10% 10%}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 52px;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid transparent;backdrop-filter:blur(0px);transition:backdrop-filter .3s,border-color .3s,background .3s}
+nav.scrolled{border-bottom-color:var(--bd);backdrop-filter:blur(20px) saturate(180%);background:rgba(8,8,8,.85)}
+.nlogo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.fmark{display:flex;flex-direction:column;gap:3px}
+.fmark-r{background:var(--blu);border-radius:2px;height:4px}
+.ln{font-size:16px;font-weight:600;color:var(--txt);letter-spacing:-.02em}
+.ln span{color:var(--blu)}
+.nav-links{display:flex;gap:28px}
+.nav-links a{font-size:13px;color:var(--txt3);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--txt2)}
+.nav-cta{display:flex;gap:8px;align-items:center}
+.btn-ghost{padding:7px 15px;border-radius:7px;border:.5px solid var(--bd2);color:var(--txt2);font-size:13px;text-decoration:none;transition:all .15s;background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-ghost:hover{border-color:var(--blu-bd);color:var(--blu)}
+.btn-pri{padding:8px 18px;border-radius:7px;background:var(--blu);color:#fff;font-size:13px;font-weight:600;text-decoration:none;transition:all .18s;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.01em}
+.btn-pri:hover{background:var(--blu2);box-shadow:0 0 24px rgba(0,119,182,.4)}
+
+/* HERO */
+.hero{min-height:100vh;display:grid;place-items:center;text-align:center;padding:120px 52px 80px;position:relative;overflow:hidden}
+.hero-orb{position:absolute;top:-8%;left:50%;transform:translateX(-50%);width:900px;height:500px;background:radial-gradient(ellipse,rgba(0,119,182,.18) 0%,rgba(0,150,199,.05) 45%,transparent 70%);animation:hpulse 8s ease-in-out infinite;pointer-events:none}
+@keyframes hpulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.07)}}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(var(--bd) 1px,transparent 1px),linear-gradient(90deg,var(--bd) 1px,transparent 1px);background-size:72px 72px;mask-image:radial-gradient(75% 52% at 50% 0%,black,transparent);pointer-events:none}
+.hero-con{position:relative;z-index:2;max-width:860px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:5px 14px 5px 9px;border:.5px solid var(--blu-bd);border-radius:20px;background:var(--blu-bg);font-size:11px;font-weight:500;color:var(--blu);margin-bottom:32px;letter-spacing:.06em;text-transform:uppercase}
+.ep{width:6px;height:6px;border-radius:50%;background:var(--blu);animation:eppulse 1.8s ease-in-out infinite}
+@keyframes eppulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.55);opacity:.35}}
+h1{font-size:84px;font-weight:200;line-height:1.02;letter-spacing:-.045em;margin-bottom:24px}
+h1 em{font-style:normal;font-weight:500;color:var(--blu)}
+.hero-sub{font-size:18px;color:var(--txt2);max-width:480px;margin:0 auto 44px;font-weight:300;line-height:1.72}
+.hero-btns{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:48px}
+.btn-hero-pri{padding:15px 32px;border-radius:10px;background:var(--blu);color:#fff;font-size:15px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;letter-spacing:.01em}
+.btn-hero-pri:hover{background:var(--blu2);transform:translateY(-2px);box-shadow:0 18px 52px rgba(0,119,182,.35)}
+.btn-hero-sec{padding:15px 32px;border-radius:10px;background:transparent;color:var(--txt2);font-size:15px;font-weight:300;text-decoration:none;display:inline-flex;align-items:center;gap:9px;border:.5px solid var(--bd2);cursor:pointer;transition:all .2s}
+.btn-hero-sec:hover{border-color:var(--blu-bd);color:var(--blu)}
+.hero-trust{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--txt3)}
+.ts{opacity:.3}
+
+/* APP WINDOW */
+.awrap{padding:0 52px 110px;position:relative;z-index:2}
+.awin{max-width:1100px;margin:0 auto;border-radius:14px;overflow:hidden;border:.5px solid rgba(0,119,182,.16);box-shadow:0 70px 180px rgba(0,0,0,.85),0 0 0 .5px var(--bd),inset 0 1px 0 rgba(255,255,255,.03);position:relative}
+.awin::before{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,119,182,.55),transparent)}
+.atbar{height:36px;background:var(--bg2);display:flex;align-items:center;padding:0 14px;gap:6px;border-bottom:.5px solid var(--bd)}
+.traf{width:10px;height:10px;border-radius:50%}
+.atbar-txt{flex:1;text-align:center;font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace}
+.ashell{display:grid;grid-template-columns:174px 1fr;height:460px;background:var(--bg)}
+.asb{background:var(--bg2);border-right:.5px solid var(--bd);padding:10px 7px;overflow:hidden}
+.asblogo{display:flex;align-items:center;gap:7px;padding:4px 6px 11px;border-bottom:.5px solid var(--bd);margin-bottom:8px}
+.asbl-fmark{display:flex;flex-direction:column;gap:2px}
+.asbl-fmark div{background:var(--blu);border-radius:1.5px}
+.asblname{font-size:11px;font-weight:600;color:var(--txt)}
+.anlbl{font-size:8px;color:var(--txt3);text-transform:uppercase;letter-spacing:.12em;padding:7px 6px 2px;font-weight:600}
+.ani{padding:5px 6px;border-radius:5px;font-size:11px;color:var(--txt2);display:flex;align-items:center;gap:5px;margin-bottom:1px}
+.ani.on{background:var(--blu-bg);color:var(--blu);font-weight:500}
+.anidot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.amain{padding:16px 18px;overflow:hidden}
+
+/* MARQUEE */
+.mwrap{padding:44px 0;border-top:.5px solid var(--bd);border-bottom:.5px solid var(--bd);overflow:hidden;position:relative}
+.mwrap::before,.mwrap::after{content:'';position:absolute;top:0;bottom:0;width:130px;z-index:2}
+.mwrap::before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
+.mwrap::after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
+.mtrack{display:flex;animation:marq 32s linear infinite;width:max-content}
+.mitem{padding:0 44px;font-size:13px;color:var(--txt3);display:flex;align-items:center;gap:14px;white-space:nowrap}
+.mitem b{color:var(--txt2);font-weight:500}
+.mdot{width:4px;height:4px;border-radius:50%;background:var(--blu);opacity:.5}
+@keyframes marq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION HEADERS */
+.seye{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;display:block}
+.stitle{font-size:54px;font-weight:200;letter-spacing:-.03em;line-height:1.06;margin-bottom:16px}
+.stitle b{font-weight:500;color:var(--blu)}
+.ssub{font-size:16px;color:var(--txt2);font-weight:300;line-height:1.65;max-width:460px;margin:0 auto}
+
+/* PLATFORM PILLARS */
+.pillars{padding:100px 52px}
+.pillar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);border:.5px solid var(--bd);border-radius:20px;overflow:hidden;margin-top:64px}
+.pillar{background:var(--bg2);padding:40px 36px;position:relative;overflow:hidden;transition:background .25s}
+.pillar:hover{background:var(--bg3)}
+.pillar-num{font-size:64px;font-weight:200;color:var(--blu);opacity:.1;line-height:1;margin-bottom:18px;font-family:'DM Mono',monospace;transition:opacity .3s}
+.pillar:hover .pillar-num{opacity:.22}
+.pillar-title{font-size:18px;font-weight:500;color:var(--txt);margin-bottom:10px;letter-spacing:-.01em}
+.pillar-desc{font-size:14px;color:var(--txt2);line-height:1.68}
+
+/* MODULES */
+.modules{padding:0 52px 100px}
+.mod-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:56px}
+.mod-card{background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;padding:20px 20px 18px;transition:all .2s;cursor:default}
+.mod-card:hover{border-color:var(--blu-bd);background:var(--bg3)}
+.mod-icon{font-size:20px;margin-bottom:12px}
+.mod-name{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:5px;letter-spacing:-.01em}
+.mod-desc{font-size:11px;color:var(--txt3);line-height:1.6}
+.mod-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;font-size:9px;font-weight:600;margin-top:9px;text-transform:uppercase;letter-spacing:.04em}
+.tag-core{background:var(--blu-bg);color:var(--blu);border:.5px solid var(--blu-bd)}
+.tag-comp{background:rgba(167,139,250,.1);color:var(--pur);border:.5px solid rgba(167,139,250,.2)}
+.tag-owner{background:rgba(96,165,250,.1);color:#60A5FA;border:.5px solid rgba(96,165,250,.2)}
+
+/* FEATURES */
+.feat-section{padding:100px 52px}
+.feat-block{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;max-width:1040px;margin:0 auto 110px}
+.feat-block:last-child{margin-bottom:0}
+.feat-block.flip{direction:rtl}
+.feat-block.flip > *{direction:ltr}
+.feat-label{font-size:10px;font-weight:600;color:var(--blu);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.feat-title{font-size:38px;font-weight:200;letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.feat-title b{font-weight:500;color:var(--txt)}
+.feat-body{font-size:15px;color:var(--txt2);line-height:1.72;margin-bottom:24px}
+.feat-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.feat-list li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--txt2);line-height:1.5}
+.feat-list li::before{content:'';width:16px;height:16px;border-radius:50%;background:var(--blu-bg);border:.5px solid var(--blu-bd);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.feat-ck{width:16px;height:16px;border-radius:50%;background:var(--blu-bg);border:.5px solid var(--blu-bd);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--blu)}
+.feat-screen{background:var(--bg2);border:.5px solid var(--bd);border-radius:14px;overflow:hidden;box-shadow:0 40px 100px rgba(0,0,0,.6)}
+
+/* SCREENSHOTS TABS */
+.shots{padding:0 52px 100px}
+.shots-tabs{display:flex;gap:4px;margin-top:52px;margin-bottom:0;border-bottom:.5px solid var(--bd);padding-bottom:0}
+.stab{padding:10px 18px;font-size:13px;color:var(--txt3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;background:transparent;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif}
+.stab:hover{color:var(--txt2)}
+.stab.on{color:var(--blu);border-bottom-color:var(--blu)}
+.shot-panels{position:relative;min-height:360px}
+.shot-panel{display:none;padding:24px 0 0}
+.shot-panel.on{display:block}
+.shot-win{background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+
+/* WHO */
+.who{padding:100px 52px;text-align:center}
+.who-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:60px;text-align:left}
+.who-card{background:var(--bg2);border:.5px solid var(--bd);border-radius:14px;padding:28px 26px;transition:border-color .2s}
+.who-card:hover{border-color:var(--blu-bd)}
+.who-icon{font-size:24px;margin-bottom:14px}
+.who-role{font-size:14px;font-weight:500;color:var(--txt);margin-bottom:8px}
+.who-desc{font-size:13px;color:var(--txt2);line-height:1.65}
+
+/* WHY DIFFERENT */
+.why{padding:100px 52px;position:relative;overflow:hidden}
+.why::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 40% at 50% 50%,rgba(0,119,182,.07),transparent);pointer-events:none}
+.why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);border:.5px solid var(--bd);border-radius:16px;overflow:hidden;margin-top:60px}
+.why-item{background:var(--bg2);padding:32px 28px;transition:background .2s}
+.why-item:hover{background:var(--bg3)}
+.why-dot{width:28px;height:28px;border-radius:8px;background:var(--blu-bg);border:.5px solid var(--blu-bd);display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:16px}
+.why-title{font-size:14px;font-weight:500;color:var(--txt);margin-bottom:8px}
+.why-body{font-size:13px;color:var(--txt2);line-height:1.65}
+
+/* PRICING */
+.psec{padding:100px 52px;text-align:center}
+.pinner{max-width:960px;margin:0 auto}
+.pcards{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:12px;margin-top:56px;text-align:left}
+.pcard{background:var(--bg2);border:.5px solid var(--bd);border-radius:18px;padding:36px;position:relative;overflow:hidden;transition:transform .25s}
+.pcard:hover{transform:translateY(-3px)}
+.pcard.hot{border-color:var(--blu-bd)}
+.pcard.hot::after{content:'';position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,var(--blu),transparent)}
+.ptag{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:20px;font-size:10px;font-weight:600;margin-bottom:20px;letter-spacing:.04em;text-transform:uppercase}
+.tag-core-p{background:var(--blu-bg);color:var(--blu);border:.5px solid var(--blu-bd)}
+.tag-pro-p{background:rgba(0,180,216,.1);color:var(--blu3);border:.5px solid rgba(0,180,216,.25)}
+.tag-ent-p{background:rgba(167,139,250,.08);color:var(--pur);border:.5px solid rgba(167,139,250,.2)}
+.pname{font-size:17px;font-weight:500;letter-spacing:-.01em;margin-bottom:5px}
+.pprice{font-size:52px;font-weight:200;letter-spacing:-.04em;line-height:1;margin-bottom:4px}
+.pprice sup{font-size:20px;vertical-align:top;margin-top:12px;font-weight:400;color:var(--txt2)}
+.pprice span{font-size:14px;color:var(--txt3);font-weight:300}
+.pper{font-size:11px;color:var(--txt3);margin-bottom:26px}
+.plist{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:28px}
+.plist li{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--txt2);line-height:1.5}
+.pck{width:16px;height:16px;border-radius:50%;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:8px}
+.pck-b{background:var(--blu-bg);color:var(--blu)}
+.pck-p{background:rgba(0,180,216,.1);color:var(--blu3)}
+.pck-e{background:rgba(167,139,250,.1);color:var(--pur)}
+.pbtn{display:block;width:100%;padding:12px;border-radius:10px;font-size:13px;font-weight:600;text-align:center;text-decoration:none;transition:all .2s;font-family:'DM Sans',sans-serif;cursor:pointer;border:none;letter-spacing:.01em}
+.pb-blu{background:var(--blu);color:#fff}
+.pb-blu:hover{background:var(--blu2);box-shadow:0 8px 32px rgba(0,119,182,.35);transform:translateY(-1px)}
+.pb-gh{background:transparent;border:.5px solid var(--bd2);color:var(--txt2)}
+.pb-gh:hover{border-color:var(--blu-bd);color:var(--blu)}
+
+/* CTA */
+.ctasec{padding:120px 52px;text-align:center;position:relative;overflow:hidden}
+.ctasec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 45% at 50% 50%,rgba(0,119,182,.09),transparent)}
+.ctasec h2{font-size:64px;font-weight:200;letter-spacing:-.04em;line-height:1.05;margin-bottom:18px}
+.ctasec h2 b{font-weight:500;color:var(--blu)}
+.ctasec p{font-size:17px;color:var(--txt2);max-width:400px;margin:0 auto 40px;font-weight:300;line-height:1.65}
+.cta-btns{display:flex;align-items:center;justify-content:center;gap:12px}
+
+/* FOOTER */
+footer{padding:48px 52px 36px;border-top:.5px solid var(--bd)}
+.footer-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:48px;margin-bottom:40px}
+.footer-brand p{font-size:13px;color:var(--txt3);line-height:1.7;margin-top:14px;max-width:240px}
+.footer-col h4{font-size:10px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.footer-col a{display:block;font-size:13px;color:var(--txt3);text-decoration:none;margin-bottom:8px;transition:color .15s}
+.footer-col a:hover{color:var(--txt2)}
+.footer-btm{display:flex;align-items:center;justify-content:space-between;border-top:.5px solid var(--bd);padding-top:20px}
+.fcopy{font-size:12px;color:var(--txt3)}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:500;display:none;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.mbg.open{display:flex}
+.mbox{background:var(--bg2);border:.5px solid var(--bd2);border-radius:18px;padding:44px;width:480px;max-width:92vw;position:relative}
+.mbox::before{content:'';position:absolute;top:0;left:15%;right:15%;height:1px;background:linear-gradient(90deg,transparent,var(--blu-bd),transparent)}
+.mcls{position:absolute;top:16px;right:16px;background:var(--bg3);border:none;color:var(--txt3);font-size:15px;cursor:pointer;width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Sans',sans-serif}
+.mcls:hover{color:var(--txt);background:var(--bg4)}
+.mtitle{font-size:22px;font-weight:500;letter-spacing:-.01em;margin-bottom:6px}
+.msub{font-size:14px;color:var(--txt2);margin-bottom:28px;line-height:1.55}
+.flbl{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:block}
+.finp{width:100%;background:var(--bg3);border:.5px solid var(--bd2);border-radius:8px;padding:10px 13px;font-size:14px;color:var(--txt);outline:none;font-family:'DM Sans',sans-serif;transition:border-color .15s;margin-bottom:14px}
+.finp:focus{border-color:var(--blu-bd)}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.frow .finp{margin-bottom:0}
+
+/* PILLS */
+.ap{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:8px;font-weight:600;white-space:nowrap}
+.ph{background:rgba(248,113,113,.14);color:var(--red)}
+.pm{background:rgba(251,146,60,.12);color:var(--or)}
+.pl{background:rgba(74,222,128,.1);color:var(--grn)}
+.popen{background:rgba(255,255,255,.06);color:var(--txt2)}
+.pprog{background:rgba(0,119,182,.15);color:var(--blu3)}
+.pdone{background:rgba(74,222,128,.1);color:var(--grn)}
+.phold{background:rgba(250,204,21,.1);color:var(--yel)}
+
+/* REVEAL */
+.rev{opacity:0;transform:translateY(26px);transition:opacity .7s cubic-bezier(.4,0,.2,1),transform .7s cubic-bezier(.4,0,.2,1)}
+.rev.in{opacity:1;transform:translateY(0)}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  nav{padding:0 20px}
+  .nav-links{display:none}
+  .nav-cta .btn-ghost{display:none}
+  .ham{display:flex;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border:none;background:transparent}
+  .ham span{width:22px;height:1.5px;background:var(--txt2);border-radius:2px;transition:all .25s;display:block}
+  .ham.open span:nth-child(1){transform:rotate(45deg) translate(4.5px,4.5px)}
+  .ham.open span:nth-child(2){opacity:0;transform:translateX(-8px)}
+  .ham.open span:nth-child(3){transform:rotate(-45deg) translate(4.5px,-4.5px)}
+  .mob-menu{position:fixed;top:64px;left:0;right:0;background:var(--bg2);border-bottom:.5px solid var(--bd2);z-index:99;padding:16px 20px;display:flex;flex-direction:column;gap:4px;transform:translateY(-110%);transition:transform .3s cubic-bezier(.4,0,.2,1);backdrop-filter:blur(20px)}
+  .mob-menu.open{transform:translateY(0)}
+  .mob-menu a{font-size:15px;color:var(--txt2);text-decoration:none;padding:11px 0;border-bottom:.5px solid var(--bd);display:block}
+  .mob-menu a:last-child{border-bottom:none}
+  .mob-menu .btn-pri{margin-top:8px;display:block;text-align:center;padding:12px;border-radius:9px;font-size:15px}
+  .hero{padding:100px 22px 56px;min-height:auto}
+  h1{font-size:44px;letter-spacing:-.03em;margin-bottom:18px}
+  .hero-sub{font-size:16px;margin-bottom:34px}
+  .hero-btns{flex-direction:column;gap:10px;margin-bottom:36px}
+  .btn-hero-pri,.btn-hero-sec{width:100%;justify-content:center;padding:14px 20px}
+  .hero-trust{flex-wrap:wrap;justify-content:center;gap:6px}
+  .ts{display:none}
+  .awrap{padding:0 16px 70px}
+  .ashell{grid-template-columns:1fr;height:auto}
+  .asb{display:none}
+  .amain{padding:14px 16px}
+  .mwrap{padding:28px 0}
+  .pillars{padding:60px 20px}
+  .stitle{font-size:36px}
+  .ssub{font-size:15px}
+  .pillar-grid{grid-template-columns:1fr;border-radius:14px}
+  .pillar{padding:28px 24px}
+  .pillar-num{font-size:48px}
+  .modules{padding:0 20px 70px}
+  .mod-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .feat-section{padding:60px 20px}
+  .feat-block{grid-template-columns:1fr;gap:40px;margin-bottom:70px}
+  .feat-block.flip{direction:ltr}
+  .feat-title{font-size:30px}
+  .shots{padding:0 20px 70px}
+  .shots-tabs{overflow-x:auto;flex-wrap:nowrap;padding-bottom:0;scrollbar-width:none}
+  .shots-tabs::-webkit-scrollbar{display:none}
+  .who{padding:60px 20px}
+  .who-grid{grid-template-columns:1fr;gap:10px}
+  .why{padding:60px 20px}
+  .why-grid{grid-template-columns:1fr;border-radius:12px}
+  .why-item{padding:26px 22px}
+  .psec{padding:60px 20px}
+  .pcards{grid-template-columns:1fr;gap:10px}
+  .pcard{padding:28px 22px}
+  .pprice{font-size:44px}
+  .ctasec{padding:70px 20px}
+  .ctasec h2{font-size:38px}
+  .ctasec p{font-size:15px}
+  .cta-btns{flex-direction:column;gap:10px}
+  .cta-btns .btn-hero-pri,.cta-btns .btn-ghost{width:100%;justify-content:center}
+  footer{padding:36px 20px 28px}
+  .footer-top{grid-template-columns:1fr 1fr;gap:28px}
+  .footer-brand{grid-column:span 2}
+  .footer-btm{flex-direction:column;gap:12px;text-align:center}
+  .mbox{padding:28px 22px}
+  .frow{grid-template-columns:1fr}
+}
+@media(min-width:769px){.ham,.mob-menu{display:none !important}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nlogo">
+    <div class="fmark">
+      <div class="fmark-r" style="width:26px"></div>
+      <div class="fmark-r" style="width:19px;opacity:.72"></div>
+      <div class="fmark-r" style="width:12px;opacity:.45"></div>
+    </div>
+    <span class="ln">Frame <span>Marine</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="#platform">Platform</a>
+    <a href="#features">Features</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#who">Who it's for</a>
+  </div>
+  <div class="nav-cta">
+    <a href="app.html" class="btn-ghost">Sign in</a>
+    <button class="btn-pri" onclick="openM()">Request a demo</button>
+    <button class="ham" id="ham" onclick="toggleMenu()" aria-label="Menu"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mob-menu" id="mob-menu">
+  <a href="#platform" onclick="closeMenu()">Platform</a>
+  <a href="#features" onclick="closeMenu()">Features</a>
+  <a href="#pricing" onclick="closeMenu()">Pricing</a>
+  <a href="#who" onclick="closeMenu()">Who it's for</a>
+  <button class="btn-pri" onclick="closeMenu();openM()">Request a demo</button>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-orb"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-con">
+    <div class="eyebrow rev"><span class="ep"></span>Now in early access · Superyacht operations</div>
+    <h1 class="rev d1">Run a<br><em>tighter ship.</em></h1>
+    <p class="hero-sub rev d2">The operations platform built for captains and yacht management companies — from the 0600 brief to the owner report.</p>
+    <div class="hero-btns rev d3">
+      <button class="btn-hero-pri" onclick="openM()">Request a demo <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+      <a href="#platform" class="btn-hero-sec">See the platform</a>
+    </div>
+    <div class="hero-trust rev d4">
+      <span>✓ No long contracts</span><span class="ts">·</span>
+      <span>✓ 30-day pilot</span><span class="ts">·</span>
+      <span>✓ White-glove onboarding</span>
+    </div>
+  </div>
+</section>
+
+<!-- APP WINDOW — Captain's Brief -->
+<div class="awrap rev">
+  <div class="awin">
+    <div class="atbar">
+      <div class="traf" style="background:#F87171"></div>
+      <div class="traf" style="background:#FACC15"></div>
+      <div class="traf" style="background:#4ADE80"></div>
+      <div class="atbar-txt">frame.marine — Captain's Brief · Wednesday 6 May 2026</div>
+    </div>
+    <div class="ashell">
+      <div class="asb">
+        <div class="asblogo">
+          <div class="asbl-fmark">
+            <div style="width:18px;height:3px;background:var(--blu);border-radius:1px"></div>
+            <div style="width:13px;height:3px;background:var(--blu);border-radius:1px;opacity:.7"></div>
+            <div style="width:8px;height:3px;background:var(--blu);border-radius:1px;opacity:.44"></div>
+          </div>
+          <span class="asblname">M/Y Aurelia</span>
+        </div>
+        <div class="anlbl">Operations</div>
+        <div class="ani on"><div class="anidot" style="background:var(--blu)"></div>Captain's Brief</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Work Orders</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Maintenance</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Logbook</div>
+        <div class="anlbl" style="margin-top:6px">Charter</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Charters</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Calendar</div>
+        <div class="anlbl" style="margin-top:6px">Compliance</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Certificates</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Crew &amp; STCW</div>
+        <div class="anlbl" style="margin-top:6px">Owner Suite</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Budget</div>
+        <div class="ani"><div class="anidot" style="background:var(--txt3)"></div>Owner Report</div>
+      </div>
+      <div class="amain" style="overflow:hidden">
+        <!-- Brief header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:14px;font-weight:500;color:var(--txt)">Wednesday 6 May 2026</div>
+            <div style="font-size:10px;color:var(--txt3);margin-top:1px">Palma de Mallorca · Moored · 8 crew onboard</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <span style="font-size:9px;background:rgba(74,222,128,.1);color:var(--grn);border:.5px solid rgba(74,222,128,.2);padding:3px 9px;border-radius:10px;font-weight:600">Engines OK</span>
+            <span style="font-size:9px;background:rgba(248,113,113,.14);color:var(--red);border:.5px solid rgba(248,113,113,.25);padding:3px 9px;border-radius:10px;font-weight:600">2 Alerts</span>
+          </div>
+        </div>
+        <!-- 2-col grid -->
+        <div style="display:grid;grid-template-columns:1fr 220px;gap:12px;height:370px;overflow:hidden">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <!-- Alerts -->
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:9px;padding:10px 13px">
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:8px">Alerts requiring action</div>
+              <div style="background:rgba(248,113,113,.07);border:.5px solid rgba(248,113,113,.22);border-radius:7px;padding:8px 10px;display:flex;gap:9px;align-items:flex-start;margin-bottom:5px">
+                <div style="width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:3px"></div>
+                <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt);margin-bottom:1px">Port engine oil pressure low</div><div style="font-size:9px;color:var(--txt3)">MAN V8-1200 · Sensor alert · 06:14</div></div>
+                <span class="ap ph">High</span>
+              </div>
+              <div style="background:rgba(251,146,60,.07);border:.5px solid rgba(251,146,60,.22);border-radius:7px;padding:8px 10px;display:flex;gap:9px;align-items:flex-start">
+                <div style="width:6px;height:6px;border-radius:50%;background:var(--or);flex-shrink:0;margin-top:3px"></div>
+                <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt);margin-bottom:1px">SSC certificate expires in 8 days</div><div style="font-size:9px;color:var(--txt3)">Safety Stability Certificate · Renewal due</div></div>
+                <span class="ap pm">Urgent</span>
+              </div>
+            </div>
+            <!-- Today's schedule -->
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:9px;padding:10px 13px;flex:1">
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:8px">Today</div>
+              <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:.5px solid var(--bd)">
+                <div style="font-size:9px;color:var(--txt3);font-family:'DM Mono',monospace;width:36px;flex-shrink:0">09:00</div>
+                <div style="flex:1"><div style="font-size:10px;color:var(--txt)">Engineer inspection — port engine</div></div>
+                <span style="font-size:8px;background:rgba(0,119,182,.12);color:var(--blu3);padding:2px 6px;border-radius:6px;font-weight:600">WO #14</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:.5px solid var(--bd)">
+                <div style="font-size:9px;color:var(--txt3);font-family:'DM Mono',monospace;width:36px;flex-shrink:0">14:00</div>
+                <div style="flex:1"><div style="font-size:10px;color:var(--txt)">Charter guest arrival — Rossi family (7 pax)</div></div>
+                <span style="font-size:8px;background:rgba(74,222,128,.1);color:var(--grn);padding:2px 6px;border-radius:6px;font-weight:600">Charter</span>
+              </div>
+              <div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0">
+                <div style="font-size:9px;color:var(--txt3);font-family:'DM Mono',monospace;width:36px;flex-shrink:0">17:00</div>
+                <div style="flex:1"><div style="font-size:10px;color:var(--txt)">Depart for Porto Cristo — ETA 20:30</div></div>
+                <span style="font-size:8px;background:rgba(167,139,250,.1);color:var(--pur);padding:2px 6px;border-radius:6px;font-weight:600">Nav</span>
+              </div>
+            </div>
+          </div>
+          <!-- Right column: health tiles + crew -->
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+              <div style="background:var(--bg3);border:.5px solid rgba(248,113,113,.25);border-radius:8px;padding:10px">
+                <div style="font-size:8px;color:var(--txt3);margin-bottom:4px">Engines</div>
+                <div style="font-size:12px;font-weight:600;color:var(--red)">⚠ 1 warn</div>
+              </div>
+              <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px">
+                <div style="font-size:8px;color:var(--txt3);margin-bottom:4px">Crew</div>
+                <div style="font-size:12px;font-weight:600;color:var(--grn)">8 / 8</div>
+              </div>
+              <div style="background:var(--bg3);border:.5px solid rgba(251,146,60,.25);border-radius:8px;padding:10px">
+                <div style="font-size:8px;color:var(--txt3);margin-bottom:4px">Certificates</div>
+                <div style="font-size:12px;font-weight:600;color:var(--or)">1 expiring</div>
+              </div>
+              <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px">
+                <div style="font-size:8px;color:var(--txt3);margin-bottom:4px">Work Orders</div>
+                <div style="font-size:12px;font-weight:600;color:var(--txt)">4 open</div>
+              </div>
+            </div>
+            <!-- Crew -->
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px;flex:1">
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:8px">Onboard crew</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:#0077b6;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#fff">JM</div><div style="flex:1"><div style="font-size:9px;font-weight:500;color:var(--txt)">Capt. James Morris</div><div style="font-size:8px;color:var(--txt3)">Master</div></div><div style="width:5px;height:5px;border-radius:50%;background:var(--grn)"></div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:#4ADE80;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#080808">SL</div><div style="flex:1"><div style="font-size:9px;font-weight:500;color:var(--txt)">Sophie Laurent</div><div style="font-size:8px;color:var(--txt3)">Chief Stew</div></div><div style="width:5px;height:5px;border-radius:50%;background:var(--grn)"></div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:#A78BFA;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#080808">DR</div><div style="flex:1"><div style="font-size:9px;font-weight:500;color:var(--txt)">Diego Ramos</div><div style="font-size:8px;color:var(--txt3)">Chief Engineer</div></div><div style="width:5px;height:5px;border-radius:50%;background:var(--grn)"></div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="width:20px;height:20px;border-radius:50%;background:#FACC15;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:700;color:#080808">AM</div><div style="flex:1"><div style="font-size:9px;font-weight:500;color:var(--txt)">Anna Mitchell</div><div style="font-size:8px;color:var(--txt3)">1st Officer</div></div><div style="width:5px;height:5px;border-radius:50%;background:var(--grn)"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="mwrap">
+  <div class="mtrack">
+    <div class="mitem"><span class="mdot"></span><b>Captain's Brief</b>0600 morning intelligence</div>
+    <div class="mitem"><span class="mdot"></span><b>Work Orders</b>Create, assign &amp; track</div>
+    <div class="mitem"><span class="mdot"></span><b>Planned Maintenance</b>PMS schedules &amp; intervals</div>
+    <div class="mitem"><span class="mdot"></span><b>Digital Logbook</b>Official deck &amp; engine logs</div>
+    <div class="mitem"><span class="mdot"></span><b>Charter Management</b>Contracts, costs &amp; P&amp;L</div>
+    <div class="mitem"><span class="mdot"></span><b>Crew &amp; STCW</b>Hours of rest &amp; compliance</div>
+    <div class="mitem"><span class="mdot"></span><b>Certificates</b>Vessel &amp; crew document tracking</div>
+    <div class="mitem"><span class="mdot"></span><b>Real-time Monitoring</b>Engines, bilge, climate &amp; power</div>
+    <div class="mitem"><span class="mdot"></span><b>Budget &amp; OPEX</b>Spend against budget, YTD</div>
+    <div class="mitem"><span class="mdot"></span><b>Owner Reporting</b>One-tap PDF reports</div>
+    <div class="mitem"><span class="mdot"></span><b>Captain's Brief</b>0600 morning intelligence</div>
+    <div class="mitem"><span class="mdot"></span><b>Work Orders</b>Create, assign &amp; track</div>
+    <div class="mitem"><span class="mdot"></span><b>Planned Maintenance</b>PMS schedules &amp; intervals</div>
+    <div class="mitem"><span class="mdot"></span><b>Digital Logbook</b>Official deck &amp; engine logs</div>
+    <div class="mitem"><span class="mdot"></span><b>Charter Management</b>Contracts, costs &amp; P&amp;L</div>
+    <div class="mitem"><span class="mdot"></span><b>Crew &amp; STCW</b>Hours of rest &amp; compliance</div>
+    <div class="mitem"><span class="mdot"></span><b>Certificates</b>Vessel &amp; crew document tracking</div>
+    <div class="mitem"><span class="mdot"></span><b>Real-time Monitoring</b>Engines, bilge, climate &amp; power</div>
+    <div class="mitem"><span class="mdot"></span><b>Budget &amp; OPEX</b>Spend against budget, YTD</div>
+    <div class="mitem"><span class="mdot"></span><b>Owner Reporting</b>One-tap PDF reports</div>
+  </div>
+</div>
+
+<!-- PLATFORM PILLARS -->
+<section class="pillars" id="platform">
+  <div style="max-width:1040px;margin:0 auto">
+    <div style="text-align:center" class="rev">
+      <span class="seye">The complete platform</span>
+      <div class="stitle">Captain-first.<br><b>Compliance built in.</b><br>Bridge to boardroom.</div>
+      <p class="ssub" style="margin-top:16px">Frame Marine connects deck operations, engineering, compliance, charter, and owner reporting in a single system designed for how yachts actually work.</p>
+    </div>
+    <div class="pillar-grid rev d1">
+      <div class="pillar">
+        <div class="pillar-num">01</div>
+        <div class="pillar-title">Captain-first operations</div>
+        <div class="pillar-desc">Start every day with the Captain's Brief — a single screen that surfaces what's urgent, what's today, and what needs your attention before you leave the wheelhouse. Work orders, monitoring alerts, crew status, and the day's schedule at a glance.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">02</div>
+        <div class="pillar-title">Compliance without the filing cabinet</div>
+        <div class="pillar-desc">Track certificates for vessel and crew, log STCW hours of rest, manage ISM documentation, and run safety drills — all with expiry alerts so nothing sneaks up on you at a port state control inspection.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-num">03</div>
+        <div class="pillar-title">From charter income to owner report</div>
+        <div class="pillar-desc">Log charter income and OPEX together. Compare spend against budget. Generate an owner report with one tap — covering revenue, expenses, technical status, and upcoming work. The kind of transparency that retains owners.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MODULES -->
+<section class="modules">
+  <div style="max-width:1040px;margin:0 auto">
+    <div style="text-align:center" class="rev">
+      <span class="seye">Everything onboard</span>
+      <div class="stitle">Every module your<br>vessel needs. <b>Unified.</b></div>
+    </div>
+    <div class="mod-grid rev d1">
+      <div class="mod-card">
+        <div class="mod-icon">🧭</div>
+        <div class="mod-name">Captain's Brief</div>
+        <div class="mod-desc">Morning intelligence dashboard. Alerts, today's schedule, crew status, and vessel health in one view.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">🔧</div>
+        <div class="mod-name">Work Orders</div>
+        <div class="mod-desc">Create, assign, and track every job onboard. Priority levels, due dates, and full history.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">⚙️</div>
+        <div class="mod-name">Planned Maintenance</div>
+        <div class="mod-desc">Engine hours, calendar intervals, and running hours triggers. Never miss a service.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📖</div>
+        <div class="mod-name">Digital Logbook</div>
+        <div class="mod-desc">Deck and engine logs that meet Flag State requirements. Position, weather, machinery readings.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">⛵</div>
+        <div class="mod-name">Charter Management</div>
+        <div class="mod-desc">Guest contracts, APA tracking, port fees, provisioning, and per-charter P&L.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📡</div>
+        <div class="mod-name">Real-time Monitoring</div>
+        <div class="mod-desc">Engine parameters, bilge levels, shore power, climate — live with instant alerts.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📋</div>
+        <div class="mod-name">Certificates &amp; Compliance</div>
+        <div class="mod-desc">Vessel and crew certificates with expiry tracking. Never walk into a PSC inspection unprepared.</div>
+        <span class="mod-tag tag-comp">Compliance</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">👥</div>
+        <div class="mod-name">Crew &amp; STCW</div>
+        <div class="mod-desc">Hours of rest logging against IMO/STCW rules. Daily records, 7-day compliance, violation alerts.</div>
+        <span class="mod-tag tag-comp">Compliance</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">🛡️</div>
+        <div class="mod-name">Safety &amp; ISM</div>
+        <div class="mod-desc">Drill records, safety inspections, non-conformity reports, and ISM documentation in one place.</div>
+        <span class="mod-tag tag-comp">Compliance</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📦</div>
+        <div class="mod-name">Parts &amp; Inventory</div>
+        <div class="mod-desc">Onboard spares, reorder levels, and parts linked directly to work orders and maintenance jobs.</div>
+        <span class="mod-tag tag-core">Core</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">💰</div>
+        <div class="mod-name">Budget &amp; OPEX</div>
+        <div class="mod-desc">Annual budget by category, actuals pulled from charter costs, variance tracking YTD.</div>
+        <span class="mod-tag tag-owner">Owner Suite</span>
+      </div>
+      <div class="mod-card">
+        <div class="mod-icon">📊</div>
+        <div class="mod-name">Owner Reporting</div>
+        <div class="mod-desc">Revenue, expenses, technical highlights, and upcoming work — one-tap PDF for the ownership group.</div>
+        <span class="mod-tag tag-owner">Owner Suite</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="feat-section" id="features">
+  <div style="max-width:1040px;margin:0 auto">
+
+    <!-- Feature 1 — Captain's Brief -->
+    <div class="feat-block rev">
+      <div>
+        <div class="feat-label">Captain's Brief</div>
+        <div class="feat-title">Everything you need<br><b>before 0700.</b></div>
+        <p class="feat-body">The first thing a captain sees every morning: active alerts, today's schedule, crew onboard, and vessel health. Not a notification list — a decision support tool.</p>
+        <ul class="feat-list">
+          <li><span class="feat-ck">✓</span>Engine and systems alerts ranked by urgency</li>
+          <li><span class="feat-ck">✓</span>Today's charters, arrivals, departures, and maintenance</li>
+          <li><span class="feat-ck">✓</span>Crew status — onboard, ashore, off-sign</li>
+          <li><span class="feat-ck">✓</span>Certificate and STCW violations flagged before they escalate</li>
+        </ul>
+      </div>
+      <div class="feat-screen">
+        <div style="background:var(--bg2);padding:10px 14px;border-bottom:.5px solid var(--bd);font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace">Captain's Brief · Wed 6 May 2026</div>
+        <div style="padding:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+            <div style="background:var(--bg3);border:.5px solid rgba(248,113,113,.3);border-radius:8px;padding:10px 12px"><div style="font-size:8px;color:var(--txt3);margin-bottom:3px">Engines</div><div style="font-size:13px;font-weight:600;color:var(--red)">⚠ Oil pressure</div></div>
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:8px;color:var(--txt3);margin-bottom:3px">Crew onboard</div><div style="font-size:13px;font-weight:600;color:var(--grn)">8 of 8</div></div>
+            <div style="background:var(--bg3);border:.5px solid rgba(251,146,60,.3);border-radius:8px;padding:10px 12px"><div style="font-size:8px;color:var(--txt3);margin-bottom:3px">Certificates</div><div style="font-size:13px;font-weight:600;color:var(--or)">1 expiring soon</div></div>
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px 12px"><div style="font-size:8px;color:var(--txt3);margin-bottom:3px">Open WOs</div><div style="font-size:13px;font-weight:600;color:var(--txt)">4 open · 1 high</div></div>
+          </div>
+          <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px 12px">
+            <div style="font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--txt3);margin-bottom:8px">Today</div>
+            <div style="font-size:10px;color:var(--txt);padding:5px 0;border-bottom:.5px solid var(--bd)"><span style="color:var(--txt3);font-family:'DM Mono',monospace;margin-right:8px">09:00</span>Engine inspection — port side</div>
+            <div style="font-size:10px;color:var(--txt);padding:5px 0;border-bottom:.5px solid var(--bd)"><span style="color:var(--txt3);font-family:'DM Mono',monospace;margin-right:8px">14:00</span>Charter guest arrival — 7 pax</div>
+            <div style="font-size:10px;color:var(--txt);padding:5px 0"><span style="color:var(--txt3);font-family:'DM Mono',monospace;margin-right:8px">17:00</span>Depart for Porto Cristo</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 2 — Compliance -->
+    <div class="feat-block flip rev d1">
+      <div>
+        <div class="feat-label">Compliance Suite</div>
+        <div class="feat-title">PSC-ready,<br><b>always.</b></div>
+        <p class="feat-body">Certificate tracking for the vessel and every crew member. STCW hours of rest logged daily. ISM drill records and safety reports. When an inspector steps aboard, you're ready.</p>
+        <ul class="feat-list">
+          <li><span class="feat-ck">✓</span>Certificate expiry alerts 90, 30, and 7 days out</li>
+          <li><span class="feat-ck">✓</span>IMO/STCW hours of rest — daily log, 7-day compliance</li>
+          <li><span class="feat-ck">✓</span>ISM safety management records and drill history</li>
+          <li><span class="feat-ck">✓</span>Non-conformity reports and corrective actions</li>
+        </ul>
+      </div>
+      <div class="feat-screen">
+        <div style="background:var(--bg2);padding:10px 14px;border-bottom:.5px solid var(--bd);font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace">Certificates · M/Y Aurelia</div>
+        <div style="padding:14px">
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <div style="background:var(--bg3);border:.5px solid rgba(74,222,128,.2);border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px">
+              <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt)">Safety Management Certificate</div><div style="font-size:8px;color:var(--txt3)">Expires 14 Dec 2026</div></div>
+              <span style="font-size:9px;background:rgba(74,222,128,.1);color:var(--grn);padding:2px 8px;border-radius:8px;font-weight:600">✓ Valid</span>
+            </div>
+            <div style="background:var(--bg3);border:.5px solid rgba(74,222,128,.2);border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px">
+              <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt)">MARPOL Annex I Certificate</div><div style="font-size:8px;color:var(--txt3)">Expires 3 Sep 2026</div></div>
+              <span style="font-size:9px;background:rgba(74,222,128,.1);color:var(--grn);padding:2px 8px;border-radius:8px;font-weight:600">✓ Valid</span>
+            </div>
+            <div style="background:var(--bg3);border:.5px solid rgba(251,146,60,.35);border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px">
+              <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt)">Safety Stability Certificate</div><div style="font-size:8px;color:var(--or)">Expires 14 May 2026 — 8 days</div></div>
+              <span style="font-size:9px;background:rgba(251,146,60,.14);color:var(--or);padding:2px 8px;border-radius:8px;font-weight:600">⚠ Renew</span>
+            </div>
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px">
+              <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt)">Radio Station Licence</div><div style="font-size:8px;color:var(--txt3)">Expires 1 Mar 2027</div></div>
+              <span style="font-size:9px;background:rgba(74,222,128,.1);color:var(--grn);padding:2px 8px;border-radius:8px;font-weight:600">✓ Valid</span>
+            </div>
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:7px;padding:8px 12px;display:flex;align-items:center;gap:10px">
+              <div style="flex:1"><div style="font-size:10px;font-weight:500;color:var(--txt)">Load Line Certificate</div><div style="font-size:8px;color:var(--txt3)">Expires 22 Aug 2027</div></div>
+              <span style="font-size:9px;background:rgba(74,222,128,.1);color:var(--grn);padding:2px 8px;border-radius:8px;font-weight:600">✓ Valid</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature 3 — Owner Suite -->
+    <div class="feat-block rev d2">
+      <div>
+        <div class="feat-label">Owner Suite</div>
+        <div class="feat-title">The report that<br><b>retains owners.</b></div>
+        <p class="feat-body">Every owner wants to know the same three things: what did the boat cost this month, is it in good shape, and what's coming up. Frame Marine answers all three in a one-tap report that looks like it came from a top-tier management company.</p>
+        <ul class="feat-list">
+          <li><span class="feat-ck">✓</span>Charter income vs. OPEX, per month and YTD</li>
+          <li><span class="feat-ck">✓</span>Budget vs. actual spend by category</li>
+          <li><span class="feat-ck">✓</span>Technical highlights and open work orders</li>
+          <li><span class="feat-ck">✓</span>Upcoming charter schedule and maintenance</li>
+        </ul>
+      </div>
+      <div class="feat-screen">
+        <div style="background:var(--bg2);padding:10px 14px;border-bottom:.5px solid var(--bd);font-size:10px;color:var(--txt3);font-family:'DM Mono',monospace">Budget · YTD 2026</div>
+        <div style="padding:14px">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px">
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px 10px"><div style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:3px">Budgeted</div><div style="font-size:15px;font-weight:400;color:var(--txt)">$412k</div></div>
+            <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;padding:10px 10px"><div style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:3px">Spent YTD</div><div style="font-size:15px;font-weight:400;color:var(--txt)">$188k</div></div>
+            <div style="background:var(--bg3);border:.5px solid rgba(74,222,128,.2);border-radius:8px;padding:10px 10px"><div style="font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:3px">Under budget</div><div style="font-size:15px;font-weight:400;color:var(--grn)">$224k</div></div>
+          </div>
+          <div style="background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;overflow:hidden">
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:6px 10px;border-bottom:.5px solid var(--bd);background:var(--bg4)">
+              <div style="font-size:8px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Category</div>
+              <div style="font-size:8px;font-weight:700;color:var(--txt3);text-align:right;text-transform:uppercase;letter-spacing:.06em">Budget</div>
+              <div style="font-size:8px;font-weight:700;color:var(--txt3);text-align:right;text-transform:uppercase;letter-spacing:.06em">Actual</div>
+            </div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:7px 10px;border-bottom:.5px solid var(--bd)"><span style="font-size:10px;color:var(--txt2)">Fuel &amp; Lube</span><span style="font-size:10px;color:var(--txt2);text-align:right">$85k</span><span style="font-size:10px;color:var(--grn);text-align:right">$34k</span></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:7px 10px;border-bottom:.5px solid var(--bd)"><span style="font-size:10px;color:var(--txt2)">Provisioning</span><span style="font-size:10px;color:var(--txt2);text-align:right">$60k</span><span style="font-size:10px;color:var(--grn);text-align:right">$28k</span></div>
+            <div style="display:grid;grid-template-columns:2fr 1fr 1fr;padding:7px 10px"><span style="font-size:10px;color:var(--txt2)">Crew Costs</span><span style="font-size:10px;color:var(--txt2);text-align:right">$180k</span><span style="font-size:10px;color:var(--txt);text-align:right">$90k</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section class="who" id="who">
+  <div class="rev">
+    <span class="seye">Built for everyone aboard</span>
+    <div class="stitle">Works for the whole<br><b>vessel organisation.</b></div>
+    <p class="ssub">From the captain on the bridge to the management company ashore — everyone gets the information they need.</p>
+  </div>
+  <div class="who-grid rev d1" style="max-width:960px;margin:56px auto 0">
+    <div class="who-card">
+      <div class="who-icon">🧭</div>
+      <div class="who-role">Captains</div>
+      <div class="who-desc">Your daily brief, your work orders, your crew — all on one screen. Stop starting the day by checking five different apps.</div>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">⚙️</div>
+      <div class="who-role">Chief Engineers</div>
+      <div class="who-desc">PMS schedules, engine hour triggers, parts inventory, and real-time monitoring. Every job tracked from creation to completion.</div>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">🍾</div>
+      <div class="who-role">Chief Stewardesses</div>
+      <div class="who-desc">Charter guest details, provisioning lists, crew hours, and guest preference notes — all connected to the same system the captain uses.</div>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">🏢</div>
+      <div class="who-role">Yacht Managers</div>
+      <div class="who-desc">Manage your entire fleet from one account. Compliance status, OPEX, owner reports, and certificate renewals across every vessel.</div>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">👑</div>
+      <div class="who-role">Owners</div>
+      <div class="who-desc">A clean, honest view of your vessel — income, costs, technical status, and upcoming schedule. No more waiting for a monthly PDF.</div>
+    </div>
+    <div class="who-card">
+      <div class="who-icon">🌐</div>
+      <div class="who-role">Management Companies</div>
+      <div class="who-desc">White-glove reporting for your clients. Fleet-level dashboards for your team. The infrastructure to run more vessels with the same people.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY DIFFERENT -->
+<section class="why">
+  <div style="max-width:1040px;margin:0 auto">
+    <div style="text-align:center" class="rev">
+      <span class="seye">Why Frame Marine</span>
+      <div class="stitle">Not another AMOS<br><b>adaptation.</b></div>
+      <p class="ssub">Legacy yacht management software was built for ship managers, not captains. Frame Marine was built for the way yachts actually work.</p>
+    </div>
+    <div class="why-grid rev d1">
+      <div class="why-item">
+        <div class="why-dot">⚡</div>
+        <div class="why-title">Built for yachts, not bulk carriers</div>
+        <div class="why-body">AMOS and DANAOS were designed for commercial shipping. Frame Marine is purpose-built for the private and charter yacht world — crew sizes, charter operations, owner relationships, and all.</div>
+      </div>
+      <div class="why-item">
+        <div class="why-dot">🎯</div>
+        <div class="why-title">Captain as the first user</div>
+        <div class="why-body">Most yacht software is designed for the office. Frame Marine starts with what the captain needs at 0600 and works outward from there. Every feature earns its place by making life on the boat simpler.</div>
+      </div>
+      <div class="why-item">
+        <div class="why-dot">📱</div>
+        <div class="why-title">Works on any device</div>
+        <div class="why-body">A full platform on desktop, a usable interface on a phone in the engine room. No dedicated hardware, no Windows-only installers, no remote desktop sessions to see your own data.</div>
+      </div>
+      <div class="why-item">
+        <div class="why-dot">⏱</div>
+        <div class="why-title">Set up in a day, not a quarter</div>
+        <div class="why-body">Traditional yacht software implementations take months and cost tens of thousands in consulting fees. Frame Marine onboards in hours with a white-glove setup call and data import included.</div>
+      </div>
+      <div class="why-item">
+        <div class="why-dot">💎</div>
+        <div class="why-title">Pricing that makes sense</div>
+        <div class="why-body">Per-vessel pricing with no per-seat fees means your whole crew can use it. Compliance and owner modules are add-ons you buy when you need them — not bundled into a $40k/year contract.</div>
+      </div>
+      <div class="why-item">
+        <div class="why-dot">🔗</div>
+        <div class="why-title">Everything connected</div>
+        <div class="why-body">Charter costs flow into the budget. Work orders link to the maintenance log. Certificates surface in the Captain's Brief. One system, no double-entry, no data living in three different places.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="psec" id="pricing">
+  <div class="pinner">
+    <div class="rev">
+      <span class="seye">Transparent pricing</span>
+      <div class="stitle">Per vessel.<br><b>No per-seat fees.</b></div>
+      <p class="ssub">Your entire crew gets access. Add compliance and owner modules when you're ready.</p>
+    </div>
+    <div class="pcards rev d1">
+
+      <!-- Core -->
+      <div class="pcard">
+        <div class="ptag tag-core-p">Core</div>
+        <div class="pname">Operations</div>
+        <div class="pprice"><sup>$</sup>199<span>/mo</span></div>
+        <div class="pper">per vessel · unlimited crew · billed monthly</div>
+        <ul class="plist">
+          <li><div class="pck pck-b">✓</div>Captain's Brief dashboard</li>
+          <li><div class="pck pck-b">✓</div>Work orders &amp; planned maintenance</li>
+          <li><div class="pck pck-b">✓</div>Digital logbook (deck &amp; engine)</li>
+          <li><div class="pck pck-b">✓</div>Charter management &amp; APA tracking</li>
+          <li><div class="pck pck-b">✓</div>Real-time monitoring dashboard</li>
+          <li><div class="pck pck-b">✓</div>Parts &amp; inventory</li>
+          <li><div class="pck pck-b">✓</div>Unlimited crew access</li>
+        </ul>
+        <button class="pbtn pb-gh" onclick="openM()">Start a pilot</button>
+      </div>
+
+      <!-- Professional -->
+      <div class="pcard hot">
+        <div class="ptag tag-pro-p">✦ Professional</div>
+        <div class="pname">Full platform</div>
+        <div class="pprice"><sup>$</sup>349<span>/mo</span></div>
+        <div class="pper">per vessel · everything in Core · compliance + owner</div>
+        <ul class="plist">
+          <li><div class="pck pck-p">✓</div>Everything in Core</li>
+          <li><div class="pck pck-p">✓</div>Certificate tracking &amp; expiry alerts</li>
+          <li><div class="pck pck-p">✓</div>STCW hours of rest logging</li>
+          <li><div class="pck pck-p">✓</div>ISM safety records &amp; drills</li>
+          <li><div class="pck pck-p">✓</div>Budget &amp; OPEX tracking</li>
+          <li><div class="pck pck-p">✓</div>Owner reporting suite</li>
+          <li><div class="pck pck-p">✓</div>Priority support</li>
+        </ul>
+        <button class="pbtn pb-blu" onclick="openM()">Request a demo</button>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pcard">
+        <div class="ptag tag-ent-p">Fleet</div>
+        <div class="pname">Management companies</div>
+        <div class="pprice" style="font-size:36px;padding-top:10px;line-height:1.2">Custom</div>
+        <div class="pper">fleet pricing · white-label · dedicated support</div>
+        <ul class="plist">
+          <li><div class="pck pck-e">✓</div>Everything in Professional</li>
+          <li><div class="pck pck-e">✓</div>Fleet-level management dashboard</li>
+          <li><div class="pck pck-e">✓</div>Volume vessel pricing</li>
+          <li><div class="pck pck-e">✓</div>White-label for your brand</li>
+          <li><div class="pck pck-e">✓</div>Dedicated customer success</li>
+          <li><div class="pck pck-e">✓</div>Custom integrations &amp; API</li>
+          <li><div class="pck pck-e">✓</div>SLA &amp; onboarding included</li>
+        </ul>
+        <button class="pbtn pb-gh" onclick="openM()">Get in touch</button>
+      </div>
+
+    </div>
+    <div style="margin-top:24px;font-size:12px;color:var(--txt3);text-align:center">30-day pilot on any plan. No credit card required. White-glove onboarding included.</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="ctasec">
+  <div class="rev">
+    <h2>Ready to run a<br><b>tighter ship?</b></h2>
+    <p>Join captains and management companies who've replaced the spreadsheets and WhatsApp groups.</p>
+    <div class="cta-btns">
+      <button class="btn-hero-pri" onclick="openM()">Request a demo <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+      <a href="app.html" class="btn-ghost">View the app →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top" style="max-width:1040px;margin:0 auto">
+    <div class="footer-brand">
+      <a href="#" class="nlogo" style="text-decoration:none;display:inline-flex;align-items:center;gap:10px;margin-bottom:4px">
+        <div class="fmark">
+          <div class="fmark-r" style="width:22px"></div>
+          <div class="fmark-r" style="width:16px;opacity:.72"></div>
+          <div class="fmark-r" style="width:10px;opacity:.45"></div>
+        </div>
+        <span class="ln" style="font-size:14px">Frame <span>Marine</span></span>
+      </a>
+      <p>The operations platform built for captains and yacht management companies. From the morning brief to the owner report.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#platform">Platform overview</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="app.html">Sign in</a>
+    </div>
+    <div class="footer-col">
+      <h4>Modules</h4>
+      <a href="#platform">Captain's Brief</a>
+      <a href="#platform">Work Orders &amp; PMS</a>
+      <a href="#platform">Compliance Suite</a>
+      <a href="#platform">Owner Suite</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#" onclick="openM();return false">Request a demo</a>
+      <a href="#" onclick="openM();return false">Contact</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-btm" style="max-width:1040px;margin:0 auto">
+    <div class="fcopy">© 2026 Frame Marine. All rights reserved.</div>
+    <div class="fcopy">Built for the sea.</div>
+  </div>
+</footer>
+
+<!-- DEMO MODAL -->
+<div class="mbg" id="modal" onclick="if(event.target===this)closeM()">
+  <div class="mbox">
+    <button class="mcls" onclick="closeM()">×</button>
+    <div class="mtitle">Request a demo</div>
+    <div class="msub">Tell us about your vessel and operation. We'll reach out within one business day to arrange a pilot.</div>
+    <div class="frow">
+      <div><label class="flbl">First name</label><input class="finp" style="margin-bottom:0" placeholder="James"></div>
+      <div><label class="flbl">Last name</label><input class="finp" style="margin-bottom:0" placeholder="Morris"></div>
+    </div>
+    <label class="flbl">Work email</label>
+    <input class="finp" type="email" placeholder="captain@vessel.com">
+    <label class="flbl">Vessel name</label>
+    <input class="finp" placeholder="M/Y Aurelia">
+    <label class="flbl">Your role</label>
+    <select class="finp" style="appearance:none;cursor:pointer">
+      <option>Captain / Master</option>
+      <option>Chief Engineer</option>
+      <option>Chief Stewardess</option>
+      <option>Yacht Manager</option>
+      <option>Management Company</option>
+      <option>Owner</option>
+    </select>
+    <label class="flbl">Fleet size</label>
+    <select class="finp" style="appearance:none;cursor:pointer">
+      <option>1 vessel</option>
+      <option>2–5 vessels</option>
+      <option>6–15 vessels</option>
+      <option>16+ vessels</option>
+    </select>
+    <button class="pbtn pb-blu" id="sbtn" style="margin-top:4px" onclick="submitDemo()">Send request →</button>
+  </div>
+</div>
+
+<script>
+// STICKY NAV
+window.addEventListener('scroll', function(){
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// SCROLL REVEAL
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold:.07});
+document.querySelectorAll('.rev').forEach(function(el){ obs.observe(el); });
+setTimeout(function(){
+  document.querySelectorAll('.hero-con .rev').forEach(function(el,i){
+    setTimeout(function(){ el.classList.add('in'); }, 60 + i * 120);
+  });
+}, 50);
+
+// MOBILE NAV
+function toggleMenu(){
+  document.getElementById('ham').classList.toggle('open');
+  document.getElementById('mob-menu').classList.toggle('open');
+}
+function closeMenu(){
+  document.getElementById('ham').classList.remove('open');
+  document.getElementById('mob-menu').classList.remove('open');
+}
+document.addEventListener('click', function(e){
+  var h = document.getElementById('ham'), m = document.getElementById('mob-menu');
+  if(m && m.classList.contains('open') && !m.contains(e.target) && !h.contains(e.target)) closeMenu();
+});
+
+// MODAL
+function openM(){ document.getElementById('modal').classList.add('open'); document.body.style.overflow='hidden'; }
+function closeM(){ document.getElementById('modal').classList.remove('open'); document.body.style.overflow=''; }
+function submitDemo(){
+  var btn = document.getElementById('sbtn');
+  btn.textContent = 'Request sent ✓';
+  btn.style.background = '#4ADE80';
+  btn.style.color = '#080808';
+  setTimeout(function(){
+    closeM();
+    setTimeout(function(){ btn.textContent = 'Send request →'; btn.style.background = ''; btn.style.color = ''; }, 400);
+  }, 1600);
+}
+
+// MARQUEE pause on hover
+var mt = document.querySelector('.mtrack');
+if(mt){
+  mt.parentElement.addEventListener('mouseenter', function(){ mt.style.animationPlayState = 'paused'; });
+  mt.parentElement.addEventListener('mouseleave', function(){ mt.style.animationPlayState = 'running'; });
+}
+
+// SMOOTH ANCHOR SCROLL with nav offset
+document.querySelectorAll('a[href^="#"]').forEach(function(a){
+  a.addEventListener('click', function(e){
+    var id = a.getAttribute('href').slice(1);
+    if(!id) return;
+    var el = document.getElementById(id);
+    if(el){
+      e.preventDefault();
+      var top = el.getBoundingClientRect().top + window.scrollY - 72;
+      window.scrollTo({top: top, behavior: 'smooth'});
+    }
+  });
+});
+</script>
+</body>
+</html>
