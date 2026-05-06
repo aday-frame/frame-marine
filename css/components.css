@@ -899,7 +899,43 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
 .wire-box:hover { border-color: var(--pur); }
 
 /* ── RESPONSIVE — MOBILE ── */
+/* back button hidden on desktop, visible on mobile */
+.mob-back-btn { display: none; }
+
 @media (max-width: 768px) {
+  /* ── SPLIT-PANEL PAGES: sidebar-only by default, drill into detail ── */
+  .cl-layout, .logbook-layout {
+    grid-template-columns: 1fr !important;
+    height: calc(100vh - 108px);
+    overflow: hidden;
+  }
+  .cl-main, .logbook-main { display: none !important; }
+  .cl-layout.mob-detail .cl-sidebar,
+  .logbook-layout.mob-detail .logbook-sidebar { display: none !important; }
+  .cl-layout.mob-detail .cl-main,
+  .logbook-layout.mob-detail .logbook-main {
+    display: flex !important;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  /* back button */
+  .mob-back-btn {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--or);
+    cursor: pointer;
+    padding: 0;
+    font-family: var(--font);
+    flex-shrink: 0;
+  }
+
   /* Dashboard hero stacks vertically */
   #dash-hero-card {
     flex-direction: column !important;
@@ -930,6 +966,9 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
   #fleet-grid {
     grid-template-columns: 1fr !important;
   }
+
+  /* Horizontal scroll for any tbl-scroll container */
+  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   /* Work orders table: horizontal scroll */
   #wo-table-wrap .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }

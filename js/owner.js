@@ -93,7 +93,7 @@ const Owner = (() => {
         </div>
 
         <!-- Two-column: P&L table + Compliance/Fleet -->
-        <div style="display:grid;grid-template-columns:1fr 380px;gap:20px;margin-bottom:28px;align-items:start">
+        <div class="_ownergrid" style="display:grid;grid-template-columns:1fr 380px;gap:20px;margin-bottom:28px;align-items:start">
 
           <!-- Charter P&L -->
           <div>
@@ -212,6 +212,13 @@ const Owner = (() => {
       <span style="font-size:11px;color:var(--txt2)">${label}</span>
       <span style="font-size:12px;font-weight:600;color:${valColor}">${val}</span>
     </div>`;
+  }
+
+  if (!document.getElementById('_owner_css')) {
+    const s = document.createElement('style');
+    s.id = '_owner_css';
+    s.textContent = '@media(max-width:768px){._ownergrid{grid-template-columns:1fr!important}}';
+    document.head.appendChild(s);
   }
 
   return { render };

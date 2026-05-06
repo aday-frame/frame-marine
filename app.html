@@ -950,13 +950,28 @@ window.renderPMS = renderPMS;
 
 /* ── LOGBOOK RENDER ── */
 let _logActive = null;
+function clMobBack() {
+  const layout = document.querySelector('.cl-layout');
+  if (layout) layout.classList.remove('mob-detail');
+}
+function lbMobBack() {
+  const layout = document.querySelector('.logbook-layout');
+  if (layout) layout.classList.remove('mob-detail');
+}
+
 function renderLogbook(id) {
   const sidebar = document.getElementById('logbook-sidebar');
   const main    = document.getElementById('logbook-main');
   if (!sidebar || !main) return;
   const entries = FM.logbook || [];
   if (!_logActive && entries.length) _logActive = entries[0].id;
-  if (id) _logActive = id;
+  if (id) {
+    _logActive = id;
+    if (window.innerWidth <= 768) {
+      const layout = document.querySelector('.logbook-layout');
+      if (layout) layout.classList.add('mob-detail');
+    }
+  }
   sidebar.innerHTML = `
     <div class="logbook-sidebar-hdr">
       <span>Logbook</span>
@@ -973,6 +988,7 @@ function renderLogbook(id) {
   const crew = FM.crew ? FM.crew.find(c => c.id === entry.watch) : null;
   main.innerHTML = `
     <div class="logbook-main-hdr">
+      <button class="mob-back-btn" onclick="lbMobBack()">← Logbook</button>
       <div>
         <div class="logbook-main-date">${entry.date}</div>
         <div class="logbook-main-loc">${entry.location} · ${entry.position}</div>
@@ -2217,7 +2233,13 @@ function renderChecklists(id) {
 
   const lists = FM.checklists || [];
   if (!_clActive && lists.length) _clActive = lists[0].id;
-  if (id) { _clActive = id; _clViewRun = null; }
+  if (id) {
+    _clActive = id; _clViewRun = null;
+    if (window.innerWidth <= 768) {
+      const layout = document.querySelector('.cl-layout');
+      if (layout) layout.classList.add('mob-detail');
+    }
+  }
 
   // Sidebar: active runs + completed archive
   const activeLists = lists.filter(c => Object.keys(_clChecked[c.id] || {}).length > 0);
@@ -2288,6 +2310,7 @@ function renderChecklists(id) {
     }
     main.innerHTML = `
       <div class="logbook-main-hdr" style="align-items:center">
+        <button class="mob-back-btn" onclick="clMobBack()">← Lists</button>
         <div>
           <div class="logbook-main-date">${run.name}</div>
           <div class="logbook-main-loc" style="color:var(--grn)">Completed · ${_clFmtDate(run.completedAt)} · ${run.done}/${run.total} items</div>
@@ -2327,6 +2350,7 @@ function renderChecklists(id) {
 
   main.innerHTML = `
     <div class="logbook-main-hdr" style="align-items:center">
+      <button class="mob-back-btn" onclick="clMobBack()">← Lists</button>
       <div>
         <div class="logbook-main-date">${checklist.name}</div>
         <div class="logbook-main-loc">${checklist.category} · ${total} items · ${checklist.scope==='charter'?'Charter only':'All vessels'}</div>
