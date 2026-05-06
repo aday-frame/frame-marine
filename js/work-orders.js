@@ -28,10 +28,22 @@ WO.renderStats = function(wos) {
 
   bar.style.gridTemplateColumns = 'repeat(4,1fr)';
   bar.innerHTML = `
-    <div class="stat"><div class="stat-lbl">Open</div><div class="stat-val or">${open}</div></div>
-    <div class="stat"><div class="stat-lbl">In progress</div><div class="stat-val">${progress}</div></div>
-    <div class="stat"><div class="stat-lbl">On hold</div><div class="stat-val yel">${hold}</div></div>
-    <div class="stat"><div class="stat-lbl">High priority</div><div class="stat-val red">${high}</div></div>
+    <div class="pms-stat">
+      <div class="pms-stat-lbl">Open</div>
+      <div class="pms-stat-val" style="color:var(--or)">${open}</div>
+    </div>
+    <div class="pms-stat">
+      <div class="pms-stat-lbl">In progress</div>
+      <div class="pms-stat-val">${progress}</div>
+    </div>
+    <div class="pms-stat">
+      <div class="pms-stat-lbl">On hold</div>
+      <div class="pms-stat-val" style="color:var(--yel)">${hold}</div>
+    </div>
+    <div class="pms-stat" style="${high > 0 ? 'background:rgba(248,113,113,.06)' : ''}">
+      <div class="pms-stat-lbl">High priority</div>
+      <div class="pms-stat-val" style="color:${high > 0 ? 'var(--red)' : 'var(--txt)'}">${high}</div>
+    </div>
   `;
 };
 
@@ -75,37 +87,37 @@ WO.renderList = function(wos) {
     return;
   }
 
-  const activeFilter = document.querySelector('#wo-filters .fp.on')?.dataset?.filter || 'all';
-
   const thead = `<thead><tr>
     <th style="width:80px">ID</th>
     <th>Title</th>
-    <th style="width:120px">Zone</th>
+    <th style="width:130px">System</th>
     <th style="width:80px">Priority</th>
     <th style="width:90px">Status</th>
     <th style="width:80px">Assignee</th>
     <th style="width:80px">Due</th>
   </tr></thead>`;
 
-  if (activeFilter !== 'all') {
-    // Specific team filter — flat list
-    wrap.innerHTML = `<div class="tbl-wrap"><table class="tbl">${thead}<tbody>${list.map(w=>WO.rowHTML(w)).join('')}</tbody></table></div>`;
+  const GRP = (t, count) => `<tr><td colspan="7" style="padding:10px 12px 6px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;background:var(--bg);border-bottom:.5px solid var(--bd)">
+    <span class="badge b-${t}" style="margin-right:6px">${FM.teamLabel(t)}</span>
+    <span style="font-weight:400;text-transform:none;letter-spacing:0">${count} work order${count!==1?'s':''}</span>
+  </td></tr>`;
+
+  let tbody;
+  if (WO.activeFilter !== 'all') {
+    tbody = list.map(w => WO.rowHTML(w)).join('');
   } else {
-    // Group by team
     const teams = ['engineering','deck','interior','charter'];
-    const grouped = {};
-    teams.forEach(t => { grouped[t] = list.filter(w => w.team === t); });
-    wrap.innerHTML = `<div class="tbl-wrap">` +
-      teams.filter(t => grouped[t].length > 0).map(t => `
-        <div class="wo-group-hdr">
-          <span class="badge b-${t}">${FM.teamLabel(t)}</span>
-          <span style="font-size:11px;color:var(--txt3);margin-left:8px">${grouped[t].length} work order${grouped[t].length!==1?'s':''}</span>
-        </div>
-        <table class="tbl">${thead}<tbody>${grouped[t].map(w=>WO.rowHTML(w)).join('')}</tbody></table>`).join('') +
-      `</div>`;
+    tbody = teams
+      .filter(t => list.some(w => w.team === t))
+      .map(t => {
+        const rows = list.filter(w => w.team === t);
+        return GRP(t, rows.length) + rows.map(w => WO.rowHTML(w)).join('');
+      }).join('');
   }
 
-  wrap.querySelectorAll('tbody tr').forEach(row => {
+  wrap.innerHTML = `<div class="tbl-wrap"><table class="tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
+
+  wrap.querySelectorAll('tbody tr[data-id]').forEach(row => {
     row.addEventListener('click', () => WO.openPanel(row.dataset.id));
   });
 };
@@ -113,7 +125,6 @@ WO.renderList = function(wos) {
 WO.rowHTML = function(w) {
   const pBadge  = `<span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>`;
   const sBadge  = WO.statusBadge(w.status);
-  const tBadge  = `<span class="badge b-${w.team}">${FM.teamLabel(w.team)}</span>`;
   const dueStr  = w.due ? fmtDate(w.due) : '<span class="c-txt3">—</span>';
   const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date();
 
@@ -122,20 +133,16 @@ WO.rowHTML = function(w) {
       <td class="tbl-mono">${w.id}</td>
       <td>
         <div class="tbl-title">${escHtml(w.title)}</div>
-        <div class="tbl-sub">${w.zone}</div>
+        <div class="tbl-sub">${escHtml(w.zone)}</div>
       </td>
-      <td class="c-txt2 t-11">${w.zone}</td>
-      <td class="c-txt2 t-11">${w.system}</td>
-      <td>${tBadge}</td>
+      <td class="c-txt2 t-11">${escHtml(w.system)}</td>
       <td>${pBadge}</td>
       <td>${sBadge}</td>
       <td>
-        <span style="display:inline-flex;align-items:center;gap:5px">
-          <span style="width:20px;height:20px;border-radius:50%;background:${FM.crewColor(w.assignee)};
-            display:inline-flex;align-items:center;justify-content:center;
-            font-size:8px;font-weight:700;color:#080808;flex-shrink:0">
-            ${FM.crewInitials(w.assignee)}
-          </span>
+        <span style="width:20px;height:20px;border-radius:50%;background:${FM.crewColor(w.assignee)};
+          display:inline-flex;align-items:center;justify-content:center;
+          font-size:8px;font-weight:700;color:#080808;flex-shrink:0">
+          ${FM.crewInitials(w.assignee)}
         </span>
       </td>
       <td class="${overdue ? 'c-red' : 'c-txt3'} t-11">${dueStr}</td>
