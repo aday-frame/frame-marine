@@ -995,17 +995,19 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
 
   /* FAB new WO button */
   .mob-fab {
-    display: flex !important;
+    display: flex;
     position: fixed; bottom: 68px; right: 16px;
-    width: 48px; height: 48px; border-radius: 50%;
+    height: 44px; border-radius: 22px;
+    padding: 0 18px 0 14px;
+    gap: 7px;
     background: var(--or); color: #080808;
     align-items: center; justify-content: center;
     border: none; cursor: pointer; z-index: 109;
     box-shadow: 0 4px 20px rgba(249,115,22,.45);
-    font-size: 22px; font-weight: 300; line-height: 1;
+    font-size: 13px; font-weight: 700; letter-spacing: -.01em;
     transition: transform .15s, box-shadow .15s;
   }
-  .mob-fab:active { transform: scale(.93); }
+  .mob-fab:active { transform: scale(.95); }
 }
 
 /* ── RESPONSIVE — TABLET ── */
