@@ -407,12 +407,15 @@ document.addEventListener('DOMContentLoaded', () => {
   initVesselPicker();
   initOffline();
 
-  const startPage = window.location.pathname.replace(/^\//, '').replace(/\/$/, '') || 'dashboard';
-  navTo(startPage, null, true);
+  const _knownPages = new Set(['dashboard','work-orders','calendar','monitoring','assets','parts','vendors','team','chat','logbook','pms','fleet','checklists','charter','owner','certificates','safety','inventory','budget','hours','documents','settings']);
+  function _parsePage(pathname) {
+    const p = pathname.replace(/^\//, '').replace(/\/$/, '').replace(/\.html$/, '');
+    return _knownPages.has(p) ? p : 'dashboard';
+  }
+  navTo(_parsePage(window.location.pathname), null, true);
 
   window.addEventListener('popstate', () => {
-    const p = window.location.pathname.replace(/^\//, '').replace(/\/$/, '') || 'dashboard';
-    navTo(p, null, true);
+    navTo(_parsePage(window.location.pathname), null, true);
   });
 
   // Unregister any existing service workers so files always load fresh
