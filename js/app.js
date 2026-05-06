@@ -402,8 +402,30 @@ function initOffline() {
   update();
 }
 
+/* ── THEME ── */
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('fm-theme', next);
+  document.getElementById('theme-icon-moon').style.display = next === 'light' ? 'none' : '';
+  document.getElementById('theme-icon-sun').style.display  = next === 'light' ? '' : 'none';
+  // Update theme-color meta for mobile
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = next === 'light' ? '#F4F4F1' : '#080808';
+}
+
 /* ── BOOT ── */
 document.addEventListener('DOMContentLoaded', () => {
+  // Apply saved theme before anything renders
+  const savedTheme = localStorage.getItem('fm-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+  if (savedTheme === 'light') {
+    const m = document.getElementById('theme-icon-moon');
+    const s = document.getElementById('theme-icon-sun');
+    if (m) m.style.display = 'none';
+    if (s) s.style.display = '';
+  }
+
   initVesselPicker();
   initOffline();
 
