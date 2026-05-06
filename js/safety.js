@@ -1,0 +1,514 @@
+/* ── SAFETY & ISM MODULE ── */
+const Safety = (() => {
+  let _tab = 'drills';
+
+  const DRILL_TYPES = {
+    'fire':         { label: 'Fire',          icon: '🔥', color: '#F87171' },
+    'abandon-ship': { label: 'Abandon Ship',  icon: '🚨', color: '#F97316' },
+    'man-overboard':{ label: 'Man Overboard', icon: '🔵', color: '#60A5FA' },
+    'oil-spill':    { label: 'Oil Spill',     icon: '⚠️', color: '#FACC15' },
+    'security':     { label: 'Security',      icon: '🔒', color: '#A78BFA' },
+  };
+
+  const NC_TYPES = {
+    'non-conformance': 'Non-conformance',
+    'near-miss':       'Near miss',
+    'observation':     'Observation',
+    'incident':        'Incident',
+  };
+
+  function fmtDate(s) {
+    if (!s) return '—';
+    const [y, m, d] = s.split('-');
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + d + ', ' + y;
+  }
+
+  /* ── render ── */
+  function render() {
+    const wrap = document.getElementById('page-safety');
+    if (!wrap) return;
+
+    const vessel = FM.currentVessel();
+    if (!vessel) { wrap.innerHTML = '<div style="padding:24px;color:var(--txt3)">No vessel selected.</div>'; return; }
+
+    const drills   = (FM.drills || []).filter(d => d.vessel === vessel.id);
+    const ncs      = (FM.nonConformances || []).filter(n => n.vessel === vessel.id);
+    const meetings = (FM.safetyMeetings || []).filter(m => m.vessel === vessel.id);
+
+    const openNCs    = ncs.filter(n => n.status === 'open').length;
+    const scheduledD = drills.filter(d => d.status === 'scheduled').length;
+
+    wrap.innerHTML = `
+      <div style="max-width:1100px;padding:0 0 40px">
+
+        <!-- Summary pills -->
+        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
+          ${_statPill(drills.filter(d=>d.status==='completed').length, 'Drills completed', 'var(--grn)')}
+          ${_statPill(scheduledD, 'Drills scheduled', 'var(--yel)')}
+          ${_statPill(openNCs, 'Open non-conformances', openNCs ? 'var(--red)' : 'var(--txt3)')}
+          ${_statPill(meetings.length, 'Safety meetings', 'var(--txt3)')}
+        </div>
+
+        <!-- Tabs -->
+        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd)">
+          <button onclick="Safety.tab('drills')"   id="st-drills"   class="tab-btn ${_tab==='drills'?'tab-btn-active':''}">Drills</button>
+          <button onclick="Safety.tab('nc')"       id="st-nc"       class="tab-btn ${_tab==='nc'?'tab-btn-active':''}">Non-conformances ${openNCs?`<span class="ni-count ni-count-red" style="position:relative;top:-1px">${openNCs}</span>`:''}</button>
+          <button onclick="Safety.tab('meetings')" id="st-meetings" class="tab-btn ${_tab==='meetings'?'tab-btn-active':''}">Safety meetings</button>
+        </div>
+
+        <div id="safety-content"></div>
+      </div>
+
+      ${_modalHtml()}
+    `;
+
+    _renderContent();
+  }
+
+  function _statPill(n, label, color) {
+    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border:.5px solid var(--bd);border-radius:8px">
+      <span style="font-size:16px;font-weight:600;color:${color}">${n}</span>
+      <span style="font-size:11px;color:var(--txt3)">${label}</span>
+    </div>`;
+  }
+
+  function _renderContent() {
+    const el = document.getElementById('safety-content');
+    if (!el) return;
+    if (_tab === 'drills')   el.innerHTML = _drillsTab();
+    else if (_tab === 'nc')  el.innerHTML = _ncTab();
+    else                     el.innerHTML = _meetingsTab();
+  }
+
+  /* ── DRILLS TAB ── */
+  function _drillsTab() {
+    const vessel = FM.currentVessel();
+    const drills = (FM.drills || []).filter(d => d.vessel === vessel.id)
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    const scheduled  = drills.filter(d => d.status === 'scheduled');
+    const completed  = drills.filter(d => d.status === 'completed');
+
+    let html = `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
+      <button class="btn btn-ghost btn-sm" onclick="Safety.openScheduleDrill()">Schedule drill</button>
+      <button class="btn btn-primary btn-sm" onclick="Safety.openLogDrill()">Log completed drill</button>
+    </div>`;
+
+    if (scheduled.length) {
+      html += `<div style="margin-bottom:20px">
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">Scheduled</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          ${scheduled.map(d => _drillRow(d)).join('')}
+        </div>
+      </div>`;
+    }
+
+    html += `<div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">Completed</div>
+      ${completed.length ? `<div style="display:flex;flex-direction:column;gap:8px">${completed.map(d => _drillRow(d)).join('')}</div>`
+        : `<div style="font-size:13px;color:var(--txt3);padding:12px 0">No completed drills yet.</div>`}
+    </div>`;
+
+    return html;
+  }
+
+  function _drillRow(d) {
+    const dt = DRILL_TYPES[d.type] || { label: d.type, icon: '📋', color: 'var(--txt3)' };
+    const isScheduled = d.status === 'scheduled';
+    return `<div style="display:flex;gap:14px;padding:14px 16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;align-items:flex-start">
+      <div style="width:36px;height:36px;border-radius:8px;background:${dt.color}18;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${dt.icon}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+          <span style="font-size:13px;font-weight:500;color:var(--txt)">${dt.label} Drill</span>
+          <span class="badge ${isScheduled?'b-hold':'b-done'}" style="font-size:9px">${isScheduled?'Scheduled':'Completed'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:${d.notes?'6':'0'}px">${fmtDate(d.date)}${d.conductor?' · Conducted by '+escHtml(FM.crewName(d.conductor)):''}${d.duration?' · '+d.duration+' min':''}${d.location?' · '+escHtml(d.location):''}</div>
+        ${d.crew && d.crew.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${d.crew.map(cid=>`<div style="width:22px;height:22px;border-radius:50%;background:${FM.crewColor(cid)}22;color:${FM.crewColor(cid)};font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center" title="${FM.crewName(cid)}">${FM.crewInitials(cid)}</div>`).join('')}</div>` : ''}
+        ${d.notes ? `<div style="font-size:11px;color:var(--txt2);line-height:1.5">${escHtml(d.notes)}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        ${isScheduled ? `<button class="btn btn-ghost btn-xs" onclick="Safety.completeDrill('${d.id}')">Log complete</button>` : ''}
+        <button class="btn btn-ghost btn-xs" onclick="Safety.delDrill('${d.id}')">Remove</button>
+      </div>
+    </div>`;
+  }
+
+  /* ── NC TAB ── */
+  function _ncTab() {
+    const vessel = FM.currentVessel();
+    const ncs = (FM.nonConformances || []).filter(n => n.vessel === vessel.id)
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary btn-sm" onclick="Safety.openNC()">+ Raise report</button>
+    </div>`;
+
+    if (!ncs.length) return html + `<div style="font-size:13px;color:var(--txt3);padding:12px 0">No reports yet.</div>`;
+
+    html += ncs.map(nc => {
+      const isOpen = nc.status === 'open';
+      return `<div style="padding:16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+              <span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(nc.ref)}</span>
+              <span class="badge ${isOpen?'b-high':'b-done'}" style="font-size:9px">${isOpen?'Open':'Closed'}</span>
+              <span class="badge b-hold" style="font-size:9px">${NC_TYPES[nc.type]||nc.type}</span>
+            </div>
+            <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px">${escHtml(nc.title)}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${fmtDate(nc.date)} · Raised by ${escHtml(FM.crewName(nc.raisedBy))} · Assigned to ${escHtml(FM.crewName(nc.assignee))}</div>
+            <div style="font-size:12px;color:var(--txt2);line-height:1.5;margin-bottom:${nc.correctiveAction?'10':'0'}px">${escHtml(nc.description)}</div>
+            ${nc.correctiveAction ? `<div style="padding:10px;background:var(--bg3);border-radius:6px;margin-top:8px">
+              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:4px">Corrective action</div>
+              <div style="font-size:12px;color:var(--txt2)">${escHtml(nc.correctiveAction)}</div>
+              ${nc.closedDate?`<div style="font-size:10px;color:var(--grn);margin-top:4px">Closed ${fmtDate(nc.closedDate)}</div>`:''}
+            </div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+            ${isOpen ? `<button class="btn btn-ghost btn-xs" onclick="Safety.closeNC('${nc.id}')">Close out</button>` : ''}
+            <button class="btn btn-ghost btn-xs" onclick="Safety.delNC('${nc.id}')">Remove</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    return html;
+  }
+
+  /* ── MEETINGS TAB ── */
+  function _meetingsTab() {
+    const vessel = FM.currentVessel();
+    const meetings = (FM.safetyMeetings || []).filter(m => m.vessel === vessel.id)
+      .sort((a, b) => b.date.localeCompare(a.date));
+
+    let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <button class="btn btn-primary btn-sm" onclick="Safety.openMeeting()">+ Log meeting</button>
+    </div>`;
+
+    if (!meetings.length) return html + `<div style="font-size:13px;color:var(--txt3);padding:12px 0">No safety meetings logged yet.</div>`;
+
+    html += meetings.map(m => `
+      <div style="padding:16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px">${escHtml(m.topic)}</div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${fmtDate(m.date)} · Conducted by ${escHtml(FM.crewName(m.conductor))} · ${m.duration} min</div>
+        ${m.attendees && m.attendees.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${m.attendees.map(cid=>`<div style="width:22px;height:22px;border-radius:50%;background:${FM.crewColor(cid)}22;color:${FM.crewColor(cid)};font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center" title="${FM.crewName(cid)}">${FM.crewInitials(cid)}</div>`).join('')}<span style="font-size:10px;color:var(--txt3);align-self:center;margin-left:4px">${m.attendees.length} crew</span></div>` : ''}
+        ${m.notes ? `<div style="font-size:12px;color:var(--txt2);line-height:1.5">${escHtml(m.notes)}</div>` : ''}
+        <div style="display:flex;justify-content:flex-end;margin-top:8px">
+          <button class="btn btn-ghost btn-xs" onclick="Safety.delMeeting('${m.id}')">Remove</button>
+        </div>
+      </div>
+    `).join('');
+
+    return html;
+  }
+
+  /* ── MODAL ── */
+  function _modalHtml() {
+    return `<div id="safety-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
+      <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;width:520px;max-width:92vw;padding:24px;max-height:90vh;overflow-y:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div style="font-size:14px;font-weight:600;color:var(--txt)" id="safety-modal-title">Log drill</div>
+          <button onclick="Safety.closeModal()" style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:18px;line-height:1">×</button>
+        </div>
+        <div id="safety-modal-body"></div>
+      </div>
+    </div>`;
+  }
+
+  function _showModal(title, bodyHtml) {
+    const modal = document.getElementById('safety-modal');
+    if (!modal) return;
+    document.getElementById('safety-modal-title').textContent = title;
+    document.getElementById('safety-modal-body').innerHTML = bodyHtml;
+    modal.style.display = 'flex';
+  }
+
+  function closeModal() {
+    const modal = document.getElementById('safety-modal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  /* ── DRILL MODAL ── */
+  function _drillForm(scheduled) {
+    const vessel = FM.currentVessel();
+    const crewList = (FM.crew || []).filter(c => c.vessel === (vessel && vessel.id));
+    const typeOpts = Object.entries(DRILL_TYPES).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+    const crewOpts = crewList.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer"><input type="checkbox" value="${c.id}" style="accent-color:var(--grn)"> <span style="font-size:12px;color:var(--txt)">${escHtml(c.name)}</span> <span style="font-size:10px;color:var(--txt3)">${escHtml(c.role)}</span></label>`).join('');
+    return `
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Drill type</label>
+        <select class="inp" id="dm-type">${typeOpts}</select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label class="inp-lbl">Date</label>
+          <input class="inp" id="dm-date" type="date" value="${new Date().toISOString().slice(0,10)}">
+        </div>
+        <div>
+          <label class="inp-lbl">Conducted by</label>
+          <select class="inp" id="dm-conductor">${crewList.map(c=>`<option value="${c.id}">${escHtml(c.name)}</option>`).join('')}</select>
+        </div>
+      </div>
+      ${!scheduled ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div>
+          <label class="inp-lbl">Duration (minutes)</label>
+          <input class="inp" id="dm-dur" type="number" placeholder="e.g. 25">
+        </div>
+        <div>
+          <label class="inp-lbl">Location / scenario</label>
+          <input class="inp" id="dm-loc" placeholder="e.g. Engine room">
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Crew present</label>
+        <div style="padding:8px 10px;background:var(--bg3);border-radius:8px;max-height:160px;overflow-y:auto">${crewOpts}</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="inp-lbl">Notes</label>
+        <textarea class="inp" id="dm-notes" rows="3" placeholder="Observations, deficiencies, actions…"></textarea>
+      </div>` : ''}
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="Safety.closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="Safety.saveDrill(${scheduled})">${scheduled?'Schedule drill':'Log drill'}</button>
+      </div>
+    `;
+  }
+
+  function openLogDrill()      { _showModal('Log completed drill', _drillForm(false)); }
+  function openScheduleDrill() { _showModal('Schedule drill',      _drillForm(true));  }
+
+  function saveDrill(scheduled) {
+    const vessel = FM.currentVessel();
+    const type   = document.getElementById('dm-type')?.value;
+    const date   = document.getElementById('dm-date')?.value;
+    const cond   = document.getElementById('dm-conductor')?.value;
+    if (!date) { alert('Date is required.'); return; }
+
+    const drill = {
+      id: 'dr' + Date.now(), vessel: vessel.id, type, date, conductor: cond,
+      crew: [], duration: null, location: '', notes: '',
+      status: scheduled ? 'scheduled' : 'completed',
+    };
+
+    if (!scheduled) {
+      drill.duration = parseInt(document.getElementById('dm-dur')?.value) || null;
+      drill.location = document.getElementById('dm-loc')?.value.trim() || '';
+      drill.notes    = document.getElementById('dm-notes')?.value.trim() || '';
+      drill.crew     = [...document.querySelectorAll('#safety-modal-body input[type=checkbox]:checked')].map(cb => cb.value);
+    }
+
+    FM.drills.push(drill);
+    closeModal();
+    render();
+  }
+
+  function completeDrill(id) {
+    const d = (FM.drills || []).find(x => x.id === id);
+    if (!d) return;
+    const vessel = FM.currentVessel();
+    const crewList = (FM.crew || []).filter(c => c.vessel === (vessel && vessel.id));
+    const crewOpts = crewList.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer"><input type="checkbox" value="${c.id}" style="accent-color:var(--grn)"> <span style="font-size:12px;color:var(--txt)">${escHtml(c.name)}</span></label>`).join('');
+    const dt = DRILL_TYPES[d.type] || { label: d.type };
+    _showModal('Log ' + dt.label + ' Drill Complete', `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div><label class="inp-lbl">Duration (min)</label><input class="inp" id="dm-dur" type="number" placeholder="25"></div>
+        <div><label class="inp-lbl">Location</label><input class="inp" id="dm-loc" placeholder="Engine room"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Crew present</label>
+        <div style="padding:8px 10px;background:var(--bg3);border-radius:8px;max-height:160px;overflow-y:auto">${crewOpts}</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="inp-lbl">Notes</label>
+        <textarea class="inp" id="dm-notes" rows="3" placeholder="Observations, deficiencies, actions…"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="Safety.closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="Safety._markComplete('${id}')">Save</button>
+      </div>
+    `);
+  }
+
+  function _markComplete(id) {
+    const d = (FM.drills || []).find(x => x.id === id);
+    if (!d) return;
+    d.status   = 'completed';
+    d.duration = parseInt(document.getElementById('dm-dur')?.value) || null;
+    d.location = document.getElementById('dm-loc')?.value.trim() || '';
+    d.notes    = document.getElementById('dm-notes')?.value.trim() || '';
+    d.crew     = [...document.querySelectorAll('#safety-modal-body input[type=checkbox]:checked')].map(cb => cb.value);
+    closeModal();
+    render();
+  }
+
+  function delDrill(id) {
+    if (!confirm('Remove this drill record?')) return;
+    FM.drills = FM.drills.filter(d => d.id !== id);
+    render();
+  }
+
+  /* ── NC MODAL ── */
+  function openNC() {
+    const vessel = FM.currentVessel();
+    const crewList = (FM.crew || []).filter(c => c.vessel === (vessel && vessel.id));
+    const crewOpts = crewList.map(c=>`<option value="${c.id}">${escHtml(c.name)} — ${escHtml(c.role)}</option>`).join('');
+    const typeOpts = Object.entries(NC_TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+    const nextRef  = 'NC-' + new Date().getFullYear() + '-' + String((FM.nonConformances||[]).length+1).padStart(3,'0');
+
+    _showModal('Raise non-conformance / incident', `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div><label class="inp-lbl">Reference</label><input class="inp" id="nc-ref" value="${nextRef}"></div>
+        <div><label class="inp-lbl">Type</label><select class="inp" id="nc-type">${typeOpts}</select></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Title</label>
+        <input class="inp" id="nc-title" placeholder="Brief description of the event">
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Description</label>
+        <textarea class="inp" id="nc-desc" rows="3" placeholder="What happened, when, where, who was involved…"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div><label class="inp-lbl">Date</label><input class="inp" id="nc-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div><label class="inp-lbl">Raised by</label><select class="inp" id="nc-raised">${crewOpts}</select></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="inp-lbl">Assigned to (for corrective action)</label>
+        <select class="inp" id="nc-assign">${crewOpts}</select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="Safety.closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="Safety.saveNC()">Raise report</button>
+      </div>
+    `);
+  }
+
+  function saveNC() {
+    const title = document.getElementById('nc-title')?.value.trim();
+    const desc  = document.getElementById('nc-desc')?.value.trim();
+    if (!title) { alert('Title is required.'); return; }
+
+    const vessel = FM.currentVessel();
+    FM.nonConformances.push({
+      id: 'nc' + Date.now(),
+      vessel: vessel.id,
+      ref:       document.getElementById('nc-ref')?.value.trim(),
+      date:      document.getElementById('nc-date')?.value,
+      type:      document.getElementById('nc-type')?.value,
+      title,
+      description: desc,
+      raisedBy:  document.getElementById('nc-raised')?.value,
+      assignee:  document.getElementById('nc-assign')?.value,
+      status:    'open',
+      correctiveAction: '',
+      closedDate: null,
+    });
+    closeModal();
+    render();
+  }
+
+  function closeNC(id) {
+    const nc = (FM.nonConformances || []).find(n => n.id === id);
+    if (!nc) return;
+    _showModal('Close out — ' + nc.ref, `
+      <div style="margin-bottom:6px;font-size:12px;color:var(--txt2)">${escHtml(nc.title)}</div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Corrective action taken</label>
+        <textarea class="inp" id="nc-ca" rows="4" placeholder="Describe the corrective action and any preventive measures implemented…">${escHtml(nc.correctiveAction||'')}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="Safety.closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="Safety._saveClose('${id}')">Mark closed</button>
+      </div>
+    `);
+  }
+
+  function _saveClose(id) {
+    const nc = (FM.nonConformances || []).find(n => n.id === id);
+    if (!nc) return;
+    nc.correctiveAction = document.getElementById('nc-ca')?.value.trim() || '';
+    nc.status     = 'closed';
+    nc.closedDate = new Date().toISOString().slice(0,10);
+    closeModal();
+    render();
+  }
+
+  function delNC(id) {
+    if (!confirm('Remove this report?')) return;
+    FM.nonConformances = FM.nonConformances.filter(n => n.id !== id);
+    render();
+  }
+
+  /* ── MEETING MODAL ── */
+  function openMeeting() {
+    const vessel = FM.currentVessel();
+    const crewList = (FM.crew || []).filter(c => c.vessel === (vessel && vessel.id));
+    const crewOpts = crewList.map(c=>`<option value="${c.id}">${escHtml(c.name)} — ${escHtml(c.role)}</option>`).join('');
+    const checkboxes = crewList.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer"><input type="checkbox" value="${c.id}" checked style="accent-color:var(--grn)"> <span style="font-size:12px;color:var(--txt)">${escHtml(c.name)}</span></label>`).join('');
+
+    _showModal('Log safety meeting', `
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Topic / agenda</label>
+        <input class="inp" id="sm-topic" placeholder="e.g. Emergency procedure review">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+        <div><label class="inp-lbl">Date</label><input class="inp" id="sm-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div><label class="inp-lbl">Duration (minutes)</label><input class="inp" id="sm-dur" type="number" placeholder="e.g. 30"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Conducted by</label>
+        <select class="inp" id="sm-conductor">${crewOpts}</select>
+      </div>
+      <div style="margin-bottom:14px">
+        <label class="inp-lbl">Attendees</label>
+        <div style="padding:8px 10px;background:var(--bg3);border-radius:8px;max-height:160px;overflow-y:auto">${checkboxes}</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label class="inp-lbl">Minutes / notes</label>
+        <textarea class="inp" id="sm-notes" rows="3" placeholder="Key points discussed, decisions made, actions assigned…"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="Safety.closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="Safety.saveMeeting()">Save meeting</button>
+      </div>
+    `);
+  }
+
+  function saveMeeting() {
+    const topic = document.getElementById('sm-topic')?.value.trim();
+    if (!topic) { alert('Topic is required.'); return; }
+    const vessel = FM.currentVessel();
+    FM.safetyMeetings.push({
+      id:        'sm' + Date.now(),
+      vessel:    vessel.id,
+      date:      document.getElementById('sm-date')?.value,
+      conductor: document.getElementById('sm-conductor')?.value,
+      attendees: [...document.querySelectorAll('#safety-modal-body input[type=checkbox]:checked')].map(cb => cb.value),
+      topic,
+      notes:     document.getElementById('sm-notes')?.value.trim() || '',
+      duration:  parseInt(document.getElementById('sm-dur')?.value) || 0,
+    });
+    closeModal();
+    render();
+  }
+
+  function delMeeting(id) {
+    if (!confirm('Remove this meeting record?')) return;
+    FM.safetyMeetings = FM.safetyMeetings.filter(m => m.id !== id);
+    render();
+  }
+
+  function tab(t) {
+    _tab = t;
+    render();
+  }
+
+  return {
+    render, tab, closeModal,
+    openLogDrill, openScheduleDrill, saveDrill, completeDrill, _markComplete, delDrill,
+    openNC, saveNC, closeNC, _saveClose, delNC,
+    openMeeting, saveMeeting, delMeeting,
+  };
+})();
+
+window.Safety = Safety;

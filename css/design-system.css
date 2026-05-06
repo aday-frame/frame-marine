@@ -213,6 +213,16 @@ textarea.inp { resize: vertical; min-height: 72px; line-height: 1.6; }
 .inp-group { display: flex; flex-direction: column; gap: 0; margin-bottom: 14px; }
 .inp-row   { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
 
+/* ── TAB BUTTONS ── */
+.tab-btn {
+  padding: 8px 14px; font-size: 12px; font-weight: 500; color: var(--txt3);
+  background: none; border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; margin-bottom: -1px; transition: color .15s, border-color .15s;
+  font-family: var(--sans);
+}
+.tab-btn:hover { color: var(--txt); }
+.tab-btn-active { color: var(--txt); border-bottom-color: var(--or); }
+
 /* ── DIVIDER ── */
 .divider { height: .5px; background: var(--bd); }
 .divider-v { width: .5px; background: var(--bd); align-self: stretch; }

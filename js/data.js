@@ -891,6 +891,65 @@ FM.checklists = [
   { id:'cl14', category:'Safety', name:'Fire & Flooding Emergency Drill', scope:'all', builtin:true, steps:['Brief all crew on scenario before drill','Sound alarm — record time all crew at muster stations','Assign roles: pump operator, damage control, communications','Simulate flooding: verify bilge pump activation in auto mode','Simulate fire: verify fire extinguisher access and crew knowledge','Demonstrate EPIRB manual activation (do not transmit)','Confirm all crew know location of life raft','Debrief — record any gaps found','Log drill date and crew attendance'] },
 ];
 
+/* ── VESSEL CERTIFICATES ── */
+FM.vesselCerts = [
+  { id:'vc1',  vessel:'v1', name:'Certificate of Registry',                  category:'Registry',  issuer:'Cayman Islands Shipping Registry', issued:'2023-06-01', expires:'2028-06-01', docRef:'CI-2023-0142' },
+  { id:'vc2',  vessel:'v1', name:'Safety Management Certificate (ISM)',       category:'ISM',       issuer:'Bureau Veritas',                   issued:'2024-01-15', expires:'2026-07-15', docRef:'BV-SMC-2024-0891' },
+  { id:'vc3',  vessel:'v1', name:'Load Line Certificate',                     category:'SOLAS',     issuer:'Bureau Veritas',                   issued:'2023-11-01', expires:'2026-05-15', docRef:'BV-LLC-2023-1204' },
+  { id:'vc4',  vessel:'v1', name:'Safety Equipment Certificate',              category:'SOLAS',     issuer:'Bureau Veritas',                   issued:'2023-11-01', expires:'2026-05-01', docRef:'BV-SEC-2023-1205' },
+  { id:'vc5',  vessel:'v1', name:'Radio Safety Certificate',                  category:'SOLAS',     issuer:'Bureau Veritas',                   issued:'2023-11-01', expires:'2026-11-01', docRef:'BV-RSC-2023-1206' },
+  { id:'vc6',  vessel:'v1', name:'Tonnage Certificate',                       category:'Registry',  issuer:'Cayman Islands Shipping Registry', issued:'2018-03-15', expires:null,         docRef:'CI-TC-2018-0088' },
+  { id:'vc7',  vessel:'v1', name:'P&I Club Certificate',                      category:'Insurance', issuer:'Skuld P&I',                        issued:'2026-02-20', expires:'2027-02-20', docRef:'SKULD-2026-1456' },
+  { id:'vc8',  vessel:'v1', name:'Hull & Machinery Insurance',                category:'Insurance', issuer:'Zurich Marine',                    issued:'2026-02-20', expires:'2027-02-20', docRef:'ZM-2026-8823' },
+  { id:'vc9',  vessel:'v1', name:'Minimum Safe Manning Document',             category:'Flag State',issuer:'Cayman Islands Shipping Registry', issued:'2023-06-01', expires:'2028-06-01', docRef:'CI-MSD-2023-0143' },
+  { id:'vc10', vessel:'v1', name:'Anti-Fouling System Certificate',           category:'MARPOL',    issuer:'Bureau Veritas',                   issued:'2023-08-10', expires:'2028-08-10', docRef:'BV-AFC-2023-0577' },
+  { id:'vc11', vessel:'v1', name:'International Oil Pollution Prevention',    category:'MARPOL',    issuer:'Bureau Veritas',                   issued:'2023-06-01', expires:'2028-06-01', docRef:'BV-IOPP-2023-0991' },
+  { id:'vc12', vessel:'v1', name:'Yacht Classification Certificate',          category:'Class',     issuer:'Bureau Veritas',                   issued:'2023-11-01', expires:'2028-11-01', docRef:'BV-CLASS-2023-7712' },
+];
+
+/* ── CREW CERTIFICATES ── */
+FM.crewCerts = [
+  { id:'cc1',  crewId:'c2', name:'STCW II/2 — Master 3000GT',         category:'STCW',    issuer:'MCA UK',                           issued:'2021-03-10', expires:'2026-06-10', docRef:'MCA-II2-7789' },
+  { id:'cc2',  crewId:'c2', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2025-01-15', expires:'2027-01-15', docRef:'ENG1-2025-4412' },
+  { id:'cc3',  crewId:'c2', name:'Cayman Islands Endorsement',         category:'Flag',    issuer:'Cayman Islands Shipping Registry', issued:'2021-03-20', expires:'2026-06-20', docRef:'CI-END-2021-0456' },
+  { id:'cc4',  crewId:'c2', name:'GMDSS GOC Radio Operator',          category:'STCW',    issuer:'MCA UK',                           issued:'2021-03-10', expires:'2026-06-10', docRef:'MCA-GOC-7790' },
+  { id:'cc5',  crewId:'c3', name:'STCW III/2 — Chief Engineer 3000kW',category:'STCW',    issuer:'MCA UK',                           issued:'2022-05-18', expires:'2027-05-18', docRef:'MCA-III2-9912' },
+  { id:'cc6',  crewId:'c3', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2025-03-10', expires:'2027-03-10', docRef:'ENG1-2025-5503' },
+  { id:'cc7',  crewId:'c3', name:'Cayman Islands Endorsement',         category:'Flag',    issuer:'Cayman Islands Shipping Registry', issued:'2022-06-01', expires:'2027-06-01', docRef:'CI-END-2022-0881' },
+  { id:'cc8',  crewId:'c4', name:'STCW II/1 — OOW 500GT',            category:'STCW',    issuer:'ANFR France',                      issued:'2023-09-01', expires:'2028-09-01', docRef:'ANFR-II1-2023-3301' },
+  { id:'cc9',  crewId:'c4', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2024-11-20', expires:'2026-11-20', docRef:'ENG1-2024-7712' },
+  { id:'cc10', crewId:'c5', name:'STCW II/1 — OOW 500GT',            category:'STCW',    issuer:'MCA UK',                           issued:'2022-08-14', expires:'2026-08-14', docRef:'MCA-II1-2022-5544' },
+  { id:'cc11', crewId:'c5', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2025-02-28', expires:'2027-02-28', docRef:'ENG1-2025-4490' },
+  { id:'cc12', crewId:'c6', name:'STCW — Ratings Certificate',        category:'STCW',    issuer:'MCA UK',                           issued:'2024-04-10', expires:'2029-04-10', docRef:'MCA-RAT-2024-2210' },
+  { id:'cc13', crewId:'c6', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2024-04-10', expires:'2026-04-10', docRef:'ENG1-2024-2211' },
+  { id:'cc14', crewId:'c7', name:'STCW — Ratings Certificate',        category:'STCW',    issuer:'MCA UK',                           issued:'2023-11-05', expires:'2028-11-05', docRef:'MCA-RAT-2023-9901' },
+  { id:'cc15', crewId:'c7', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2025-05-01', expires:'2027-05-01', docRef:'ENG1-2025-9902' },
+];
+
+/* ── DRILLS ── */
+FM.drills = [
+  { id:'dr1', vessel:'v1', type:'fire',         date:'2026-04-15', conductor:'c2', crew:['c2','c3','c4','c5','c6','c7'],     duration:25, location:'Engine room scenario — aft bilge',     notes:'All crew mustered at stations within 3 minutes. BA sets checked. Extinguishers deployed correctly. No deficiencies noted.', status:'completed' },
+  { id:'dr2', vessel:'v1', type:'abandon-ship', date:'2026-04-01', conductor:'c2', crew:['c2','c3','c4','c5','c6','c7','c8'],duration:40, location:'Aft deck — liferaft stations',         notes:'Full muster completed. EPIRB and SART locations verified by all crew. Liferaft hydrostatic release inspected. Immersion suits checked.', status:'completed' },
+  { id:'dr3', vessel:'v1', type:'man-overboard', date:'2026-04-22', conductor:'c2', crew:['c2','c5','c7'],                   duration:18, location:'Underway — St. Barths passage',        notes:'Oscar buoy and dan buoy deployed. Recovery time 4 min 20 sec at 7 knots. Rescue sling deployed successfully.', status:'completed' },
+  { id:'dr4', vessel:'v1', type:'oil-spill',    date:'2026-03-18', conductor:'c3', crew:['c3','c5','c7'],                   duration:20, location:'Engine room / aft deck',               notes:'SOPEP locker contents checked. Boom deployment practiced. Oil spill reporting procedure reviewed with crew.', status:'completed' },
+  { id:'dr5', vessel:'v1', type:'fire',         date:'2026-05-15', conductor:'c2', crew:[],                                 duration:null, location:'',                                   notes:'', status:'scheduled' },
+  { id:'dr6', vessel:'v1', type:'abandon-ship', date:'2026-05-01', conductor:'c2', crew:[],                                 duration:null, location:'',                                   notes:'', status:'scheduled' },
+];
+
+/* ── NON-CONFORMANCES ── */
+FM.nonConformances = [
+  { id:'nc1', vessel:'v1', ref:'NC-2026-001', date:'2026-04-20', type:'near-miss',       title:'Unsecured toolbox in engine room during passage',    description:'Toolbox found unsecured on engine room workbench during swell conditions. Slid approximately 30cm before crew noticed and secured it.',             raisedBy:'c3', assignee:'c2', status:'closed', correctiveAction:'All tools now stowed in dedicated lockable drawers. Daily engine room inspection before departure added to departure checklist.', closedDate:'2026-04-22' },
+  { id:'nc2', vessel:'v1', ref:'NC-2026-002', date:'2026-04-28', type:'non-conformance', title:'Fire extinguisher inspection overdue — aft deck',     description:'Aft deck CO2 extinguisher annual inspection sticker shows April 2025. Overdue by one month for annual inspection.',                             raisedBy:'c5', assignee:'c3', status:'open',   correctiveAction:'', closedDate:null },
+  { id:'nc3', vessel:'v1', ref:'NC-2026-003', date:'2026-05-01', type:'observation',     title:'Guest safety briefing delayed before departure',      description:'Charter guests boarded during fuelling operations. Safety briefing not completed until 45 minutes after scheduled departure time.',               raisedBy:'c2', assignee:'c4', status:'open',   correctiveAction:'', closedDate:null },
+];
+
+/* ── SAFETY MEETINGS ── */
+FM.safetyMeetings = [
+  { id:'sm1', vessel:'v1', date:'2026-04-28', conductor:'c2', attendees:['c2','c3','c4','c5','c6','c7','c8'], topic:'Charter season preparation & emergency procedure review',  notes:'Reviewed updated muster list. Confirmed guest safety brief procedure: brief must be completed before gangway is lifted. Engine room access protocol during charter reviewed with all HoDs.', duration:35 },
+  { id:'sm2', vessel:'v1', date:'2026-04-07', conductor:'c2', attendees:['c2','c3','c4','c5','c7'],          topic:'Near-miss debrief — NC-2026-001 unsecured tools',           notes:'Root cause discussed. Agreed on lockable drawer stowage for all engine room tools. C3 to inspect and sign off before next departure.', duration:20 },
+  { id:'sm3', vessel:'v1', date:'2026-03-15', conductor:'c2', attendees:['c2','c3','c4','c5','c6','c7','c8'], topic:'MARPOL compliance & waste management procedures',           notes:'Garbage management plan reviewed. Crew reminded of no-discharge zones for Caribbean waters. SOPEP locker restocked.', duration:25 },
+];
+
 /* ── UTILS ── */
 FM.getWO = id => FM.workOrders.find(w => w.id === id);
 FM.getCrew = id => FM.crew.find(c => c.id === id);

@@ -44,7 +44,9 @@ function navTo(pageId, clickedEl, skipPush) {
     logbook:     'Logbook',
     pms:         'Planned maintenance',
     fleet:       'Tender & fleet',
-    checklists:  'Checklists',
+    checklists:    'Checklists',
+    certificates:  'Certificates',
+    safety:        'Safety & ISM',
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -67,6 +69,8 @@ function navTo(pageId, clickedEl, skipPush) {
     pms:           () => window.renderPMS && renderPMS(),
     fleet:         () => window.renderFleet && renderFleet(),
     checklists:    () => window.renderChecklists && renderChecklists(),
+    certificates:  () => window.Certs && Certs.render(),
+    safety:        () => window.Safety && Safety.render(),
   };
   if (inits[pageId]) inits[pageId]();
 
@@ -85,6 +89,17 @@ function navTo(pageId, clickedEl, skipPush) {
     const el = document.getElementById(id);
     if (el) { el.textContent = woCount; el.style.display = woCount ? '' : 'none'; }
   });
+
+  // Update cert expiry badge
+  if (window.Certs) Certs.updateSidebarBadge();
+
+  // Update open NC badge
+  const ncCount = (FM.nonConformances || []).filter(n => {
+    const cr = FM.currentVessel();
+    return n.vessel === (cr && cr.id) && n.status === 'open';
+  }).length;
+  const ncEl = document.getElementById('sb-nc-count');
+  if (ncEl) { ncEl.textContent = ncCount; ncEl.style.display = ncCount ? '' : 'none'; }
 
   // Show FAB only on work-orders page
   const fab = document.getElementById('mob-fab');
