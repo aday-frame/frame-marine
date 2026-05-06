@@ -29,14 +29,13 @@ const Inventory = (() => {
         </div>` : ''}
 
         <!-- Tabs -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd)">
+        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd);padding-bottom:0">
           ${CATS.map(c => `
             <button onclick="Inventory.setTab('${c}')" class="tab-btn ${_tab===c ? 'tab-btn-active' : ''}">
               ${c}${c !== 'All' ? ` (${items.filter(i=>i.category===c).length})` : ''}
             </button>`).join('')}
         </div>
 
-        <!-- Add button -->
         <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
           <button class="btn btn-primary btn-sm" onclick="Inventory.openAdd()">+ Add item</button>
         </div>
