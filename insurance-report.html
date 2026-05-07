@@ -462,67 +462,126 @@
     /* ── SECTION SCROLL OFFSET ── */
     .section { scroll-margin-top: 48px; }
 
-    /* ── RESPONSIVE — 680px ── */
+    /* ══ RESPONSIVE — 680px ══ */
     @media (max-width: 680px) {
-      .header { padding: 24px 16px 20px; }
-      .header-title { font-size: 19px; }
+      /* Header */
+      .header { padding: 20px 16px 18px; }
+      .header-title { font-size: 18px; }
       .header-vessel { font-size: 11px; }
+      /* Seal: shrink but keep visible on mid-sizes */
       .seal-ring { width: 64px; height: 64px; }
 
+      /* Insurance banner → 2×2 grid */
       .ins-banner {
         padding: 0;
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0;
       }
-      .ins-banner-icon { display: none; }
-      .ins-banner-divider { display: none; }
+      .ins-banner-icon, .ins-banner-divider { display: none; }
       .ins-banner-item {
         flex: none;
-        padding: 12px 16px;
+        padding: 12px 14px;
         border-right: 1px solid var(--blu-bd);
         border-bottom: 1px solid var(--blu-bd);
       }
-      .ins-banner-item:nth-child(2n) { border-right: none; }
+      .ins-banner-item:nth-child(2n)        { border-right: none; }
       .ins-banner-item:nth-last-child(-n+2) { border-bottom: none; }
 
+      /* Compliance */
       .compliance-wrap { flex-wrap: wrap; gap: 10px; }
       .compliance-badge-text { flex-shrink: 0; }
 
+      /* Stats */
       .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
+      /* Particulars → 2-col */
       .particulars { grid-template-columns: repeat(2, 1fr); }
       .part-item:nth-child(4n)        { border-right: 1px solid var(--bd); }
       .part-item:nth-last-child(-n+4) { border-bottom: 1px solid var(--bd); }
       .part-item:nth-child(2n)        { border-right: none; }
       .part-item:nth-last-child(-n+2) { border-bottom: none; }
 
-      .body { padding: 20px 16px 40px; }
+      .body { padding: 18px 14px 40px; }
       .footer { padding: 14px 16px; flex-direction: column; gap: 6px; align-items: flex-start; }
       .no-print { padding: 14px 16px; flex-direction: column; align-items: flex-start; }
-      .anchor-nav a { padding: 10px 12px; font-size: 9px; }
-
-      .crew-member-header { flex-wrap: wrap; gap: 8px; }
-      .crew-member-header > span:last-child { margin-left: 0 !important; }
     }
 
-    /* ── RESPONSIVE — 420px ── */
-    @media (max-width: 420px) {
-      .header-inner { flex-direction: column; gap: 16px; align-items: flex-start; }
-      .cert-seal { flex-direction: row; align-items: center; gap: 10px; }
-      .header-title { font-size: 17px; }
-      .seal-ring { width: 52px; height: 52px; }
-      .seal-text { font-size: 6px; }
+    /* ══ RESPONSIVE — 600px: card tables + hide sticky nav ══ */
+    @media (max-width: 600px) {
+      /* The sticky nav + overflow-x:auto combo breaks on iOS Safari — just hide it.
+         User can scroll; sections are clearly titled. */
+      .anchor-nav { display: none; }
 
+      /* Hide decorative seal — SVG clips badly at small ring sizes */
+      .cert-seal { display: none; }
+
+      /* ── Card-style tables ── */
+      .tbl-wrap { overflow-x: visible; }
+      .tbl-wrap table {
+        min-width: 0 !important;
+        width: 100%;
+        table-layout: auto;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+      }
+      .tbl-wrap thead { display: none; }
+      .tbl-wrap tbody { display: block; }
+      .tbl-wrap tr {
+        display: block;
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,.04);
+      }
+      .tbl-wrap td {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--bd);
+        border-radius: 0;
+        font-size: 12px;
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+      }
+      .tbl-wrap td:last-child { border-bottom: none; }
+      /* Label from data-label attribute */
+      .tbl-wrap td::before {
+        content: attr(data-label);
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        color: var(--txt3);
+        flex-shrink: 0;
+        width: 90px;
+        padding-top: 2px;
+        line-height: 1.4;
+      }
+      /* Remove alternating rows (cards are separated by borders) */
+      .tbl-wrap tbody tr:nth-child(even) { background: #fff; }
+      /* Crew table inside crew-member card */
+      .crew-member .tbl-wrap { border: none; border-radius: 0; }
+      .crew-member .tbl-wrap tr { border-radius: 0; box-shadow: none; border-left: none; border-right: none; border-bottom: none; border-top: 1px solid var(--bd); }
+      .crew-member .tbl-wrap tr:first-child { border-top: .5px solid var(--bd); }
+    }
+
+    /* ══ RESPONSIVE — 420px ══ */
+    @media (max-width: 420px) {
+      .header { padding: 16px 14px 14px; }
+      .header-title { font-size: 16px; }
+
+      /* Insurance banner → single column */
       .ins-banner { grid-template-columns: 1fr; }
       .ins-banner-item { border-right: none !important; border-bottom: 1px solid var(--blu-bd) !important; }
       .ins-banner-item:last-child { border-bottom: none !important; }
 
       .stats-grid { grid-template-columns: repeat(2, 1fr); }
-      .stat-val { font-size: 17px; }
+      .stat-val { font-size: 18px; }
 
-      table { min-width: 420px; }
-      .section-title { font-size: 8px; }
       .compliance-wrap { padding: 12px 14px; }
     }
 
@@ -536,7 +595,8 @@
       body { font-size: 10px; background: #fff; }
 
       /* ── insurance banner ── */
-      .ins-banner { padding: 12px 32px; }
+      .ins-banner { display: flex !important; padding: 12px 32px; }
+      .ins-banner-divider { display: flex !important; }
       .ins-banner-val { color: #111827 !important; }
 
       /* ── header: flip dark → white ── */
@@ -836,13 +896,13 @@ document.getElementById('ins-value').textContent  = vessel.insuredValue   || '�
     document.getElementById('vessel-cert-body').innerHTML = vc.map(c => {
       const s = certStatusClass(c.expires);
       return `<tr>
-        <td><strong>${escHtml(c.name)}</strong></td>
-        <td><span class="tag">${escHtml(c.category)}</span></td>
-        <td style="color:var(--txt2)">${escHtml(c.issuer)}</td>
-        <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
-        <td style="color:var(--txt3)">${fmtDate(c.issued)}</td>
-        <td style="font-weight:600">${fmtDate(c.expires)}</td>
-        <td class="${s.cls}">${s.label}</td>
+        <td data-label="Certificate"><strong>${escHtml(c.name)}</strong></td>
+        <td data-label="Category"><span class="tag">${escHtml(c.category)}</span></td>
+        <td data-label="Issuer" style="color:var(--txt2)">${escHtml(c.issuer)}</td>
+        <td data-label="Doc ref" style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
+        <td data-label="Issued" style="color:var(--txt3)">${fmtDate(c.issued)}</td>
+        <td data-label="Expires" style="font-weight:600">${fmtDate(c.expires)}</td>
+        <td data-label="Status" class="${s.cls}">${s.label}</td>
       </tr>`;
     }).join('');
   </script>
@@ -873,12 +933,12 @@ document.getElementById('ins-value').textContent  = vessel.insuredValue   || '�
             ${certs.map(c => {
               const s = certStatusClass(c.expires);
               return `<tr>
-                <td>${escHtml(c.name)}</td>
-                <td><span class="tag">${escHtml(c.category)}</span></td>
-                <td style="color:var(--txt2)">${escHtml(c.issuer)}</td>
-                <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
-                <td style="font-weight:600">${fmtDate(c.expires)}</td>
-                <td class="${s.cls}">${s.label}</td>
+                <td data-label="Certificate">${escHtml(c.name)}</td>
+                <td data-label="Category"><span class="tag">${escHtml(c.category)}</span></td>
+                <td data-label="Issuer" style="color:var(--txt2)">${escHtml(c.issuer)}</td>
+                <td data-label="Doc ref" style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(c.docRef||'—')}</td>
+                <td data-label="Expires" style="font-weight:600">${fmtDate(c.expires)}</td>
+                <td data-label="Status" class="${s.cls}">${s.label}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -897,13 +957,13 @@ document.getElementById('ins-value').textContent  = vessel.insuredValue   || '�
       const rows = recentDrills.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(d => {
         const crewNames = (d.crew||[]).map(id => FM.crewName(id)).filter(Boolean);
         return `<tr>
-          <td style="color:var(--txt3)">${fmtDate(d.date)}</td>
-          <td><strong>${escHtml(DRILL_LABELS[d.type] || d.type)}</strong></td>
-          <td style="color:var(--txt2)">${escHtml(FM.crewName(d.conductor))}</td>
-          <td style="color:var(--txt3)">${d.duration ? d.duration + ' min' : '—'}</td>
-          <td style="color:var(--txt3)">${escHtml(d.location || '—')}</td>
-          <td style="font-size:10px;color:var(--txt3)">${crewNames.length ? crewNames.join(', ') : '—'}</td>
-          <td class="status-ok">Completed</td>
+          <td data-label="Date" style="color:var(--txt3)">${fmtDate(d.date)}</td>
+          <td data-label="Type"><strong>${escHtml(DRILL_LABELS[d.type] || d.type)}</strong></td>
+          <td data-label="Conducted by" style="color:var(--txt2)">${escHtml(FM.crewName(d.conductor))}</td>
+          <td data-label="Duration" style="color:var(--txt3)">${d.duration ? d.duration + ' min' : '—'}</td>
+          <td data-label="Location" style="color:var(--txt3)">${escHtml(d.location || '—')}</td>
+          <td data-label="Crew present" style="font-size:10px;color:var(--txt3)">${crewNames.length ? crewNames.join(', ') : '—'}</td>
+          <td data-label="Status" class="status-ok">Completed</td>
         </tr>`;
       }).join('');
       document.getElementById('drills-wrap').innerHTML =
@@ -923,12 +983,12 @@ document.getElementById('ins-value').textContent  = vessel.insuredValue   || '�
       const rows = ncs.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(n => {
         const isOpen = n.status === 'open';
         return `<tr>
-          <td style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(n.ref)}</td>
-          <td style="color:var(--txt3)">${fmtDate(n.date)}</td>
-          <td><span class="tag">${escHtml(n.type.replace('-',' '))}</span></td>
-          <td class="td-desc"><strong>${escHtml(n.title)}</strong><br><span style="color:var(--txt3);font-size:10px">${escHtml(n.description)}</span></td>
-          <td class="${isOpen?'status-open':'status-closed'}">${isOpen?'Open':'Closed'}</td>
-          <td class="td-desc" style="font-size:10px;color:var(--txt3)">${n.correctiveAction ? escHtml(n.correctiveAction) : isOpen ? 'Pending' : '—'}</td>
+          <td data-label="Ref" style="font-family:monospace;font-size:10px;color:var(--txt3)">${escHtml(n.ref)}</td>
+          <td data-label="Date" style="color:var(--txt3)">${fmtDate(n.date)}</td>
+          <td data-label="Type"><span class="tag">${escHtml(n.type.replace('-',' '))}</span></td>
+          <td data-label="Description" class="td-desc"><strong>${escHtml(n.title)}</strong><br><span style="color:var(--txt3);font-size:10px">${escHtml(n.description)}</span></td>
+          <td data-label="Status" class="${isOpen?'status-open':'status-closed'}">${isOpen?'Open':'Closed'}</td>
+          <td data-label="Action" class="td-desc" style="font-size:10px;color:var(--txt3)">${n.correctiveAction ? escHtml(n.correctiveAction) : isOpen ? 'Pending' : '—'}</td>
         </tr>`;
       }).join('');
       document.getElementById('nc-wrap').innerHTML =
@@ -948,11 +1008,11 @@ document.getElementById('ins-value').textContent  = vessel.insuredValue   || '�
       const rows = meetings.slice().sort((a,b)=>b.date.localeCompare(a.date)).map(m => {
         const att = (m.attendees||[]).map(id=>FM.crewName(id)).filter(Boolean);
         return `<tr>
-          <td style="color:var(--txt3)">${fmtDate(m.date)}</td>
-          <td><strong>${escHtml(m.topic)}</strong></td>
-          <td style="color:var(--txt2)">${escHtml(FM.crewName(m.conductor))}</td>
-          <td style="color:var(--txt3)">${m.duration ? m.duration + ' min' : '—'}</td>
-          <td style="font-size:10px;color:var(--txt3)">${att.join(', ') || '—'}</td>
+          <td data-label="Date" style="color:var(--txt3)">${fmtDate(m.date)}</td>
+          <td data-label="Topic"><strong>${escHtml(m.topic)}</strong></td>
+          <td data-label="Conducted by" style="color:var(--txt2)">${escHtml(FM.crewName(m.conductor))}</td>
+          <td data-label="Duration" style="color:var(--txt3)">${m.duration ? m.duration + ' min' : '—'}</td>
+          <td data-label="Attendees" style="font-size:10px;color:var(--txt3)">${att.join(', ') || '—'}</td>
         </tr>`;
       }).join('');
       document.getElementById('meetings-wrap').innerHTML =
@@ -976,12 +1036,12 @@ document.getElementById('ins-value').textContent  = vessel.insuredValue   || '�
         const statusCls = p.status==='overdue'||p.status==='due' ? 'status-expired' : p.status==='due-soon' ? 'status-expiring' : 'status-valid';
         const statusLbl = p.status==='overdue'?'OVERDUE':p.status==='due'?'Due now':p.status==='due-soon'?'Due soon':'Upcoming';
         return `<tr>
-          <td><strong>${escHtml(p.task||p.asset||'—')}</strong></td>
-          <td style="font-size:10px;color:var(--txt3)">${escHtml(p.system||'—')}</td>
-          <td style="color:var(--txt3)">${escHtml(p.interval||'—')}</td>
-          <td style="color:var(--txt3)">${p.lastDate ? fmtDate(p.lastDate) : '—'}</td>
-          <td style="color:var(--txt3)">${p.dueHours ? p.dueHours.toLocaleString()+'h' : '—'}</td>
-          <td class="${statusCls}">${statusLbl}</td>
+          <td data-label="Task"><strong>${escHtml(p.task||p.asset||'—')}</strong></td>
+          <td data-label="System" style="font-size:10px;color:var(--txt3)">${escHtml(p.system||'—')}</td>
+          <td data-label="Interval" style="color:var(--txt3)">${escHtml(p.interval||'—')}</td>
+          <td data-label="Last done" style="color:var(--txt3)">${p.lastDate ? fmtDate(p.lastDate) : '—'}</td>
+          <td data-label="Due at" style="color:var(--txt3)">${p.dueHours ? p.dueHours.toLocaleString()+'h' : '—'}</td>
+          <td data-label="Status" class="${statusCls}">${statusLbl}</td>
         </tr>`;
       }).join('');
       document.getElementById('pms-wrap').innerHTML =
