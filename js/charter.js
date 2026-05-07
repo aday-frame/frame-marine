@@ -64,8 +64,7 @@ Charter.renderSidebar = function() {
 Charter.select = function(id) {
   Charter.selectedId = id;
   Charter.activeTab  = 'overview';
-  Charter.renderSidebar();
-  Charter.renderDetail();
+  navTo('charter', null, true);
 };
 
 /* ── DETAIL PANEL ── */

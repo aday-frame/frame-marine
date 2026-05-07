@@ -184,18 +184,11 @@
       </div>
 
       <!-- CHARTER -->
-      <div class="sec-lbl">Charter</div>
-
-      <div class="ni" data-page="charter" data-label="Charter" onclick="navTo('charter',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
-          <circle cx="8" cy="4" r="2"/>
-          <line x1="8" y1="6" x2="8" y2="14"/>
-          <path d="M4 9a4 4 0 008 0"/>
-          <line x1="2" y1="9" x2="4" y2="9"/>
-          <line x1="12" y1="9" x2="14" y2="9"/>
-        </svg>
-        <span class="ni-lbl">Charter</span>
+      <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Charter</span>
+        <button onclick="event.stopPropagation();Upgrade.show('charter')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(45,212,191,.12);color:#2dd4bf;border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
       </div>
+      <div id="charter-sb"></div>
 
       <!-- CREW -->
       <div class="sec-lbl">Crew</div>
