@@ -45,6 +45,44 @@ const Documents = (() => {
     return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + d + ', ' + y;
   }
 
+  function _alertBanner(expiring) {
+    if (!expiring.length) return '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:8px;margin-bottom:16px">
+      <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
+      <span style="font-size:12px;color:var(--yel);font-weight:500">${expiring.length} document${expiring.length > 1 ? 's' : ''} expiring within 90 days. Give them a look.</span>
+    </div>`;
+  }
+
+  function _tabBar(docs) {
+    return `<div style="display:flex;gap:4px;margin-bottom:16px;border-bottom:.5px solid var(--bd)">
+      ${CATS.map(c => `<button onclick="Documents.setTab('${c}')" class="tab-btn ${_tab===c ? 'tab-btn-active' : ''}">${c}${c !== 'All' ? ` (${docs.filter(d=>d.category===c).length})` : ''}</button>`).join('')}
+    </div>`;
+  }
+
+  function _docCard(d) {
+    const exp = _expStatus(d.expires);
+    const CAT_COL = { Registration:'#60A5FA', Insurance:'#A78BFA', Contracts:'#4ADE80', Manuals:'#FACC15' };
+    const col = CAT_COL[d.category] || 'var(--txt3)';
+    return `
+      <div class="doc-mob-card">
+        <div class="doc-mob-icon" style="background:${col}22;color:${col}">
+          <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h3.586a1 1 0 01.707.293L8.707 3.707A1 1 0 019.414 4H13a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/></svg>
+        </div>
+        <div class="doc-mob-body">
+          <div class="doc-mob-title">${escHtml(d.name)}</div>
+          <div class="doc-mob-meta">
+            <span class="badge ${exp.cls}" style="font-size:9px">${exp.label}</span>
+            ${d.expires ? `<span style="font-size:11px;color:var(--txt3)">${_fmtDate(d.expires)}</span>` : ''}
+            <span style="font-size:11px;color:var(--txt4)">${escHtml(d.category)}</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();Documents.view('${d.id}')">View</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();Documents.openEdit('${d.id}')">Edit</button>
+        </div>
+      </div>`;
+  }
+
   function render() {
     const wrap = document.getElementById('page-documents');
     if (!wrap) return;
@@ -52,37 +90,33 @@ const Documents = (() => {
     const visible = _tab === 'All' ? docs : docs.filter(d => d.category === _tab);
     const expiring = docs.filter(d => { const dd = _daysUntil(d.expires); return dd !== null && dd <= 90; });
 
+    const isMob = window.innerWidth <= 768;
+
+    const listContent = (() => {
+      if (!visible.length) return `<div style="color:var(--txt3);font-size:13px;padding:20px 0">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}documents on file. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Documents.openAdd()">Add document</button></div>`;
+      if (isMob) {
+        const cats = _tab === 'All' ? [...new Set(visible.map(d => d.category))] : [_tab];
+        return cats.map(cat => {
+          const items = visible.filter(d => d.category === cat);
+          if (!items.length) return '';
+          return `<div class="doc-mob-group-lbl">${escHtml(cat)}</div>${items.map(_docCard).join('')}`;
+        }).join('');
+      }
+      const cats = _tab === 'All' ? [...new Set(visible.map(d => d.category))] : null;
+      const tbody = cats
+        ? cats.map(cat => _GRP(cat) + visible.filter(d => d.category === cat).map(_docRow).join('')).join('')
+        : visible.map(_docRow).join('');
+      return `<div class="tbl-wrap"><table class="tbl">${_THEAD}<tbody>${tbody}</tbody></table></div>`;
+    })();
+
     wrap.innerHTML = `
-      <div style="padding:18px 20px 48px">
-
-        <!-- Expiry alert -->
-        ${expiring.length ? `
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:8px;margin-bottom:20px">
-          <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
-          <span style="font-size:12px;color:var(--yel);font-weight:500">${expiring.length} document${expiring.length > 1 ? 's' : ''} expiring within 90 days — review required</span>
-        </div>` : ''}
-
-        <!-- Tabs -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd);padding-bottom:0">
-          ${CATS.map(c => `
-            <button onclick="Documents.setTab('${c}')" class="tab-btn ${_tab===c ? 'tab-btn-active' : ''}">
-              ${c}${c !== 'All' ? ` (${docs.filter(d=>d.category===c).length})` : ''}
-            </button>`).join('')}
-        </div>
-
+      <div style="padding:18px 20px 80px">
+        ${_alertBanner(expiring)}
+        ${_tabBar(docs)}
         <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
           <button class="btn btn-primary btn-sm" onclick="Documents.openAdd()">+ Add document</button>
         </div>
-
-        ${(() => {
-          if (!visible.length) return `<div style="color:var(--txt3);font-size:13px;padding:20px 0">No ${_tab !== 'All' ? _tab.toLowerCase() + ' ' : ''}documents on file. <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Documents.openAdd()">Add document →</button></div>`;
-          const cats = _tab === 'All' ? [...new Set(visible.map(d => d.category))] : null;
-          const tbody = cats
-            ? cats.map(cat => _GRP(cat) + visible.filter(d => d.category === cat).map(_docRow).join('')).join('')
-            : visible.map(_docRow).join('');
-          return `<div class="tbl-wrap"><table class="tbl">${_THEAD}<tbody>${tbody}</tbody></table></div>`;
-        })()}
-
+        ${listContent}
       </div>
     `;
   }
@@ -147,7 +181,7 @@ const Documents = (() => {
           <input class="inp" id="doc-notes" value="${doc ? escHtml(doc.notes) : ''}" placeholder="Optional notes about this document">
         </div>
         <div style="background:var(--bg3);border-radius:8px;padding:12px;font-size:11px;color:var(--txt3);text-align:center">
-          📎 File upload coming soon — for now, enter the document details to track it
+          📎 File upload coming soon. For now, enter the document details to track it.
         </div>
         <div style="display:flex;gap:8px;justify-content:flex-end">
           ${editing ? `<button class="btn btn-ghost btn-sm" onclick="Documents.del('${doc.id}')">Delete</button>` : ''}

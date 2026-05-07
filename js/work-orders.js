@@ -203,6 +203,8 @@ WO.renderMobCards = function(wrap, list) {
   const pColors = { high: 'var(--red)', medium: '#f59e0b', low: 'var(--txt4)' };
   const pLabels = { high: 'High', medium: 'Medium', low: 'Low' };
 
+  const sysColors = { Propulsion:'#22D3EE', Electrical:'#FACC15', HVAC:'#A78BFA', Plumbing:'#60A5FA', 'Deck / Exterior':'#4ADE80', Stabilizers:'#F97316', Watermaker:'#60A5FA', 'Safety / Fire':'#F87171', Navigation:'#5E6AD2', 'AV / IT':'#34D399', Controls:'#FB923C' };
+
   const cards = list.map(w => {
     const pc      = pColors[w.priority] || 'var(--txt4)';
     const overdue = w.due && w.status !== 'done' && w.due < '2026-05-07';
@@ -210,9 +212,19 @@ WO.renderMobCards = function(wrap, list) {
     const cr      = FM.getCrew(w.assignee);
     const subtasksDone  = (w.subtasks || []).filter(s => s.done).length;
     const subtasksTotal = (w.subtasks || []).length;
+    const img     = (w.images || [])[0];
+    const sysCol  = sysColors[w.system] || 'var(--txt3)';
+
+    const thumbEl = img
+      ? `<img class="wo-mob-thumb" src="${escHtml(img)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholderEl = `<div class="wo-mob-thumb-ph" style="${img ? 'display:none' : ''}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${sysCol}" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
+      </div>`;
 
     return `
       <div class="wo-mob-card-row" data-id="${w.id}">
+        <div class="wo-mob-thumb-wrap">${thumbEl}${placeholderEl}</div>
         <div class="wo-mob-card-body">
           <div class="wo-mob-card-title">${escHtml(w.title)}</div>
           <div class="wo-mob-card-meta">

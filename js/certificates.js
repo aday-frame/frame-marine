@@ -66,7 +66,7 @@ const Certs = (() => {
         <!-- Summary bar -->
         ${alertCount ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(248,113,113,.08);border:.5px solid rgba(248,113,113,.25);border-radius:8px;margin-bottom:20px">
           <svg viewBox="0 0 16 16" fill="var(--red)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
-          <span style="font-size:12px;color:var(--red);font-weight:500">${alertCount} certificate${alertCount>1?'s':''} expiring within 90 days — review required</span>
+          <span style="font-size:12px;color:var(--red);font-weight:500">${alertCount} certificate${alertCount>1?'s':''} expiring within 90 days. Give them a look.</span>
         </div>` : ''}
 
         <!-- Tabs -->

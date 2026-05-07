@@ -60,8 +60,8 @@ Dash.render = function () {
   /* alerts */
   const alerts = [];
   overdueWOs.forEach(w => alerts.push({ sev:'red',   title:w.title, sub:'Work order · Due '+_f(w.due)+' · Overdue', go:"navTo('work-orders',document.querySelector('[data-page=work-orders]'))" }));
-  violations.forEach(r => r._crew && alerts.push({ sev:'red',   title:r._crew.name+' — Hours violation', sub:r.restHours+'h rest · minimum 10h required', go:"navTo('hours',document.querySelector('[data-page=hours]'))" }));
-  warnEng.forEach(e => alerts.push({ sev:e.status==='crit'?'red':'amber', title:e.name+' — '+e.status.toUpperCase(), sub:'Current: '+e.value+(e.unit?' '+e.unit:''), go:"navTo('monitoring',document.querySelector('[data-page=monitoring]'))" }));
+  violations.forEach(r => r._crew && alerts.push({ sev:'red',   title:r._crew.name+': Hours violation', sub:r.restHours+'h rest (minimum 10h required)', go:"navTo('hours',document.querySelector('[data-page=hours]'))" }));
+  warnEng.forEach(e => alerts.push({ sev:e.status==='crit'?'red':'amber', title:e.name, sub:'Current: '+e.value+(e.unit?' '+e.unit:''), go:"navTo('monitoring',document.querySelector('[data-page=monitoring]'))" }));
   highWOs.filter(w => !overdueWOs.includes(w)).forEach(w => alerts.push({ sev:'amber', title:w.title, sub:'High priority · Due '+_f(w.due), go:"navTo('work-orders',document.querySelector('[data-page=work-orders]'))" }));
 
   const allOK = alerts.length === 0;
@@ -238,7 +238,7 @@ Dash.render = function () {
               </div>`).join('') : `
               <div style="padding:18px 14px;display:flex;align-items:center;gap:10px">
                 <span style="font-size:18px">✓</span>
-                <span style="font-size:12px;color:var(--txt3)">No urgent items — vessel running normally.</span>
+                <span style="font-size:12px;color:var(--txt3)">No urgent items. Vessel running normally.</span>
               </div>`}
           </div>
 
@@ -329,7 +329,7 @@ Dash.render = function () {
               ${late ? '<div style="font-size:9px;color:var(--red)">Overdue</div>' : ''}
             </div>
           </div>`;
-        }).join('') : `<div style="padding:24px;text-align:center;font-size:12px;color:var(--txt3)">No open work orders — looking good.</div>`}
+        }).join('') : `<div style="padding:24px;text-align:center;font-size:12px;color:var(--txt3)">No open work orders. Looking good.</div>`}
       </div>
 
     </div>

@@ -25,7 +25,7 @@ const Inventory = (() => {
         ${low.length ? `
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:8px;margin-bottom:20px">
           <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
-          <span style="font-size:12px;color:var(--yel);font-weight:500">${low.length} item${low.length > 1 ? 's' : ''} at or below reorder level — restock required</span>
+          <span style="font-size:12px;color:var(--yel);font-weight:500">${low.length} item${low.length > 1 ? 's' : ''} at or below reorder level. Time to restock.</span>
         </div>` : ''}
 
         <!-- Tabs -->
@@ -52,7 +52,7 @@ const Inventory = (() => {
             return `<tr>
               <td style="font-weight:500;color:var(--txt)">${escHtml(i.name)}
                 ${isOut ? `<div style="font-size:10px;color:var(--red);font-weight:600">Out of stock</div>`
-                        : isLow ? `<div style="font-size:10px;color:var(--yel);font-weight:600">Low stock — reorder</div>` : ''}
+                        : isLow ? `<div style="font-size:10px;color:var(--yel);font-weight:600">Low stock, reorder soon</div>` : ''}
               </td>
               <td><span style="font-size:14px;font-weight:600;color:${col}">${i.qty}</span> <span style="font-size:11px;color:var(--txt3)">${escHtml(i.unit)}</span></td>
               <td style="color:var(--txt3)">${i.reorderAt} ${escHtml(i.unit)}</td>

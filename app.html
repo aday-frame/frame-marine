@@ -28,7 +28,7 @@
   <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
     <path d="M1 1l14 14M10.6 10.6A5 5 0 005.4 5.4M13.6 7.4A8 8 0 002.4 8.6M7.5 12.5a2 2 0 012.5-2"/>
   </svg>
-  Working offline — changes will sync when connected
+  Working offline. Changes will sync when you reconnect.
 </div>
 
 <!-- APP SHELL -->
@@ -235,6 +235,11 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M13 2H3a1 1 0 00-1 1v8a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M5 6h6M5 9h4"/></svg>
         <span class="ni-lbl">Requests</span>
         <span class="ni-count ni-count-or" id="sb-req-count" style="display:none"></span>
+      </div>
+
+      <div class="ni" data-page="reports" data-label="Reports" onclick="navTo('reports',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12h2V6H2v6zm3 0h2V3H5v9zm3 0h2V8H8v4zm3 0h2V1h-2v11zM1 13h14v1H1v-1z" opacity=".9"/></svg>
+        <span class="ni-lbl">Reports</span>
       </div>
 
       <div class="ni" data-page="pms" data-label="Maintenance" onclick="navTo('pms',this)">
@@ -603,12 +608,32 @@
       <!-- HUB -->
       <div id="page-hub" class="page"></div>
 
+      <!-- REPORTS -->
+      <div id="page-reports" class="page"></div>
+
       <!-- UPGRADE OVERLAY (shown over any locked page) -->
       <div id="upgrade-overlay"></div>
 
       <!-- SETTINGS -->
       <div id="page-settings" class="page">
         <div class="settings-wrap">
+
+          <!-- Preferences -->
+          <div class="settings-section">
+            <div class="settings-title">Preferences</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Appearance</div>
+                <div class="settings-row-sub">Switch between light and dark mode</div>
+              </div>
+              <div class="theme-seg" id="settings-theme-seg">
+                <button class="theme-seg-btn" id="seg-dark" onclick="Settings.setTheme('dark')">Dark</button>
+                <button class="theme-seg-btn" id="seg-light" onclick="Settings.setTheme('light')">Light</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notifications -->
           <div class="settings-section">
             <div class="settings-title">Notifications</div>
             <div class="settings-row">
@@ -623,7 +648,7 @@
             <div class="settings-row">
               <div>
                 <div class="settings-row-label">Engine alarms</div>
-                <div class="settings-row-sub">Immediate alert on critical engine parameters</div>
+                <div class="settings-row-sub">Critical engine parameter alerts go out immediately, any time</div>
               </div>
               <div class="toggle on" onclick="this.classList.toggle('on')">
                 <div class="toggle-thumb"></div>
@@ -632,7 +657,7 @@
             <div class="settings-row">
               <div>
                 <div class="settings-row-label">Work order assignments</div>
-                <div class="settings-row-sub">Notify when a WO is assigned to you</div>
+                <div class="settings-row-sub">Get notified when a work order is assigned to you</div>
               </div>
               <div class="toggle on" onclick="this.classList.toggle('on')">
                 <div class="toggle-thumb"></div>
@@ -647,10 +672,41 @@
                 <div class="toggle-thumb"></div>
               </div>
             </div>
+
+            <!-- Alert schedule -->
+            <div class="settings-schedule">
+              <div class="settings-schedule-hdr">
+                <div>
+                  <div class="settings-row-label" style="margin-bottom:2px">Alert schedule</div>
+                  <div class="settings-row-sub">Alerts (except engine) only fire during these hours</div>
+                </div>
+              </div>
+              <div class="settings-days">
+                <label class="day-chip"><input type="checkbox" checked><span>Mon</span></label>
+                <label class="day-chip"><input type="checkbox" checked><span>Tue</span></label>
+                <label class="day-chip"><input type="checkbox" checked><span>Wed</span></label>
+                <label class="day-chip"><input type="checkbox" checked><span>Thu</span></label>
+                <label class="day-chip"><input type="checkbox" checked><span>Fri</span></label>
+                <label class="day-chip"><input type="checkbox"><span>Sat</span></label>
+                <label class="day-chip"><input type="checkbox"><span>Sun</span></label>
+              </div>
+              <div class="settings-time-row">
+                <div class="settings-time-field">
+                  <label class="settings-row-sub" style="margin-bottom:4px;display:block">From</label>
+                  <input type="time" class="inp inp-sm" value="07:00">
+                </div>
+                <div class="settings-time-field">
+                  <label class="settings-row-sub" style="margin-bottom:4px;display:block">To</label>
+                  <input type="time" class="inp inp-sm" value="21:00">
+                </div>
+                <button class="btn btn-ghost btn-sm" style="align-self:flex-end" onclick="showToast('Schedule saved')">Save</button>
+              </div>
+            </div>
           </div>
 
+          <!-- Vessel -->
           <div class="settings-section">
-            <div class="settings-title">Vessel — Lady M</div>
+            <div class="settings-title">Vessel: Lady M</div>
             <div class="settings-row">
               <div>
                 <div class="settings-row-label">IMO / MMSI</div>
@@ -674,6 +730,7 @@
             </div>
           </div>
 
+          <!-- Account -->
           <div class="settings-section">
             <div class="settings-title">Account</div>
             <div class="settings-row">
@@ -693,6 +750,7 @@
               </div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -747,6 +805,7 @@
 <script src="js/budget.js"></script>
 <script src="js/hours.js"></script>
 <script src="js/documents.js"></script>
+<script src="js/reports.js"></script>
 <script src="js/upgrade.js"></script>
 <script src="js/offline.js"></script>
 
@@ -918,11 +977,34 @@ Hub.render = function() {
     </div>`;
 };
 
+/* ── SETTINGS MODULE ── */
+const Settings = window.Settings = {
+  setTheme(mode) {
+    document.documentElement.setAttribute('data-theme', mode);
+    localStorage.setItem('fm-theme', mode);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.content = mode === 'light' ? '#F4F4F1' : '#080808';
+    const moon = document.getElementById('theme-icon-moon');
+    const sun  = document.getElementById('theme-icon-sun');
+    if (moon) moon.style.display = mode === 'light' ? 'none' : '';
+    if (sun)  sun.style.display  = mode === 'light' ? '' : 'none';
+    Settings._syncSeg();
+    showToast(mode === 'light' ? 'Light mode on' : 'Dark mode on');
+  },
+  _syncSeg() {
+    const mode = document.documentElement.getAttribute('data-theme') || 'dark';
+    document.getElementById('seg-dark')?.classList.toggle('active', mode === 'dark');
+    document.getElementById('seg-light')?.classList.toggle('active', mode === 'light');
+  },
+  init() { Settings._syncSeg(); },
+};
+
 /* ── PAGE INIT HOOKS ── */
 document.addEventListener('DOMContentLoaded', () => {
   // Wire up work order filters
   WO.initFilters();
   WO.initSearch();
+  Settings.init();
 });
 
 // Show/hide chrome per page
@@ -1113,12 +1195,12 @@ function renderPMS() {
   if (overdue.length) {
     alertHtml = `<div style="display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(248,113,113,.08);border-bottom:.5px solid rgba(248,113,113,.25);flex-shrink:0">
       <svg viewBox="0 0 16 16" fill="var(--red)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
-      <span style="font-size:12px;color:var(--red);font-weight:500">${overdue.length} task${overdue.length > 1 ? 's' : ''} overdue — immediate attention required</span>
+      <span style="font-size:12px;color:var(--red);font-weight:500">${overdue.length} task${overdue.length > 1 ? 's' : ''} overdue. Needs attention now.</span>
     </div>`;
   } else if (dueSoon.length) {
     alertHtml = `<div style="display:flex;align-items:center;gap:10px;padding:10px 20px;background:rgba(251,191,36,.08);border-bottom:.5px solid rgba(251,191,36,.25);flex-shrink:0">
       <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
-      <span style="font-size:12px;color:var(--yel);font-weight:500">${dueSoon.length} task${dueSoon.length > 1 ? 's' : ''} coming due — schedule maintenance soon</span>
+      <span style="font-size:12px;color:var(--yel);font-weight:500">${dueSoon.length} task${dueSoon.length > 1 ? 's' : ''} coming up. Review your maintenance schedule.</span>
     </div>`;
   }
 
@@ -1417,7 +1499,7 @@ function fleetLogHours(craftId, craftName) {
   const craft = (FM.fleet || []).find(c => c.id === craftId);
   openModal(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <span style="font-weight:600;font-size:15px">Log hours — ${craftName}</span>
+      <span style="font-weight:600;font-size:15px">Log hours: ${craftName}</span>
       <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">
@@ -1454,7 +1536,7 @@ window.submitFleetHours = submitFleetHours;
 function fleetFuelUp(craftId, craftName) {
   openModal(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <span style="font-weight:600;font-size:15px">Fuel up — ${craftName}</span>
+      <span style="font-weight:600;font-size:15px">Fuel up: ${craftName}</span>
       <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">
@@ -1499,7 +1581,7 @@ window.submitFleetFuel = submitFleetFuel;
 function fleetCharge(craftId, craftName) {
   openModal(`
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <span style="font-weight:600;font-size:15px">Charge — ${craftName}</span>
+      <span style="font-weight:600;font-size:15px">Charge: ${craftName}</span>
       <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px">

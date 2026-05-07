@@ -54,6 +54,7 @@ function navTo(pageId, clickedEl, skipPush) {
     documents:     'Documents',
     requests:      'Requests',
     hub:           'Hub',
+    reports:       'Reports',
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -85,6 +86,8 @@ function navTo(pageId, clickedEl, skipPush) {
     documents:     () => window.Documents && Documents.render(),
     requests:      () => window.Requests && Requests.render(),
     hub:           () => window.Hub && Hub.render(),
+    reports:       () => window.Reports && Reports.render(),
+    settings:      () => window.Settings && Settings.init(),
   };
   if (inits[pageId]) inits[pageId]();
 

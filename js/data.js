@@ -71,6 +71,7 @@ FM.workOrders = [
       { author: 'c2', time: '29 Apr · 08:45', text: 'Owner arrives 3 May. Engine must be cleared before departure.' },
     ],
     parts: ['CAT thermostat 2W-8900', 'Coolant 50/50 premix (5L)'],
+    images: ['img/wo-001a.jpg', 'img/wo-001b.jpg'],
   },
   {
     id: 'WO-002', vessel: 'v1',
@@ -88,6 +89,7 @@ FM.workOrders = [
       { author: 'c3', time: '27 Apr · 14:30', text: 'Weep is slow — about 5ml/day. Monitoring. Will need seal replacement before transatlantic.' },
     ],
     parts: [],
+    images: ['img/wo-002.jpg'],
   },
   {
     id: 'WO-003', vessel: 'v1',
@@ -153,6 +155,7 @@ FM.workOrders = [
     ],
     comments: [],
     parts: [],
+    images: ['img/wo-007.jpg'],
   },
   {
     id: 'WO-007', vessel: 'v1',

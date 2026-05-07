@@ -120,7 +120,7 @@ const Hours = (() => {
         <div class="tbl-scroll">
         <div style="background:var(--bg2);min-width:560px">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:.5px solid var(--bd)">
-            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">Daily record — ${escHtml(selected.name)}</span>
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">Daily record: ${escHtml(selected.name)}</span>
             <button class="btn btn-primary btn-sm" onclick="Hours.openLog()">+ Log hours</button>
           </div>
           ${days.map(date => {
@@ -228,7 +228,7 @@ const Hours = (() => {
     }
     closeModal();
     render();
-    const viol = rest < 10 ? '⚠ Violation — less than 10h rest' : '';
+    const viol = rest < 10 ? '⚠ Violation: less than 10h rest' : '';
     showToast(viol || 'Hours logged ✓');
   }
 
