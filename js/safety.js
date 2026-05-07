@@ -38,38 +38,33 @@ const Safety = (() => {
     const openNCs    = ncs.filter(n => n.status === 'open').length;
     const scheduledD = drills.filter(d => d.status === 'scheduled').length;
 
-    wrap.innerHTML = `
-      <div style="padding:18px 20px 40px">
+    const completed = drills.filter(d => d.status === 'completed').length;
 
-        <!-- Summary pills -->
-        <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-          ${_statPill(drills.filter(d=>d.status==='completed').length, 'Drills completed', 'var(--grn)')}
-          ${_statPill(scheduledD, 'Drills scheduled', 'var(--yel)')}
-          ${_statPill(openNCs, 'Open non-conformances', openNCs ? 'var(--red)' : 'var(--txt3)')}
-          ${_statPill(meetings.length, 'Safety meetings', 'var(--txt3)')}
+    wrap.innerHTML = `
+      <div style="padding:0 0 40px">
+
+        <!-- Stat bar -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd);margin-bottom:0">
+          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${completed}</div><div class="wo-stat-lbl">Drills completed</div></div>
+          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${scheduledD}</div><div class="wo-stat-lbl">Drills scheduled</div></div>
+          <div class="wo-stat"><div class="wo-stat-num" style="${openNCs ? 'color:var(--red)' : ''}">${openNCs}</div><div class="wo-stat-lbl">Open non-conformances</div></div>
+          <div class="wo-stat" style="border-right:none"><div class="wo-stat-num">${meetings.length}</div><div class="wo-stat-lbl">Safety meetings</div></div>
         </div>
 
         <!-- Tabs -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd)">
+        <div style="display:flex;gap:4px;padding:0 20px;margin-top:20px;margin-bottom:20px;border-bottom:.5px solid var(--bd)">
           <button onclick="Safety.tab('drills')"   id="st-drills"   class="tab-btn ${_tab==='drills'?'tab-btn-active':''}">Drills</button>
           <button onclick="Safety.tab('nc')"       id="st-nc"       class="tab-btn ${_tab==='nc'?'tab-btn-active':''}">Non-conformances ${openNCs?`<span class="ni-count ni-count-red" style="position:relative;top:-1px">${openNCs}</span>`:''}</button>
           <button onclick="Safety.tab('meetings')" id="st-meetings" class="tab-btn ${_tab==='meetings'?'tab-btn-active':''}">Safety meetings</button>
         </div>
 
-        <div id="safety-content"></div>
+        <div id="safety-content" style="padding:0 20px"></div>
       </div>
 
       ${_modalHtml()}
     `;
 
     _renderContent();
-  }
-
-  function _statPill(n, label, color) {
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border:.5px solid var(--bd);border-radius:8px">
-      <span style="font-size:16px;font-weight:600;color:${color}">${n}</span>
-      <span style="font-size:11px;color:var(--txt3)">${label}</span>
-    </div>`;
   }
 
   function _renderContent() {
@@ -225,25 +220,40 @@ const Safety = (() => {
     const meetings = (FM.safetyMeetings || []).filter(m => m.vessel === vessel.id)
       .sort((a, b) => b.date.localeCompare(a.date));
 
-    let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    const actions = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
       <button class="btn btn-primary btn-sm" onclick="Safety.openMeeting()">+ Log meeting</button>
     </div>`;
 
-    if (!meetings.length) return html + `<div style="font-size:13px;color:var(--txt3);padding:12px 0">No safety meetings logged yet.</div>`;
+    if (!meetings.length) return actions + `<div class="empty" style="padding:40px 0"><div class="empty-title">No meetings logged</div><div class="empty-sub">Log your first safety meeting above</div></div>`;
 
-    html += meetings.map(m => `
-      <div style="padding:16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px">${escHtml(m.topic)}</div>
-        <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${fmtDate(m.date)} · Conducted by ${escHtml(FM.crewName(m.conductor))} · ${m.duration} min</div>
-        ${m.attendees && m.attendees.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${m.attendees.map(cid=>`<div style="width:22px;height:22px;border-radius:50%;background:${FM.crewColor(cid)}22;color:${FM.crewColor(cid)};font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center" title="${FM.crewName(cid)}">${FM.crewInitials(cid)}</div>`).join('')}<span style="font-size:10px;color:var(--txt3);align-self:center;margin-left:4px">${m.attendees.length} crew</span></div>` : ''}
-        ${m.notes ? `<div style="font-size:12px;color:var(--txt2);line-height:1.5">${escHtml(m.notes)}</div>` : ''}
-        <div style="display:flex;justify-content:flex-end;margin-top:8px">
-          <button class="btn btn-ghost btn-xs" onclick="Safety.delMeeting('${m.id}')">Remove</button>
-        </div>
-      </div>
-    `).join('');
+    const rows = meetings.map(m => {
+      const avatars = (m.attendees || []).slice(0, 5).map(cid =>
+        `<span style="width:20px;height:20px;border-radius:50%;background:${FM.crewColor(cid)}22;color:${FM.crewColor(cid)};font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center" title="${FM.crewName(cid)}">${FM.crewInitials(cid)}</span>`
+      ).join('');
+      return `<tr>
+        <td>
+          <div style="font-size:13px;font-weight:500;color:var(--txt)">${escHtml(m.topic)}</div>
+          ${m.notes ? `<div style="font-size:11px;color:var(--txt3);margin-top:1px;max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(m.notes)}</div>` : ''}
+        </td>
+        <td style="font-size:12px;color:var(--txt2);white-space:nowrap">${fmtDate(m.date)}</td>
+        <td style="font-size:12px;color:var(--txt3)">${m.duration ? m.duration + ' min' : '—'}</td>
+        <td style="font-size:12px;color:var(--txt2)">${escHtml(FM.crewName(m.conductor))}</td>
+        <td><div style="display:flex;gap:3px">${avatars}${m.attendees && m.attendees.length > 5 ? `<span style="font-size:10px;color:var(--txt3);align-self:center;margin-left:3px">+${m.attendees.length-5}</span>` : ''}</div></td>
+        <td><button class="btn btn-ghost btn-xs" onclick="Safety.delMeeting('${m.id}')">Remove</button></td>
+      </tr>`;
+    }).join('');
 
-    return html;
+    return actions + `<div class="tbl-wrap"><table class="tbl">
+      <thead><tr>
+        <th>Topic</th>
+        <th style="width:110px">Date</th>
+        <th style="width:80px">Duration</th>
+        <th style="width:150px">Conducted by</th>
+        <th style="width:100px">Attendees</th>
+        <th style="width:80px"></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
   }
 
   /* ── MODAL ── */

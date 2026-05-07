@@ -98,6 +98,9 @@ function navTo(pageId, clickedEl, skipPush) {
   };
   if (inits[pageId]) inits[pageId]();
 
+  // Scroll content to top
+  document.querySelector('.page-body')?.scrollTo(0, 0);
+
   // Close mobile sidebar + backdrop
   document.getElementById('mob-sb')?.classList.remove('mob-open');
   document.getElementById('mob-backdrop')?.classList.remove('open');
@@ -270,6 +273,21 @@ function switchVessel(vesselId) {
     calendar:      () => Cal?.render(),
     team:          () => Team?.render(),
     chat:          () => Chat?.render(),
+    safety:        () => Safety?.render(),
+    inventory:     () => Inventory?.render(),
+    requests:      () => Requests?.render(),
+    certificates:  () => Certs?.render(),
+    logbook:       () => window.renderLogbook?.(),
+    pms:           () => window.renderPMS?.(),
+    fleet:         () => window.renderFleet?.(),
+    documents:     () => Documents?.render(),
+    hours:         () => Hours?.render(),
+    kb:            () => KB?.render(),
+    reports:       () => Reports?.render(),
+    checklists:    () => window.renderChecklists?.(),
+    budget:        () => Budget?.render(),
+    hub:           () => Hub?.render(),
+    owner:         () => Owner?.render(),
   };
   if (inits[App.currentPage]) inits[App.currentPage]();
 
@@ -447,18 +465,33 @@ function openManageVessels() {
       </div>
     </div>`).join('');
 
+  const propRows = (FM.properties || []).map(p => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--bd)">
+      <div style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--txt)">${escHtml(p.name)}</div>
+        <div style="font-size:11px;color:var(--txt3)">${escHtml(p.type)} · ${escHtml(p.location)}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-danger btn-xs" onclick="deleteProperty('${p.id}','${escHtml(p.name).replace(/'/g,"\\'")}')">Remove</button>
+      </div>
+    </div>`).join('');
+
   openModal(`
     <div style="display:flex;flex-direction:column;gap:20px">
       <div>
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:12px">Your vessels</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#60A5FA;margin-bottom:12px">Marine</div>
         ${vesselRows}
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" onclick="openAddVessel()">+ Add vessel</button>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn btn-primary" onclick="openAddVessel()">+ Add vessel</button>
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#4ADE80;margin-bottom:12px">Properties</div>
+        ${propRows || '<div style="font-size:12px;color:var(--txt3);padding:8px 0">No properties added yet.</div>'}
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" onclick="openAddProperty()">+ Add property</button>
       </div>
       <div style="font-size:11px;color:var(--txt4);text-align:center">To transfer a vessel, the new owner must have a Frame account.</div>
     </div>
-  `, 'Manage vessels');
+  `, 'Manage assets');
 }
 window.openManageVessels = openManageVessels;
 
@@ -523,6 +556,70 @@ function saveNewVessel(e) {
   showToast(name + ' added', 'ok');
 }
 window.saveNewVessel = saveNewVessel;
+
+function openAddProperty() {
+  openModal(`
+    <form onsubmit="saveNewProperty(event)" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Property name *</label>
+          <input class="inp" id="ap-name" placeholder="Mallorca Villa" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Type *</label>
+          <select class="inp" id="ap-type">
+            <option>Villa</option><option>Apartment</option><option>Chalet</option><option>Condo</option><option>Estate</option><option>Penthouse</option><option>Other</option>
+          </select>
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Location *</label>
+          <input class="inp" id="ap-location" placeholder="Palma, Mallorca" required>
+        </div>
+        <div style="grid-column:1/-1">
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Description</label>
+          <input class="inp" id="ap-desc" placeholder="e.g. 6BR villa with pool and sea views">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="openManageVessels()">Back</button>
+        <button type="submit" class="btn btn-primary btn-sm">Add property</button>
+      </div>
+    </form>
+  `, 'Add property');
+}
+window.openAddProperty = openAddProperty;
+
+function saveNewProperty(e) {
+  e.preventDefault();
+  const name     = document.getElementById('ap-name').value.trim();
+  const type     = document.getElementById('ap-type').value;
+  const location = document.getElementById('ap-location').value.trim();
+  const desc     = document.getElementById('ap-desc').value.trim();
+  if (!name || !location) return;
+  const colors = ['#F97316','#60A5FA','#A78BFA','#4ADE80','#FACC15','#F87171'];
+  const newP = {
+    id: 'p' + Date.now(), name, type, location, desc,
+    color: colors[(FM.properties || []).length % colors.length],
+    status: 'vacant', guests: 0, checkIn: null, checkOut: null,
+    staff: 0, openIssues: 0,
+  };
+  if (!FM.properties) FM.properties = [];
+  FM.properties.push(newP);
+  renderVesselDropdown();
+  closeModal();
+  showToast(name + ' added', 'ok');
+}
+window.saveNewProperty = saveNewProperty;
+
+function deleteProperty(id, name) {
+  if (!confirm('Remove ' + name + ' from your portfolio?')) return;
+  FM.properties = (FM.properties || []).filter(p => p.id !== id);
+  if (App.currentVesselId === id) switchVessel(FM.vessels[0]?.id || 'v1');
+  renderVesselDropdown();
+  closeModal();
+  showToast(name + ' removed');
+}
+window.deleteProperty = deleteProperty;
 
 function openTransferVessel(vesselId) {
   const v = FM.vessels.find(x => x.id === vesselId);
