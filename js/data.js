@@ -1065,3 +1065,338 @@ FM.teamLabel     = t => ({ engineering: 'Engineering', deck: 'Deck', interior: '
 FM.crewColor = id => { const c = FM.getCrew(id); return c ? c.color : '#9A9A92'; };
 FM.crewInitials = id => { const c = FM.getCrew(id); return c ? c.initials : '—'; };
 FM.crewName = id => { const c = FM.getCrew(id); return c ? c.name : 'Unassigned'; };
+
+/* ── KNOWLEDGE BASE ── */
+FM.kbArticles = [
+
+  /* PROPULSION */
+  {
+    id:'kb-p1', vessel:'v1', system:'propulsion', title:'Daily Engine Checks',
+    summary:'Pre-departure checklist for both main engines before every underway.',
+    content:'Run these checks every morning before departure or any planned engine start. Both port and starboard engines follow the same procedure. Allow 5–10 minutes per engine.',
+    steps:[
+      'Confirm bilge is clear before entering engine room — no standing water.',
+      'Check port engine oil level: dipstick should read between MIN and MAX. Top up with Caterpillar DEO-ULS 15W-40 if below halfway.',
+      'Check starboard engine oil level in the same way.',
+      'Inspect coolant overflow bottle on each engine — should be at COLD FULL mark.',
+      'Check raw water strainers: basket should be clear of debris. Clean if more than one-third blocked.',
+      'Visually inspect all raw water and coolant hoses for softness, cracking, or weeping at clamps.',
+      'Confirm seacocks for engine raw water intakes are fully open (handle parallel to pipe).',
+      'Check gearbox oil level (dipstick beside transmission) — both sides.',
+      'Confirm throttles are in neutral before attempting to start.',
+      'Start engines, confirm raw water flow from exhaust within 20 seconds of start.',
+    ],
+    notes:[
+      'If raw water does not appear at exhaust within 30 seconds, shut down immediately and inspect impeller.',
+      'Record hours at each check in the engine log — useful for scheduling 250hr service intervals.',
+      'Fresh oil on the bilge floor around the sump is not normal. Log it and investigate before departing.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-03-10', author:'Chief Eng. Santos',
+  },
+  {
+    id:'kb-p2', vessel:'v1', system:'propulsion', title:'Engine Service Intervals',
+    summary:'Scheduled maintenance milestones for main engines, gearboxes, and shafts.',
+    content:"Lady M's main engines are twin Caterpillar C18 diesels. All service intervals below are based on engine hours shown on the ECM display at the helm, not elapsed calendar time.",
+    steps:[],
+    notes:[],
+    body:[
+      { heading:'250-Hour Service', items:['Engine oil and filter change (both engines)', 'Gearbox oil check and top-up', 'Fuel water separators: drain and inspect element', 'Belt tension check on all auxiliary drives', 'Raw water impeller inspection (replace if any vane deformation)'] },
+      { heading:'500-Hour Service', items:['All 250hr items', 'Replace raw water impellers (mandatory)', 'Zinc anodes: inspect and replace if more than 50% consumed', 'Coolant sample for analysis', 'Valve clearance check (Cat-certified only)', 'Injector cleaning and spray pattern test'] },
+      { heading:'1,000-Hour Service', items:['All 500hr items', 'Full injector replacement', 'Turbocharger inspection', 'Heat exchanger cleaning', 'Flexible engine mounts: inspect for deterioration'] },
+      { heading:'Annual (regardless of hours)', items:['Fuel polishing — both day tanks and main tank', 'Shaft seal inspection (lip seal or dripless)', 'Propeller shaft alignment check', 'Cutlass bearing condition check', 'Intercooler cleaning'] },
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-01-20', author:'Chief Eng. Santos',
+  },
+  {
+    id:'kb-p3', vessel:'v1', system:'propulsion', title:'Overheating Alarm — First Response',
+    summary:'What to do if a high-temperature alarm fires on either main engine.',
+    content:'A high coolant or exhaust temperature alarm requires immediate action. Do not ignore and hope it clears. Overheating for even a few minutes can cause serious internal damage.',
+    steps:[
+      'Note which engine (port or starboard) and what parameter (coolant temp, exhaust temp, or raw water flow alarm).',
+      'Reduce throttle to idle on the affected engine immediately.',
+      'If underway, engage the other engine to maintain steerage.',
+      'Check raw water flow at the exhaust: if absent or weak, the impeller has likely failed.',
+      'Check raw water strainer basket: if blocked, clear it with engine at idle.',
+      'If raw water is flowing normally, check coolant level in the overflow bottle — a sudden drop indicates a hose failure or head gasket issue.',
+      'If alarm does not clear within 2 minutes at idle, shut down the engine.',
+      'Do not restart until root cause is identified and corrected.',
+    ],
+    notes:[
+      'The most common cause is a failed raw water impeller. Keep two spare impellers per engine in the parts locker.',
+      'Impeller replacement takes approximately 20 minutes with the right tool (impeller puller is in the red toolbox).',
+      'A blocked raw water strainer is the second most common cause — check this first as it takes 60 seconds to clear.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-02-14', author:'Chief Eng. Santos',
+  },
+
+  /* ELECTRICAL */
+  {
+    id:'kb-e1', vessel:'v1', system:'electrical', title:'Shore Power Connection',
+    summary:'Connecting and disconnecting 50A shore power at a marina.',
+    content:"Lady M accepts 50A / 240V shore power via the connector on the starboard aft deck. Always follow this sequence to avoid arcing, damage to the inverter/charger, or tripping marina breakers.",
+    steps:[
+      'At the main panel, set the SHORE POWER selector to OFF.',
+      'At the marina pedestal, confirm pedestal breaker is off before handling the cable.',
+      'Inspect the shore cord connector and receptacle for damage or corrosion.',
+      'Connect shore cord to vessel first, then to marina pedestal.',
+      'Turn on the marina pedestal breaker.',
+      'On the vessel main panel, turn SHORE POWER selector to ON.',
+      'Confirm the green SHORE POWER AVAILABLE light is illuminated on the panel.',
+      'Set INVERTER/CHARGER to SHORE mode (Victron Quattro: press MODE until SHORE is shown).',
+      'Confirm battery charger has started: check Victron VRM display or Color Control GX.',
+    ],
+    notes:[
+      'If the marina breaker trips immediately, the shore cord or vessel wiring has a fault. Do not reset and retry — investigate.',
+      'In tropical marinas (Caribbean), always coil shore cord off the dock to prevent water ingress at the pedestal end.',
+      'Disconnection sequence is the reverse: vessel selector OFF, then pedestal breaker OFF, then unplug pedestal, then vessel.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-01-08', author:'Chief Eng. Santos',
+  },
+  {
+    id:'kb-e2', vessel:'v1', system:'electrical', title:'Generator Transfer Procedure',
+    summary:'Switching from shore power to generator and back without interruption.',
+    content:'Use this procedure when leaving a berth, during power outages, or when shore power quality is poor. The Victron Quattro inverter/charger handles automatic transfer between shore and generator — this procedure is for controlled manual transfer.',
+    steps:[
+      'Start the generator from the engine room panel or helm station.',
+      'Allow generator to warm up at no load for 2 minutes.',
+      'Confirm generator voltage and frequency are stable: should read 240V ±5% and 50Hz ±1Hz on the Maretron display.',
+      'At the main switchboard, turn the GENERATOR ACB breaker to ON — the transfer will happen automatically via the Victron.',
+      'Turn the SHORE POWER selector to OFF.',
+      'Confirm all critical loads (AC, fridge, nav electronics) remained on through the transfer.',
+    ],
+    notes:[
+      'Never turn off shore power before starting the generator — there will be a power gap that resets all electronics.',
+      'The generator should not be loaded to more than 80% of its rated 50kVA. Shed large loads (electric cooker, watermaker) before transfer if vessel is fully loaded.',
+      'To return to shore power: connect shore cord first, confirm availability light, then ACB transfer back, then switch generator to cool-down, then shut down after 3 min.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-01-08', author:'Chief Eng. Santos',
+  },
+
+  /* NAVIGATION */
+  {
+    id:'kb-n1', vessel:'v1', system:'navigation', title:'Passage Planning Checklist',
+    summary:'Everything to confirm before departing on any offshore or coastal passage.',
+    content:"The captain must complete this checklist and sign the logbook before any passage over 20nm or when overnight sailing is expected.",
+    steps:[
+      'Download latest weather forecast from PredictWind Pro for route and ETA window.',
+      'Check NAVTEX and SafetyNET for any NAVAREA IV notices, TSS advisories, or range activities on route.',
+      'Plot waypoints on chart plotter and confirm route clears all hazards with minimum 0.5nm clearance.',
+      'Calculate ETA and fuel burn at planned speed — confirm sufficient fuel in tank (minimum 30% reserve at destination).',
+      'File a voyage plan with marina or agent at destination and leave copy with shore contact.',
+      'Confirm all navigation lights are functioning (run test from helm panel).',
+      'Test VHF Ch16 and SSB (if fitted) before departure.',
+      'Brief all crew on passage route, expected conditions, watch rotation, and emergency muster points.',
+      'Confirm SART and EPIRB are in bracket and hydrostatic release is within service date.',
+      'Check radar is operational — run a brief scan before departure.',
+    ],
+    notes:[
+      'Night passages require a mandatory minimum of two qualified crew on watch rotation.',
+      'Log departure time, position, and weather conditions in the deck log before leaving harbour.',
+      'Caribbean squall season (July–November): be particularly cautious of convective weather between 14:00–18:00 local.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-03-01', author:'Capt. Martinez',
+  },
+  {
+    id:'kb-n2', vessel:'v1', system:'navigation', title:'GMDSS Daily Radio Check',
+    summary:'Daily DSC test and radio check required by SOLAS and MCA for Class A vessels.',
+    content:'Lady M is equipped with Icom M605 VHF with DSC controller and Icom M802 SSB. GMDSS routine tests must be logged daily while at sea.',
+    steps:[
+      'Press MENU on Icom M605 → DSC → TEST CALL.',
+      'Select DSC DISTRESS TEST (not a real distress call — this is the pink test button sequence).',
+      'If in range of a coast station, a test call will confirm DSC is operational. Log the response.',
+      'Tune M802 SSB to the appropriate offshore working frequency (4125 kHz Caribbean).',
+      'Make a radio check call: "All stations, all stations, this is MY Lady M, MMSI 319123456, radio check, over."',
+      'Log result in deck log with time, frequency, and any response received.',
+    ],
+    notes:[
+      'MMSI for Lady M is 319123456. Confirm this is programmed into both the M605 and M802 DSC controllers.',
+      'EPIRB registered to Lady M: Jotron Tron 60S, 406MHz, beacon ID ending in 456. Registration must be renewed annually with COSPAS-SARSAT.',
+      'Do not accidentally send a real distress call during testing. The pink button on the M605 requires a 3-second hold to initiate — do not hold for more than 1 second during test.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2025-11-15', author:'Capt. Martinez',
+  },
+
+  /* PLUMBING & WATERMAKER */
+  {
+    id:'kb-w1', vessel:'v1', system:'plumbing', title:'Watermaker Daily Start & Stop',
+    summary:'How to run and shut down the Spectra Newport 1000 watermaker for daily freshwater production.',
+    content:'The watermaker produces 1,000 litres per hour of fresh water. A typical run produces enough water for one full day of operations in about 90 minutes. Run early morning to avoid peak electrical load.',
+    steps:[
+      'Open the sea water supply seacock for the watermaker (located starboard forward in the engine room, labeled WMAKER IN).',
+      'Check the pre-filter housing — replace cartridge if visually brown or if pressure gauge reads more than 10 PSI drop across it.',
+      'Turn the power switch ON at the watermaker control panel.',
+      'Set MODE to PRODUCTION and press START.',
+      'For the first 3 minutes, fresh water output is diverted to drain (flush cycle) — this is normal.',
+      'After flush, open the fresh water line valve to route output to the main tank.',
+      'Monitor product water TDS on the display — should read below 500 ppm. Above 1,000 ppm indicates membrane or system issue.',
+      'To stop: press STOP on the panel. The unit runs a short flush cycle automatically.',
+      'Close the seacock after the system fully stops.',
+    ],
+    notes:[
+      'Never run the watermaker in a marina, harbour, or close to a fuel dock — contaminated intake will damage the membranes.',
+      'If the unit has been idle for more than 3 days, run a 15-minute pickle/preservation flush before returning to production mode.',
+      'Fresh water tanks on Lady M hold 5,000 litres total across two tanks. Check the tank gauge before and after each run.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-02-28', author:'Chief Eng. Santos',
+  },
+  {
+    id:'kb-w2', vessel:'v1', system:'plumbing', title:'Bilge Pump Testing',
+    summary:'Weekly manual test procedure to confirm all bilge pumps are functional.',
+    content:'Lady M has six electric bilge pumps: engine room (port and starboard), forward bilge, aft bilge, lazarette, and tender garage. Each should be tested manually once per week and during safety checks.',
+    steps:[
+      'Locate each bilge pump float switch and bilge control panel (starboard side, engine room entry).',
+      'On the panel, turn each zone switch to MAN (manual) — the pump should activate immediately.',
+      'Confirm the pump can be heard running and that water is being expelled at the overboard discharge.',
+      'Return switch to AUTO after confirming operation.',
+      'Check for any unusual sounds (dry running, grinding) that may indicate pump wear.',
+      'Inspect bilge for any unusual oily sheen, dark water, or floating debris — log any concerns.',
+    ],
+    notes:[
+      'The engine room bilge pumps are set to auto-activate at 25mm water depth. A manual test does not test float switch function — wiggle the float manually to confirm switch activation.',
+      'Oil in the bilge must not be pumped overboard under MARPOL. Collect in the sludge tank and discharge at a certified facility. Log all bilge water disposals.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2025-12-05', author:'Chief Eng. Santos',
+  },
+
+  /* HVAC */
+  {
+    id:'kb-h1', vessel:'v1', system:'hvac', title:'AC System Startup',
+    summary:'Bringing the main chiller and zone units online at the start of the season or after a lay-up.',
+    content:'Lady M runs a chilled-water central AC system by Marine Air. There is one main seawater-cooled chiller and individual fan-coil units in each space. This startup procedure is for beginning of season or after more than 2 weeks with system off.',
+    steps:[
+      'Open the raw water seacock for the chiller (marked HVAC CIRC, aft starboard engine room).',
+      'Check the raw water strainer basket for the chiller circuit — clean if necessary.',
+      'At the main electrical panel, turn HVAC MAIN breaker to ON.',
+      'At the chiller control panel (forward engine room bulkhead), set to AUTO.',
+      'Allow the chiller 10 minutes to reach set temperature before turning on zone fan-coil units.',
+      'Turn on individual cabin thermostats — set to AUTO, fan MEDIUM, desired temperature.',
+      'Check chiller display for any active fault codes after 15 minutes of operation.',
+    ],
+    notes:[
+      'In hot weather (ambient above 35°C), the chiller may struggle to reach set point. This is normal — reduce AC load by closing external hatches and blinds.',
+      'Weekly: run all fan-coil units on maximum fan speed for 30 minutes to prevent mould build-up in coil drain trays.',
+      'Monthly: check and clean condensate drain lines on each zone unit. Blocked drains cause ceiling water damage.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-04-01', author:'Chief Eng. Santos',
+  },
+
+  /* SAFETY */
+  {
+    id:'kb-s1', vessel:'v1', system:'safety', title:'Emergency Shutdown Procedure',
+    summary:'How to safely shut down all main systems in the event of fire, flooding, or vessel emergency.',
+    content:"The emergency stop panel is located at the helm station (red panel, starboard side) and at the engine room entry. Know where both are located before every voyage. This procedure is for 'abandon or fight' scenarios where shutting down machinery is required.",
+    steps:[
+      'Sound the general alarm (helm panel, red ALARM button) before taking any further action.',
+      'If fire: activate the appropriate fire suppression system zone at the helm panel.',
+      'At the emergency stop panel, press ENGINE ROOM E-STOP to shut down both main engines simultaneously.',
+      'Shut down the generator using the generator E-STOP button on the same panel.',
+      'Turn the MAIN AC PANEL breaker to OFF to isolate AC distribution.',
+      'Close the fuel supply valves at the day tanks — port and starboard, engine room aft bulkhead.',
+      'Close all sea cocks if flooding: forward bilge, engine room intakes, AC chiller intake.',
+      'Confirm EPIRB and SART are removed from bracket and ready to deploy if abandoning vessel.',
+    ],
+    notes:[
+      'Shutting down both engines removes all propulsion and steering. Only do this if the risk from continuing to run the engines exceeds the risk of loss of control.',
+      'The Halon/FM-200 engine room suppression system activates automatically via heat detector. Manual activation switch is at the helm. Do not enter the engine room for 15 minutes after system discharge.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-03-22', author:'Capt. Martinez',
+  },
+  {
+    id:'kb-s2', vessel:'v1', system:'safety', title:'Fire Extinguisher Locations',
+    summary:'Where each extinguisher is located, what type it is, and when it was last serviced.',
+    content:'Lady M carries 14 portable fire extinguishers across all zones, plus fixed suppression in the engine room and generator space. All portable units require annual inspection — check the service tag on each one.',
+    steps:[],
+    notes:[],
+    body:[
+      { heading:'Engine Room (4 units)', items:['2x CO2 5kg — forward and aft bulkhead', '2x Dry Powder 9kg — engine room entry, starboard'] },
+      { heading:'Accommodation (6 units)', items:['Galley: 1x CO2 2kg wet chemical (next to range)', 'Master stateroom: 1x CO2 2kg (bedside cabinet)', 'VIP stateroom: 1x CO2 2kg', 'Guest staterooms 1 & 2: 1x CO2 2kg each', 'Main saloon: 1x CO2 2kg (forward port corner)'] },
+      { heading:'Deck (4 units)', items:['Helm station: 1x CO2 2kg (port helm seat)', 'Foredeck: 1x Dry Powder 9kg (forward anchor locker)', 'Tender garage: 1x Dry Powder 9kg (entry)', 'Aft deck: 1x CO2 2kg (aft deck cabinet)'] },
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-04-01', author:'Capt. Martinez',
+  },
+  {
+    id:'kb-s3', vessel:'v1', system:'safety', title:'Life Raft & EPIRB Locations',
+    summary:'Where safety equipment is stowed, hydrostatic release service dates, and deployment instructions.',
+    content:'All safety equipment positions are marked on the vessel emergency plan posted in each cabin. Crew must be briefed on locations during pre-departure safety brief.',
+    steps:[
+      'Life raft: stowed on the flybridge deck, port side, in white fibreglass canister. Hydrostatic release (Hammar H20) service due October 2026.',
+      'EPIRB: mounted in white bracket at helm station, starboard side. Jotron Tron 60S. Battery replacement due January 2027. Annual registration renewal via COSPAS-SARSAT.',
+      'SART (Search and Rescue Transponder): stowed in grab bag, helm station locker.',
+      'Grab bag: waterproof red bag in helm station locker. Contains flares (check expiry annually), SART, personal PLBs (4x), first aid basics, ship papers copies.',
+      'Immersion suits: 8 suits total, stowed in deck locker forward of helm. One per crew member — confirm correct size labels.',
+      'Lifebuoys: 2x ring buoys with dan buoy and drogue, one each side of helm station.',
+    ],
+    notes:[
+      'To deploy life raft: remove lashing, throw canister into water, pull activation line firmly — canister will inflate automatically.',
+      'Hydrostatic release activates at 2–4 metres depth if vessel sinks without raft being deployed manually.',
+      'Test personal PLBs monthly by confirming green LED indicator is flashing (self-test mode, no transmission).',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-03-22', author:'Capt. Martinez',
+  },
+
+  /* DECK */
+  {
+    id:'kb-d1', vessel:'v1', system:'deck', title:'Anchoring Procedure',
+    summary:"How to anchor Lady M safely, select scope, and confirm the anchor is holding.",
+    content:'Lady M has a 60kg Bruce anchor with 80m of 16mm short-link chain. The anchor windlass is electric, controlled from the foredeck panel. Always appoint a dedicated crew member to the bow for the full anchoring sequence.',
+    steps:[
+      'Select an anchorage that provides shelter from the forecast wind direction and has swinging room of at least 3x your scope (typically 150–200m radius).',
+      'Approach the anchorage bow-to-wind at dead slow. Aim to stop the vessel with zero forward way.',
+      'Confirm the depth on the chart plotter sounder — add 2m for tidal range if applicable.',
+      'Calculate scope: minimum 5:1 depth-to-chain ratio in settled conditions, 7:1 or more in strong winds. E.g. 8m depth = minimum 40m chain.',
+      'Lower the anchor to the bottom using the windlass DOWN button. Do not drop freely — lower under control.',
+      'Once anchor is on the bottom, pay out chain at idle reverse. Keep tension light as chain is deployed.',
+      'When target scope is deployed, apply moderate reverse to set the anchor. Increase to full reverse briefly to test hold.',
+      'Take two-bearing or GPS anchor watch position. Log position in deck log.',
+      'Set anchor watch alarm on chart plotter (circle radius 20m).',
+    ],
+    notes:[
+      'In areas with poor holding (weed, rock), consider two shots of chain and a bridle setup.',
+      'Never anchor closer than 30m to another vessel without agreeing with the other skipper first.',
+      'In squall conditions, let out extra chain to increase holding power — additional chain weight adds catenary.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-02-01', author:'Capt. Martinez',
+  },
+  {
+    id:'kb-d2', vessel:'v1', system:'deck', title:'Tender Launch & Recovery',
+    summary:'Safe procedure for launching and recovering the yacht tender using the aft crane.',
+    content:'Lady M carries a Williams TurboJet 505 tender and a Seabob F5S watertoy. The tender is stored in the aft garage and launched by the hydraulic transom platform and crane davit. Two crew minimum for all tender operations.',
+    steps:[
+      'Confirm tender fuel tank is full and safety lanyard is attached to helm.',
+      'Open transom garage door using switch at aft deck control panel.',
+      'One crew member stands by in the garage to guide the tender out; one operates the crane control pendant.',
+      'Attach crane hook to bow lifting eye. Confirm pin is locked.',
+      'Lower tender to water slowly. Crew in garage holds bow line to prevent swinging.',
+      'When tender touches water, disconnect crane hook and attach bow line to cleat.',
+      'Start tender engine at the aft platform. Confirm water flow at engine exhaust.',
+      'Tender driver boards, confirms controls, and moves clear before passengers embark at the platform.',
+      'Recovery is the reverse sequence — ensure tender is fully secured in garage before underway.',
+    ],
+    notes:[
+      'Maximum crane capacity is 800kg. TurboJet 505 is approximately 480kg wet — well within limit.',
+      'Never operate the crane in conditions above 25 knots wind or 1.5m swell.',
+      'After saltwater use, flush tender engine with fresh water and rinse all exterior surfaces.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-01-15', author:'Capt. Martinez',
+  },
+
+  /* AV & IT */
+  {
+    id:'kb-av1', vessel:'v1', system:'avit', title:'Starlink & Guest Wi-Fi',
+    summary:"How Lady M's Starlink satellite internet works and how to set up the guest network.",
+    content:'Lady M uses a Starlink Maritime terminal on the flybridge. Internet is distributed via a Peplink Balance 20X router with a dedicated crew network and a guest network. The system requires clear sky view — range of obstruction more than 30° above horizon will cause dropouts.',
+    steps:[
+      'Starlink powers on automatically when the main electrical panel is on. Allow 5 minutes for the dish to align and acquire signal.',
+      'Confirm Starlink status on the Peplink router admin page (192.168.1.1 on crew network, password in captain logbook).',
+      'Guest Wi-Fi SSID is "LadyM-Guest" — password is posted on the inside of the main saloon credenza door.',
+      'To change the guest password: log in to Peplink admin → Wi-Fi → LadyM-Guest → edit passphrase.',
+      'If internet is down, check Starlink app (iOS/Android) for outage status. A yellow status means obstructed — adjust vessel heading or wait for clear sky.',
+    ],
+    notes:[
+      'Crew network is "LadyM-Crew" — do not share this password with charter guests. It provides access to vessel admin and Victron monitoring.',
+      'Data usage during a typical charter week is 50–200GB. If guests are heavy streamers, the connection may throttle during peak hours.',
+      'Starlink Maritime does not work while underway in some regions. If internet drops on passage, this is normal and expected until the vessel exits the restricted zone.',
+    ],
+    relatedVendors:[], relatedAssets:[], updatedAt:'2026-02-20', author:'Chief Eng. Santos',
+  },
+];

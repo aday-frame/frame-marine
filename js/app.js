@@ -55,6 +55,7 @@ function navTo(pageId, clickedEl, skipPush) {
     requests:      'Requests',
     hub:           'Hub',
     reports:       'Reports',
+    kb:            'Vessel manual',
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -87,6 +88,7 @@ function navTo(pageId, clickedEl, skipPush) {
     requests:      () => window.Requests && Requests.render(),
     hub:           () => window.Hub && Hub.render(),
     reports:       () => window.Reports && Reports.render(),
+    kb:            () => window.KB && KB.render(),
     settings:      () => window.Settings && Settings.init(),
   };
   if (inits[pageId]) inits[pageId]();
@@ -447,7 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initVesselPicker();
   initOffline();
 
-  const _knownPages = new Set(['dashboard','work-orders','calendar','monitoring','assets','parts','vendors','team','chat','logbook','pms','fleet','checklists','charter','owner','certificates','safety','inventory','budget','hours','documents','settings']);
+  const _knownPages = new Set(['dashboard','work-orders','calendar','monitoring','assets','parts','vendors','team','chat','logbook','pms','fleet','checklists','charter','owner','certificates','safety','inventory','budget','hours','documents','reports','kb','settings']);
   function _parsePage(pathname) {
     const p = pathname.replace(/^\//, '').replace(/\/$/, '').replace(/\.html$/, '');
     return _knownPages.has(p) ? p : 'dashboard';
