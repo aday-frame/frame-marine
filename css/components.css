@@ -921,36 +921,130 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
 }
 
 /* Row cells */
-.wo-id {
-  font-family: var(--mono); font-size: 11px;
-  color: var(--txt3); letter-spacing: 0;
-}
+.wo-id { font-family: var(--mono); font-size: 11px; color: var(--txt3); }
 .wo-title-cell { max-width: 320px; }
 .wo-title {
-  font-size: 13px; font-weight: 500;
-  color: var(--txt); letter-spacing: -.018em;
-  margin-bottom: 2px; white-space: nowrap;
-  overflow: hidden; text-overflow: ellipsis;
-  max-width: 300px;
+  font-size: 13px; font-weight: 500; color: var(--txt);
+  letter-spacing: -.018em; margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 340px;
 }
-.wo-sub {
-  font-size: 11px; color: var(--txt3);
-  display: flex; gap: 6px; align-items: center;
-}
-.wo-sub-dot {
-  width: 3px; height: 3px; border-radius: 50%;
-  background: var(--txt4); flex-shrink: 0;
-}
-
-/* Assignee avatar */
+.wo-sub { font-size: 11px; color: var(--txt3); display: flex; gap: 6px; align-items: center; }
+.wo-sub-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--txt4); flex-shrink: 0; }
 .wo-av {
   width: 24px; height: 24px; border-radius: 50%;
   display: inline-flex; align-items: center; justify-content: center;
-  font-size: 8px; font-weight: 700; color: #060606; flex-shrink: 0;
+  font-size: 8px; font-weight: 700; color: #fff; flex-shrink: 0;
 }
+
+/* Priority pip (dot + text, MaintainX style) */
+.wo-pip {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; flex-shrink: 0; vertical-align: middle;
+  margin-right: 5px;
+}
+.wo-priority-label { font-size: 12px; color: var(--txt2); display: flex; align-items: center; }
+
+/* Sortable column headers */
+.wo-th { cursor: pointer; user-select: none; }
+.wo-th:hover { color: var(--txt2) !important; }
+.wo-th-active { color: var(--or) !important; }
+
+/* ── VIEW SWITCHER ── */
+.wo-view-sw { display: flex; gap: 2px; }
+.wo-vsw-btn {
+  width: 30px; height: 30px; border-radius: var(--r8);
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: .5px solid var(--bd2);
+  color: var(--txt3); cursor: pointer; transition: all var(--t1);
+}
+.wo-vsw-btn:hover { color: var(--txt2); border-color: var(--bd3); }
+.wo-vsw-btn.active { background: var(--or-bg); border-color: var(--or-bd); color: var(--or); }
+
+/* ── TO DO VIEW ── */
+.wo-todo-layout {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  height: 100%;
+  overflow: hidden;
+}
+.wo-todo-sidebar {
+  border-right: .5px solid var(--bd);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.wo-todo-hdr {
+  padding: 10px 16px; border-bottom: .5px solid var(--bd);
+  flex-shrink: 0;
+}
+.wo-todo-count { font-size: 11px; font-weight: 600; color: var(--txt3); text-transform: uppercase; letter-spacing: .07em; }
+.wo-todo-cards { flex: 1; overflow-y: auto; padding: 6px; }
+.wo-todo-detail { overflow-y: auto; }
+.wo-todo-empty {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 12px; height: 100%;
+  color: var(--txt3); font-size: 13px;
+}
+
+/* WO Cards (To Do view) */
+.wo-card {
+  display: flex; border-radius: var(--r8);
+  margin-bottom: 3px; cursor: pointer;
+  border: .5px solid transparent;
+  transition: all var(--t1); overflow: hidden;
+}
+.wo-card:hover { background: var(--bg3); border-color: var(--bd); }
+.wo-card.active { background: var(--or-bg); border-color: var(--or-bd); }
+.wo-card-accent { width: 3px; flex-shrink: 0; }
+.wo-card-body { flex: 1; padding: 10px 12px; min-width: 0; }
+.wo-card-title {
+  font-size: 13px; font-weight: 500; color: var(--txt);
+  letter-spacing: -.015em; margin-bottom: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wo-card-meta { font-size: 11px; color: var(--txt3); margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wo-card-foot { display: flex; align-items: center; gap: 6px; }
+
+/* Detail pane (To Do view) */
+.wo-detail-wrap { padding: 28px 32px; max-width: 720px; }
+.wo-detail-hdr { margin-bottom: 24px; }
+.wo-detail-title { font-size: 20px; font-weight: 600; color: var(--txt); letter-spacing: -.03em; line-height: 1.25; margin-bottom: 6px; }
+.wo-detail-id { font-size: 12px; color: var(--txt3); }
+.wo-detail-section { margin-bottom: 24px; }
+.wo-detail-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--txt3); margin-bottom: 8px; }
+.wo-detail-val { font-size: 13px; color: var(--txt2); display: flex; align-items: center; gap: 6px; }
+.wo-detail-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0; margin-bottom: 24px;
+  border: .5px solid var(--bd); border-radius: var(--r10); overflow: hidden;
+}
+.wo-detail-field {
+  padding: 12px 16px; border-bottom: .5px solid var(--bd);
+  border-right: .5px solid var(--bd);
+}
+.wo-detail-field:nth-child(2n) { border-right: none; }
+.wo-detail-field:nth-last-child(-n+2) { border-bottom: none; }
+.wo-detail-desc { font-size: 13px; color: var(--txt2); line-height: 1.7; letter-spacing: -.01em; }
+
+/* Status tab buttons (MaintainX style) */
+.wo-status-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.wo-status-tab {
+  padding: 7px 16px; border-radius: var(--r8);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: .5px solid var(--bd2); background: var(--bg3);
+  color: var(--txt2); transition: all var(--t1); font-family: var(--font);
+}
+.wo-status-tab:hover { border-color: var(--bd3); color: var(--txt); }
+.wo-status-tab.active { background: var(--or); border-color: var(--or); color: #fff; }
 
 /* WO Group header (old — kept for compatibility) */
 .wo-group-hdr { display: flex; align-items: center; padding: 10px 16px 8px; background: var(--bg2); border-bottom: .5px solid var(--bd); position: sticky; top: 0; z-index: 2; }
+
+@media (max-width: 768px) {
+  .wo-todo-layout { grid-template-columns: 1fr; }
+  .wo-todo-detail { display: none; }
+  .wo-todo-layout.mob-detail .wo-todo-sidebar { display: none; }
+  .wo-todo-layout.mob-detail .wo-todo-detail { display: block; }
+}
 
 /* ── CHARTER QUOTE DOCUMENT ── */
 .quote-doc {
