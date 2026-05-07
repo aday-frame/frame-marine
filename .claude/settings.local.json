@@ -33,7 +33,8 @@
       "WebFetch(domain:seazone.app)",
       "Bash(git commit *)",
       "Bash(sudo chown *)",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }

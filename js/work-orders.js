@@ -213,7 +213,6 @@ WO.renderMobCards = function(wrap, list) {
 
     return `
       <div class="wo-mob-card-row" data-id="${w.id}">
-        <div class="wo-mob-card-pip" style="background:${pc}"></div>
         <div class="wo-mob-card-body">
           <div class="wo-mob-card-title">${escHtml(w.title)}</div>
           <div class="wo-mob-card-meta">

@@ -351,25 +351,21 @@
   <nav class="mob-nav">
     <div class="mob-nav-inner">
       <button class="mob-nav-item active" id="mobnav-dashboard" onclick="navTo('dashboard',document.querySelector('.ni[data-page=dashboard]'))">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h6v6H1V1zm8 0h6v6H9V1zM1 9h6v6H1V9zm8 0h6v6H9V9z" opacity=".85"/></svg>
-        Home
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
       </button>
       <button class="mob-nav-item" id="mobnav-work-orders" onclick="navTo('work-orders',document.querySelector('.ni[data-page=work-orders]'))">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
         <span class="mob-nav-badge" id="mobnav-wo-badge" style="display:none"></span>
-        Work orders
+        Work Orders
       </button>
-      <button class="mob-nav-item" id="mobnav-fleet" onclick="navTo('fleet',document.querySelector('.ni[data-page=fleet]'))">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L3 6h2v4H2l-1 4h14l-1-4h-3V6h2L8 1zm0 2.4L10.6 6H9v4H7V6H5.4L8 3.4z"/></svg>
-        Fleet
+      <button class="mob-nav-item" id="mobnav-documents" onclick="navTo('documents',document.querySelector('.ni[data-page=documents]'))">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+        Docs
       </button>
-      <button class="mob-nav-item" id="mobnav-monitoring" onclick="navTo('monitoring',document.querySelector('.ni[data-page=monitoring]'))">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 12l3.5-7 3 4 2.5-5L14 12H1z"/><path d="M1 14h14" stroke="currentColor" stroke-width="1" fill="none"/></svg>
-        Monitoring
-      </button>
-      <button class="mob-nav-item" id="mobnav-menu" onclick="toggleMobSidebar()">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
-        More
+      <button class="mob-nav-item" id="mobnav-hub" onclick="navTo('hub')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></svg>
+        Hub
       </button>
     </div>
   </nav>
@@ -595,6 +591,9 @@
       <!-- DOCUMENTS -->
       <div id="page-documents" class="page"></div>
 
+      <!-- HUB -->
+      <div id="page-hub" class="page"></div>
+
       <!-- UPGRADE OVERLAY (shown over any locked page) -->
       <div id="upgrade-overlay"></div>
 
@@ -743,6 +742,77 @@
 <script src="js/offline.js"></script>
 
 <script>
+/* ── HUB ── */
+const Hub = window.Hub = {};
+Hub.render = function() {
+  const wrap = document.getElementById('page-hub');
+  if (!wrap) return;
+  const v  = FM.currentVessel();
+  const me = (FM.crew || []).find(c => c.id === 'c1');
+
+  const features = [
+    { page:'fleet',        label:'Fleet',         color:'#60a5fa', bg:'rgba(59,130,246,.15)',
+      icon:'<path d="M12 3L4 9v11h5v-6h6v6h5V9L12 3z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'team',         label:'Team',           color:'#4ade80', bg:'rgba(34,197,94,.15)',
+      icon:'<circle cx="9" cy="7" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6h0M15 11a3 3 0 110-6 3 3 0 010 6zM21 20c0-3.3-2.7-6-6-6h-3" stroke-linecap="round"/>' },
+    { page:'monitoring',   label:'Monitoring',     color:'#fb923c', bg:'rgba(251,146,60,.15)',
+      icon:'<path d="M2 12l4-6 4 8 3-4 3 4 4-7" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'hours',        label:'Hours of Rest',  color:'#a78bfa', bg:'rgba(167,139,250,.15)',
+      icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/>' },
+    { page:'calendar',     label:'Calendar',       color:'#5e6ad2', bg:'rgba(94,106,210,.15)',
+      icon:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/>' },
+    { page:'charter',      label:'Charter',        color:'#2dd4bf', bg:'rgba(20,184,166,.15)',
+      icon:'<path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-2M12 17l-5 4 5-4zM12 17l5 4-5-4z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'certificates', label:'Certificates',   color:'#f87171', bg:'rgba(248,113,113,.15)',
+      icon:'<path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'budget',       label:'Budget',         color:'#fbbf24', bg:'rgba(251,191,36,.15)',
+      icon:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" stroke-linecap="round"/>' },
+  ];
+
+  wrap.innerHTML = `
+    <div class="hub-wrap">
+      <div class="hub-hdr">
+        <div>
+          <div class="hub-brand">Frame Marine</div>
+          <div class="hub-vessel">${v ? escHtml(v.name) + ' · ' + escHtml(v.type) : ''}</div>
+        </div>
+        <div class="hub-avatar" style="background:${me?.color||'var(--or)'}">
+          <span>${me?.initials||'AJ'}</span>
+        </div>
+      </div>
+
+      <div class="hub-sec-lbl">Navigate</div>
+      <div class="hub-grid">
+        ${features.map(f => `
+          <div class="hub-card" onclick="navTo('${f.page}',document.querySelector('.ni[data-page=${f.page}]'))">
+            <div class="hub-card-icon" style="background:${f.bg};color:${f.color}">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${f.icon}</svg>
+            </div>
+            <div class="hub-card-lbl">${f.label}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="hub-sec-lbl">Account</div>
+      <div class="hub-list">
+        <button class="hub-list-row" onclick="navTo('settings',document.querySelector('.ni[data-page=settings]'))">
+          <span>Settings</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <button class="hub-list-row" onclick="navTo('documents',document.querySelector('.ni[data-page=documents]'))">
+          <span>Documents &amp; Certificates</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+        <button class="hub-list-row" onclick="navTo('safety',document.querySelector('.ni[data-page=safety]'))">
+          <span>Safety &amp; ISM</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </button>
+      </div>
+
+      <div style="text-align:center;padding:24px 0 8px;font-size:11px;color:var(--txt4)">Frame Marine · v1.0</div>
+    </div>`;
+};
+
 /* ── PAGE INIT HOOKS ── */
 document.addEventListener('DOMContentLoaded', () => {
   // Wire up work order filters
