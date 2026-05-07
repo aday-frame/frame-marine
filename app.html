@@ -346,6 +346,18 @@
     <!-- Stats bar (monitoring) -->
     <div class="stats" id="mon-stats" style="display:none"></div>
 
+    <!-- Stats bar (requests) -->
+    <div class="stats" id="req-stats" style="display:none"></div>
+
+    <!-- Filters (requests) -->
+    <div class="filters" id="req-filters" style="display:none">
+      <div class="fp on" data-rf="all">All</div>
+      <div class="fp" data-rf="new">New</div>
+      <div class="fp" data-rf="reviewing">Reviewing</div>
+      <div class="fp" data-rf="converted">Converted</div>
+      <div class="fp" data-rf="closed">Closed</div>
+    </div>
+
     <!-- ── PAGE CONTENT ── -->
     <div class="page-body">
 
@@ -825,38 +837,35 @@ Requests.openDetail = function(id) {
   `);
 };
 
-Requests.setFilter = function(f) { Requests._filter = f; Requests.render(); };
-
 Requests.render = function() {
   const wrap = document.getElementById('page-requests');
   if (!wrap) return;
   const reqs = Requests.data();
-  const newCount  = reqs.filter(r => r.status === 'new').length;
-  const revCount  = reqs.filter(r => r.status === 'reviewing').length;
-  const convCount = reqs.filter(r => r.status === 'converted').length;
+  const newCount    = reqs.filter(r => r.status === 'new').length;
+  const revCount    = reqs.filter(r => r.status === 'reviewing').length;
+  const convCount   = reqs.filter(r => r.status === 'converted').length;
   const closedCount = reqs.filter(r => r.status === 'closed').length;
 
   const f = Requests._filter;
   const visible = f === 'all' ? reqs : reqs.filter(r => r.status === f);
 
-  const statsBar = `
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd)">
+  // Populate the shared stats bar
+  const statsEl = document.getElementById('req-stats');
+  if (statsEl) {
+    statsEl.style.gridTemplateColumns = 'repeat(4,1fr)';
+    statsEl.innerHTML = `
       <div class="wo-stat"><div class="wo-stat-num" style="color:var(--or)">${newCount}</div><div class="wo-stat-lbl">New</div></div>
       <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${revCount}</div><div class="wo-stat-lbl">Reviewing</div></div>
       <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${convCount}</div><div class="wo-stat-lbl">Converted</div></div>
-      <div class="wo-stat" style="border-right:none"><div class="wo-stat-num" style="color:var(--txt3)">${reqs.length}</div><div class="wo-stat-lbl">Total</div></div>
-    </div>`;
+      <div class="wo-stat"><div class="wo-stat-num" style="color:var(--txt3)">${reqs.length}</div><div class="wo-stat-lbl">Total</div></div>`;
+  }
 
-  const filterBar = `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;flex-wrap:wrap;gap:8px">
-    <div class="wo-status-tabs">
-      ${[['all','All',reqs.length],['new','New',newCount],['reviewing','Reviewing',revCount],['converted','Converted',convCount],['closed','Closed',closedCount]].map(([val,lbl,cnt]) =>
-        `<button class="wo-status-tab ${f===val?'active':''}" onclick="Requests.setFilter('${val}')">${lbl}${cnt?' ('+cnt+')':''}</button>`
-      ).join('')}
-    </div>
-    <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none;flex-shrink:0">Share portal link ↗</a>
-  </div>`;
+  // Sync filter pill active state
+  document.querySelectorAll('#req-filters .fp').forEach(pill => {
+    pill.classList.toggle('on', pill.dataset.rf === f);
+  });
 
-  const empty = `<div class="empty"><div class="empty-title">No requests${f !== 'all' ? ' matching this filter' : ' yet'}</div><div class="empty-sub">${f === 'all' ? 'Share the portal link with guests or crew to receive requests' : ''}</div></div>`;
+  const empty = `<div class="empty"><div class="empty-title">No ${f !== 'all' ? f : ''} requests${f === 'all' ? ' yet' : ''}</div><div class="empty-sub">${f === 'all' ? 'Share the portal link with guests or crew to receive requests' : ''}</div></div>`;
 
   const rows = visible.map(r => {
     const submitted = new Date(r.submitted).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
@@ -878,22 +887,21 @@ Requests.render = function() {
     </tr>`;
   }).join('');
 
-  wrap.innerHTML = `<div style="padding:0 0 80px">
-    ${statsBar}
-    <div style="padding:0 20px">
-      ${filterBar}
-      ${visible.length === 0 ? empty : `<div class="tbl-wrap" style="margin-top:8px"><table class="tbl">
-        <thead><tr>
-          <th>Request</th>
-          <th style="width:180px">Contact</th>
-          <th style="width:140px">Location</th>
-          <th style="width:110px">Submitted</th>
-          <th style="width:110px">Status</th>
-          <th style="width:80px"></th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-      </table></div>`}
+  wrap.innerHTML = `<div style="padding:18px 20px 80px">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+      <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none">Share portal link ↗</a>
     </div>
+    ${visible.length === 0 ? empty : `<div class="tbl-wrap"><table class="tbl">
+      <thead><tr>
+        <th>Request</th>
+        <th style="width:180px">Contact</th>
+        <th style="width:140px">Location</th>
+        <th style="width:110px">Submitted</th>
+        <th style="width:110px">Status</th>
+        <th style="width:80px"></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`}
   </div>`;
   Requests.updateBadge();
 };
@@ -1049,6 +1057,16 @@ document.addEventListener('DOMContentLoaded', () => {
   WO.initFilters();
   WO.initSearch();
   Settings.init();
+
+  // Wire up request filters
+  document.querySelectorAll('#req-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#req-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Requests._filter = this.dataset.rf;
+      Requests.render();
+    });
+  });
 });
 
 // Show/hide chrome per page
@@ -1064,15 +1082,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     origNav(pageId, el, skipPush);
 
-    const hasStats   = ['work-orders'].includes(pageId);
-    const hasFilters = ['work-orders'].includes(pageId);
-    const hasSearch  = ['work-orders'].includes(pageId);
+    const hasStats    = ['work-orders'].includes(pageId);
+    const hasFilters  = ['work-orders'].includes(pageId);
+    const hasSearch   = ['work-orders'].includes(pageId);
     const hasMonStats = ['monitoring'].includes(pageId);
+    const hasReqStats   = ['requests'].includes(pageId);
+    const hasReqFilters = ['requests'].includes(pageId);
 
-    document.getElementById('wo-stats').style.display   = hasStats   ? 'grid' : 'none';
-    document.getElementById('wo-filters').style.display = hasFilters ? 'flex' : 'none';
-    document.getElementById('main-search').style.display = hasSearch ? 'flex' : 'none';
-    document.getElementById('mon-stats').style.display  = hasMonStats ? 'grid' : 'none';
+    document.getElementById('wo-stats').style.display    = hasStats      ? 'grid' : 'none';
+    document.getElementById('wo-filters').style.display  = hasFilters    ? 'flex' : 'none';
+    document.getElementById('main-search').style.display = hasSearch     ? 'flex' : 'none';
+    document.getElementById('mon-stats').style.display   = hasMonStats   ? 'grid' : 'none';
+    document.getElementById('req-stats').style.display   = hasReqStats   ? 'grid' : 'none';
+    document.getElementById('req-filters').style.display = hasReqFilters ? 'flex' : 'none';
 
     // Show templates button only on work orders page
     const tmplBtn = document.getElementById('template-btn');
