@@ -6,150 +6,135 @@
 <title>Frame — User Flow</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #080808; font-family: 'DM Sans', system-ui, sans-serif; color: #F0F0EC; min-height: 100vh; }
 
-  body {
-    background: #080808;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    color: #F0F0EC;
-    min-height: 100vh;
-  }
+  /* ── Topbar */
+  .topbar { display:flex; align-items:center; gap:16px; padding:14px 24px; border-bottom:.5px solid #1E1E18; position:sticky; top:0; z-index:100; background:#080808; }
+  .logo { font-size:13px; font-weight:700; letter-spacing:.04em; }
+  .topbar-sub { font-size:11px; color:#52524A; }
 
-  .topbar {
-    display: flex; align-items: center; gap: 16px;
-    padding: 14px 24px;
-    border-bottom: .5px solid #1E1E18;
-    position: sticky; top: 0; z-index: 100;
-    background: #080808;
-  }
-  .logo { font-size: 13px; font-weight: 700; letter-spacing: .04em; }
-  .logo span { color: #F97316; }
-  .topbar-sub { font-size: 11px; color: #52524A; }
+  /* ── Tabs */
+  .flows-nav { display:flex; gap:6px; padding:20px 24px 0; border-bottom:.5px solid #1E1E18; overflow-x:auto; }
+  .flow-tab { padding:8px 16px; border-radius:8px 8px 0 0; font-size:11px; font-weight:600; cursor:pointer; border:.5px solid #1E1E18; border-bottom:none; background:transparent; color:#6B6B63; transition:all .15s; white-space:nowrap; flex-shrink:0; }
+  .flow-tab.active { background:#111110; color:#F0F0EC; border-color:#2A2A24; }
+  .flow-tab:hover:not(.active) { color:#9A9A92; }
 
-  .flows-nav {
-    display: flex; gap: 6px; padding: 20px 24px 0;
-    border-bottom: .5px solid #1E1E18;
-  }
-  .flow-tab {
-    padding: 8px 16px; border-radius: 8px 8px 0 0;
-    font-size: 11px; font-weight: 600; cursor: pointer;
-    border: .5px solid #1E1E18; border-bottom: none;
-    background: transparent; color: #6B6B63;
-    transition: all .15s;
-  }
-  .flow-tab.active { background: #111110; color: #F0F0EC; border-color: #2A2A24; }
-  .flow-tab:hover:not(.active) { color: #9A9A92; }
+  /* ── Canvas */
+  .canvas { display:none; padding:36px 24px 80px; max-width:960px; }
+  .canvas.active { display:block; }
 
-  .canvas { display: none; padding: 40px 24px 80px; max-width: 900px; }
-  .canvas.active { display: block; }
+  /* ── Section label */
+  .sec { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#3A3A34; display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+  .sec::after { content:''; flex:1; height:.5px; background:#1A1A14; }
 
   /* ── Nodes */
-  .node {
-    border-radius: 10px; border: .5px solid #1E1E18;
-    background: #0D0D0B; padding: 14px 16px;
-    flex-shrink: 0;
-  }
-  .node.vessel  { border-color: #F97316; background: rgba(249,115,22,.05); }
-  .node.person  { border-color: #A78BFA; background: rgba(167,139,250,.05); }
-  .node.ops     { border-color: #2A2A24; background: #111110; }
-  .node.result  { border-color: #4ADE80; background: rgba(74,222,128,.04); }
+  .node { border-radius:10px; padding:14px 16px; border:.5px solid #1E1E18; background:#0D0D0B; }
+  .node.vessel  { border-color:rgba(249,115,22,.35); background:rgba(249,115,22,.05); }
+  .node.person  { border-color:rgba(167,139,250,.35); background:rgba(167,139,250,.05); }
+  .node.result  { border-color:rgba(74,222,128,.35);  background:rgba(74,222,128,.04); }
+  .node.neutral { border-color:#2A2A24; background:#111110; }
+  .node.dim     { border-color:#1E1E18; background:#0A0A08; opacity:.6; }
 
-  .node-tag {
-    font-size: 8px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .09em; margin-bottom: 5px;
-  }
-  .node.vessel .node-tag { color: #F97316; }
-  .node.person .node-tag { color: #A78BFA; }
-  .node.ops    .node-tag { color: #6B6B63; }
-  .node.result .node-tag { color: #4ADE80; }
+  .node-tag { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; margin-bottom:5px; }
+  .node.vessel .node-tag { color:#F97316; }
+  .node.person .node-tag { color:#A78BFA; }
+  .node.result .node-tag { color:#4ADE80; }
+  .node.neutral .node-tag { color:#52524A; }
+  .node.dim    .node-tag { color:#3A3A34; }
 
-  .node-title { font-size: 12px; font-weight: 600; color: #F0F0EC; margin-bottom: 5px; line-height: 1.3; }
-  .node-body  { font-size: 10px; color: #6B6B63; line-height: 1.55; }
-  .node-body li { list-style: none; padding-left: 10px; position: relative; }
-  .node-body li::before { content: '—'; position: absolute; left: 0; color: #2A2A24; }
+  .node-title { font-size:12px; font-weight:600; color:#F0F0EC; margin-bottom:4px; line-height:1.3; }
+  .node-body  { font-size:10px; color:#6B6B63; line-height:1.55; }
+  .node-body li { list-style:none; padding-left:10px; position:relative; }
+  .node-body li::before { content:'—'; position:absolute; left:0; color:#2A2A24; }
 
   /* ── Arrow */
-  .arr {
-    display: flex; align-items: center; padding: 0 10px;
-    color: #2A2A24; flex-shrink: 0; margin-top: 18px;
-  }
-  .arr-down {
-    display: flex; justify-content: center;
-    padding: 6px 0; color: #2A2A24;
-  }
-
-  /* ── Row / split */
-  .flow-row { display: flex; align-items: flex-start; gap: 0; flex-wrap: wrap; }
-  .split     { display: flex; gap: 10px; flex-wrap: wrap; }
-  .split-branch { flex: 1; min-width: 160px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .split-label {
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .07em; color: #3A3A34; text-align: center; margin-bottom: 2px;
-  }
-
-  /* ── Stage */
-  .flow-stage { padding: 28px 0; border-bottom: .5px solid #1A1A14; }
-  .flow-stage:last-child { border-bottom: none; }
-  .stage-label {
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: #3A3A34;
-    display: flex; align-items: center; gap: 10px; margin-bottom: 18px;
-  }
-  .stage-label::after { content: ''; flex: 1; height: .5px; background: #1A1A14; }
-
-  /* ── The two layers — big visual */
-  .two-layers {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
-    border-radius: 12px; overflow: hidden; margin-bottom: 32px;
-  }
-  .layer-card { padding: 24px; }
-  .layer-card.vessel { background: rgba(249,115,22,.07); }
-  .layer-card.person { background: rgba(167,139,250,.07); }
-  .layer-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .layer-card.vessel .layer-title { color: #F97316; }
-  .layer-card.person .layer-title { color: #A78BFA; }
-  .layer-desc { font-size: 11px; color: #6B6B63; line-height: 1.6; margin-bottom: 14px; }
-  .layer-items { display: flex; flex-direction: column; gap: 5px; }
-  .layer-item { font-size: 10px; color: #9A9A92; padding-left: 10px; position: relative; }
-  .layer-item::before { content: '·'; position: absolute; left: 0; color: #3A3A34; }
-
-  /* ── Default / override banner */
-  .banner {
-    border-radius: 8px; padding: 12px 16px; margin-bottom: 28px;
-    font-size: 11px; line-height: 1.6;
-    border: .5px solid #2A2A24; background: #111110; color: #9A9A92;
-  }
-  .banner strong { color: #F0F0EC; }
-
-  /* ── Persona bar */
-  .persona-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .persona-dot {
-    width: 36px; height: 36px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; flex-shrink: 0;
-  }
-  .persona-name { font-size: 15px; font-weight: 600; }
-  .persona-role { font-size: 11px; color: #6B6B63; }
+  .arr { display:flex; align-items:center; padding:0 8px; color:#2A2A24; flex-shrink:0; margin-top:18px; }
 
   /* ── Mini screen */
-  .screen-mock {
-    border-radius: 8px; border: .5px solid #2A2A24;
-    background: #0A0A08; padding: 10px 12px; margin-top: 8px;
+  .sm { border-radius:7px; border:.5px solid #1E1E18; background:#080808; padding:9px 11px; margin-top:8px; }
+  .sm-row { display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:.5px solid #111110; font-size:10px; }
+  .sm-row:last-child { border-bottom:none; }
+  .sm-l { color:#52524A; }
+  .sm-v { color:#F0F0EC; font-weight:600; }
+  .sm-tag { font-size:8px; font-weight:700; padding:1px 6px; border-radius:3px; }
+
+  /* ── Phase layout (horizontal stages) */
+  .phases { display:grid; gap:2px; margin-bottom:20px; }
+  .phases-3 { grid-template-columns:1fr 1fr 1fr; }
+  .phases-4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+
+  .phase-hdr {
+    padding:10px 14px; text-align:center;
+    font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.09em;
+    background:#111110; border:.5px solid #2A2A24; color:#3A3A34;
   }
-  .sm-row {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 4px 0; border-bottom: .5px solid #141410; font-size: 10px;
+  .phase-hdr:first-child { border-radius:8px 0 0 0; }
+  .phase-hdr:last-child  { border-radius:0 8px 0 0; }
+
+  /* ── Product row label */
+  .prod-row { display:grid; gap:2px; }
+  .prod-row-3 { grid-template-columns:1fr 1fr 1fr; }
+  .prod-row-4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+
+  .phase-cell { padding:14px 14px; border:.5px solid #1E1E18; background:#0D0D0B; }
+  .phase-cell.mar { border-color:rgba(249,115,22,.2); background:rgba(249,115,22,.04); }
+  .phase-cell.pro { border-color:rgba(96,165,250,.2); background:rgba(96,165,250,.04); }
+  .phase-cell.pur { border-color:rgba(167,139,250,.2); background:rgba(167,139,250,.04); }
+  .phase-cell.grn { border-color:rgba(74,222,128,.2); background:rgba(74,222,128,.03); }
+  .phase-cell.dim { background:#080808; border-color:#141410; opacity:.5; }
+
+  .pc-tag { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
+  .mar .pc-tag { color:#F97316; }
+  .pro .pc-tag { color:#60A5FA; }
+  .pur .pc-tag { color:#A78BFA; }
+  .grn .pc-tag { color:#4ADE80; }
+  .pc-title { font-size:11px; font-weight:600; color:#F0F0EC; margin-bottom:5px; line-height:1.3; }
+  .pc-body  { font-size:10px; color:#6B6B63; line-height:1.5; }
+  .pc-body li { list-style:none; padding-left:9px; position:relative; font-size:10px; }
+  .pc-body li::before { content:'·'; position:absolute; left:0; color:#3A3A34; }
+
+  /* ── Row label strip */
+  .row-label {
+    display:flex; align-items:center;
+    font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+    padding:8px 14px; border-radius:6px; margin-bottom:2px; gap:8px;
   }
-  .sm-row:last-child { border-bottom: none; }
-  .sm-lbl { color: #52524A; }
-  .sm-val { color: #F0F0EC; font-weight: 600; }
-  .sm-tag {
-    font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 3px;
+  .row-label.mar { background:rgba(249,115,22,.08); color:#F97316; }
+  .row-label.pro { background:rgba(96,165,250,.08);  color:#60A5FA; }
+
+  /* ── Ops bar */
+  .ops-bar {
+    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+    padding:10px 14px; border-radius:0 0 8px 8px;
+    background:#0A0A08; border:.5px solid #1E1E18; border-top:none;
+    margin-top:2px;
+  }
+  .ops-bar-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#2A2A24; white-space:nowrap; }
+  .ops-pill {
+    font-size:9px; padding:2px 8px; border-radius:4px;
+    background:#111110; color:#3A3A34; border:.5px solid #1A1A14;
   }
 
-  .section-lbl {
-    font-size: 9px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .1em; color: #52524A; margin-bottom: 20px;
+  /* ── Big step flow (for "Doing work") */
+  .step-flow { display:flex; align-items:flex-start; gap:0; }
+  .step { display:flex; flex-direction:column; align-items:center; flex:1; }
+  .step-num {
+    width:28px; height:28px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-weight:700; margin-bottom:8px; flex-shrink:0;
   }
+  .step-connector { flex:1; height:.5px; background:#2A2A24; margin-top:14px; }
+
+  /* ── Two col */
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .two-col-3 { display:grid; grid-template-columns:1fr 1fr; gap:2px; }
+
+  /* ── Badge */
+  .badge { display:inline-block; font-size:8px; font-weight:700; padding:2px 7px; border-radius:4px; margin-top:6px; }
+
+  /* ── Banner */
+  .banner { border-radius:8px; padding:12px 16px; font-size:11px; line-height:1.6; border:.5px solid #2A2A24; background:#111110; color:#9A9A92; }
+  .banner strong { color:#F0F0EC; }
 </style>
 </head>
 <body>
@@ -160,441 +145,520 @@
 </div>
 
 <div class="flows-nav">
-  <div class="flow-tab active" onclick="showFlow('overview')">The model</div>
-  <div class="flow-tab" onclick="showFlow('owner')">Owner arriving</div>
-  <div class="flow-tab" onclick="showFlow('charter')">Charter guest</div>
-  <div class="flow-tab" onclick="showFlow('captain')">Captain's day</div>
+  <div class="flow-tab active" onclick="showFlow('model')">The model</div>
+  <div class="flow-tab" onclick="showFlow('ops')">Doing work</div>
+  <div class="flow-tab" onclick="showFlow('owner')">Owner visit</div>
+  <div class="flow-tab" onclick="showFlow('charter')">Charter / Rental</div>
 </div>
 
 
-<!-- ═══════ THE MODEL ═══════ -->
-<div class="canvas active" id="flow-overview">
+<!-- ══════════════════════════════════════════════════════════
+     TAB 1 — THE MODEL
+══════════════════════════════════════════════════════════ -->
+<div class="canvas active" id="flow-model">
 
-  <!-- Frame brand hierarchy -->
-  <div style="margin-bottom:36px">
-    <div class="section-lbl">The platform</div>
-    <div style="display:flex;flex-direction:column;gap:2px">
+  <div class="sec">The platform</div>
 
-      <!-- Section 1: Frame -->
-      <div style="background:#111110;border:.5px solid #2A2A24;border-radius:10px 10px 0 0;padding:20px 24px">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#3A3A34;margin-bottom:6px">01 — Parent platform</div>
-        <div style="font-size:22px;font-weight:700;color:#F0F0EC;letter-spacing:.01em;margin-bottom:4px">Frame</div>
-        <div style="font-size:11px;color:#6B6B63;margin-bottom:14px">The operating system for complex managed environments. One account. All assets. Shared infrastructure across every product.</div>
+  <!-- Three sections block -->
+  <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:32px">
+
+    <div style="background:#111110;border:.5px solid #2A2A24;border-radius:10px 10px 0 0;padding:20px 24px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#3A3A34;margin-bottom:5px">01 — Parent platform</div>
+      <div style="font-size:20px;font-weight:700;color:#F0F0EC;margin-bottom:4px">Frame</div>
+      <div style="font-size:11px;color:#6B6B63;margin-bottom:12px">The operating system for complex managed environments. Shared infrastructure across every product.</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px">
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Asset standard</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Person profiles</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Asset register</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Vendor management</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Work orders</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Documents</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Calendar</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Owner reporting</span>
+        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Offline-first</span>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
+      <div style="background:rgba(249,115,22,.06);border:.5px solid rgba(249,115,22,.25);border-radius:0 0 0 10px;padding:20px 24px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#F97316;margin-bottom:5px">02 — Vessel product</div>
+        <div style="font-size:20px;font-weight:700;color:#F0F0EC;margin-bottom:4px">Frame Marine</div>
+        <div style="font-size:11px;color:#6B6B63;margin-bottom:12px">Yachts and professionally managed vessels.</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px">
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Vessel / property standard</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Person profiles</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Asset register</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Vendor management</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Documents</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Calendar</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Checklists</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Owner reporting</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Offline-first</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">PMS</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Live monitoring</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Charter management</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">STCW / ISM</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Logbook</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Hours of rest</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Certificates</span>
         </div>
       </div>
-
-      <!-- Sections 2 + 3 side by side -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-
-        <!-- Section 2: Frame Marine -->
-        <div style="background:rgba(249,115,22,.06);border:.5px solid rgba(249,115,22,.25);border-radius:0 0 0 10px;padding:20px 24px">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#F97316;margin-bottom:6px">02 — Vessel product</div>
-          <div style="font-size:22px;font-weight:700;color:#F0F0EC;letter-spacing:.01em;margin-bottom:4px">Frame Marine</div>
-          <div style="font-size:11px;color:#6B6B63;margin-bottom:14px">For yachts and professionally managed vessels. Full operational depth — maintenance, compliance, charter, monitoring.</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px">
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Work orders</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">PMS</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Live monitoring</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Charter management</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">STCW / ISM</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Logbook</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Certificates</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Hours of rest</span>
-          </div>
+      <div style="background:rgba(96,165,250,.06);border:.5px solid rgba(96,165,250,.25);border-radius:0 0 10px 0;padding:20px 24px">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#60A5FA;margin-bottom:5px">03 — Property product</div>
+        <div style="font-size:20px;font-weight:700;color:#F0F0EC;margin-bottom:4px">Frame Property</div>
+        <div style="font-size:11px;color:#6B6B63;margin-bottom:12px">Estates, residences, and managed properties.</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">House manual</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Staff management</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Systems monitoring</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Rental / guest</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Seasonal care</span>
+          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Build / refit</span>
         </div>
-
-        <!-- Section 3: Frame Property -->
-        <div style="background:rgba(96,165,250,.06);border:.5px solid rgba(96,165,250,.25);border-radius:0 0 10px 0;padding:20px 24px">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#60A5FA;margin-bottom:6px">03 — Property product</div>
-          <div style="font-size:22px;font-weight:700;color:#F0F0EC;letter-spacing:.01em;margin-bottom:4px">Frame Property</div>
-          <div style="font-size:11px;color:#6B6B63;margin-bottom:14px">For estates, residences, and managed properties. Knowledge base, household standards, staff coordination, systems management.</div>
-          <div style="display:flex;flex-wrap:wrap;gap:5px">
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Work orders</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Maintenance</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">House manual</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Staff management</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Systems monitoring</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Rental / guest</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Build / refit</span>
-            <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Owner reporting</span>
-          </div>
-        </div>
-
       </div>
-
     </div>
   </div>
 
-  <div class="section-lbl">Two things. That's it.</div>
+  <div class="sec">How both products work — two layers</div>
 
-  <div class="two-layers">
-    <div class="layer-card vessel">
-      <div class="layer-title">Vessel standard</div>
-      <div class="layer-desc">How Lady M operates — for everyone, always. Set once by the owner. Applies to every guest, every charter, every arrival.</div>
-      <div class="layer-items">
-        <div class="layer-item">Aesop soap in every cabin</div>
-        <div class="layer-item">Frette linens, 800 thread count</div>
-        <div class="layer-item">Champagne on arrival, always</div>
-        <div class="layer-item">Crew in formal uniform underway</div>
-        <div class="layer-item">Provisioning standards</div>
-        <div class="layer-item">Service style and formality</div>
-        <div class="layer-item">Emergency procedures</div>
-        <div class="layer-item">System references and SOPs</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:20px">
+    <div style="background:rgba(249,115,22,.06);border:.5px solid rgba(249,115,22,.25);border-radius:10px 0 0 10px;padding:18px 20px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#F97316;margin-bottom:6px">Layer 1 — Asset standard</div>
+      <div style="font-size:13px;font-weight:700;color:#F0F0EC;margin-bottom:6px">How this asset always operates</div>
+      <div style="font-size:10px;color:#6B6B63;line-height:1.6;margin-bottom:10px">Set once. Applies to everyone — owner, charter guest, rental guest, anyone. Never changes per visitor.</div>
+      <div style="font-size:10px;color:#9A9A92">
+        <div style="margin-bottom:3px">Marine: Aesop soap, Frette linens, crew uniform, service style</div>
+        <div>Property: housekeeping standard, welcome setup, systems at arrival temp</div>
       </div>
     </div>
-    <div class="layer-card person">
-      <div class="layer-title">Person profile</div>
-      <div class="layer-desc">Additional layer when a specific person arrives. Owner or charter guest. Surfaces on top of the vessel standard — only when that person is expected.</div>
-      <div class="layer-items">
-        <div class="layer-item">Mr. Smith: espresso at 6:45am</div>
-        <div class="layer-item">Mrs. Smith: gluten-free</div>
-        <div class="layer-item">Emma (8): peanut allergy</div>
-        <div class="layer-item">Johnson charter: shellfish allergy</div>
-        <div class="layer-item">Johnson charter: champagne preference</div>
-        <div class="layer-item">Repeat guest prefs saved automatically</div>
+    <div style="background:rgba(167,139,250,.06);border:.5px solid rgba(167,139,250,.25);border-radius:0 10px 10px 0;padding:18px 20px">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#A78BFA;margin-bottom:6px">Layer 2 — Person profile</div>
+      <div style="font-size:13px;font-weight:700;color:#F0F0EC;margin-bottom:6px">What's unique to this specific person</div>
+      <div style="font-size:10px;color:#6B6B63;line-height:1.6;margin-bottom:10px">Activates when someone is arriving. Layers on top of the asset standard. Auto-generates the arrival checklist.</div>
+      <div style="font-size:10px;color:#9A9A92">
+        <div style="margin-bottom:3px">Owner: espresso at 6:45, gluten-free, firm pillows</div>
+        <div>Charter guest: shellfish allergy, champagne preference — saved for next time</div>
       </div>
     </div>
   </div>
 
   <div class="banner">
-    <strong>Vessel standard is the default.</strong> It runs everything when no arrival is active — charter or owner. When someone is arriving, their profile layers on top and generates the arrival checklist automatically. No duplication. No confusion.
-  </div>
-
-  <div class="section-lbl">Who arrives and what triggers</div>
-
-  <div class="split" style="margin-bottom:32px">
-
-    <div style="flex:1;min-width:200px">
-      <div class="node vessel" style="margin-bottom:8px">
-        <div class="node-tag">No arrival</div>
-        <div class="node-title">Ops mode</div>
-        <div class="node-body">Vessel standard is the only active layer. Operations are the primary view — WOs, PMS, monitoring.</div>
-      </div>
-    </div>
-
-    <div style="flex:1;min-width:200px">
-      <div class="node person" style="margin-bottom:8px">
-        <div class="node-tag">Owner visit</div>
-        <div class="node-title">Mr. Smith arriving</div>
-        <div class="node-body">His profile surfaces. Arrival checklist auto-generates combining vessel standard + his personal layer.</div>
-      </div>
-    </div>
-
-    <div style="flex:1;min-width:200px">
-      <div class="node person" style="margin-bottom:8px">
-        <div class="node-tag">Charter booking</div>
-        <div class="node-title">Johnsons arriving</div>
-        <div class="node-body">Their profile surfaces. Same vessel standard underneath. Their specific needs on top.</div>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="section-lbl">Where things live</div>
-
-  <div class="split">
-    <div class="node vessel" style="flex:1;min-width:200px">
-      <div class="node-tag">Vessel standard lives in</div>
-      <div class="node-title">Knowledge base + SOPs</div>
-      <div class="node-body">
-        <ul>
-          <li>Vessel manual — how Lady M operates</li>
-          <li>SOPs — procedures and standards</li>
-          <li>Asset hub — systems and equipment</li>
-          <li>Documents — specs, manuals, certs</li>
-        </ul>
-      </div>
-    </div>
-    <div class="node person" style="flex:1;min-width:200px">
-      <div class="node-tag">Person profile lives in</div>
-      <div class="node-title">Owner profile / Charter guests</div>
-      <div class="node-body">
-        <ul>
-          <li>Owner profile — persistent, always on file</li>
-          <li>Family members — children, dietary, routines</li>
-          <li>Charter guests — saved per booking, retained</li>
-          <li>Surfaces on arrival, drives checklist</li>
-        </ul>
-      </div>
-    </div>
-    <div class="node ops" style="flex:1;min-width:200px">
-      <div class="node-tag">Operations live in</div>
-      <div class="node-title">Work orders, PMS, calendar</div>
-      <div class="node-body">
-        <ul>
-          <li>Work orders — tasks and repairs</li>
-          <li>PMS — scheduled maintenance</li>
-          <li>Monitoring — live systems</li>
-          <li>Logbook — voyage record</li>
-        </ul>
-      </div>
-    </div>
+    <strong>Operations run continuously underneath both layers.</strong> A work order logged by the chief engineer doesn't care who's aboard. The maintenance schedule doesn't pause for a charter. Operations are always on — the asset standard and person profile sit on top of them.
   </div>
 
 </div>
 
 
-<!-- ═══════ OWNER ARRIVING ═══════ -->
+<!-- ══════════════════════════════════════════════════════════
+     TAB 2 — DOING WORK
+══════════════════════════════════════════════════════════ -->
+<div class="canvas" id="flow-ops">
+
+  <div class="banner" style="margin-bottom:28px">
+    <strong>The most common flow. Happens 10× more than anything else.</strong> A crew member or staff finds an issue and needs to log it. Three steps. Same every time. Doesn't matter if Mr. Smith is aboard, a charter is running, or the vessel is in yard.
+  </div>
+
+  <!-- The 3 steps -->
+  <div class="sec">Three steps — always the same</div>
+
+  <div style="display:flex;align-items:center;gap:0;margin-bottom:32px">
+
+    <div style="flex:1;text-align:center;padding:0 8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:#F97316;color:#080808;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">1</div>
+      <div style="font-size:12px;font-weight:600;color:#F0F0EC;margin-bottom:4px">Open Frame</div>
+      <div style="font-size:10px;color:#6B6B63">See your tasks and any open alerts. What needs attention today.</div>
+    </div>
+
+    <div style="width:40px;height:.5px;background:#2A2A24;flex-shrink:0;margin-bottom:28px"></div>
+
+    <div style="flex:1;text-align:center;padding:0 8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:#F97316;color:#080808;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">2</div>
+      <div style="font-size:12px;font-weight:600;color:#F0F0EC;margin-bottom:4px">Log the issue</div>
+      <div style="font-size:10px;color:#6B6B63">Title, photo, which asset, assign to someone. Ten seconds.</div>
+    </div>
+
+    <div style="width:40px;height:.5px;background:#2A2A24;flex-shrink:0;margin-bottom:28px"></div>
+
+    <div style="flex:1;text-align:center;padding:0 8px">
+      <div style="width:36px;height:36px;border-radius:50%;background:#F97316;color:#080808;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">3</div>
+      <div style="font-size:12px;font-weight:600;color:#F0F0EC;margin-bottom:4px">Back to work</div>
+      <div style="font-size:10px;color:#6B6B63">Ticket is in the system. Captain sees it. Asset history updated. Done.</div>
+    </div>
+
+  </div>
+
+  <!-- Marine vs Property side by side -->
+  <div class="sec">Marine vs Property — same flow, different context</div>
+
+  <div class="two-col" style="margin-bottom:24px">
+
+    <!-- Marine -->
+    <div>
+      <div class="row-label mar" style="border-radius:8px 8px 0 0;margin-bottom:0">Frame Marine</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+
+        <div class="phase-cell mar">
+          <div class="pc-tag">Step 1 — Open Frame</div>
+          <div class="pc-title">Dashboard</div>
+          <div class="pc-body">Dmitri opens the app in the engine room. Sees 2 overdue PMS items and 1 alert on port engine coolant temp.</div>
+          <div class="sm">
+            <div class="sm-row"><span class="sm-l">Port engine temp</span><span class="sm-tag" style="background:rgba(248,113,113,.1);color:#F87171">91°C alert</span></div>
+            <div class="sm-row"><span class="sm-l">PMS overdue</span><span class="sm-v" style="color:#F87171">2 items</span></div>
+            <div class="sm-row"><span class="sm-l">My open WOs</span><span class="sm-v">3</span></div>
+          </div>
+        </div>
+
+        <div class="phase-cell mar">
+          <div class="pc-tag">Step 2 — Log the issue</div>
+          <div class="pc-title">New work order</div>
+          <div class="pc-body">Taps + New WO. Types the title. Links to port C32 engine asset. Adds a photo of the temp gauge. Assigns to himself. Priority: High.</div>
+          <div class="sm">
+            <div class="sm-row"><span class="sm-l">Title</span><span class="sm-v" style="font-size:9px">Port engine coolant high</span></div>
+            <div class="sm-row"><span class="sm-l">Asset</span><span class="sm-v" style="font-size:9px">Port CAT C32</span></div>
+            <div class="sm-row"><span class="sm-l">Priority</span><span class="sm-tag" style="background:rgba(248,113,113,.1);color:#F87171">High</span></div>
+          </div>
+        </div>
+
+        <div class="phase-cell mar" style="border-radius:0 0 0 8px">
+          <div class="pc-tag">Step 3 — Done</div>
+          <div class="pc-title">WO is live</div>
+          <div class="pc-body">Captain Romain sees it on his dashboard immediately. CAT vendor is linked to the asset — contact is one tap away. Dmitri goes back to the engine room.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Property -->
+    <div>
+      <div class="row-label pro" style="border-radius:8px 8px 0 0;margin-bottom:0">Frame Property</div>
+      <div style="display:flex;flex-direction:column;gap:2px">
+
+        <div class="phase-cell pro">
+          <div class="pc-tag">Step 1 — Open Frame</div>
+          <div class="pc-title">Dashboard</div>
+          <div class="pc-body">Maria opens the app walking through the Palm Beach house. Sees her housekeeping tasks for today and a maintenance item flagged yesterday.</div>
+          <div class="sm">
+            <div class="sm-row"><span class="sm-l">My tasks today</span><span class="sm-v">5</span></div>
+            <div class="sm-row"><span class="sm-l">Open maintenance</span><span class="sm-v" style="color:#FACC15">1 flagged</span></div>
+            <div class="sm-row"><span class="sm-l">Owner arrives</span><span class="sm-v">Friday</span></div>
+          </div>
+        </div>
+
+        <div class="phase-cell pro">
+          <div class="pc-tag">Step 2 — Log the issue</div>
+          <div class="pc-title">New work order</div>
+          <div class="pc-body">She notices the master bath faucet is dripping. Taps + New WO. Types it, takes a photo, links to master bathroom zone. Assigns to maintenance. Done.</div>
+          <div class="sm">
+            <div class="sm-row"><span class="sm-l">Title</span><span class="sm-v" style="font-size:9px">Master bath faucet dripping</span></div>
+            <div class="sm-row"><span class="sm-l">Zone</span><span class="sm-v" style="font-size:9px">Master bathroom</span></div>
+            <div class="sm-row"><span class="sm-l">Assigned</span><span class="sm-v" style="font-size:9px">Maintenance</span></div>
+          </div>
+        </div>
+
+        <div class="phase-cell pro" style="border-radius:0 0 8px 0">
+          <div class="pc-tag">Step 3 — Done</div>
+          <div class="pc-title">WO is live</div>
+          <div class="pc-body">Estate manager sees it immediately. Plumber vendor is linked — contact one tap away. Maria continues her housekeeping rounds. Ten seconds total.</div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="banner">
+    <strong>The mode doesn't change this flow at all.</strong> It works identically whether the owner is in residence, a charter guest is aboard, or the property is empty. Operations don't require context — they just work.
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     TAB 3 — OWNER VISIT
+══════════════════════════════════════════════════════════ -->
 <div class="canvas" id="flow-owner">
 
-  <div class="persona-bar">
-    <div class="persona-dot" style="background:#F97316;color:#080808">MS</div>
-    <div>
-      <div class="persona-name">Mr. Smith — arriving Friday</div>
-      <div class="persona-role">Owner. His vessel standards are already set. His personal profile adds the layer on top.</div>
-    </div>
+  <div class="banner" style="margin-bottom:28px">
+    The asset standard never changes. When Mr. Smith arrives, his <strong>person profile layers on top</strong> and generates the arrival checklist automatically. Operations continue running underneath — nothing stops.
   </div>
 
-  <div class="flow-stage">
-    <div class="stage-label">Captain sees the arrival</div>
-    <div class="flow-row">
+  <div class="sec">Three phases — arriving, in residence, departing</div>
 
-      <div class="node ops" style="width:190px">
-        <div class="node-tag">Calendar</div>
-        <div class="node-title">Owner visit — Friday</div>
-        <div class="node-body">Flagged 5 days out. Captain is notified. Arrival mode begins.</div>
-        <div class="screen-mock">
-          <div class="sm-row"><span class="sm-lbl">Mr. Smith</span><span class="sm-tag" style="background:rgba(249,115,22,.12);color:#F97316">Arrives Fri</span></div>
-          <div class="sm-row"><span class="sm-lbl">Party of 4</span><span class="sm-val">+family</span></div>
-          <div class="sm-row"><span class="sm-lbl">Duration</span><span class="sm-val">10 days</span></div>
-        </div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node person" style="width:190px">
-        <div class="node-tag">Profile pulls up</div>
-        <div class="node-title">Smith family prefs</div>
-        <div class="node-body">His personal layer surfaces automatically. Everything about the family is on file.</div>
-        <div class="screen-mock">
-          <div class="sm-row"><span class="sm-lbl">Coffee</span><span class="sm-val">Espresso 6:45</span></div>
-          <div class="sm-row"><span class="sm-lbl">Mrs. Smith</span><span class="sm-val">Gluten-free</span></div>
-          <div class="sm-row"><span class="sm-lbl">Emma</span><span class="sm-val">Peanut allergy</span></div>
-        </div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node result" style="width:190px">
-        <div class="node-tag">Auto-generated</div>
-        <div class="node-title">Arrival checklist</div>
-        <div class="node-body">Vessel standard + Smith profile combined. One checklist, assigned to crew.</div>
-        <div class="screen-mock">
-          <div class="sm-row"><span class="sm-lbl">Aesop stocked</span><span class="sm-tag" style="background:rgba(74,222,128,.1);color:#4ADE80">Vessel std</span></div>
-          <div class="sm-row"><span class="sm-lbl">Espresso ready</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">His prefs</span></div>
-          <div class="sm-row"><span class="sm-lbl">Peanut-free galley</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Emma</span></div>
-        </div>
-      </div>
-
-    </div>
+  <!-- Phase headers -->
+  <div class="phases phases-3" style="margin-bottom:2px">
+    <div class="phase-hdr" style="border-radius:8px 0 0 0">Arriving</div>
+    <div class="phase-hdr">In residence</div>
+    <div class="phase-hdr" style="border-radius:0 8px 0 0">Departing</div>
   </div>
 
-  <div class="flow-stage">
-    <div class="stage-label">During the visit — what the crew sees</div>
-    <div class="split">
+  <!-- Marine row -->
+  <div class="row-label mar" style="margin:2px 0 2px">Frame Marine</div>
+  <div class="prod-row prod-row-3" style="margin-bottom:2px">
 
-      <div class="split-branch">
-        <div class="split-label">Stewardess</div>
-        <div class="node vessel" style="width:100%">
-          <div class="node-tag">Vessel standard</div>
-          <div class="node-title">Daily ops</div>
-          <div class="node-body">Cabin service, provisioning, uniform — all from vessel standard. No guesswork.</div>
-        </div>
+    <div class="phase-cell mar">
+      <div class="pc-tag">Owner arriving</div>
+      <div class="pc-title">Vessel prep</div>
+      <div class="pc-body">
+        <ul>
+          <li>Smith profile activates</li>
+          <li>Arrival checklist auto-generates</li>
+          <li>Provisions to his spec</li>
+          <li>Peanut-free galley (Emma)</li>
+          <li>Espresso machine ready 6:45</li>
+          <li>Crew briefed on family prefs</li>
+        </ul>
       </div>
-
-      <div class="split-branch">
-        <div class="split-label">Chef</div>
-        <div class="node person" style="width:100%">
-          <div class="node-tag">Smith profile</div>
-          <div class="node-title">Meal planning</div>
-          <div class="node-body">Gluten-free for Mrs. Smith, vegetarian for Max, peanut-free throughout. All visible.</div>
-        </div>
+      <div class="sm" style="margin-top:8px">
+        <div class="sm-row"><span class="sm-l">Asset standard</span><span class="sm-tag" style="background:rgba(249,115,22,.1);color:#F97316">Aesop, Frette</span></div>
+        <div class="sm-row"><span class="sm-l">+ Smith profile</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Espresso, peanut-free</span></div>
       </div>
-
-      <div class="split-branch">
-        <div class="split-label">Captain</div>
-        <div class="node ops" style="width:100%">
-          <div class="node-tag">Operations</div>
-          <div class="node-title">Running the vessel</div>
-          <div class="node-body">WOs, itinerary, crew hours, logbook. Ops don't stop for owner visits.</div>
-        </div>
-      </div>
-
     </div>
+
+    <div class="phase-cell mar">
+      <div class="pc-tag">In residence</div>
+      <div class="pc-title">Service running</div>
+      <div class="pc-body">
+        <ul>
+          <li>His preferences visible to all crew</li>
+          <li>Any requests become tasks instantly</li>
+          <li>Itinerary managed in calendar</li>
+          <li>Chef sees dietary requirements</li>
+          <li>WOs and PMS continue quietly</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-cell mar">
+      <div class="pc-tag">Owner departing</div>
+      <div class="pc-title">Close-down</div>
+      <div class="pc-body">
+        <ul>
+          <li>Departure checklist runs</li>
+          <li>Vessel secured and stowed</li>
+          <li>Systems to standby mode</li>
+          <li>Crew rotation if needed</li>
+          <li>Smith profile deactivates</li>
+          <li>Back to ops mode</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Property row -->
+  <div class="row-label pro" style="margin:2px 0 2px">Frame Property</div>
+  <div class="prod-row prod-row-3" style="margin-bottom:2px">
+
+    <div class="phase-cell pro">
+      <div class="pc-tag">Owner arriving</div>
+      <div class="pc-title">House opening</div>
+      <div class="pc-body">
+        <ul>
+          <li>Smith profile activates</li>
+          <li>House opening checklist runs</li>
+          <li>Systems brought to temp (68°F)</li>
+          <li>Provisions ordered to his spec</li>
+          <li>Staff briefed on family prefs</li>
+          <li>WSJ delivery arranged</li>
+        </ul>
+      </div>
+      <div class="sm" style="margin-top:8px">
+        <div class="sm-row"><span class="sm-l">Property standard</span><span class="sm-tag" style="background:rgba(96,165,250,.1);color:#60A5FA">Aesop, linens</span></div>
+        <div class="sm-row"><span class="sm-l">+ Smith profile</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Temp, WSJ, gluten-free</span></div>
+      </div>
+    </div>
+
+    <div class="phase-cell pro">
+      <div class="pc-tag">In residence</div>
+      <div class="pc-title">Household running</div>
+      <div class="pc-body">
+        <ul>
+          <li>Daily housekeeping schedule active</li>
+          <li>Chef sees all dietary requirements</li>
+          <li>Children's schedules visible to staff</li>
+          <li>Any issues logged as WOs</li>
+          <li>Maintenance continues in background</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-cell pro">
+      <div class="pc-tag">Owner departing</div>
+      <div class="pc-title">House closing</div>
+      <div class="pc-body">
+        <ul>
+          <li>Closing checklist — room by room</li>
+          <li>Systems shut down or to standby</li>
+          <li>Seasonal close if applicable</li>
+          <li>Staff schedule reduced</li>
+          <li>Next opening pre-planned</li>
+          <li>Back to maintenance ops</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Ops bar -->
+  <div class="ops-bar">
+    <div class="ops-bar-lbl">Ops always running →</div>
+    <span class="ops-pill">Work orders</span>
+    <span class="ops-pill">PMS schedule</span>
+    <span class="ops-pill">Monitoring</span>
+    <span class="ops-pill">Vendor coordination</span>
+    <span class="ops-pill">Documents</span>
+    <span class="ops-pill">Unaffected by owner visit</span>
   </div>
 
 </div>
 
 
-<!-- ═══════ CHARTER GUEST ═══════ -->
+<!-- ══════════════════════════════════════════════════════════
+     TAB 4 — CHARTER / RENTAL
+══════════════════════════════════════════════════════════ -->
 <div class="canvas" id="flow-charter">
 
-  <div class="persona-bar">
-    <div class="persona-dot" style="background:#A78BFA;color:#080808">JG</div>
-    <div>
-      <div class="persona-name">The Johnsons — charter guests</div>
-      <div class="persona-role">7-day charter. Second time on Lady M. Their preferences are already on file.</div>
-    </div>
+  <div class="banner" style="margin-bottom:28px">
+    A third-party guest books the asset. The <strong>asset standard stays exactly the same</strong> — Aesop soap, Frette linens, the lot. Their <strong>person profile layers on top</strong> just like the owner's does. Preferences are saved and ready for next time they book.
   </div>
 
-  <div class="flow-stage">
-    <div class="stage-label">Booking to boarding</div>
-    <div class="flow-row">
+  <div class="sec">Four phases — booking, arrival, in stay, departure</div>
 
-      <div class="node ops" style="width:175px">
-        <div class="node-tag">Charter created</div>
-        <div class="node-title">Booking confirmed</div>
-        <div class="node-body">Dates, guests, APA, broker. Charter added to calendar.</div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node person" style="width:175px">
-        <div class="node-tag">Profile loads</div>
-        <div class="node-title">Johnsons on file</div>
-        <div class="node-body">Chartered before. Shellfish allergy, champagne on arrival, specific cabin layout.</div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node result" style="width:175px">
-        <div class="node-tag">Checklist ready</div>
-        <div class="node-title">Same vessel standard</div>
-        <div class="node-body">Aesop soap, Frette linens — all the same. Johnson prefs layer on top. Done.</div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node ops" style="width:175px">
-        <div class="node-tag">Charter closes</div>
-        <div class="node-title">Profile updated</div>
-        <div class="node-body">Any new notes saved. Next time they book, profile is even more complete.</div>
-      </div>
-
-    </div>
+  <!-- Phase headers -->
+  <div class="phases phases-4" style="margin-bottom:2px">
+    <div class="phase-hdr" style="border-radius:8px 0 0 0">Booking</div>
+    <div class="phase-hdr">Arrival</div>
+    <div class="phase-hdr">In stay</div>
+    <div class="phase-hdr" style="border-radius:0 8px 0 0">Departure</div>
   </div>
 
-  <div class="flow-stage">
-    <div class="stage-label">The key point</div>
-    <div class="banner" style="margin-bottom:0">
-      The vessel standard never changes for a charter. <strong>The Johnsons still get Aesop soap</strong> — because that's Lady M's standard, not Mr. Smith's personal preference traveling with him. The person profile only adds what's unique to them.
+  <!-- Marine row -->
+  <div class="row-label mar" style="margin:2px 0 2px">Frame Marine — Charter</div>
+  <div class="prod-row prod-row-4" style="margin-bottom:2px">
+
+    <div class="phase-cell mar">
+      <div class="pc-tag">Booking confirmed</div>
+      <div class="pc-title">Charter created</div>
+      <div class="pc-body">
+        <ul>
+          <li>Dates, guests, broker, APA</li>
+          <li>Guest profile loaded or created</li>
+          <li>Repeat guests: prefs auto-fill</li>
+          <li>Appears on calendar</li>
+        </ul>
+      </div>
     </div>
+
+    <div class="phase-cell mar">
+      <div class="pc-tag">Guest arriving</div>
+      <div class="pc-title">Vessel prep</div>
+      <div class="pc-body">
+        <ul>
+          <li>Guest profile activates</li>
+          <li>Checklist: vessel standard + guest prefs</li>
+          <li>Provisioning to their spec</li>
+          <li>Crew briefed</li>
+        </ul>
+      </div>
+      <div class="sm" style="margin-top:8px">
+        <div class="sm-row"><span class="sm-l">Vessel standard</span><span class="sm-tag" style="background:rgba(249,115,22,.1);color:#F97316">Aesop, Frette ✓</span></div>
+        <div class="sm-row"><span class="sm-l">+ Guest prefs</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">No shellfish</span></div>
+      </div>
+    </div>
+
+    <div class="phase-cell mar">
+      <div class="pc-tag">Charter active</div>
+      <div class="pc-title">Running</div>
+      <div class="pc-body">
+        <ul>
+          <li>Itinerary in calendar</li>
+          <li>APA spend tracked live</li>
+          <li>Requests become tasks</li>
+          <li>WOs and PMS continue</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-cell mar">
+      <div class="pc-tag">Charter closes</div>
+      <div class="pc-title">Close-out</div>
+      <div class="pc-body">
+        <ul>
+          <li>APA reconciled</li>
+          <li>Final costs to owner P&L</li>
+          <li>Guest profile updated + saved</li>
+          <li>Vessel back to ops mode</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
-</div>
+  <!-- Property row -->
+  <div class="row-label pro" style="margin:2px 0 2px">Frame Property — Rental / Guest stay</div>
+  <div class="prod-row prod-row-4" style="margin-bottom:2px">
 
-
-<!-- ═══════ CAPTAIN'S DAY ═══════ -->
-<div class="canvas" id="flow-captain">
-
-  <div class="persona-bar">
-    <div class="persona-dot" style="background:#4ADE80;color:#080808">RC</div>
-    <div>
-      <div class="persona-name">Romain — Captain</div>
-      <div class="persona-role">Every morning. What's urgent, what's coming, what does the crew need to know.</div>
+    <div class="phase-cell pro">
+      <div class="pc-tag">Booking confirmed</div>
+      <div class="pc-title">Stay created</div>
+      <div class="pc-body">
+        <ul>
+          <li>Dates, guests, rental terms</li>
+          <li>Guest profile loaded or created</li>
+          <li>Repeat guests: prefs auto-fill</li>
+          <li>Appears on calendar</li>
+        </ul>
+      </div>
     </div>
+
+    <div class="phase-cell pro">
+      <div class="pc-tag">Guest arriving</div>
+      <div class="pc-title">Property prep</div>
+      <div class="pc-body">
+        <ul>
+          <li>Guest profile activates</li>
+          <li>House opening checklist runs</li>
+          <li>Property standard + guest prefs</li>
+          <li>Staff briefed</li>
+        </ul>
+      </div>
+      <div class="sm" style="margin-top:8px">
+        <div class="sm-row"><span class="sm-l">Prop. standard</span><span class="sm-tag" style="background:rgba(96,165,250,.1);color:#60A5FA">Aesop, linens ✓</span></div>
+        <div class="sm-row"><span class="sm-l">+ Guest prefs</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Dietary, temp</span></div>
+      </div>
+    </div>
+
+    <div class="phase-cell pro">
+      <div class="pc-tag">In stay</div>
+      <div class="pc-title">Running</div>
+      <div class="pc-body">
+        <ul>
+          <li>Daily housekeeping continues</li>
+          <li>Guest requests become tasks</li>
+          <li>Costs tracked if applicable</li>
+          <li>Maintenance runs in background</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase-cell pro">
+      <div class="pc-tag">Guest departs</div>
+      <div class="pc-title">Close-out</div>
+      <div class="pc-body">
+        <ul>
+          <li>Departure checklist runs</li>
+          <li>Damage check if needed</li>
+          <li>Guest profile saved for next time</li>
+          <li>Property back to maintenance ops</li>
+        </ul>
+      </div>
+    </div>
+
   </div>
 
-  <div class="flow-stage">
-    <div class="stage-label">Morning — first open</div>
-    <div class="flow-row">
-
-      <div class="node ops" style="width:190px">
-        <div class="node-tag">Dashboard</div>
-        <div class="node-title">Today's picture</div>
-        <div class="node-body">Open WOs, overdue PMS, next arrival, active alerts. Everything urgent, nothing else.</div>
-        <div class="screen-mock">
-          <div class="sm-row"><span class="sm-lbl">Open WOs</span><span class="sm-val">4</span></div>
-          <div class="sm-row"><span class="sm-lbl">PMS overdue</span><span class="sm-val" style="color:#F87171">2</span></div>
-          <div class="sm-row"><span class="sm-lbl">Smith arrives</span><span class="sm-val">3 days</span></div>
-        </div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node ops" style="width:190px">
-        <div class="node-tag">Work orders</div>
-        <div class="node-title">Assign the day</div>
-        <div class="node-body">WO-001 port engine to Dmitri. Teak repair to deck. Cabin AC to stewardess.</div>
-      </div>
-
-      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
-
-      <div class="node result" style="width:190px">
-        <div class="node-tag">Smith arriving Friday</div>
-        <div class="node-title">Arrival checklist</div>
-        <div class="node-body">Auto-generated from vessel standard + Smith profile. Assigned to crew by department.</div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="flow-stage">
-    <div class="stage-label">When he needs to look something up</div>
-    <div class="split">
-
-      <div class="split-branch">
-        <div class="split-label">System question</div>
-        <div class="node vessel" style="width:100%">
-          <div class="node-tag">Asset hub</div>
-          <div class="node-title">Port C32 engine</div>
-          <div class="node-body">Full history, specs, vendor, all past WOs. One page, everything linked.</div>
-        </div>
-      </div>
-
-      <div class="split-branch">
-        <div class="split-label">Procedure question</div>
-        <div class="node vessel" style="width:100%">
-          <div class="node-tag">Vessel manual</div>
-          <div class="node-title">SOPs & standards</div>
-          <div class="node-body">Engine room entry, MOB, departure checklist. The way Lady M does things.</div>
-        </div>
-      </div>
-
-      <div class="split-branch">
-        <div class="split-label">Guest question</div>
-        <div class="node person" style="width:100%">
-          <div class="node-tag">Person profile</div>
-          <div class="node-title">Who's arriving</div>
-          <div class="node-body">Smith family prefs, Johnson charter history. Everything the crew needs to know.</div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="flow-stage">
-    <div class="stage-label">End of day</div>
-    <div class="split">
-      <div class="node ops" style="flex:1;min-width:160px">
-        <div class="node-tag">Logbook</div>
-        <div class="node-title">Passage entry</div>
-        <div class="node-body">Today's movements, weather, crew on watch. Official record.</div>
-      </div>
-      <div class="node ops" style="flex:1;min-width:160px">
-        <div class="node-tag">Hours of rest</div>
-        <div class="node-title">Crew compliance</div>
-        <div class="node-body">Hours logged. STCW rules checked. Violations flagged automatically.</div>
-      </div>
-      <div class="node ops" style="flex:1;min-width:160px">
-        <div class="node-tag">Calendar</div>
-        <div class="node-title">Tomorrow</div>
-        <div class="node-body">Provisions at 0800. Generator service 1000. Smith arrives in 3 days.</div>
-      </div>
-    </div>
+  <!-- Ops bar -->
+  <div class="ops-bar">
+    <div class="ops-bar-lbl">Ops always running →</div>
+    <span class="ops-pill">Work orders</span>
+    <span class="ops-pill">PMS schedule</span>
+    <span class="ops-pill">Monitoring</span>
+    <span class="ops-pill">Vendor coordination</span>
+    <span class="ops-pill">Unaffected by charter / rental</span>
   </div>
 
 </div>
+
 
 <script>
   function showFlow(id) {
