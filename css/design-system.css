@@ -224,10 +224,10 @@ html, body {
 .b-low    { background: var(--grn-bg);  color: var(--grn); }
 
 /* Status */
-.b-open     { background: var(--bg5);     color: var(--txt2); }
-.b-progress { background: var(--or-bg);   color: var(--or); }
+.b-open     { background: var(--blu-bg);  color: var(--blu); }
+.b-progress { background: var(--yel-bg);  color: var(--yel); }
 .b-done     { background: var(--grn-bg);  color: var(--grn); }
-.b-hold     { background: var(--yel-bg);  color: var(--yel); }
+.b-hold     { background: var(--bg5);     color: var(--txt3); }
 .b-critical { background: var(--red-bg);  color: var(--red); border: .5px solid var(--red-bd); }
 
 /* Teams */

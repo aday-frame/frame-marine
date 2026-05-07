@@ -1606,6 +1606,38 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
   flex-wrap: wrap;
 }
 
+/* ── WO PANEL PHOTOS ── */
+.wo-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 4px;
+}
+.wo-photo-thumb {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg3);
+  border: .5px solid var(--bd);
+  transition: opacity .1s;
+}
+.wo-photo-thumb:hover { opacity: .85; }
+.wo-photo-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: .5px dashed var(--bd2);
+  border-radius: 8px;
+  background: var(--bg2);
+  cursor: pointer;
+  transition: background .1s;
+}
+.wo-photo-empty:hover { background: var(--bg3); }
+
 /* ── WO MOBILE THUMBNAIL ── */
 .wo-mob-thumb-wrap {
   width: 64px;

@@ -203,8 +203,6 @@ WO.renderMobCards = function(wrap, list) {
   const pColors = { high: 'var(--red)', medium: '#f59e0b', low: 'var(--txt4)' };
   const pLabels = { high: 'High', medium: 'Medium', low: 'Low' };
 
-  const sysColors = { Propulsion:'#22D3EE', Electrical:'#FACC15', HVAC:'#A78BFA', Plumbing:'#60A5FA', 'Deck / Exterior':'#4ADE80', Stabilizers:'#F97316', Watermaker:'#60A5FA', 'Safety / Fire':'#F87171', Navigation:'#5E6AD2', 'AV / IT':'#34D399', Controls:'#FB923C' };
-
   const cards = list.map(w => {
     const pc      = pColors[w.priority] || 'var(--txt4)';
     const overdue = w.due && w.status !== 'done' && w.due < '2026-05-07';
@@ -213,13 +211,12 @@ WO.renderMobCards = function(wrap, list) {
     const subtasksDone  = (w.subtasks || []).filter(s => s.done).length;
     const subtasksTotal = (w.subtasks || []).length;
     const img     = (w.images || [])[0];
-    const sysCol  = sysColors[w.system] || 'var(--txt3)';
 
     const thumbEl = img
       ? `<img class="wo-mob-thumb" src="${escHtml(img)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
       : '';
     const placeholderEl = `<div class="wo-mob-thumb-ph" style="${img ? 'display:none' : ''}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${sysCol}" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--txt4)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
       </div>`;
 
     return `
@@ -322,13 +319,37 @@ WO.openPanel = function(id) {
     </div>
     ` : ''}
 
+    <!-- Photos -->
+    <div class="panel-section">
+      <div class="panel-section-title" style="display:flex;align-items:center;justify-content:space-between">
+        Photos
+        <label class="btn btn-ghost btn-xs" style="cursor:pointer">
+          + Add photo
+          <input type="file" accept="image/*" multiple style="display:none" onchange="WO.addPhotos('${w.id}', this)">
+        </label>
+      </div>
+      <div class="wo-photo-grid" id="wo-photos-${w.id}">
+        ${(w.images || []).length === 0 ? `
+          <label class="wo-photo-empty" style="cursor:pointer">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--txt4)" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
+            <span style="font-size:11px;color:var(--txt4);margin-top:4px">Tap to add photos</span>
+            <input type="file" accept="image/*" multiple style="display:none" onchange="WO.addPhotos('${w.id}', this)">
+          </label>` :
+          (w.images || []).map((src, i) => `
+            <div class="wo-photo-thumb" onclick="WO.viewPhoto('${w.id}',${i})">
+              <img src="${escHtml(src)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
+            </div>`).join('')
+        }
+      </div>
+    </div>
+
     <!-- Parts -->
     ${w.parts.length ? `
     <div class="panel-section">
       <div class="panel-section-title">Parts required</div>
       ${w.parts.map(p => `
         <div style="font-size:12px;color:var(--txt2);padding:7px 0;border-bottom:.5px solid var(--bd);display:flex;gap:8px;align-items:center">
-          <span style="font-family:var(--mono);font-size:10px;color:var(--txt4)">—</span>
+          <span style="font-size:10px;color:var(--txt4)">·</span>
           ${escHtml(p)}
         </div>
       `).join('')}
@@ -409,6 +430,56 @@ WO.setStatus = function(woId, status) {
   WO.renderList(WO.allWOs());
   WO.renderStats(WO.allWOs());
   showToast('Status updated to ' + FM.statusLabel(status), 'ok');
+};
+
+WO.addPhotos = function(woId, input) {
+  const w = FM.getWO(woId);
+  if (!w || !input.files.length) return;
+  if (!w.images) w.images = [];
+  const files = Array.from(input.files);
+  let loaded = 0;
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      w.images.push(e.target.result);
+      loaded++;
+      if (loaded === files.length) {
+        WO.openPanel(woId);
+        WO.renderList(WO.allWOs());
+        showToast(files.length === 1 ? 'Photo added' : files.length + ' photos added', 'ok');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+WO.viewPhoto = function(woId, index) {
+  const w = FM.getWO(woId);
+  if (!w || !w.images || !w.images[index]) return;
+  openModal(`
+    <div style="text-align:center">
+      <img src="${w.images[index]}" alt="" style="max-width:100%;max-height:60vh;border-radius:8px;display:block;margin:0 auto">
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+        ${w.images.length > 1 ? `
+          ${index > 0 ? `<button class="btn btn-ghost btn-sm" onclick="closeModal();WO.viewPhoto('${woId}',${index-1})">← Prev</button>` : ''}
+          <span style="font-size:12px;color:var(--txt3);align-self:center">${index+1} / ${w.images.length}</span>
+          ${index < w.images.length-1 ? `<button class="btn btn-ghost btn-sm" onclick="closeModal();WO.viewPhoto('${woId}',${index+1})">Next →</button>` : ''}
+        ` : ''}
+        <button class="btn btn-ghost btn-sm" style="color:var(--red)" onclick="WO.deletePhoto('${woId}',${index})">Delete</button>
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  `, 'Photo ${index+1} of ${w.images.length}');
+};
+
+WO.deletePhoto = function(woId, index) {
+  const w = FM.getWO(woId);
+  if (!w || !w.images) return;
+  w.images.splice(index, 1);
+  closeModal();
+  WO.openPanel(woId);
+  WO.renderList(WO.allWOs());
+  showToast('Photo removed');
 };
 
 /* ── VIEW SWITCHER ── */

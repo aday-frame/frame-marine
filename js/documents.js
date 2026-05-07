@@ -123,23 +123,130 @@ const Documents = (() => {
 
   function setTab(t) { _tab = t; render(); }
 
+  function _docPreviewHTML(d) {
+    const exp = _expStatus(d.expires);
+    const v   = FM.currentVessel() || FM.vessels[0];
+    const vName = v ? v.name : 'Lady M';
+    const flag  = v ? v.flag : 'CYM';
+
+    const header = `
+      <div style="background:var(--bg3);border-radius:8px 8px 0 0;padding:16px 20px;border:.5px solid var(--bd);border-bottom:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt4);margin-bottom:4px">${escHtml(d.category)} · ${escHtml(d.docRef)}</div>
+            <div style="font-size:16px;font-weight:600;color:var(--txt);letter-spacing:-.01em">${escHtml(d.name)}</div>
+          </div>
+          <span class="badge ${exp.cls}">${exp.label}</span>
+        </div>
+      </div>`;
+
+    const metaRow = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:.5px solid var(--bd);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;margin-bottom:20px">
+        <div style="padding:10px 14px;border-right:.5px solid var(--bd)">
+          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Vessel</div>
+          <div style="font-size:12px;color:var(--txt)">${escHtml(vName)}</div>
+        </div>
+        <div style="padding:10px 14px;border-right:.5px solid var(--bd)">
+          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Expiry</div>
+          <div style="font-size:12px;color:${exp.color}">${d.expires ? _fmtDate(d.expires) : 'No expiry'}</div>
+        </div>
+        <div style="padding:10px 14px">
+          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Updated</div>
+          <div style="font-size:12px;color:var(--txt)">${d.uploadedAt || 'On file'}</div>
+        </div>
+      </div>`;
+
+    let body = '';
+
+    if (d.category === 'Registration') {
+      body = `
+        <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:8px;padding:20px;font-size:12px;line-height:1.8;color:var(--txt2)">
+          <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:.5px solid var(--bd)">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.15em;color:var(--txt4);margin-bottom:8px">Certificate of Registry</div>
+            <div style="font-size:18px;font-weight:700;color:var(--txt);letter-spacing:-.01em">${escHtml(vName)}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px">Flag State: ${flag} &nbsp;·&nbsp; Official Number: ${v?.mmsi || '319123456'}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 24px">
+            <div><span style="color:var(--txt3)">Vessel type</span><br><strong style="color:var(--txt)">${v?.type || 'Motor Yacht'}</strong></div>
+            <div><span style="color:var(--txt3)">LOA</span><br><strong style="color:var(--txt)">${v?.loa || '48m'}</strong></div>
+            <div><span style="color:var(--txt3)">Home port</span><br><strong style="color:var(--txt)">${v?.port || 'Gustavia, St. Barths'}</strong></div>
+            <div><span style="color:var(--txt3)">MMSI</span><br><strong style="color:var(--txt);font-family:var(--mono)">${v?.mmsi || '319123456'}</strong></div>
+            <div><span style="color:var(--txt3)">Flag state</span><br><strong style="color:var(--txt)">Cayman Islands (CYM)</strong></div>
+            <div><span style="color:var(--txt3)">Gross tonnage</span><br><strong style="color:var(--txt)">499 GT</strong></div>
+          </div>
+          <div style="margin-top:20px;padding-top:16px;border-top:.5px solid var(--bd);font-size:10px;color:var(--txt4);text-align:center">
+            Issued by the Cayman Islands Shipping Registry &nbsp;·&nbsp; Document ref: ${escHtml(d.docRef)}
+          </div>
+        </div>`;
+    } else if (d.category === 'Insurance') {
+      body = `
+        <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:8px;padding:20px;font-size:12px;line-height:1.8;color:var(--txt2)">
+          <div style="margin-bottom:16px;padding-bottom:14px;border-bottom:.5px solid var(--bd)">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--txt4);margin-bottom:6px">Policy Summary</div>
+            <div style="font-size:15px;font-weight:600;color:var(--txt)">${escHtml(d.name)}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px">${v?.insurer || 'Pantaenius Yacht Insurance'} &nbsp;·&nbsp; ${v?.policyNumber || 'PAN-2026-MY-004821'}</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-bottom:16px">
+            <div><span style="color:var(--txt3)">Insured vessel</span><br><strong style="color:var(--txt)">${escHtml(vName)}</strong></div>
+            <div><span style="color:var(--txt3)">Insured value</span><br><strong style="color:var(--txt)">${v?.insuredValue || '$12,500,000'}</strong></div>
+            <div><span style="color:var(--txt3)">Policy period</span><br><strong style="color:var(--txt)">1 Jan 2026 – ${_fmtDate(v?.policyExpiry || '2026-12-31')}</strong></div>
+            <div><span style="color:var(--txt3)">Coverage type</span><br><strong style="color:var(--txt)">Hull & Machinery, P&I</strong></div>
+            <div><span style="color:var(--txt3)">Navigation area</span><br><strong style="color:var(--txt)">Worldwide</strong></div>
+            <div><span style="color:var(--txt3)">Deductible</span><br><strong style="color:var(--txt)">$25,000</strong></div>
+          </div>
+          <div style="background:var(--bg3);border-radius:6px;padding:12px;font-size:11px;color:var(--txt3)">
+            <strong style="color:var(--txt2);display:block;margin-bottom:4px">Coverage includes</strong>
+            Hull &amp; Machinery · Total loss · Salvage · Collision liability · Personal accident · Medical expenses · Crew liability
+          </div>
+        </div>`;
+    } else if (d.category === 'Manuals') {
+      body = `
+        <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:8px;padding:20px;font-size:12px;line-height:1.8;color:var(--txt2)">
+          <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid var(--bd)">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--txt4);margin-bottom:4px">Technical Manual</div>
+            <div style="font-size:15px;font-weight:600;color:var(--txt)">${escHtml(d.name)}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            ${['Introduction & safety warnings','Technical specifications','Installation & commissioning','Operating procedures','Routine maintenance schedule','Fault diagnosis & troubleshooting','Spare parts list','Warranty information'].map((s, i) => `
+              <div style="display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:6px;background:var(--bg3);cursor:pointer">
+                <span style="font-size:10px;font-weight:600;color:var(--txt4);font-family:var(--mono);width:28px;flex-shrink:0">${String(i+1).padStart(2,'0')}</span>
+                <span style="flex:1;color:var(--txt2)">${s}</span>
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--txt4)" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+              </div>`).join('')}
+          </div>
+          <div style="margin-top:14px;font-size:10px;color:var(--txt4);text-align:center">Ref: ${escHtml(d.docRef)} &nbsp;·&nbsp; ${d.notes || 'Technical documentation'}</div>
+        </div>`;
+    } else {
+      body = `
+        <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:8px;padding:20px;font-size:12px;line-height:1.8;color:var(--txt2)">
+          <div style="margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid var(--bd)">
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--txt4);margin-bottom:4px">${escHtml(d.category)}</div>
+            <div style="font-size:15px;font-weight:600;color:var(--txt)">${escHtml(d.name)}</div>
+          </div>
+          ${d.notes ? `<p style="margin-bottom:14px;color:var(--txt2)">${escHtml(d.notes)}</p>` : ''}
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px">
+            <div><span style="color:var(--txt3)">Reference</span><br><span style="font-family:var(--mono);font-size:11px;color:var(--txt)">${escHtml(d.docRef)}</span></div>
+            <div><span style="color:var(--txt3)">Category</span><br><strong style="color:var(--txt)">${escHtml(d.category)}</strong></div>
+            <div><span style="color:var(--txt3)">Vessel</span><br><strong style="color:var(--txt)">${escHtml(vName)}</strong></div>
+            <div><span style="color:var(--txt3)">Status</span><br><span class="badge ${exp.cls}" style="font-size:10px">${exp.label}</span></div>
+          </div>
+        </div>`;
+    }
+
+    return header + metaRow + body;
+  }
+
   function view(id) {
     const d = (FM.vesselDocs || []).find(x => x.id === id);
     if (!d) return;
     openModal(`
-      <div style="display:flex;flex-direction:column;gap:12px">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Document ref</div><div style="font-size:12px;font-family:var(--mono)">${escHtml(d.docRef)}</div></div>
-          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Category</div><div style="font-size:12px">${escHtml(d.category)}</div></div>
-          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Uploaded</div><div style="font-size:12px">${d.uploadedAt ? d.uploadedAt : '—'}</div></div>
-          <div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Expires</div><div style="font-size:12px">${d.expires ? d.expires : 'No expiry'}</div></div>
+      <div style="display:flex;flex-direction:column;gap:0;max-height:70vh;overflow-y:auto">
+        ${_docPreviewHTML(d)}
+        ${d.notes && d.category !== 'Manuals' ? `<div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--txt3)">${escHtml(d.notes)}</div>` : ''}
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="Documents.openEdit('${id}');closeModal()">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
         </div>
-        ${d.notes ? `<div><div style="font-size:10px;color:var(--txt3);margin-bottom:2px">Notes</div><div style="font-size:12px;color:var(--txt2)">${escHtml(d.notes)}</div></div>` : ''}
-        <div style="background:var(--bg3);border-radius:8px;padding:16px;text-align:center;font-size:11px;color:var(--txt3)">
-          📄 ${escHtml(d.docRef)}.pdf<br>
-          <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="showToast('File download coming soon')">Download PDF</button>
-        </div>
-        <button class="btn btn-ghost btn-sm" onclick="closeModal()" style="align-self:flex-end">Close</button>
       </div>
     `, escHtml(d.name));
   }
