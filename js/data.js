@@ -38,6 +38,40 @@ FM.currentVesselId = 'v1';
 
 FM.currentVessel = () => FM.vessels.find(v => v.id === FM.currentVesselId);
 
+/* ── PROPERTIES ── */
+FM.properties = [
+  {
+    id: 'p1', name: 'Mallorca Villa', location: 'Palma, Mallorca', type: 'Villa',
+    color: '#F97316', status: 'occupied', guests: 4,
+    checkIn: '2026-05-05', checkOut: '2026-05-12', staff: 3, openIssues: 2,
+    desc: '6BR villa with pool and sea views',
+  },
+  {
+    id: 'p2', name: 'NYC Penthouse', location: 'New York, NY', type: 'Apartment',
+    color: '#60A5FA', status: 'vacant', guests: 0,
+    checkIn: null, checkOut: null, staff: 1, openIssues: 1,
+    desc: 'Central Park West penthouse, 4BR',
+  },
+  {
+    id: 'p3', name: 'Aspen Chalet', location: 'Aspen, CO', type: 'Chalet',
+    color: '#A78BFA', status: 'occupied', guests: 6,
+    checkIn: '2026-05-04', checkOut: '2026-05-11', staff: 2, openIssues: 0,
+    desc: 'Ski-in/ski-out mountain lodge, 5BR',
+  },
+  {
+    id: 'p4', name: 'London Flat', location: 'Mayfair, London', type: 'Apartment',
+    color: '#4ADE80', status: 'vacant', guests: 0,
+    checkIn: null, checkOut: null, staff: 1, openIssues: 3,
+    desc: 'Mayfair 3BR pied-à-terre',
+  },
+  {
+    id: 'p5', name: 'Miami Condo', location: 'Miami Beach, FL', type: 'Condo',
+    color: '#FACC15', status: 'occupied', guests: 2,
+    checkIn: '2026-05-06', checkOut: '2026-05-10', staff: 1, openIssues: 1,
+    desc: 'South Beach oceanfront residence',
+  },
+];
+
 /* ── CREW ── */
 FM.crew = [
   { id: 'c1', initials: 'AJ', name: 'Albert Day',     role: 'Owner',           vessel: 'v1', color: '#F97316', phone: '', email: 'aday@castellomgmt.com', status: 'ashore' },
@@ -58,7 +92,19 @@ FM.workOrders = [
     desc: 'Port Caterpillar C32 throwing high coolant temp at 90°C setpoint. Thermostat suspected. Logged three events in past 48h.',
     zone: 'Engine Room', system: 'Propulsion',
     priority: 'high', status: 'open', team: 'engineering',
-    assignee: 'c3', created: '2026-04-29', due: '2026-05-02', vendor: 'vnd1',
+    assignee: 'c3', createdBy: 'c2', created: '2026-04-29', updatedAt: '2026-05-01', due: '2026-05-02', vendor: 'vnd1',
+    assetId: 'a1', recurring: false,
+    procedures: [
+      'Shut down port engine and allow to cool for 30 min',
+      'Drain coolant — collect in drip tray, dispose per MARPOL',
+      'Remove thermostat housing (4× M10 bolts)',
+      'Inspect housing gasket — replace if cracked or swollen',
+      'Install new thermostat (CAT 2W-8900) with fresh gasket',
+      'Refill coolant loop with 50/50 premix — approx 14L',
+      'Bleed air from system at highest point',
+      'Run engine at idle 15 min, monitor temp on SCADA',
+      'Confirm no alarm at operating temp, log in maintenance record',
+    ],
     subtasks: [
       { id: 's1', text: 'Check coolant level', done: true },
       { id: 's2', text: 'Inspect thermostat housing for leaks', done: true },
@@ -79,7 +125,15 @@ FM.workOrders = [
     desc: 'Small weep around the port seal on starboard fin actuator. No performance loss yet but needs attention before Atlantic crossing.',
     zone: 'Engine Room', system: 'Stabilizers',
     priority: 'medium', status: 'open', team: 'engineering',
-    assignee: 'c3', created: '2026-04-27', due: '2026-05-05', vendor: 'vnd2',
+    assignee: 'c3', createdBy: 'c3', created: '2026-04-27', due: '2026-05-05', vendor: 'vnd2',
+    assetId: 'a4', recurring: false,
+    procedures: [
+      'Inspect actuator seal area — photograph and measure weep rate',
+      'Order Naiad Dynamics seal kit (model-specific)',
+      'Top up hydraulic reservoir to correct level with Castrol Hyspin 46',
+      'Install seal kit per Naiad service manual section 5.3',
+      'Pressure test to 250 PSI and verify no weep',
+    ],
     subtasks: [
       { id: 's1', text: 'Inspect actuator seals', done: false },
       { id: 's2', text: 'Top up hydraulic reservoir', done: false },
@@ -97,7 +151,8 @@ FM.workOrders = [
     desc: 'Climatisation in GS2 not maintaining setpoint. Blowing room temp air. Other zones OK.',
     zone: 'Guest Stateroom 2', system: 'HVAC',
     priority: 'high', status: 'in-progress', team: 'engineering',
-    assignee: 'c3', created: '2026-04-30', due: '2026-05-01', vendor: 'vnd3',
+    assignee: 'c3', createdBy: 'c4', created: '2026-04-30', due: '2026-05-01', vendor: 'vnd3',
+    assetId: 'a3', recurring: false,
     subtasks: [
       { id: 's1', text: 'Check FCU filter — replace if blocked', done: true },
       { id: 's2', text: 'Check refrigerant pressure at chiller', done: false },
@@ -147,7 +202,15 @@ FM.workOrders = [
     desc: 'Katadyn watermaker requires freshwater flush after harbour use. Membranes need pickling if not in use for >72h.',
     zone: 'Engine Room', system: 'Plumbing',
     priority: 'low', status: 'done', team: 'engineering',
-    assignee: 'c3', created: '2026-04-26', due: '2026-04-27',
+    assignee: 'c3', createdBy: 'c3', created: '2026-04-26', due: '2026-04-27',
+    assetId: 'a5', recurring: 'Every 72h in port',
+    procedures: [
+      'Connect fresh water feed to watermaker inlet',
+      'Run flush cycle 20 min at low pressure',
+      'If inactive >72h: add Katadyn pickling solution to brine outlet loop',
+      'Circulate pickle solution for 10 min, close all valves',
+      'Log date and hours in maintenance record',
+    ],
     subtasks: [
       { id: 's1', text: '20-min fresh water flush cycle', done: true },
       { id: 's2', text: 'Pickle membranes with solution', done: true },
@@ -349,12 +412,30 @@ FM.sensors = {
 
 /* ── EVENTS / CALENDAR ── */
 FM.events = [
-  { id: 'e1', vessel: 'v1', title: 'Bermuda charter — 6 guests', start: '2026-05-05', end: '2026-05-12', type: 'charter', color: 'or', wo: null },
-  { id: 'e2', vessel: 'v1', title: 'Engine service — CAT dealer on board', start: '2026-05-02', end: '2026-05-02', type: 'maintenance', color: 'eng', wo: 'WO-001' },
-  { id: 'e3', vessel: 'v1', title: 'Annual survey — Lloyd\'s', start: '2026-05-20', end: '2026-05-22', type: 'regulatory', color: 'red', wo: null },
-  { id: 'e4', vessel: 'v1', title: 'Provisions delivery', start: '2026-05-04', end: '2026-05-04', type: 'logistics', color: 'grn', wo: 'WO-004' },
-  { id: 'e5', vessel: 'v1', title: 'Tender engine service', start: '2026-05-07', end: '2026-05-07', type: 'maintenance', color: 'blu', wo: 'WO-005' },
-  { id: 'e6', vessel: 'v2', title: 'Rigging inspection', start: '2026-05-10', end: '2026-05-11', type: 'maintenance', color: 'or', wo: 'WO-008' },
+  // Lady M — May
+  { id: 'e1',  vessel: 'v1', title: 'Bermuda charter — 6 guests',         start: '2026-05-05', end: '2026-05-12', type: 'charter',     color: 'or',  wo: null },
+  { id: 'e2',  vessel: 'v1', title: 'Engine service — CAT dealer on board',start: '2026-05-02', end: '2026-05-02', type: 'maintenance', color: 'eng', wo: 'WO-001' },
+  { id: 'e3',  vessel: 'v1', title: 'Annual survey — Lloyd\'s',            start: '2026-05-20', end: '2026-05-22', type: 'regulatory',  color: 'red', wo: null },
+  { id: 'e4',  vessel: 'v1', title: 'Provisions delivery',                 start: '2026-05-04', end: '2026-05-04', type: 'logistics',   color: 'grn', wo: 'WO-004' },
+  { id: 'e5',  vessel: 'v1', title: 'Tender engine service',               start: '2026-05-07', end: '2026-05-07', type: 'maintenance', color: 'blu', wo: 'WO-005' },
+  { id: 'e7',  vessel: 'v1', title: 'St. Barths private charter — 4 guests', start: '2026-05-15', end: '2026-05-18', type: 'charter',   color: 'or',  wo: null },
+  { id: 'e8',  vessel: 'v1', title: 'Fire & safety drill',                 start: '2026-05-13', end: '2026-05-13', type: 'regulatory',  color: 'red', wo: null },
+  { id: 'e9',  vessel: 'v1', title: 'Watermaker membrane flush',           start: '2026-05-10', end: '2026-05-10', type: 'maintenance', color: 'blu', wo: null },
+  { id: 'e10', vessel: 'v1', title: 'Antigua Sailing Week delivery',       start: '2026-04-28', end: '2026-05-01', type: 'logistics',   color: 'grn', wo: null },
+  { id: 'e11', vessel: 'v1', title: 'Owner cruise — Anguilla to St. Maarten', start: '2026-05-25', end: '2026-05-30', type: 'charter', color: 'or',  wo: null },
+  // Lady M — June
+  { id: 'e12', vessel: 'v1', title: 'Yacht charter — 8 guests (confirmed)', start: '2026-06-05', end: '2026-06-12', type: 'charter',   color: 'or',  wo: null },
+  { id: 'e13', vessel: 'v1', title: 'Haul-out — Fort Lauderdale',          start: '2026-06-20', end: '2026-06-28', type: 'maintenance', color: 'eng', wo: null },
+  { id: 'e14', vessel: 'v1', title: 'Hull & antifoul survey',              start: '2026-06-21', end: '2026-06-21', type: 'regulatory',  color: 'red', wo: null },
+  // Naiad — May
+  { id: 'e6',  vessel: 'v2', title: 'Rigging inspection',                  start: '2026-05-10', end: '2026-05-11', type: 'maintenance', color: 'or',  wo: 'WO-008' },
+  { id: 'e15', vessel: 'v2', title: 'Chesapeake Bay weekend cruise',       start: '2026-05-08', end: '2026-05-10', type: 'charter',     color: 'or',  wo: null },
+  { id: 'e16', vessel: 'v2', title: 'Sail inventory & repair',             start: '2026-05-14', end: '2026-05-15', type: 'maintenance', color: 'blu', wo: null },
+  { id: 'e17', vessel: 'v2', title: 'STCW refresher — crew training',      start: '2026-05-19', end: '2026-05-20', type: 'regulatory',  color: 'red', wo: null },
+  { id: 'e18', vessel: 'v2', title: 'Newport to Bermuda race delivery',    start: '2026-05-28', end: '2026-06-01', type: 'logistics',   color: 'grn', wo: null },
+  // Naiad — June
+  { id: 'e19', vessel: 'v2', title: 'Newport Bermuda Race 2026',           start: '2026-06-19', end: '2026-06-23', type: 'charter',     color: 'or',  wo: null },
+  { id: 'e20', vessel: 'v2', title: 'Standing rigging replacement',        start: '2026-06-10', end: '2026-06-12', type: 'maintenance', color: 'eng', wo: null },
 ];
 
 /* ── PARTS INVENTORY ── */
@@ -736,12 +817,12 @@ FM.fleet = [
     notes: 'Guest use only. Helmet stored in starboard watersports locker. Max 2 riders.',
   },
   {
-    id: 'f4', vessel: 'v1', name: 'Jet Ski 2', type: 'PWC', make: 'Sea-Doo', model: 'GTX 230', year: 2022,
-    loa: '3.4m', beam: '1.2m', engine: 'Rotax 1630 ACE 230hp', fuel: 'petrol',
-    hours: 298, fuelPct: 65, status: 'swim-platform',
+    id: 'f4', vessel: 'v1', name: 'Jet Ski 2', type: 'PWC', make: 'Sea-Doo', model: 'GTX 300', year: 2022,
+    loa: '3.4m', beam: '1.2m', engine: 'Rotax 1630 ACE 300hp', fuel: 'petrol',
+    hours: 298, fuelPct: 60, status: 'swim-platform',
     lastService: '2026-01-20', nextServiceHours: 400,
     color: '#F97316', reg: 'KYA-PWC-002', photo: 'img/jet-ski-2.avif',
-    notes: 'Guest use only. Inspect hull and wear ring every 50 hours.',
+    notes: 'Guest use. Throttle cable recently serviced (WO-012). Max 2 riders. Helmet in port watersports locker.',
   },
   {
     id: 'f5', vessel: 'v1', name: 'Seabob 1', type: 'Seabob', make: 'Seabob', model: 'F5 SR', year: 2023,
@@ -750,6 +831,14 @@ FM.fleet = [
     lastService: '2026-02-01', nextServiceHours: 200,
     color: '#A78BFA', reg: null, photo: 'img/seabob-f5.webp',
     notes: 'Charge takes 3.5 hours. Max depth 40m. Inspect impeller o-rings monthly.',
+  },
+  {
+    id: 'f6', vessel: 'v2', name: 'Naiad RIB', type: 'Tender', make: 'Highfield', model: 'SP 460', year: 2021,
+    loa: '4.6m', beam: '2.0m', engine: 'Yamaha F60 60hp', fuel: 'petrol',
+    hours: 142, fuelPct: 80, status: 'davits',
+    lastService: '2026-01-20', nextServiceHours: 300,
+    color: '#60A5FA', reg: 'MDY-TDR-001', photo: 'img/castoldi-jet-12.jpg',
+    notes: 'Primary tender for Naiad. Stored on stern davits. Monthly impeller check.',
   },
 ];
 
@@ -1026,6 +1115,33 @@ FM.crewCerts = [
   { id:'cc13', crewId:'c6', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2024-04-10', expires:'2026-04-10', docRef:'ENG1-2024-2211' },
   { id:'cc14', crewId:'c7', name:'STCW — Ratings Certificate',        category:'STCW',    issuer:'MCA UK',                           issued:'2023-11-05', expires:'2028-11-05', docRef:'MCA-RAT-2023-9901' },
   { id:'cc15', crewId:'c7', name:'ENG1 Medical Certificate',           category:'Medical', issuer:'Approved Medical Examiner',        issued:'2025-05-01', expires:'2027-05-01', docRef:'ENG1-2025-9902' },
+];
+
+/* ── CREW DOCUMENTS ── */
+FM.crewDocs = [
+  { id:'cd1',  crewId:'c2', name:'Passport — French',               type:'passport',    issued:'2021-03-10', expires:'2031-03-10' },
+  { id:'cd2',  crewId:'c2', name:"Seafarer's Discharge Book",       type:'seamans_book',issued:'2010-06-01', expires:null },
+  { id:'cd3',  crewId:'c2', name:'Employment Contract',             type:'contract',    issued:'2024-01-01', expires:'2026-12-31' },
+  { id:'cd4',  crewId:'c2', name:'Yellow Fever Vaccination',        type:'vaccination', issued:'2022-04-15', expires:'2032-04-15' },
+  { id:'cd5',  crewId:'c3', name:'Passport — Russian',              type:'passport',    issued:'2020-05-18', expires:'2030-05-18' },
+  { id:'cd6',  crewId:'c3', name:"Seafarer's Discharge Book",       type:'seamans_book',issued:'2012-09-01', expires:null },
+  { id:'cd7',  crewId:'c3', name:'Employment Contract',             type:'contract',    issued:'2024-01-01', expires:'2026-12-31' },
+  { id:'cd8',  crewId:'c3', name:'Yellow Fever Vaccination',        type:'vaccination', issued:'2023-01-10', expires:'2033-01-10' },
+  { id:'cd9',  crewId:'c4', name:'Passport — French',               type:'passport',    issued:'2022-09-01', expires:'2032-09-01' },
+  { id:'cd10', crewId:'c4', name:"Seafarer's Discharge Book",       type:'seamans_book',issued:'2018-03-15', expires:null },
+  { id:'cd11', crewId:'c4', name:'Employment Contract',             type:'contract',    issued:'2024-03-01', expires:'2027-02-28' },
+  { id:'cd12', crewId:'c5', name:'Passport — British',              type:'passport',    issued:'2023-08-14', expires:'2033-08-14' },
+  { id:'cd13', crewId:'c5', name:"Seafarer's Discharge Book",       type:'seamans_book',issued:'2019-11-20', expires:null },
+  { id:'cd14', crewId:'c5', name:'Employment Contract',             type:'contract',    issued:'2024-06-01', expires:'2026-05-31' },
+  { id:'cd15', crewId:'c6', name:'Passport — Czech',                type:'passport',    issued:'2024-04-10', expires:'2034-04-10' },
+  { id:'cd16', crewId:'c6', name:"Seafarer's Discharge Book",       type:'seamans_book',issued:'2022-06-01', expires:null },
+  { id:'cd17', crewId:'c6', name:'Employment Contract',             type:'contract',    issued:'2025-01-15', expires:'2026-12-31' },
+  { id:'cd18', crewId:'c7', name:'Passport — Irish',                type:'passport',    issued:'2023-11-05', expires:'2033-11-05' },
+  { id:'cd19', crewId:'c7', name:"Seafarer's Discharge Book",       type:'seamans_book',issued:'2021-08-01', expires:null },
+  { id:'cd20', crewId:'c7', name:'Employment Contract',             type:'contract',    issued:'2024-09-01', expires:'2026-08-31' },
+  { id:'cd21', crewId:'c8', name:'Passport — Russian',              type:'passport',    issued:'2022-07-20', expires:'2032-07-20' },
+  { id:'cd22', crewId:'c8', name:'Employment Contract',             type:'contract',    issued:'2024-04-01', expires:'2026-03-31' },
+  { id:'cd23', crewId:'c8', name:'Food Handler Certificate',        type:'certification',issued:'2024-04-01', expires:'2026-04-01' },
 ];
 
 /* ── DRILLS ── */

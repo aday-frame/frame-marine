@@ -15,7 +15,7 @@ const Hours = (() => {
   function _last7() {
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date('2026-05-06');
+      const d = new Date();
       d.setDate(d.getDate() - i);
       days.push(d.toISOString().slice(0,10));
     }
@@ -126,7 +126,7 @@ const Hours = (() => {
           ${days.map(date => {
             const rec  = recs.find(r => r.date === date);
             const viol = rec ? _violation(rec) : null;
-            const isToday = date === '2026-05-06';
+            const isToday = date === new Date().toISOString().slice(0,10);
             return `
             <div style="display:grid;grid-template-columns:160px 1fr 1fr 80px 120px;align-items:center;padding:11px 16px;border-bottom:.5px solid var(--bd);${isToday ? 'background:var(--bg3)' : ''}">
               <div>

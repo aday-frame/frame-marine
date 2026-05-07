@@ -42,21 +42,24 @@ const Reports = window.Reports = (() => {
       : null;
 
     /* ── Crew workload ── */
+    const priHours = { high: 8, medium: 4, low: 2 };
     const crewMap = {};
     wos.forEach(w => {
       if (!w.assignee) return;
-      if (!crewMap[w.assignee]) crewMap[w.assignee] = { open:0, inProg:0, done:0, overdue:0 };
+      if (!crewMap[w.assignee]) crewMap[w.assignee] = { open:0, inProg:0, done:0, overdue:0, hours:0 };
       const cm = crewMap[w.assignee];
       if (w.status === 'open') cm.open++;
       else if (w.status === 'in-progress') cm.inProg++;
       else if (w.status === 'done') cm.done++;
       if (w.due && w.status !== 'done' && new Date(w.due) < new Date('2026-05-07')) cm.overdue++;
+      cm.hours += w.estimatedHours || priHours[w.priority] || 2;
     });
 
     const crewRows = Object.entries(crewMap)
       .map(([id, c]) => ({ id, ...c, total: c.open + c.inProg + c.done }))
-      .sort((a, b) => b.open - a.open || b.inProg - a.inProg);
+      .sort((a, b) => b.total - a.total);
     const maxCrew = Math.max(...crewRows.map(r => r.total), 1);
+    const maxHours = Math.max(...crewRows.map(r => r.hours), 1);
 
     /* ── By system ── */
     const sysMap = {};
@@ -144,6 +147,38 @@ const Reports = window.Reports = (() => {
                     ${r.open ? `<span style="color:var(--or)">${r.open} open</span>` : ''}
                     ${r.inProg ? `<span style="color:var(--txt)">${r.inProg} in progress</span>` : ''}
                     ${r.done ? `<span style="color:var(--grn)">${r.done} done</span>` : ''}
+                    ${r.overdue ? `<span style="color:var(--red)">${r.overdue} overdue</span>` : ''}
+                  </div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+
+        <!-- Hours by crew -->
+        <div class="rep-section">
+          <div class="rep-section-title">
+            Estimated hours by crew member
+            <span class="rep-section-sub">based on ticket priority (high=8h, medium=4h, low=2h)</span>
+          </div>
+          ${crewRows.length === 0 ? `<div class="rep-empty">No assigned work orders</div>` : crewRows.map(r => {
+            const cr = FM.getCrew(r.id);
+            if (!cr) return '';
+            const pct = Math.round(r.hours / maxHours * 100);
+            return `
+              <div class="rep-crew-row">
+                <div class="rep-crew-left">
+                  <div class="wo-av" style="background:${cr.color}">${cr.initials}</div>
+                  <div class="rep-crew-info">
+                    <div class="rep-crew-name">${escHtml(cr.name)}</div>
+                    <div class="rep-crew-role">${r.total} ticket${r.total!==1?'s':''}</div>
+                  </div>
+                </div>
+                <div class="rep-crew-bars">
+                  <div class="rep-bar-track"><div class="rep-bar-fill" style="width:${pct}%;background:${cr.color}"></div></div>
+                  <div class="rep-crew-counts">
+                    <span style="color:var(--txt);font-weight:600">${r.hours}h</span>
+                    <span style="color:var(--txt3)">estimated</span>
+                    ${r.done ? `<span style="color:var(--grn)">${r.done} completed</span>` : ''}
                     ${r.overdue ? `<span style="color:var(--red)">${r.overdue} overdue</span>` : ''}
                   </div>
                 </div>

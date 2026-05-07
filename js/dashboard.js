@@ -20,10 +20,198 @@ function _dayFull(s) {
 const _pill = (txt, color, bg) =>
   `<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:5px 11px;border-radius:20px;white-space:nowrap;background:${bg};color:${color}">${txt}</span>`;
 
+/* ─── All-vessels overview ──────────────────────────────── */
+function _renderAllVessels(wrap) {
+  const vessels = FM.vessels || [];
+  const me = (FM.crew || []).find(c => c.id === 'c1');
+
+  const vData = vessels.map(v => {
+    const openWOs    = FM.openWOs(v.id);
+    const highWOs    = openWOs.filter(w => w.priority === 'high');
+    const overdueWOs = openWOs.filter(w => w.due && w.due < _T);
+    const crewAll    = (FM.crew || []).filter(c => c.vessel === v.id && c.id !== 'c1');
+    const onboard    = crewAll.filter(c => c.status === 'onboard');
+    const sensors    = FM.sensors?.[v.id];
+    const warnEng    = sensors ? sensors.engines.filter(e => e.status === 'warn' || e.status === 'crit') : [];
+    const docs       = (FM.vesselDocs || []).filter(d => d.vessel === v.id);
+    const expiredDocs  = docs.filter(d => { const x = _du(d.expires); return x !== null && x < 0; });
+    const nextCharter  = (FM.events || [])
+      .filter(e => e.vessel === v.id && e.type === 'charter' && e.end >= _T)
+      .sort((a,b) => a.start.localeCompare(b.start))[0];
+    const sev = overdueWOs.length || warnEng.length ? 'red'
+              : highWOs.length || expiredDocs.length ? 'amber'
+              : 'ok';
+    return { v, openWOs, highWOs, overdueWOs, crewAll, onboard, warnEng, expiredDocs, nextCharter, sev };
+  });
+
+  const totalOpen    = vData.reduce((s,d) => s + d.openWOs.length, 0);
+  const totalHigh    = vData.reduce((s,d) => s + d.highWOs.length, 0);
+  const totalOnboard = vData.reduce((s,d) => s + d.onboard.length, 0);
+  const totalWarnEng = vData.reduce((s,d) => s + d.warnEng.length, 0);
+  const totalOverdue = vData.reduce((s,d) => s + d.overdueWOs.length, 0);
+  const hasAlerts    = totalOverdue > 0 || totalWarnEng > 0;
+
+  /* ── MOBILE ─────────────────────────────────────────────── */
+  const mobHTML = `
+    <div class="dash-mob-wrap">
+      <div class="dash-mob-hdr">
+        <div>
+          <div class="dash-mob-greeting">Fleet Overview</div>
+          <div class="dash-mob-vessel">${vessels.length} vessels · ${_dayFull(_T).split(' ').slice(0,3).join(' ')}</div>
+        </div>
+        <div style="width:38px;height:38px;border-radius:50%;background:${me?.color||'var(--or)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">${me?.initials||'?'}</div>
+      </div>
+
+      <div class="dash-mob-section">FLEET STATUS</div>
+      <div class="dash-mob-stats">
+        <div class="dash-mob-stat">
+          <div class="dash-mob-stat-num" style="color:${totalOpen>0?'var(--or)':'var(--grn)'}">${totalOpen}</div>
+          <div class="dash-mob-stat-lbl">Open Work Orders</div>
+        </div>
+        <div class="dash-mob-stat">
+          <div class="dash-mob-stat-num" style="color:${totalHigh>0?'var(--red)':'var(--grn)'}">${totalHigh}</div>
+          <div class="dash-mob-stat-lbl">High Priority</div>
+        </div>
+        <div class="dash-mob-stat">
+          <div class="dash-mob-stat-num" style="color:var(--txt)">${totalOnboard}</div>
+          <div class="dash-mob-stat-lbl">Crew Onboard</div>
+        </div>
+        <div class="dash-mob-stat">
+          <div class="dash-mob-stat-num" style="color:${totalWarnEng>0?'var(--red)':'var(--grn)'}">${totalWarnEng}</div>
+          <div class="dash-mob-stat-lbl">Engine Warnings</div>
+        </div>
+      </div>
+
+      ${vData.map(d => {
+        const sc = d.sev==='red'?'var(--red)':d.sev==='amber'?'var(--yel)':'var(--grn)';
+        return `
+          <div class="dash-mob-section">${escHtml(d.v.name).toUpperCase()}</div>
+          <div class="dash-mob-card" onclick="switchVessel('${d.v.id}')" style="cursor:pointer">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div>
+                <div style="font-size:15px;font-weight:600;color:var(--txt)">${escHtml(d.v.name)}</div>
+                <div style="font-size:11px;color:var(--txt3)">${escHtml(d.v.type)} · ${escHtml(d.v.port)}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:5px">
+                <div style="width:7px;height:7px;border-radius:50%;background:${sc}"></div>
+                <span style="font-size:11px;color:${sc}">${d.sev==='ok'?'All clear':d.sev==='amber'?'Attention':'Alert'}</span>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+              <div style="text-align:center;background:var(--bg3);border-radius:8px;padding:8px 4px">
+                <div style="font-size:18px;font-weight:700;color:${d.openWOs.length>0?'var(--or)':'var(--grn)'}">${d.openWOs.length}</div>
+                <div style="font-size:9px;color:var(--txt3)">Open WOs</div>
+              </div>
+              <div style="text-align:center;background:var(--bg3);border-radius:8px;padding:8px 4px">
+                <div style="font-size:18px;font-weight:700;color:var(--txt)">${d.onboard.length}</div>
+                <div style="font-size:9px;color:var(--txt3)">Crew</div>
+              </div>
+              <div style="text-align:center;background:var(--bg3);border-radius:8px;padding:8px 4px">
+                <div style="font-size:18px;font-weight:700;color:${d.highWOs.length>0?'var(--red)':'var(--grn)'}">${d.highWOs.length}</div>
+                <div style="font-size:9px;color:var(--txt3)">High Pri.</div>
+              </div>
+            </div>
+            ${d.nextCharter ? `<div style="margin-top:10px;font-size:11px;color:var(--or)">Next charter: ${_f(d.nextCharter.start)}</div>` : ''}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  /* ── DESKTOP ─────────────────────────────────────────────── */
+  const deskHTML = `
+    <div class="dash-desk-wrap">
+      <div style="max-width:1060px;padding:0 22px 60px;margin:0 auto">
+
+        <div style="padding:22px 0 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:.5px solid var(--bd);margin-bottom:20px">
+          <div>
+            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--txt3);margin-bottom:4px">Fleet overview</div>
+            <div style="font-size:22px;font-weight:500;color:var(--txt);letter-spacing:-.02em">${_dayFull(_T)}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            ${_pill(totalOnboard+' crew onboard', 'var(--txt2)', 'var(--bg3)')}
+            ${_pill(totalOpen+' open work orders', totalOpen>2?'var(--yel)':'var(--txt2)', totalOpen>2?'var(--yel-bg)':'var(--bg3)')}
+            ${_pill(hasAlerts?'⚠ Issues need attention':'✓ Fleet nominal', hasAlerts?'var(--red)':'var(--grn)', hasAlerts?'var(--red-bg)':'var(--grn-bg)')}
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          ${vData.map(d => {
+            const sc  = d.sev==='red'?'var(--red)':d.sev==='amber'?'var(--yel)':'var(--grn)';
+            const sbd = d.sev==='red'?'var(--red-bd)':d.sev==='amber'?'var(--yel-bd)':'var(--bd)';
+            return `
+              <div style="background:var(--bg2);border:.5px solid ${sbd};border-radius:12px;overflow:hidden">
+                <div style="padding:14px 16px 12px;border-bottom:.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between">
+                  <div>
+                    <div style="font-size:16px;font-weight:600;color:var(--txt);letter-spacing:-.01em">${escHtml(d.v.name)}</div>
+                    <div style="font-size:11px;color:var(--txt3);margin-top:2px">${escHtml(d.v.type)} · ${escHtml(d.v.port)}</div>
+                  </div>
+                  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+                    <div style="display:flex;align-items:center;gap:5px">
+                      <div style="width:7px;height:7px;border-radius:50%;background:${sc}"></div>
+                      <span style="font-size:11px;font-weight:500;color:${sc}">${d.sev==='ok'?'All clear':d.sev==='amber'?'Attention':'Alert'}</span>
+                    </div>
+                    <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();switchVessel('${d.v.id}')">View vessel →</button>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr)">
+                  ${[
+                    { val:d.openWOs.length,  lbl:'Open WOs',     color:d.openWOs.length>0?'var(--or)':'var(--grn)' },
+                    { val:d.highWOs.length,  lbl:'High pri.',    color:d.highWOs.length>0?'var(--red)':'var(--grn)' },
+                    { val:d.onboard.length,  lbl:'Crew onboard', color:'var(--txt)' },
+                    { val:d.warnEng.length,  lbl:'Engine warn.', color:d.warnEng.length>0?'var(--red)':'var(--grn)' },
+                  ].map((s,i) => `
+                    <div style="padding:12px 8px;text-align:center;${i<3?'border-right:.5px solid var(--bd);':''}border-bottom:.5px solid var(--bd)">
+                      <div style="font-size:20px;font-weight:700;color:${s.color}">${s.val}</div>
+                      <div style="font-size:9px;color:var(--txt3);margin-top:2px">${s.lbl}</div>
+                    </div>
+                  `).join('')}
+                </div>
+                <div>
+                  ${d.openWOs.length===0
+                    ? '<div style="padding:14px 16px;font-size:12px;color:var(--txt3)">No open work orders.</div>'
+                    : d.openWOs.slice(0,4).map(w => {
+                        const late = w.due && w.due < _T;
+                        const pc = w.priority==='high'?'var(--red)':w.priority==='medium'?'var(--yel)':'var(--txt4)';
+                        return `<div style="display:flex;align-items:center;gap:10px;padding:9px 16px;border-bottom:.5px solid var(--bd);cursor:pointer" onclick="switchVessel('${d.v.id}');setTimeout(()=>navTo('work-orders',document.querySelector('[data-page=work-orders]')),80)">
+                          <div style="width:6px;height:6px;border-radius:50%;background:${pc};flex-shrink:0"></div>
+                          <div style="flex:1;min-width:0;font-size:11px;font-weight:500;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(w.title)}</div>
+                          <div style="font-size:10px;color:${late?'var(--red)':'var(--txt3)'};flex-shrink:0">${w.due?_f(w.due):'—'}</div>
+                        </div>`;
+                      }).join('')
+                  }
+                  ${d.openWOs.length>4 ? `<div style="padding:8px 16px;font-size:10px;color:var(--txt3)">+${d.openWOs.length-4} more</div>` : ''}
+                </div>
+                ${d.nextCharter ? `<div style="padding:10px 16px;border-top:.5px solid var(--bd);font-size:11px;color:var(--or)">Next charter: ${_f(d.nextCharter.start)}</div>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  wrap.innerHTML = mobHTML + deskHTML;
+
+  if (!document.getElementById('_dash_css')) {
+    const s = document.createElement('style');
+    s.id = '_dash_css';
+    s.textContent = [
+      '@media(max-width:900px){._briefgrid{grid-template-columns:1fr!important}}',
+      '@media(max-width:768px){._dashwrap{padding:0 14px 60px!important}}',
+      '@media(max-width:768px){._wogrid{grid-template-columns:auto 1fr auto!important}}',
+    ].join('');
+    document.head.appendChild(s);
+  }
+}
+
 /* ─── Main render ───────────────────────────────────────── */
 Dash.render = function () {
   const wrap = document.getElementById('page-dashboard');
   if (!wrap) return;
+
+  if (FM.currentVesselId === 'all') { _renderAllVessels(wrap); return; }
 
   const v = FM.currentVessel();
   if (!v) {

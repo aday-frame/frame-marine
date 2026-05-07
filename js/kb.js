@@ -125,6 +125,19 @@ const KB = (() => {
 
     const color = SYS_COLORS[a.system] || 'var(--txt3)';
 
+    const imagesHTML = (a.images || []).length ? `
+      <div class="kb-art-section" style="display:flex;flex-direction:column;gap:10px">
+        ${a.images.map((url, i) => `
+          <div style="position:relative;border-radius:10px;overflow:hidden;background:var(--bg3)">
+            <img src="${escHtml(url)}" style="width:100%;max-height:320px;object-fit:cover;display:block"
+                 alt="" onerror="this.closest('div').remove()">
+            <button onclick="KB.removeImage('${a.id}',${i})"
+              style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer">
+              Remove
+            </button>
+          </div>`).join('')}
+      </div>` : '';
+
     const stepsHTML = (a.steps || []).length ? `
       <div class="kb-art-section">
         <div class="kb-art-section-title">Steps</div>
@@ -173,14 +186,46 @@ const KB = (() => {
 
           ${a.summary ? `<div class="kb-art-summary">${escHtml(a.summary)}</div>` : ''}
 
+          ${imagesHTML}
+
           ${a.content ? `<div class="kb-art-content">${escHtml(a.content)}</div>` : ''}
 
           ${stepsHTML}
           ${bodyHTML}
           ${notesHTML}
+
+          <!-- Add image -->
+          <div class="kb-art-section" style="border-top:.5px solid var(--bd);padding-top:16px;margin-top:4px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:8px">Add image</div>
+            <div style="display:flex;gap:8px">
+              <input id="kb-img-url-${a.id}" class="kb-search" style="flex:1;font-size:12px" placeholder="Paste an image URL…">
+              <button class="btn btn-ghost btn-sm" onclick="KB.addImage('${a.id}')">Add</button>
+            </div>
+            <div style="font-size:10px;color:var(--txt4);margin-top:6px">Paste any direct image URL (e.g. from Unsplash, manufacturer sites, your own photos)</div>
+          </div>
         </div>
       </div>
     `;
+  }
+
+  function addImage(articleId) {
+    const input = document.getElementById('kb-img-url-' + articleId);
+    const url = input?.value?.trim();
+    if (!url) return;
+    const a = (FM.kbArticles || []).find(x => x.id === articleId);
+    if (!a) return;
+    if (!a.images) a.images = [];
+    a.images.push(url);
+    _article = articleId;
+    render();
+  }
+
+  function removeImage(articleId, index) {
+    const a = (FM.kbArticles || []).find(x => x.id === articleId);
+    if (!a || !a.images) return;
+    a.images.splice(index, 1);
+    _article = articleId;
+    render();
   }
 
   function open(id) {
@@ -205,5 +250,7 @@ const KB = (() => {
     render();
   }
 
-  return { render, open, back, setSystem, search };
+  return { render, open, back, setSystem, search, addImage, removeImage };
 })();
+
+window.KB = KB;

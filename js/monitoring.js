@@ -203,7 +203,7 @@ Mon.render = function() {
         <div style="position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(34,211,238,.45),transparent)"></div>
         <div>
           <div style="font-size:15px;font-weight:600;color:var(--txt);margin-bottom:6px">Ready to add Real-time Monitoring?</div>
-          <div style="font-size:12px;color:var(--txt3);line-height:1.65;max-width:440px">Contact your Frame Marine account manager to activate monitoring for your vessel. Setup typically takes 30 minutes with a hardware kit we ship to you.</div>
+          <div style="font-size:12px;color:var(--txt3);line-height:1.65;max-width:440px">Contact your Frame account manager to activate monitoring for your vessel. Setup typically takes 30 minutes with a hardware kit we ship to you.</div>
         </div>
         <div style="display:flex;gap:10px;flex-shrink:0">
           <a href="mailto:hello@framemarine.io?subject=Real-time Monitoring — Lady M&body=Hi,%0A%0AI%27d like to add the Real-time Monitoring module to Lady M.%0A%0APlease send me setup details.%0A%0AThanks"

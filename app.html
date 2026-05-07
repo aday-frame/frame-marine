@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Frame Marine</title>
+  <title>Frame</title>
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#010102">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
@@ -42,7 +42,7 @@
         <path d="M0 27H40V50H0V27Z" fill="var(--or)" opacity=".75"/>
         <path d="M0 0H58V23H0V0Z" fill="var(--or)" opacity=".5"/>
       </svg>
-      <span>Frame <span style="color:var(--or);font-weight:500">Marine</span></span>
+      <span style="font-weight:600;letter-spacing:-.01em">Frame</span>
     </a>
 
     <div class="tb-divider"></div>
@@ -155,12 +155,38 @@
     <!-- Right side -->
     <div class="tb-right">
       <button class="btn btn-ghost btn-sm" id="template-btn" onclick="renderWOTemplates()" style="display:none">Templates</button>
-      <button class="btn btn-primary" id="new-btn" onclick="WO.openNewModal()">
-        <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px">
-          <path d="M8 2v12M2 8h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
-        </svg>
-        New work order
-      </button>
+      <div style="position:relative">
+        <button class="btn btn-primary" id="quick-action-btn" onclick="toggleQuickMenu()" style="gap:6px">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px"><path d="M8 2v12M2 8h12"/></svg>
+          Quick add
+        </button>
+        <div id="quick-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:300;background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:230px;padding:6px;overflow:hidden">
+          <button onclick="closeQuickMenu();WO.openNewModal()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:8px;border:none;background:transparent;cursor:pointer;text-align:left;color:var(--txt)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+            <div style="width:28px;height:28px;border-radius:7px;background:rgba(249,115,22,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;color:var(--or)"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/></svg>
+            </div>
+            <div><div style="font-size:13px;font-weight:500">New work order</div><div style="font-size:11px;color:var(--txt3)">Create a task or repair ticket</div></div>
+          </button>
+          <button onclick="closeQuickMenu();openCrewStatusModal()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:8px;border:none;background:transparent;cursor:pointer;text-align:left;color:var(--txt)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+            <div style="width:28px;height:28px;border-radius:7px;background:rgba(74,222,128,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;color:var(--grn)"><path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/></svg>
+            </div>
+            <div><div style="font-size:13px;font-weight:500">Update crew status</div><div style="font-size:11px;color:var(--txt3)">Toggle on board / ashore</div></div>
+          </button>
+          <button onclick="closeQuickMenu();Hours.openLog()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:8px;border:none;background:transparent;cursor:pointer;text-align:left;color:var(--txt)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+            <div style="width:28px;height:28px;border-radius:7px;background:rgba(167,139,250,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" style="width:13px;height:13px;color:#A78BFA"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/></svg>
+            </div>
+            <div><div style="font-size:13px;font-weight:500">Log hours of rest</div><div style="font-size:11px;color:var(--txt3)">Daily STCW crew record</div></div>
+          </button>
+          <button onclick="closeQuickMenu();openLogbookEntry()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:8px;border:none;background:transparent;cursor:pointer;text-align:left;color:var(--txt)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
+            <div style="width:28px;height:28px;border-radius:7px;background:rgba(96,165,250,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;color:#60A5FA"><path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 1v10h6V3H5zm1 2h4v1H6V5zm0 2h4v1H6V7zm0 2h3v1H6V9z"/></svg>
+            </div>
+            <div><div style="font-size:13px;font-weight:500">New logbook entry</div><div style="font-size:11px;color:var(--txt3)">Log today's vessel activity</div></div>
+          </button>
+        </div>
+      </div>
       <button class="btn-icon" onclick="openAI()" title="Frame AI" style="display:flex;align-items:center;justify-content:center;position:relative">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:14px;height:14px">
           <circle cx="8" cy="8" r="2.5"/>
@@ -168,23 +194,12 @@
         </svg>
         <div class="tb-notif-dot"></div>
       </button>
-      <button class="btn-icon" id="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode" style="display:flex;align-items:center;justify-content:center">
-        <svg id="theme-icon-moon" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px">
-          <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 1.5a5.5 5.5 0 010 11 5.5 5.5 0 010-11z" opacity=".3"/>
-          <path d="M6 2.2A5.5 5.5 0 1013.8 10 5.5 5.5 0 006 2.2z"/>
-        </svg>
-        <svg id="theme-icon-sun" viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px;display:none">
-          <circle cx="8" cy="8" r="3"/>
-          <path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M3.2 12.8l1.1-1.1M11.7 4.3l1.1-1.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-        </svg>
-      </button>
       <button class="btn-icon" id="notif-btn" onclick="navTo('notifications')" title="Notifications" style="display:flex;align-items:center;justify-content:center;position:relative">
         <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px">
           <path d="M8 1a5 5 0 00-5 5v3l-1.5 2h13L13 9V6a5 5 0 00-5-5zm-1 12a1 1 0 002 0H7z"/>
         </svg>
         <span class="notif-count" id="notif-count">2</span>
       </button>
-      <div class="tb-avatar" title="Albert Day">AJ</div>
     </div>
   </header>
 
@@ -200,9 +215,19 @@
       <!-- OVERVIEW -->
       <div class="sec-lbl">Overview</div>
 
+      <div class="ni" data-page="portfolio" data-label="Portfolio" onclick="navTo('portfolio',this)" style="display:none">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3h14v2H1V3zm2 4h10v6H3V7zm2 2v2h6V9H5z" opacity=".85"/></svg>
+        <span class="ni-lbl">Portfolio</span>
+      </div>
+
       <div class="ni active" data-page="dashboard" data-label="Dashboard" onclick="navTo('dashboard',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h6v6H1V1zm8 0h6v6H9V1zM1 9h6v6H1V9zm8 0h6v6H9V9z" opacity=".85"/></svg>
         <span class="ni-lbl">Dashboard</span>
+      </div>
+
+      <div class="ni" data-page="reports" data-label="Reports" onclick="navTo('reports',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12h2V6H2v6zm3 0h2V3H5v9zm3 0h2V8H8v4zm3 0h2V1h-2v11zM1 13h14v1H1v-1z" opacity=".9"/></svg>
+        <span class="ni-lbl">Reports</span>
       </div>
 
       <div class="ni" data-page="calendar" data-label="Calendar" onclick="navTo('calendar',this)">
@@ -228,11 +253,6 @@
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M13 2H3a1 1 0 00-1 1v8a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M5 6h6M5 9h4"/></svg>
         <span class="ni-lbl">Requests</span>
         <span class="ni-count ni-count-or" id="sb-req-count" style="display:none"></span>
-      </div>
-
-      <div class="ni" data-page="reports" data-label="Reports" onclick="navTo('reports',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12h2V6H2v6zm3 0h2V3H5v9zm3 0h2V8H8v4zm3 0h2V1h-2v11zM1 13h14v1H1v-1z" opacity=".9"/></svg>
-        <span class="ni-lbl">Reports</span>
       </div>
 
       <div class="ni" data-page="pms" data-label="Maintenance" onclick="navTo('pms',this)">
@@ -265,27 +285,28 @@
         <span class="ni-lbl">Crew</span>
       </div>
 
-      <div class="ni" data-page="hours" data-label="Hours of rest" onclick="navTo('hours',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/></svg>
-        <span class="ni-lbl">Hours of rest</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
-      </div>
-
       <!-- COMPLIANCE -->
-      <div class="sec-lbl">Compliance</div>
+      <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Compliance</span>
+        <button onclick="event.stopPropagation();Upgrade.show('compliance')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--or-bg);color:var(--or);border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
+      </div>
 
       <div class="ni" data-page="certificates" data-label="Certificates" onclick="navTo('certificates',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.5 2.5L12 4l-2 2 .5 2.5L8 7.5 5.5 8.5 6 6 4 4l2.5-.5L8 1z" opacity=".9"/><path d="M2 10a1 1 0 011-1h10a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm2 1v2h8v-2H4z"/></svg>
         <span class="ni-lbl">Certificates</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
         <span class="ni-count ni-count-red" id="sb-cert-count" style="display:none">0</span>
       </div>
 
       <div class="ni" data-page="safety" data-label="Safety & ISM" onclick="navTo('safety',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 3.5v4C2 11 5 14 8 15c3-1 6-4 6-7.5v-4L8 1zm-.5 4h1v3.5h-1V5zm0 4.5h1v1h-1V9.5z" opacity=".9"/></svg>
         <span class="ni-lbl">Safety &amp; ISM</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
         <span class="ni-count ni-count-red" id="sb-nc-count" style="display:none">0</span>
+      </div>
+
+      <div class="ni" data-page="hours" data-label="Hours of rest" onclick="navTo('hours',this)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/></svg>
+        <span class="ni-lbl">Hours of rest</span>
+        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
       </div>
 
       <!-- DOCUMENTS -->
@@ -301,24 +322,25 @@
         <span class="ni-lbl">Checklists</span>
       </div>
 
-      <div class="ni" data-page="kb" data-label="Vessel manual" onclick="navTo('kb',this)">
+      <div class="ni" data-page="kb" data-label="Manuals" onclick="navTo('kb',this)">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h6v12H2zm6 0h6v12h-6"/><path d="M2 6h6M2 9h4M10 6h4M10 9h3"/></svg>
-        <span class="ni-lbl">Vessel manual</span>
+        <span class="ni-lbl">Manuals</span>
       </div>
 
       <!-- OWNER -->
-      <div class="sec-lbl">Owner</div>
+      <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between">
+        <span>Owner</span>
+        <button onclick="event.stopPropagation();Upgrade.show('owner')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--or-bg);color:var(--or);border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
+      </div>
 
       <div class="ni" data-page="budget" data-label="Budget" onclick="navTo('budget',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM5 7.5h6v1H5v-1zm0-2h6v1H5v-1zm1.5 4.5h3v1h-3v-1z" opacity=".8"/></svg>
         <span class="ni-lbl">Budget</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
       </div>
 
-      <div class="ni" data-page="owner" data-label="Owner view" onclick="navTo('owner',this)">
+      <div class="ni" data-page="owner" data-label="Owner" onclick="navTo('owner',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13a5 5 0 0110 0v1H3v-1z" opacity=".7"/><path d="M11 7.5l1.5 1.5-1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
-        <span class="ni-lbl">Owner view</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
+        <span class="ni-lbl">Owner</span>
       </div>
 
       <!-- SYSTEM -->
@@ -338,7 +360,7 @@
 
     <!-- Sidebar footer -->
     <div class="sb-foot">
-      <div class="sb-foot-av">
+      <div class="sb-foot-av" onclick="openPersonalSettings()" style="cursor:pointer" title="Personal settings">
         <div class="sb-foot-img">AJ</div>
         <div>
           <div class="sb-foot-name">Albert Day</div>
@@ -379,11 +401,6 @@
     </div>
   </nav>
 
-  <!-- Mobile FAB — New work order -->
-  <button class="mob-fab" id="mob-fab" onclick="WO.openNewModal()" style="display:none;visibility:hidden">
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:14px;height:14px"><path d="M8 3v10M3 8h10"/></svg>
-    New work order
-  </button>
 
   <!-- ── MAIN ── -->
   <main class="main">
@@ -567,8 +584,7 @@
       <!-- FLEET -->
       <div id="page-fleet" class="page">
         <div class="fleet-grid" id="fleet-grid"></div>
-        <div id="fleet-wos" style="padding:0 24px 20px"></div>
-        <div id="fleet-activity" style="padding:0 24px 32px"></div>
+        <div id="fleet-activity" style="padding:0 20px 32px"></div>
       </div>
 
       <!-- CHECKLISTS -->
@@ -615,6 +631,9 @@
       <!-- NOTIFICATIONS -->
       <div id="page-notifications" class="page"></div>
 
+      <!-- PORTFOLIO -->
+      <div id="page-portfolio" class="page"></div>
+
       <!-- UPGRADE OVERLAY (shown over any locked page) -->
       <div id="upgrade-overlay"></div>
 
@@ -622,25 +641,7 @@
       <div id="page-settings" class="page">
         <div class="settings-wrap">
 
-          <!-- Personal settings label -->
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.10em;color:var(--txt4);padding:20px 0 8px">Personal</div>
-
-          <!-- Preferences -->
-          <div class="settings-section">
-            <div class="settings-title">Preferences</div>
-            <div class="settings-row">
-              <div>
-                <div class="settings-row-label">Appearance</div>
-                <div class="settings-row-sub">Switch between light and dark mode</div>
-              </div>
-              <div class="theme-seg" id="settings-theme-seg">
-                <button class="theme-seg-btn" id="seg-dark" onclick="Settings.setTheme('dark')">Dark</button>
-                <button class="theme-seg-btn" id="seg-light" onclick="Settings.setTheme('light')">Light</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Notifications -->
+              <!-- Notifications -->
           <div class="settings-section">
             <div class="settings-title">Notifications</div>
             <div class="settings-row">
@@ -883,8 +884,9 @@ Requests.render = function() {
   const statusColor = { new:'var(--or)', reviewing:'var(--yel)', converted:'var(--grn)', closed:'var(--txt4)' };
 
   wrap.innerHTML = `
-    <div style="max-width:680px;padding:0 0 80px">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:.5px solid var(--bd);margin-bottom:4px">
+    <div style="padding:18px 20px 80px">
+      <div style="max-width:660px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:14px;border-bottom:.5px solid var(--bd);margin-bottom:4px">
         <div style="font-size:11px;color:var(--txt3)">${reqs.filter(r=>r.status==='new').length} new · ${reqs.length} total</div>
         <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none">Share portal link ↗</a>
       </div>
@@ -911,6 +913,7 @@ Requests.render = function() {
           </div>` : ''}
         </div>
       `).join('')}
+      </div>
     </div>`;
   Requests.updateBadge();
 };
@@ -971,7 +974,7 @@ Hub.render = function() {
     <div class="hub-wrap">
       <div class="hub-hdr">
         <div>
-          <div class="hub-brand">Frame Marine</div>
+          <div class="hub-brand">Frame</div>
           <div class="hub-vessel">${v ? escHtml(v.name) + ' · ' + escHtml(v.type) : 'All vessels'}</div>
         </div>
         <div class="hub-avatar" style="background:${me?.color||'var(--or)'}">
@@ -1034,7 +1037,7 @@ Hub.render = function() {
         </button>
       </div>
 
-      <div style="text-align:center;padding:12px 0 8px;font-size:11px;color:var(--txt4)">Frame Marine · v1.0</div>
+      <div style="text-align:center;padding:12px 0 8px;font-size:11px;color:var(--txt4)">Frame · v1.0</div>
     </div>`;
 };
 
@@ -1075,10 +1078,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dismiss any open upgrade overlay before switching pages
     window.Upgrade && Upgrade.hide();
 
-    origNav(pageId, el, skipPush);
+    // Clear per-page action buttons (e.g. WO view switcher) before each page init
+    const pageActionsEl = document.getElementById('page-actions');
+    if (pageActionsEl) pageActionsEl.innerHTML = '';
 
-    // Show upgrade gate for premium pages (renders page behind the overlay)
-    window.Upgrade && Upgrade.show(pageId);
+    origNav(pageId, el, skipPush);
 
     const hasStats   = ['work-orders'].includes(pageId);
     const hasFilters = ['work-orders'].includes(pageId);
@@ -1090,15 +1094,92 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('main-search').style.display = hasSearch ? 'flex' : 'none';
     document.getElementById('mon-stats').style.display  = hasMonStats ? 'grid' : 'none';
 
-    // Update new button visibility
-    const newBtn = document.getElementById('new-btn');
-    if (newBtn) {
-      newBtn.style.display = ['work-orders','dashboard','charter'].includes(pageId) ? '' : 'none';
+    // Show templates button only on work orders page
     const tmplBtn = document.getElementById('template-btn');
     if (tmplBtn) tmplBtn.style.display = pageId === 'work-orders' ? '' : 'none';
-    }
+    // Close quick menu on page change
+    closeQuickMenu();
   };
 })();
+
+/* ── QUICK ACTION MENU ── */
+function toggleQuickMenu() {
+  const menu = document.getElementById('quick-menu');
+  if (!menu) return;
+  const open = menu.style.display !== 'none';
+  menu.style.display = open ? 'none' : 'block';
+  if (!open) {
+    setTimeout(() => document.addEventListener('click', _quickMenuOutside, { once: true }), 0);
+  }
+}
+function closeQuickMenu() {
+  const menu = document.getElementById('quick-menu');
+  if (menu) menu.style.display = 'none';
+}
+function _quickMenuOutside(e) {
+  if (!document.getElementById('quick-action-btn')?.contains(e.target)) closeQuickMenu();
+}
+window.toggleQuickMenu = toggleQuickMenu;
+window.closeQuickMenu  = closeQuickMenu;
+
+/* ── CREW STATUS MODAL ── */
+function openCrewStatusModal() {
+  const crew = (FM.crew || []).filter(c => c.id !== 'c1' && c.vessel === App.currentVesselId);
+  function renderRows() {
+    return crew.map(c => {
+      const on = c.status === 'onboard';
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:9px 10px;background:var(--bg3);border-radius:8px">
+          <div style="width:34px;height:34px;border-radius:50%;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#080808;flex-shrink:0">${c.initials}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;color:var(--txt)">${escHtml(c.name)}</div>
+            <div style="font-size:11px;color:var(--txt3)">${escHtml(c.role)}</div>
+          </div>
+          <button onclick="toggleCrewStatus('${c.id}')"
+            style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .15s;flex-shrink:0;
+              ${on ? 'background:rgba(74,222,128,.12);color:var(--grn);border:1.5px solid rgba(74,222,128,.3)' : 'background:var(--bg4);color:var(--txt3);border:1.5px solid var(--bd)'}">
+            ${on ? 'On board' : 'Ashore'}
+          </button>
+        </div>`;
+    }).join('');
+  }
+  openModal(`
+    <div style="display:flex;flex-direction:column;gap:6px" id="crew-status-rows">
+      ${renderRows()}
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal()">Done</button>
+    </div>
+  `, 'Crew status');
+}
+function toggleCrewStatus(id) {
+  const c = FM.getCrew(id);
+  if (!c) return;
+  c.status = c.status === 'onboard' ? 'ashore' : 'onboard';
+  const rows = document.getElementById('crew-status-rows');
+  if (rows) {
+    const crew = (FM.crew || []).filter(x => x.id !== 'c1' && x.vessel === App.currentVesselId);
+    rows.innerHTML = crew.map(cr => {
+      const on = cr.status === 'onboard';
+      return `
+        <div style="display:flex;align-items:center;gap:12px;padding:9px 10px;background:var(--bg3);border-radius:8px">
+          <div style="width:34px;height:34px;border-radius:50%;background:${cr.color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#080808;flex-shrink:0">${cr.initials}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;color:var(--txt)">${escHtml(cr.name)}</div>
+            <div style="font-size:11px;color:var(--txt3)">${escHtml(cr.role)}</div>
+          </div>
+          <button onclick="toggleCrewStatus('${cr.id}')"
+            style="font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .15s;flex-shrink:0;
+              ${on ? 'background:rgba(74,222,128,.12);color:var(--grn);border:1.5px solid rgba(74,222,128,.3)' : 'background:var(--bg4);color:var(--txt3);border:1.5px solid var(--bd)'}">
+            ${on ? 'On board' : 'Ashore'}
+          </button>
+        </div>`;
+    }).join('');
+  }
+  if (window.Team) Team.render();
+}
+window.openCrewStatusModal = openCrewStatusModal;
+window.toggleCrewStatus    = toggleCrewStatus;
 
 /* ── QR CODE GENERATOR (deterministic SVG) ── */
 function makeQR(sku) {
@@ -1378,70 +1459,77 @@ window.renderLogbook = renderLogbook;
 function renderFleet() {
   const grid = document.getElementById('fleet-grid');
   if (!grid) return;
-  const vessel  = FM.currentVessel();
-  const allWOs  = (FM.workOrders || []).filter(w => w.status !== 'done' && (!vessel || w.vessel === vessel.id));
+  const vessel = FM.currentVessel();
+  const allWOs = (FM.workOrders || []).filter(w => w.status !== 'done' && (!vessel || w.vessel === vessel.id));
+  const craft  = (FM.fleet || []).filter(c => !vessel || c.vessel === vessel.id);
 
-  // When "All vessels" is active, prepend a summary row of main vessels
-  const isAll = App.currentVesselId === 'all';
-  const vesselSummary = isAll ? `
-    <div style="grid-column:1/-1;padding:0 0 4px">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:12px">Main vessels</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:24px">
-        ${FM.vessels.map(v => {
-          const vWOs = (FM.workOrders || []).filter(w => w.vessel === v.id && w.status !== 'done').length;
-          return `<div onclick="switchVessel('${v.id}')" style="background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;padding:16px 18px;cursor:pointer;display:flex;align-items:center;gap:14px;transition:background .1s" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
-            <div style="width:40px;height:40px;border-radius:50%;background:${v.color}22;border:.5px solid ${v.color}44;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <div style="width:10px;height:10px;border-radius:50%;background:${v.color}"></div>
+  const statusLabel = { 'in-water':'In water', 'davits':'On davits', 'swim-platform':'Deployed', 'charged':'Charged', 'maintenance':'In maintenance' };
+  const statusColor = { 'in-water':'var(--grn)', 'davits':'var(--txt3)', 'swim-platform':'var(--grn)', 'charged':'var(--grn)', 'maintenance':'var(--yel)' };
+
+  grid.innerHTML = craft.map(c => {
+    const fuelPct = c.fuelPct || 0;
+    const fuelCol = fuelPct < 25 ? 'var(--red)' : fuelPct < 50 ? 'var(--yel)' : 'var(--grn)';
+    const isElec  = c.fuel === 'electric';
+
+    // Related open WOs — match by craft name/make/model in title
+    const terms   = [c.name, c.make, c.model].map(s => (s||'').toLowerCase());
+    const craftWOs = allWOs.filter(w => terms.some(t => t && w.title.toLowerCase().includes(t)));
+    const hasWOAlert = craftWOs.some(w => w.priority === 'high' || (w.due && w.due < '2026-05-07'));
+
+    // Next service
+    const hrsLeft = c.nextServiceHours ? c.nextServiceHours - (c.hours || 0) : null;
+    const svcColor = hrsLeft !== null ? (hrsLeft <= 0 ? 'var(--red)' : hrsLeft <= 50 ? 'var(--yel)' : 'var(--grn)') : 'var(--txt3)';
+    const svcLabel = hrsLeft !== null ? (hrsLeft <= 0 ? 'Overdue' : '+' + hrsLeft + 'h') : '—';
+
+    return `
+      <div onclick="openCraftDetail('${c.id}')"
+        style="background:var(--bg2);border:.5px solid var(--bd);border-radius:14px;overflow:hidden;cursor:pointer;transition:border-color .15s;display:flex;flex-direction:column"
+        onmouseover="this.style.borderColor='var(--bd2)'" onmouseout="this.style.borderColor='var(--bd)'">
+
+        <!-- Photo -->
+        <div style="height:140px;position:relative;overflow:hidden;background:linear-gradient(145deg,${c.color}18,${c.color}06);flex-shrink:0">
+          ${c.photo ? `<img src="${c.photo}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">` : `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center"><span style="font-size:40px;opacity:.2">⛵</span></div>`}
+          <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.55))"></div>
+          <div style="position:absolute;bottom:10px;left:14px;right:14px;display:flex;align-items:flex-end;justify-content:space-between">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.1">${escHtml(c.name)}</div>
+              <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${c.year} ${c.make} ${c.model} · ${c.loa}</div>
             </div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:14px;font-weight:600;color:var(--txt)">${escHtml(v.name)}</div>
-              <div style="font-size:11px;color:var(--txt3)">${escHtml(v.type)} · ${escHtml(v.loa)}</div>
-            </div>
-            ${vWOs ? `<span class="badge b-open" style="font-size:9px">${vWOs} WO${vWOs !== 1 ? 's' : ''}</span>` : ''}
-            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--txt4)"><path d="M6 3l5 5-5 5"/></svg>
-          </div>`;
-        }).join('')}
-      </div>
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:12px">Tenders & watertoys</div>
-    </div>` : '';
-
-  const craft = (FM.fleet || []).filter(c => !vessel || c.vessel === vessel.id);
-
-  // Compact tender cards — click for detail modal
-  grid.innerHTML = vesselSummary + `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">` +
-  craft.map(c => {
-    const fuelPct  = c.fuelPct || 0;
-    const fuelCol  = fuelPct < 25 ? 'var(--red)' : fuelPct < 50 ? 'var(--yel)' : 'var(--grn)';
-    const statusMap = { 'in-water':'b-done','davits':'b-progress','swim-platform':'b-done','charged':'b-done' };
-    const labelMap  = { 'in-water':'In water','davits':'On davits','swim-platform':'Deployed','charged':'Charged' };
-    const openWOs = allWOs.filter(w => {
-      const terms = [c.name, c.make, c.model].map(s => s.toLowerCase());
-      return terms.some(t => w.title.toLowerCase().includes(t));
-    }).length;
-
-    return `<div onclick="openCraftDetail('${c.id}')"
-      style="background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .12s"
-      onmouseover="this.style.borderColor='var(--bd2)'" onmouseout="this.style.borderColor='var(--bd)'">
-      <!-- Photo -->
-      <div style="height:110px;background:linear-gradient(145deg,${c.color}22,${c.color}08);position:relative;overflow:hidden">
-        ${c.photo ? `<img src="${c.photo}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">` : ''}
-        <span class="badge ${statusMap[c.status]||'b-hold'}" style="position:absolute;top:7px;right:7px;font-size:9px">${labelMap[c.status]||c.status}</span>
-        ${openWOs ? `<span style="position:absolute;top:7px;left:7px;background:var(--amb);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px">${openWOs} WO</span>` : ''}
-      </div>
-      <!-- Info -->
-      <div style="padding:10px 12px 12px">
-        <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:1px">${escHtml(c.name)}</div>
-        <div style="font-size:10px;color:var(--txt3);margin-bottom:8px">${c.year} ${c.make} · ${c.loa}</div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div style="font-size:11px;color:var(--txt3)">${c.hours}h</div>
-          <div style="display:flex;align-items:center;gap:4px">
-            <div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);overflow:hidden"><div style="width:${fuelPct}%;height:100%;background:${fuelCol};border-radius:2px"></div></div>
-            <span style="font-size:10px;color:${fuelCol}">${fuelPct}%</span>
+            <button onclick="event.stopPropagation();openCraftDetail('${c.id}')" style="font-size:11px;font-weight:600;color:#fff;background:rgba(255,255,255,.15);border:.5px solid rgba(255,255,255,.25);border-radius:7px;padding:5px 11px;cursor:pointer;backdrop-filter:blur(4px);white-space:nowrap">Details →</button>
           </div>
+          ${hasWOAlert ? `<div style="position:absolute;top:10px;right:10px;background:rgba(248,113,113,.9);color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:20px;backdrop-filter:blur(4px)">⚠ Needs attention</div>` : `<div style="position:absolute;top:10px;right:10px"><span style="font-size:10px;font-weight:600;color:${statusColor[c.status]||'var(--txt3)'};background:rgba(0,0,0,.5);padding:3px 9px;border-radius:20px;backdrop-filter:blur(4px)">${statusLabel[c.status]||c.status}</span></div>`}
         </div>
-      </div>
-    </div>`;
-  }).join('') + `</div>`;
+
+        <!-- Stats row -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:.5px solid var(--bd)">
+          ${[
+            { lbl: 'Hours',       val: (c.hours||0)+'h',  color:'var(--txt)' },
+            { lbl: isElec ? 'Charge' : 'Fuel', val: fuelPct+'%', color: fuelCol },
+            { lbl: 'Next svc',    val: svcLabel,          color: svcColor },
+            { lbl: 'Open WOs',    val: craftWOs.length,   color: craftWOs.length ? 'var(--or)' : 'var(--txt3)' },
+          ].map(s => `
+            <div style="padding:10px 0;text-align:center;border-right:.5px solid var(--bd)">
+              <div style="font-size:15px;font-weight:600;color:${s.color};line-height:1">${s.val}</div>
+              <div style="font-size:9px;color:var(--txt4);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-top:3px">${s.lbl}</div>
+            </div>`).join('').replace(/border-right[^"]+";(\s*<\/div>\s*<\/div>)$/, '";$1')}
+        </div>
+
+        <!-- WO list -->
+        ${craftWOs.length ? `
+        <div style="padding:10px 14px 12px;flex:1">
+          ${craftWOs.slice(0,3).map(w => {
+            const pCol = {high:'var(--red)',medium:'var(--or)',low:'var(--txt4)'}[w.priority]||'var(--txt4)';
+            const overdue = w.due && w.due < '2026-05-07';
+            return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--bd)" onclick="event.stopPropagation();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)">
+              <span style="width:6px;height:6px;border-radius:50%;background:${pCol};flex-shrink:0"></span>
+              <span style="flex:1;font-size:12px;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.title)}</span>
+              ${w.due ? `<span style="font-size:10px;color:${overdue?'var(--red)':'var(--txt3)'};flex-shrink:0">${w.due.slice(5).replace('-',' ').replace('0','').trim()}</span>` : ''}
+            </div>`;
+          }).join('')}
+          ${craftWOs.length > 3 ? `<div style="font-size:11px;color:var(--txt4);padding-top:7px">+${craftWOs.length - 3} more</div>` : ''}
+        </div>` : `<div style="padding:16px 14px;font-size:12px;color:var(--txt4);flex:1">No open work orders</div>`}
+      </div>`;
+  }).join('');
 }
 window.renderFleet = renderFleet;
 
@@ -1572,7 +1660,7 @@ function submitFleetHours(craftId) {
   FM.fleetLog.unshift({ id: 'fl' + Date.now(), craftId, type: 'hours', date: today, crew: 'c5', hours, note });
   closeModal();
   renderFleet();
-  renderFleetWOs();
+  
   renderFleetLog();
   showToast('Hours logged');
 }
@@ -1617,7 +1705,7 @@ function submitFleetFuel(craftId) {
   FM.fleetLog.unshift({ id: 'fl' + Date.now(), craftId, type: 'fuel', date: today, crew: 'c5', litres, cost, fuelPct: isNaN(fuelPct) ? (craft ? craft.fuelPct : 0) : fuelPct, note });
   closeModal();
   renderFleet();
-  renderFleetWOs();
+  
   renderFleetLog();
   showToast('Fuel logged');
 }
@@ -1653,7 +1741,7 @@ function submitFleetCharge(craftId) {
   FM.fleetLog.unshift({ id: 'fl' + Date.now(), craftId, type: 'charge', date: today, crew: 'c5', fuelPct: isNaN(fuelPct) ? 100 : fuelPct, note });
   closeModal();
   renderFleet();
-  renderFleetWOs();
+  
   renderFleetLog();
   showToast('Charge logged');
 }
@@ -1740,25 +1828,166 @@ window.Team = {
     const wrap = document.getElementById('team-wrap');
     if (!wrap) return;
     const crew = FM.crew.filter(c => c.vessel === App.currentVesselId);
+    const today = new Date('2026-05-07');
     wrap.innerHTML = `
-      <div class="crew-grid">
-        ${crew.map(c => `
-          <div class="crew-card">
+      <div class="crew-grid" style="padding:18px 20px 48px">
+        ${crew.map(c => {
+          const certs = (FM.crewCerts || []).filter(x => x.crewId === c.id);
+          const expiring = certs.filter(x => x.expires && (new Date(x.expires) - today) / 86400000 < 90 && new Date(x.expires) > today).length;
+          const expired  = certs.filter(x => x.expires && new Date(x.expires) <= today).length;
+          return `
+          <div class="crew-card" onclick="Team.openCrew('${c.id}')" style="cursor:pointer">
             <div class="crew-av" style="background:${c.color}">${c.initials}</div>
-            <div class="crew-name">${c.name}</div>
-            <div class="crew-role">${c.role}</div>
-            <div class="flex items-center gap-6" style="margin-bottom:6px">
+            <div class="crew-name">${escHtml(c.name)}</div>
+            <div class="crew-role">${escHtml(c.role)}</div>
+            <div class="flex items-center gap-6" style="margin-bottom:8px">
               <span class="dot dot-${c.status === 'onboard' ? 'grn' : 'txt3'}"></span>
               <span class="t-11 c-txt3">${c.status === 'onboard' ? 'On board' : 'Ashore'}</span>
             </div>
-            ${c.email ? `<div class="crew-contact">
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:11px;height:11px"><path d="M2 4l6 5 6-5M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"/></svg>
-              ${c.email}
-            </div>` : ''}
-          </div>
-        `).join('')}
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span style="font-size:10px;color:var(--txt3)">${certs.length} cert${certs.length!==1?'s':''}</span>
+              ${expired  ? `<span style="font-size:10px;font-weight:600;color:var(--red)">· ${expired} expired</span>` : ''}
+              ${expiring ? `<span style="font-size:10px;font-weight:600;color:#f59e0b">· ${expiring} expiring</span>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     `;
+  },
+
+  openCrew(id) {
+    const c = FM.getCrew(id);
+    if (!c) return;
+    const today   = new Date('2026-05-07');
+    const certs   = (FM.crewCerts || []).filter(x => x.crewId === id);
+    const docs    = (FM.crewDocs  || []).filter(x => x.crewId === id);
+    const wos     = (FM.workOrders|| []).filter(w => w.assignee === id && w.status !== 'done');
+
+    function certStatus(expires) {
+      if (!expires) return { color: 'var(--txt3)', label: 'No expiry' };
+      const days = Math.round((new Date(expires) - today) / 86400000);
+      if (days < 0)   return { color: 'var(--red)',  label: 'Expired' };
+      if (days < 90)  return { color: '#f59e0b',     label: days + 'd left' };
+      return              { color: 'var(--grn)',  label: days + 'd left' };
+    }
+
+    function fmtDate(s) {
+      if (!s) return '—';
+      const [y,m,d] = s.split('-');
+      return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]+' '+parseInt(d)+', '+y;
+    }
+
+    const docIcon = type => ({
+      passport:    '<svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;opacity:.7"><path d="M3 1a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V2a1 1 0 00-1-1H3zm5 2a2 2 0 110 4 2 2 0 010-4zm-3 6h6v1H5V9zm0 2h4v1H5v-1z"/></svg>',
+      seamans_book:'<svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;opacity:.7"><path d="M2 2a1 1 0 011-1h3.5v5l-1.5-1-1.5 1V1H3a1 1 0 00-1 1v12a1 1 0 001 1h10a1 1 0 001-1V2a1 1 0 00-1-1H7.5v5l-1.5-1-1.5 1V1z"/></svg>',
+      contract:    '<svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;opacity:.7"><path d="M4 1a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5.414L9.586 1H4zm4 1.5L11.5 6H8V2.5zM5 8h6v1H5V8zm0 2h6v1H5v-1zm0 2h4v1H5v-1z"/></svg>',
+      vaccination: '<svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;opacity:.7"><path d="M10 1l1.5 1.5-1 1 1 1-4.5 4.5-1-1-1 1L3.5 7.5l1-1-1-1L8 1zm-5 9l-1.5 1.5 1 1L3 14h3l1-2.5-1.5-1.5z" opacity=".8"/></svg>',
+      certification:'<svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;opacity:.7"><path d="M8 1l1.5 2.5L12 4l-2 2 .5 2.5L8 7.5 5.5 8.5 6 6 4 4l2.5-.5L8 1z"/></svg>',
+    }[type] || '<svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px;opacity:.7"><path d="M4 1a1 1 0 00-1 1v12a1 1 0 001 1h8a1 1 0 001-1V5.414L9.586 1H4z"/></svg>');
+
+    const catGroups = {};
+    certs.forEach(cert => {
+      if (!catGroups[cert.category]) catGroups[cert.category] = [];
+      catGroups[cert.category].push(cert);
+    });
+
+    const certsHTML = Object.entries(catGroups).map(([cat, items]) => `
+      <div style="margin-bottom:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:6px">${escHtml(cat)}</div>
+        ${items.map(cert => {
+          const st = certStatus(cert.expires);
+          return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--bg3);border-radius:7px;margin-bottom:4px;gap:8px">
+            <div style="min-width:0">
+              <div style="font-size:12px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(cert.name)}</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:1px">${escHtml(cert.issuer)} · Ref: ${escHtml(cert.docRef||'—')}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div style="font-size:11px;font-weight:600;color:${st.color}">${st.label}</div>
+              <div style="font-size:10px;color:var(--txt3)">${cert.expires ? 'Exp ' + fmtDate(cert.expires) : ''}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>`).join('');
+
+    const docsHTML = docs.map(doc => {
+      const st = certStatus(doc.expires);
+      return `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;margin-bottom:4px">
+        <div style="width:28px;height:28px;border-radius:6px;background:var(--bg4);display:flex;align-items:center;justify-content:center;flex-shrink:0">${docIcon(doc.type)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--txt)">${escHtml(doc.name)}</div>
+          <div style="font-size:10px;color:var(--txt3)">Issued ${fmtDate(doc.issued)}</div>
+        </div>
+        ${doc.expires ? `<div style="text-align:right;flex-shrink:0">
+          <div style="font-size:11px;font-weight:600;color:${st.color}">${st.label}</div>
+          <div style="font-size:10px;color:var(--txt3)">Exp ${fmtDate(doc.expires)}</div>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+
+    const wosHTML = wos.length ? wos.map(w => `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg3);border-radius:7px;margin-bottom:4px;cursor:pointer"
+           onclick="closePanel();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)">
+        <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;flex-shrink:0;
+          background:${w.priority==='high'?'rgba(248,113,113,.12)':w.priority==='medium'?'rgba(251,146,60,.12)':'var(--bg4)'};
+          color:${w.priority==='high'?'var(--red)':w.priority==='medium'?'var(--or)':'var(--txt3)'}">
+          ${escHtml(w.priority)}
+        </span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(w.title)}</div>
+          <div style="font-size:10px;color:var(--txt3)">${escHtml(w.id)} · ${FM.statusLabel(w.status)}</div>
+        </div>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="width:12px;height:12px;opacity:.4;flex-shrink:0"><path d="M6 3l5 5-5 5"/></svg>
+      </div>`) .join('') : `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No open work orders</div>`;
+
+    openPanel(`
+      <div style="padding:20px">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+          <div style="width:52px;height:52px;border-radius:50%;background:${c.color};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#080808;flex-shrink:0">${c.initials}</div>
+          <div>
+            <div style="font-size:17px;font-weight:600;color:var(--txt)">${escHtml(c.name)}</div>
+            <div style="font-size:12px;color:var(--txt3)">${escHtml(c.role)}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+              <span class="dot dot-${c.status==='onboard'?'grn':'txt3'}" style="width:7px;height:7px"></span>
+              <span style="font-size:11px;color:var(--txt3)">${c.status==='onboard'?'On board':'Ashore'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        ${c.email || c.phone ? `
+        <div style="background:var(--bg2);border:.5px solid var(--bd);border-radius:8px;padding:10px 12px;margin-bottom:20px;display:flex;flex-direction:column;gap:6px">
+          ${c.email ? `<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px;flex-shrink:0"><path d="M2 4l6 5 6-5M2 4h12v9a1 1 0 01-1 1H3a1 1 0 01-1-1V4z"/></svg>
+            ${escHtml(c.email)}
+          </div>` : ''}
+          ${c.phone ? `<div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--txt2)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" style="width:13px;height:13px;flex-shrink:0"><path d="M3 2h3l1 3-1.5 1.5a8 8 0 004 4L11 9l3 1v3a1 1 0 01-1 1A11 11 0 012 3a1 1 0 011-1z"/></svg>
+            ${escHtml(c.phone)}
+          </div>` : ''}
+        </div>` : ''}
+
+        <!-- Certifications -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:10px">Certifications (${certs.length})</div>
+          ${certs.length ? certsHTML : '<div style="font-size:12px;color:var(--txt3);padding:8px 0">No certificates on record</div>'}
+        </div>
+
+        <!-- Documents -->
+        <div style="margin-bottom:20px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:10px">Documents (${docs.length})</div>
+          ${docs.length ? docsHTML : '<div style="font-size:12px;color:var(--txt3);padding:8px 0">No documents on record</div>'}
+        </div>
+
+        <!-- Open work orders -->
+        <div>
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:10px">Open work orders (${wos.length})</div>
+          ${wosHTML}
+        </div>
+      </div>
+    `);
   }
 };
 
@@ -2390,7 +2619,7 @@ window.Chat = {
       if (pageId === 'files')       renderFiles(activeFilesFolder);
       if (pageId === 'pms')         renderPMS();
       if (pageId === 'logbook')     renderLogbook();
-      if (pageId === 'fleet')       { renderFleet(); renderFleetWOs(); renderFleetLog(); }
+      if (pageId === 'fleet')       { renderFleet();  renderFleetLog(); }
       if (pageId === 'checklists')  renderChecklists();
     };
   });
@@ -2484,6 +2713,20 @@ window.Assets = {
                 <span class="stock-badge ${p.qty===0?'stock-out':p.qty<=p.min?'stock-low':'stock-ok'}">${p.qty} ${p.unit}</span>
               </div>`).join('')}
           </div>` : ''}
+        ${(() => {
+          const relWOs = (FM.workOrders||[]).filter(w => w.assetId === a.id);
+          if (!relWOs.length) return '';
+          const pColors = {high:'var(--red)',medium:'#f59e0b',low:'var(--txt4)'};
+          return `<div class="part-detail-lbl" style="margin-bottom:8px">Work orders (${relWOs.length})</div>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:14px">
+            ${relWOs.map(w => `
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--bg3);border:.5px solid var(--bd);border-radius:var(--r6);cursor:pointer" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)">
+                <span class="wo-id" style="font-size:10px;flex-shrink:0">${w.id}</span>
+                <div style="flex:1;font-size:12px;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${w.title}</div>
+                <span class="wo-pip" style="background:${pColors[w.priority]||'var(--txt4)'}"></span>
+              </div>`).join('')}
+          </div>`;
+        })()}
         <div style="display:flex;gap:8px">
           <button class="btn btn-ghost btn-sm" onclick="showToast('Edit asset coming soon')">Edit</button>
           <button class="btn btn-ghost btn-sm" onclick="showToast('Work order created')">Work order</button>
@@ -2920,10 +3163,10 @@ function exportChecklist(clId, runId) {
     .footer{margin-top:24px;font-size:10px;color:#bbb;display:flex;justify-content:space-between}
     @media print{body{padding:24px 28px} @page{margin:16mm}}
   </style></head><body>
-  <div class="doc-hdr"><div><div class="doc-title">${checklist.name}</div><div class="doc-meta">${vName} &nbsp;·&nbsp; ${dateStr}</div></div><div class="doc-logo">Frame Marine</div></div>
+  <div class="doc-hdr"><div><div class="doc-title">${checklist.name}</div><div class="doc-meta">${vName} &nbsp;·&nbsp; ${dateStr}</div></div><div class="doc-logo">Frame</div></div>
   ${bodyHtml}
   <div class="sign-block"><div class="sign-field"><div class="sign-label">Officer / Captain</div><div class="sign-line"></div></div><div class="sign-field"><div class="sign-label">Date &amp; Time</div><div class="sign-line"></div></div></div>
-  <div class="footer"><span>Frame Marine</span><span>Generated ${dateStr}</span></div>
+  <div class="footer"><span>Frame</span><span>Generated ${dateStr}</span></div>
   <script>window.onload=()=>{window.print();}<\/script></body></html>`);
   win.document.close();
 }
@@ -2972,6 +3215,60 @@ function _closeNotif(e) {
     document.addEventListener('click', _closeNotif, {once:true});
   }
 }
+function renderNotifications() {
+  const wrap = document.getElementById('page-notifications');
+  if (!wrap) return;
+  const notifs = FM.notifications || [];
+  const unread = notifs.filter(n => !n.read);
+
+  wrap.innerHTML = `
+    <div style="padding:18px 20px 80px">
+      <div style="max-width:600px">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div>
+            <div style="font-size:15px;font-weight:600;color:var(--txt);letter-spacing:-.02em">Notifications</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px">${unread.length ? unread.length + ' unread' : 'All caught up'}</div>
+          </div>
+          ${unread.length ? `<button class="btn btn-ghost btn-sm" onclick="markAllRead();renderNotifications()">Mark all read</button>` : ''}
+        </div>
+
+        ${notifs.length === 0 ? `
+          <div class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <div class="empty-title">No notifications</div>
+            <div class="empty-sub">You're all caught up</div>
+          </div>` : notifs.map(n => `
+          <div style="display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:${n.read ? 'var(--bg2)' : 'rgba(251,146,60,.05)'};border:.5px solid ${n.read ? 'var(--bd)' : 'rgba(251,146,60,.2)'};border-radius:10px;margin-bottom:8px;cursor:pointer" onclick="markNotifRead('${n.id}');renderNotifications()">
+            <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${n.type==='alert'?'rgba(248,113,113,.12)':'rgba(96,165,250,.12)'}">
+              ${n.type==='alert'
+                ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="var(--red)"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>`
+                : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>`
+              }
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:${n.read?'400':'600'};color:var(--txt);margin-bottom:3px">${escHtml(n.title)}</div>
+              <div style="font-size:12px;color:var(--txt3);line-height:1.5">${escHtml(n.sub)}</div>
+              <div style="font-size:10px;color:var(--txt4);margin-top:6px">${escHtml(n.time)}</div>
+            </div>
+            ${!n.read ? `<div style="width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0;margin-top:4px"></div>` : ''}
+          </div>`).join('')}
+
+      </div>
+    </div>`;
+}
+
+function markNotifRead(id) {
+  const n = (FM.notifications||[]).find(x => x.id === id);
+  if (n) n.read = true;
+  const ct = document.getElementById('notif-count');
+  const unread = (FM.notifications||[]).filter(n => !n.read).length;
+  if (ct) { ct.textContent = unread; ct.style.display = unread ? '' : 'none'; }
+  renderNotifPanel();
+}
+window.markNotifRead = markNotifRead;
+window.renderNotifications = renderNotifications;
+
 function renderNotifPanel() {
   const list = document.getElementById('notif-list');
   if (!list) return;
@@ -3000,6 +3297,189 @@ document.addEventListener('DOMContentLoaded', () => {
   const ct = document.getElementById('notif-count');
   if (ct) { ct.textContent = unread; ct.style.display = unread ? '' : 'none'; }
 });
+
+/* ── PORTFOLIO ── */
+function renderPortfolio() {
+  const wrap = document.getElementById('page-portfolio');
+  if (!wrap) return;
+
+  const vessels = FM.vessels || [];
+  const props   = FM.properties || [];
+
+  const totalAssets   = vessels.length + props.length;
+  const openWOs       = (FM.workOrders || []).filter(w => w.status !== 'done').length;
+  const propIssues    = props.reduce((s, p) => s + (p.openIssues || 0), 0);
+  const totalIssues   = openWOs + propIssues;
+  const totalGuests   = props.filter(p => p.status === 'occupied').reduce((s, p) => s + (p.guests || 0), 0);
+  const occupiedProps = props.filter(p => p.status === 'occupied').length;
+  const vesselSvc     = vessels.filter(v => v.status === 'In service').length;
+
+  function _fmtDate(s) {
+    if (!s) return '';
+    const [y, m, d] = s.split('-');
+    return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1] + ' ' + +d;
+  }
+
+  function _vesselCard(v) {
+    const vWOs = (FM.workOrders || []).filter(w => w.vessel === v.id && w.status !== 'done').length;
+    const highPri = (FM.workOrders || []).filter(w => w.vessel === v.id && w.status !== 'done' && w.priority === 'high').length;
+    const statusColor = v.status === 'In service' ? '#4ADE80' : '#FACC15';
+    return `
+      <div class="pf-card" onclick="switchVessel('${v.id}');navTo('dashboard',document.querySelector('.ni[data-page=dashboard]'))">
+        <div class="pf-card-banner" style="background:linear-gradient(135deg,#60A5FA18 0%,#60A5FA06 100%);border-bottom:.5px solid #60A5FA22">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:9px;background:#60A5FA18;border:.5px solid #60A5FA35;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.5" stroke-linecap="round" style="width:18px;height:18px">
+                <path d="M3 17l4-8 5 4 4-6 5 10H3z"/><path d="M3 17h18"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600;color:var(--txt);letter-spacing:-.01em">${escHtml(v.name)}</div>
+              <div style="font-size:11px;color:var(--txt3);margin-top:1px">${escHtml(v.type)} · ${escHtml(v.loa)}</div>
+            </div>
+            <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:${statusColor}18;color:${statusColor};flex-shrink:0">${escHtml(v.status)}</span>
+          </div>
+        </div>
+        <div class="pf-card-body">
+          <div class="pf-stat-row">
+            <div class="pf-stat">
+              <div class="pf-stat-val" style="color:${vWOs > 0 ? 'var(--or)' : 'var(--txt)'}">${vWOs}</div>
+              <div class="pf-stat-lbl">Open WOs</div>
+            </div>
+            <div class="pf-stat">
+              <div class="pf-stat-val" style="color:${highPri > 0 ? '#F87171' : 'var(--txt)'}">${highPri}</div>
+              <div class="pf-stat-lbl">High priority</div>
+            </div>
+            <div class="pf-stat">
+              <div class="pf-stat-val">${escHtml(v.port ? v.port.split(',')[0] : '—')}</div>
+              <div class="pf-stat-lbl">Location</div>
+            </div>
+          </div>
+          ${vWOs > 0 ? `
+            <div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--bd)">
+              ${(FM.workOrders||[]).filter(w=>w.vessel===v.id&&w.status!=='done').slice(0,2).map(w=>`
+                <div style="display:flex;align-items:center;gap:8px;padding:5px 0" onclick="event.stopPropagation();switchVessel('${v.id}');navTo('work-orders',document.querySelector('.ni[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)">
+                  <span style="width:6px;height:6px;border-radius:50%;flex-shrink:0;background:${w.priority==='high'?'#F87171':w.priority==='medium'?'var(--or)':'var(--txt4)'}"></span>
+                  <span style="font-size:11px;color:var(--txt2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.title)}</span>
+                </div>`).join('')}
+            </div>` : ''}
+        </div>
+        <div class="pf-card-foot">
+          <span style="font-size:11px;color:var(--txt3)">${escHtml(v.flag || '')} · ${escHtml(v.mmsi || '')}</span>
+          <span style="font-size:11px;color:#60A5FA">Open →</span>
+        </div>
+      </div>`;
+  }
+
+  function _propCard(p) {
+    const isOcc = p.status === 'occupied';
+    const statusColor = isOcc ? '#4ADE80' : 'var(--txt3)';
+    const issueColor  = p.openIssues > 0 ? (p.openIssues >= 3 ? '#F87171' : 'var(--or)') : 'var(--txt)';
+    return `
+      <div class="pf-card">
+        <div class="pf-card-banner" style="background:linear-gradient(135deg,#4ADE8018 0%,#4ADE8006 100%);border-bottom:.5px solid #4ADE8022">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:9px;background:#4ADE8018;border:.5px solid #4ADE8035;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="1.5" stroke-linecap="round" style="width:18px;height:18px">
+                <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+              </svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:600;color:var(--txt);letter-spacing:-.01em">${escHtml(p.name)}</div>
+              <div style="font-size:11px;color:var(--txt3);margin-top:1px">${escHtml(p.location)}</div>
+            </div>
+            <span style="font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:${isOcc?'rgba(74,222,128,.12)':'rgba(255,255,255,.06)'};color:${isOcc?'#4ADE80':'var(--txt3)'};flex-shrink:0;text-transform:capitalize">${escHtml(p.status)}</span>
+          </div>
+        </div>
+        <div class="pf-card-body">
+          <div class="pf-stat-row">
+            <div class="pf-stat">
+              <div class="pf-stat-val" style="color:${isOcc?'var(--txt)':'var(--txt3)'}">${isOcc ? p.guests : '—'}</div>
+              <div class="pf-stat-lbl">Guests</div>
+            </div>
+            <div class="pf-stat">
+              <div class="pf-stat-val" style="color:${issueColor}">${p.openIssues}</div>
+              <div class="pf-stat-lbl">Open issues</div>
+            </div>
+            <div class="pf-stat">
+              <div class="pf-stat-val">${p.staff}</div>
+              <div class="pf-stat-lbl">Staff</div>
+            </div>
+          </div>
+          ${isOcc && p.checkIn ? `
+            <div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--bd);display:flex;align-items:center;gap:6px">
+              <svg viewBox="0 0 16 16" fill="none" stroke="var(--txt3)" stroke-width="1.3" stroke-linecap="round" style="width:12px;height:12px;flex-shrink:0"><rect x="2" y="3" width="12" height="11" rx="1"/><path d="M5 1v3M11 1v3M2 7h12"/></svg>
+              <span style="font-size:11px;color:var(--txt3)">${_fmtDate(p.checkIn)} – ${_fmtDate(p.checkOut)}</span>
+            </div>` : `
+            <div style="margin-top:10px;padding-top:10px;border-top:.5px solid var(--bd)">
+              <span style="font-size:11px;color:var(--txt4)">${escHtml(p.desc)}</span>
+            </div>`}
+        </div>
+        <div class="pf-card-foot">
+          <span style="font-size:11px;color:var(--txt3)">${escHtml(p.type)}</span>
+          ${p.openIssues > 0 ? `<span style="font-size:11px;color:${issueColor}">${p.openIssues} issue${p.openIssues>1?'s':''}</span>` : '<span style="font-size:11px;color:#4ADE80">All clear ✓</span>'}
+        </div>
+      </div>`;
+  }
+
+  wrap.innerHTML = `
+    <div style="padding:20px 20px 80px;max-width:1100px">
+
+      <!-- Summary stats -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px">
+        <div class="pf-kpi">
+          <div class="pf-kpi-val">${totalAssets}</div>
+          <div class="pf-kpi-lbl">Total assets</div>
+        </div>
+        <div class="pf-kpi" style="border-color:#60A5FA22">
+          <div class="pf-kpi-val" style="color:#60A5FA">${vesselSvc} / ${vessels.length}</div>
+          <div class="pf-kpi-lbl" style="color:#60A5FA99">Vessels in service</div>
+        </div>
+        <div class="pf-kpi" style="border-color:#4ADE8022">
+          <div class="pf-kpi-val" style="color:#4ADE80">${totalGuests}</div>
+          <div class="pf-kpi-lbl" style="color:#4ADE8099">Active guests</div>
+        </div>
+        <div class="pf-kpi">
+          <div class="pf-kpi-val" style="color:${totalIssues>0?'var(--or)':'var(--txt)'}">${totalIssues}</div>
+          <div class="pf-kpi-lbl">Open issues</div>
+        </div>
+      </div>
+
+      <!-- Marine section -->
+      <div style="margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:.5px solid #60A5FA22">
+          <div style="width:24px;height:24px;border-radius:7px;background:#60A5FA18;border:.5px solid #60A5FA30;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" style="width:14px;height:14px">
+              <path d="M3 17l4-8 5 4 4-6 5 10H3z"/><path d="M3 17h18"/>
+            </svg>
+          </div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#60A5FA">Marine</div>
+          <div style="font-size:11px;color:var(--txt4)">${vessels.length} vessel${vessels.length>1?'s':''}</div>
+        </div>
+        <div class="pf-grid">
+          ${vessels.map(_vesselCard).join('')}
+        </div>
+      </div>
+
+      <!-- Properties section -->
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:10px;border-bottom:.5px solid #4ADE8022">
+          <div style="width:24px;height:24px;border-radius:7px;background:#4ADE8018;border:.5px solid #4ADE8030;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#4ADE80" stroke-width="1.6" stroke-linecap="round" style="width:14px;height:14px">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#4ADE80">Properties</div>
+          <div style="font-size:11px;color:var(--txt4)">${props.length} properties</div>
+        </div>
+        <div class="pf-grid">
+          ${props.map(_propCard).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+window.renderPortfolio = renderPortfolio;
 
 /* ── MODULE PREVIEW POPUPS ── */
 document.addEventListener('DOMContentLoaded', () => {
@@ -3038,31 +3518,89 @@ function openPMSDetail(id) {
   const hasHours = t.dueHours != null && t.currentHours != null && t.lastHours != null;
   const hoursLeft = hasHours ? t.dueHours - t.currentHours : null;
   const dueStr = hoursLeft != null ? (hoursLeft >= 0 ? hoursLeft+' hrs remaining' : Math.abs(hoursLeft)+' hrs overdue') : (t.dueDate ? 'Due '+t.dueDate : '');
+  const hasWO = !!t.wo;
+  const primaryBtn = hasWO
+    ? `<button class="btn btn-primary btn-sm" onclick="closeModal();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${t.wo}'),80)">View work order ↗</button>`
+    : `<button class="btn btn-primary btn-sm" onclick="pmsCreateWO('${t.id}')">Create work order</button>`;
   openModal(`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
       <div class="pms-task-dot ${sc}" style="width:12px;height:12px;flex-shrink:0"></div>
       <div>
-        <div style="font-size:17px;font-weight:500;color:var(--txt)">${t.task}</div>
-        <div style="font-size:12px;color:var(--txt3)">${t.system} · ${t.asset}</div>
+        <div style="font-size:17px;font-weight:500;color:var(--txt)">${escHtml(t.task)}</div>
+        <div style="font-size:12px;color:var(--txt3)">${escHtml(t.system)} · ${escHtml(t.asset)}</div>
       </div>
       <span class="badge ${sc}" style="margin-left:auto">${sl}</span>
     </div>
     <div class="part-detail-grid" style="margin-bottom:18px">
-      <div class="part-detail-item"><div class="part-detail-lbl">Interval</div><div>${t.interval}</div></div>
-      <div class="part-detail-item"><div class="part-detail-lbl">Assignee</div><div>${assigneeName}</div></div>
+      <div class="part-detail-item"><div class="part-detail-lbl">Interval</div><div>${escHtml(t.interval)}</div></div>
+      <div class="part-detail-item"><div class="part-detail-lbl">Assignee</div><div>${escHtml(assigneeName)}</div></div>
       ${t.lastDate?`<div class="part-detail-item"><div class="part-detail-lbl">Last done</div><div>${t.lastDate}</div></div>`:''}
       ${hasHours?`<div class="part-detail-item"><div class="part-detail-lbl">Current hrs</div><div>${t.currentHours?.toLocaleString()}</div></div>`:''}
       ${hasHours?`<div class="part-detail-item"><div class="part-detail-lbl">Due at hrs</div><div>${t.dueHours?.toLocaleString()}</div></div>`:''}
       <div class="part-detail-item"><div class="part-detail-lbl">Due</div><div style="color:${t.status==='overdue'?'var(--red)':t.status==='due-soon'?'var(--yel)':'var(--txt)'}">${dueStr}</div></div>
-      ${t.wo?`<div class="part-detail-item"><div class="part-detail-lbl">Work order</div><div style="color:var(--or);cursor:pointer" onclick="closeModal();setTimeout(()=>WO.openPanel('${t.wo}'),80)">${t.wo} ↗</div></div>`:''}
+      ${hasWO?`<div class="part-detail-item"><div class="part-detail-lbl">Work order</div><div style="color:var(--or);cursor:pointer;text-decoration:underline" onclick="closeModal();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${t.wo}'),80)">${t.wo} ↗</div></div>`:''}
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn btn-primary btn-sm" onclick="closeModal();showToast('Work order created from PMS task')">Create work order</button>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal();showToast('Marked as complete')">Mark complete</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${primaryBtn}
+      <button class="btn btn-ghost btn-sm" onclick="pmsMarkComplete('${t.id}')">Mark complete</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
     </div>`);
 }
 window.openPMSDetail = openPMSDetail;
+
+function pmsCreateWO(pmsId) {
+  const t = (FM.pms||[]).find(x => x.id === pmsId);
+  if (!t) return;
+  const newId = 'WO-M' + Date.now().toString().slice(-5);
+  const priority = t.status === 'overdue' ? 'high' : t.status === 'due-soon' ? 'medium' : 'low';
+  const wo = {
+    id: newId, vessel: t.vessel,
+    title: t.task + ' — ' + t.asset,
+    desc: 'Scheduled maintenance. Interval: ' + t.interval + '.',
+    zone: t.system, system: t.system, team: 'engineering',
+    priority, status: 'open',
+    assignee: t.assignee, createdBy: 'c1',
+    created: new Date().toISOString().split('T')[0],
+    fromPMS: pmsId,
+    procedures: [], subtasks: [], comments: [], parts: [], images: [],
+  };
+  FM.workOrders.unshift(wo);
+  t.wo = newId;
+  closeModal();
+  renderPMS();
+  navTo('work-orders', document.querySelector('[data-page=work-orders]'));
+  setTimeout(() => WO.openPanel(newId), 80);
+  showToast('Work order created from maintenance schedule');
+}
+window.pmsCreateWO = pmsCreateWO;
+
+function pmsMarkComplete(pmsId) {
+  const t = (FM.pms||[]).find(x => x.id === pmsId);
+  if (!t) return;
+  _pmsReset(t);
+  closeModal();
+  renderPMS();
+  showToast('Maintenance task marked complete ✓');
+}
+window.pmsMarkComplete = pmsMarkComplete;
+
+function _pmsReset(t) {
+  t.lastDate = new Date().toISOString().split('T')[0];
+  if (t.dueHours != null && t.lastHours != null && t.currentHours != null) {
+    const interval = t.dueHours - t.lastHours;
+    t.lastHours = t.currentHours;
+    t.dueHours  = t.currentHours + interval;
+  } else if (t.dueDate) {
+    const due = new Date(t.dueDate);
+    const intv = (t.interval || '').toLowerCase();
+    if      (intv.includes('18')) due.setMonth(due.getMonth() + 18);
+    else if (intv.includes('6'))  due.setMonth(due.getMonth() + 6);
+    else                          due.setFullYear(due.getFullYear() + 1);
+    t.dueDate = due.toISOString().split('T')[0];
+  }
+  t.status = 'upcoming';
+  t.wo = null;
+}
 
 /* ── LOGBOOK ENTRY MODAL ── */
 function openLogbookEntry() {

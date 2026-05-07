@@ -44,6 +44,7 @@ function navTo(pageId, clickedEl, skipPush) {
     logbook:     'Logbook',
     pms:         'Planned maintenance',
     fleet:       'Tenders',
+    owner:       'Owner',
     checklists:    'Checklists',
     owner:         'Owner view',
     certificates:  'Certificates',
@@ -55,8 +56,9 @@ function navTo(pageId, clickedEl, skipPush) {
     requests:      'Requests',
     hub:           'Hub',
     reports:       'Reports',
-    kb:            'Vessel manual',
+    kb:            'Manuals',
     notifications: 'Notifications',
+    portfolio:     'Portfolio',
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -92,6 +94,7 @@ function navTo(pageId, clickedEl, skipPush) {
     kb:            () => window.KB && KB.render(),
     notifications: () => renderNotifications(),
     settings:      () => window.Settings && Settings.init(),
+    portfolio:     () => window.renderPortfolio && renderPortfolio(),
   };
   if (inits[pageId]) inits[pageId]();
 
@@ -164,25 +167,40 @@ function renderVesselDropdown() {
   const dropdown = document.getElementById('vessel-dropdown');
   if (!dropdown) return;
 
+  const cur = App.currentVesselId;
+  const totalAssets = FM.vessels.length + (FM.properties || []).length;
+
   dropdown.innerHTML = `
-    <div class="vessel-opt ${App.currentVesselId === 'all' ? 'active' : ''}" onclick="switchVessel('all')">
-      <span class="vessel-opt-dot" style="background:var(--txt3)"></span>
+    <div class="vessel-opt ${cur === 'portfolio' ? 'active' : ''}" onclick="switchVessel('portfolio')">
+      <span class="vessel-opt-dot" style="background:linear-gradient(135deg,#F97316,#A78BFA)"></span>
       <div>
-        <div class="vessel-opt-name">All vessels</div>
-        <div class="vessel-opt-type">Fleet overview</div>
+        <div class="vessel-opt-name">Portfolio</div>
+        <div class="vessel-opt-type">${totalAssets} assets</div>
       </div>
-      ${App.currentVesselId === 'all' ? '<span class="vessel-opt-check">✓</span>' : ''}
+      ${cur === 'portfolio' ? '<span class="vessel-opt-check">✓</span>' : ''}
     </div>
-    <div class="dropdown-sep"></div>` +
+    <div class="dropdown-sep"></div>
+    <div style="padding:4px 12px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#60A5FA">Marine</div>` +
   FM.vessels.map(v => `
-    <div class="vessel-opt ${v.id === App.currentVesselId ? 'active' : ''}"
-         onclick="switchVessel('${v.id}')">
+    <div class="vessel-opt ${v.id === cur ? 'active' : ''}" onclick="switchVessel('${v.id}')">
       <span class="vessel-opt-dot" style="background:${v.color}"></span>
       <div>
         <div class="vessel-opt-name">${v.name}</div>
         <div class="vessel-opt-type">${v.type} · ${v.loa}</div>
       </div>
-      ${v.id === App.currentVesselId ? '<span class="vessel-opt-check">✓</span>' : ''}
+      ${v.id === cur ? '<span class="vessel-opt-check">✓</span>' : ''}
+    </div>
+  `).join('') + `
+    <div class="dropdown-sep"></div>
+    <div style="padding:4px 12px 2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4ADE80">Properties</div>` +
+  (FM.properties || []).map(p => `
+    <div class="vessel-opt ${p.id === cur ? 'active' : ''}" onclick="switchVessel('${p.id}')">
+      <span class="vessel-opt-dot" style="background:${p.color}"></span>
+      <div>
+        <div class="vessel-opt-name">${p.name}</div>
+        <div class="vessel-opt-type">${p.type} · ${p.location}</div>
+      </div>
+      ${p.id === cur ? '<span class="vessel-opt-check">✓</span>' : ''}
     </div>
   `).join('') + `
     <div class="dropdown-sep"></div>
@@ -190,7 +208,7 @@ function renderVesselDropdown() {
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:13px;height:13px">
         <circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/>
       </svg>
-      Manage vessels
+      Manage assets
     </div>
   `;
 }
@@ -199,28 +217,52 @@ function switchVessel(vesselId) {
   App.currentVesselId = vesselId;
   FM.currentVesselId = vesselId;
 
-  if (vesselId === 'all') {
-    document.getElementById('vessel-picker-dot').style.background = 'var(--txt3)';
-    document.getElementById('vessel-picker-name').textContent = 'All vessels';
-    document.getElementById('vessel-picker-type').textContent = 'Fleet overview';
+  const dot  = document.getElementById('vessel-picker-dot');
+  const name = document.getElementById('vessel-picker-name');
+  const type = document.getElementById('vessel-picker-type');
+
+  if (vesselId === 'portfolio') {
+    dot.style.background = 'linear-gradient(135deg,#F97316,#A78BFA)';
+    name.textContent = 'Portfolio';
+    type.textContent = (FM.vessels.length + (FM.properties||[]).length) + ' assets';
+  } else if (vesselId === 'all') {
+    dot.style.background = 'var(--txt3)';
+    name.textContent = 'All vessels';
+    type.textContent = 'Fleet overview';
   } else {
     const v = FM.vessels.find(x => x.id === vesselId);
-    if (!v) return;
-    document.getElementById('vessel-picker-dot').style.background = v.color;
-    document.getElementById('vessel-picker-name').textContent = v.name;
-    document.getElementById('vessel-picker-type').textContent = v.type;
+    const p = (FM.properties || []).find(x => x.id === vesselId);
+    if (v) {
+      dot.style.background = v.color;
+      name.textContent = v.name;
+      type.textContent = v.type;
+    } else if (p) {
+      dot.style.background = p.color;
+      name.textContent = p.name;
+      type.textContent = p.type;
+    }
   }
 
   document.getElementById('vessel-dropdown').classList.remove('open');
   renderVesselDropdown();
 
-  // "All vessels" → fleet page is the natural fleet overview
+  if (vesselId === 'portfolio') {
+    navTo('portfolio', document.querySelector('.ni[data-page="portfolio"]'));
+    return;
+  }
+
   if (vesselId === 'all') {
     navTo('dashboard', document.querySelector('.ni[data-page="dashboard"]'));
     return;
   }
 
-  // Re-render current page for new vessel
+  // If switching to a property, go to portfolio view
+  if ((FM.properties || []).find(x => x.id === vesselId)) {
+    navTo('portfolio', document.querySelector('.ni[data-page="portfolio"]'));
+    return;
+  }
+
+  // Re-render current page for the new vessel
   const inits = {
     'work-orders': () => WO?.render(),
     dashboard:     () => Dash?.render(),
@@ -231,7 +273,7 @@ function switchVessel(vesselId) {
   };
   if (inits[App.currentPage]) inits[App.currentPage]();
 
-  const vLabel = vesselId === 'all' ? 'All vessels' : FM.vessels.find(x => x.id === vesselId)?.name || vesselId;
+  const vLabel = FM.vessels.find(x => x.id === vesselId)?.name || vesselId;
   showToast('Switched to ' + vLabel);
 }
 
@@ -566,57 +608,58 @@ function openCraftDetail(craftId) {
   }).join('') : `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No activity logged</div>`;
 
   const woHTML = wos.length ? wos.map(w => `
-    <div onclick="closeModal();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)"
+    <div onclick="closePanel();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)"
          style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:.5px solid var(--bd);cursor:pointer">
       <span style="font-family:var(--mono);font-size:10px;color:var(--txt3);flex-shrink:0">${w.id}</span>
       <span style="font-size:12px;color:var(--txt);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.title)}</span>
       <span class="badge b-${w.status === 'in-progress' ? 'progress' : w.status === 'on-hold' ? 'hold' : 'open'}" style="font-size:9px">${FM.statusLabel(w.status)}</span>
     </div>`).join('') : `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No open work orders</div>`;
 
-  openModal(`
-    <div style="display:flex;flex-direction:column;gap:20px;max-height:72vh;overflow-y:auto;padding-bottom:4px">
+  document.getElementById('panel-title').textContent = c.name;
+  openPanel(`
+    <!-- Photo hero -->
+    ${c.photo ? `<div style="height:180px;background:linear-gradient(145deg,${c.color}22,${c.color}08);overflow:hidden;margin:-18px -18px 18px;border-bottom:.5px solid var(--bd)"><img src="${c.photo}" alt="" style="width:100%;height:100%;object-fit:cover;display:block"></div>` : ''}
 
-      <!-- Header -->
-      <div style="display:flex;align-items:center;gap:14px">
-        <div style="width:52px;height:52px;border-radius:14px;background:${c.color}22;border:.5px solid ${c.color}44;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${typeEmoji[c.type]||'⛵'}</div>
-        <div>
-          <div style="font-size:18px;font-weight:700;color:var(--txt);letter-spacing:-.02em">${escHtml(c.name)}</div>
-          <div style="font-size:12px;color:var(--txt3)">${c.year} ${c.make} ${c.model} · ${escHtml(vessel?.name||'')}</div>
-        </div>
+    <!-- Status + fuel row -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <span class="badge b-done" style="font-size:11px">${c.status.replace('-',' ')}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--txt3)">${c.fuel === 'electric' ? 'Battery' : 'Fuel'}</span>
+        <div style="width:60px;height:5px;border-radius:3px;background:var(--bg4);overflow:hidden"><div style="height:100%;width:${fuelPct}%;background:${fuelCol};border-radius:3px"></div></div>
+        <span style="font-size:12px;font-weight:600;color:${fuelCol}">${fuelPct}%</span>
       </div>
-
-      <!-- Stats -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
-        ${[['Hours', c.hours.toLocaleString()], ['LOA', c.loa], ['Engine', c.engine]].map(([l,v]) => `
-          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px">
-            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:4px">${l}</div>
-            <div style="font-size:13px;font-weight:500;color:var(--txt)">${v}</div>
-          </div>`).join('')}
-      </div>
-
-      <!-- Fuel -->
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="font-size:11px;color:var(--txt3);width:60px;flex-shrink:0">${c.fuel === 'electric' ? 'Battery' : 'Fuel'}</span>
-        <div style="flex:1;height:6px;border-radius:3px;background:var(--bg4);overflow:hidden"><div style="height:100%;width:${fuelPct}%;background:${fuelCol};border-radius:3px"></div></div>
-        <span style="font-size:12px;font-weight:500;color:${fuelCol};width:34px;text-align:right">${fuelPct}%</span>
-      </div>
-
-      <!-- Work orders -->
-      <div>
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:10px">Open work orders</div>
-        ${woHTML}
-      </div>
-
-      <!-- Activity log -->
-      <div>
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:10px">Recent activity</div>
-        ${logHTML}
-      </div>
-
-      <!-- Notes -->
-      ${c.notes ? `<div style="background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--txt2);line-height:1.6">${escHtml(c.notes)}</div>` : ''}
     </div>
-  `, escHtml(c.name));
+
+    <!-- Sub-header info -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:18px;font-weight:600;color:var(--txt);letter-spacing:-.02em">${escHtml(c.name)}</div>
+      <div style="font-size:12px;color:var(--txt3);margin-top:2px">${c.year} ${c.make} ${c.model} · ${escHtml(vessel?.name||'')} · ${c.loa}</div>
+    </div>
+
+    <!-- Stats grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px">
+      ${[['Hours', c.hours.toLocaleString()+'h'], ['Engine', c.engine], ['Reg.', c.reg||'—'], ['Last service', c.lastService||'—']].map(([l,v]) => `
+        <div style="background:var(--bg3);border-radius:8px;padding:10px 12px">
+          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:4px">${l}</div>
+          <div style="font-size:12px;font-weight:500;color:var(--txt)">${v}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- Open work orders -->
+    <div class="panel-section">
+      <div class="panel-section-title">Open work orders</div>
+      ${woHTML}
+    </div>
+
+    <!-- Activity log -->
+    <div class="panel-section">
+      <div class="panel-section-title">Recent activity</div>
+      ${logHTML}
+    </div>
+
+    <!-- Notes -->
+    ${c.notes ? `<div style="background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--txt2);line-height:1.6;margin-top:4px">${escHtml(c.notes)}</div>` : ''}
+  `);
 }
 window.openCraftDetail = openCraftDetail;
 
@@ -666,6 +709,59 @@ function renderNotifications() {
     </div>`;
 }
 window.renderNotifications = renderNotifications;
+
+/* ── PERSONAL SETTINGS ── */
+function openPersonalSettings() {
+  openModal(`
+    <div style="display:flex;flex-direction:column;gap:0">
+      <div style="display:flex;align-items:center;gap:14px;padding:4px 0 20px">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff;flex-shrink:0">AJ</div>
+        <div>
+          <div style="font-size:16px;font-weight:600;color:var(--txt)">Albert Day</div>
+          <div style="font-size:12px;color:var(--txt3)">aday@castellomgmt.com · Owner</div>
+        </div>
+      </div>
+      <div style="border-top:.5px solid var(--bd);padding-top:16px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.10em;color:var(--txt4);margin-bottom:12px">Appearance</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0">
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--txt)">Theme</div>
+            <div style="font-size:11px;color:var(--txt3)">Switch between light and dark mode</div>
+          </div>
+          <div class="theme-seg" id="settings-theme-seg">
+            <button class="theme-seg-btn" id="seg-dark" onclick="Settings.setTheme('dark')">Dark</button>
+            <button class="theme-seg-btn" id="seg-light" onclick="Settings.setTheme('light')">Light</button>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:.5px solid var(--bd);padding-top:16px;margin-top:4px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.10em;color:var(--txt4);margin-bottom:12px">Notifications</div>
+        ${[
+          { lbl:'Bilge alerts', sub:'SMS and push when bilge exceeds threshold', on:true },
+          { lbl:'Engine alarms', sub:'Critical engine parameter alerts go out immediately, any time', on:true },
+          { lbl:'Work order assignments', sub:'Get notified when a work order is assigned to you', on:true },
+          { lbl:'Daily digest', sub:'Morning summary at 07:00', on:false },
+        ].map(r => `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:.5px solid var(--bd)">
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--txt)">${r.lbl}</div>
+              <div style="font-size:11px;color:var(--txt3)">${r.sub}</div>
+            </div>
+            <div class="toggle ${r.on?'on':''}" onclick="this.classList.toggle('on')"><div class="toggle-thumb"></div></div>
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-danger btn-sm" onclick="showToast('Signed out');closeModal()">Sign out</button>
+      </div>
+    </div>
+  `, 'Account');
+  setTimeout(() => {
+    const mode = document.body.dataset.theme || 'dark';
+    document.getElementById('seg-dark')?.classList.toggle('active', mode === 'dark');
+    document.getElementById('seg-light')?.classList.toggle('active', mode === 'light');
+  }, 50);
+}
+window.openPersonalSettings = openPersonalSettings;
 
 /* ── HELPERS ── */
 function escHtml(s) {

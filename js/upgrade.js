@@ -128,9 +128,15 @@ const Upgrade = (() => {
   function isLocked(pageId) { return !!_moduleForPage(pageId); }
 
   function show(pageId) {
-    const entry = _moduleForPage(pageId);
-    if (!entry) return false;
-    const [moduleId, mod] = entry;
+    let moduleId, mod;
+    if (MODULES[pageId]) {
+      moduleId = pageId;
+      mod = MODULES[pageId];
+    } else {
+      const entry = _moduleForPage(pageId);
+      if (!entry) return false;
+      [moduleId, mod] = entry;
+    }
     _current = moduleId;
 
     const overlay = document.getElementById('upgrade-overlay');
@@ -210,7 +216,7 @@ const Upgrade = (() => {
     if (!mod) return;
     window.location.href = 'mailto:hello@framemarine.io?subject=' +
       encodeURIComponent(mod.name + ' module — upgrade enquiry') +
-      '&body=' + encodeURIComponent('Hi,\n\nI\'d like to add the ' + mod.name + ' module to my Frame Marine account.\n\nVessel: Lady M\nContact: ');
+      '&body=' + encodeURIComponent('Hi,\n\nI\'d like to add the ' + mod.name + ' module to my Frame account.\n\nVessel: Lady M\nContact: ');
   }
 
   return { show, hide, isLocked, contact };

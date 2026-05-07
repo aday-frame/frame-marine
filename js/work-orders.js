@@ -135,6 +135,7 @@ WO.renderList = function(wos) {
   };
 
   const thead = `<thead><tr>
+    <th style="width:40px"></th>
     ${col('title','Title')}
     ${col('id','ID','76px')}
     ${col('status','Status','110px')}
@@ -171,8 +172,16 @@ WO.rowHTML = function(w) {
   const subtasksDone  = w.subtasks.filter(s => s.done).length;
   const subtasksTotal = w.subtasks.length;
 
+  const _phSvg = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--txt4)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>`;
+  const _phDiv = `<div style="width:32px;height:32px;border-radius:5px;background:var(--bg5);display:flex;align-items:center;justify-content:center">${_phSvg}</div>`;
+  const thumbImg = (w.images || [])[0];
+  const thumbEl = thumbImg
+    ? `<img src="${escHtml(thumbImg)}" style="width:32px;height:32px;border-radius:5px;object-fit:cover;display:block" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div style="width:32px;height:32px;border-radius:5px;background:var(--bg5);display:none;align-items:center;justify-content:center">${_phSvg}</div>`
+    : _phDiv;
+
   return `
     <tr data-id="${w.id}" class="${WO.activeId === w.id ? 'selected' : ''}">
+      <td style="padding:6px 4px 6px 10px">${thumbEl}</td>
       <td class="wo-title-cell">
         <div class="wo-title">${escHtml(w.title)}</div>
         <div class="wo-sub">
@@ -275,6 +284,7 @@ WO.openPanel = function(id) {
       ${WO.statusBadge(w.status)}
       <span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>
       <span class="badge b-${w.team}">${FM.teamLabel(w.team)}</span>
+      ${w.fromPMS ? `<span class="badge" style="background:rgba(251,146,60,.1);color:var(--or);cursor:pointer" onclick="navTo('pms',document.querySelector('[data-page=pms]'))">⚙ Maintenance schedule</span>` : ''}
     </div>
 
     <!-- Description -->
@@ -290,13 +300,38 @@ WO.openPanel = function(id) {
           ${FM.crewName(w.assignee)}
         </span>
       </div>
+      ${w.createdBy ? `
+      <div class="panel-row">
+        <span class="panel-row-key">Created by</span>
+        <span class="panel-row-val" style="display:flex;align-items:center;gap:7px">
+          <span class="wo-av" style="background:${FM.crewColor(w.createdBy)};width:20px;height:20px;font-size:8px">${FM.crewInitials(w.createdBy)}</span>
+          ${FM.crewName(w.createdBy)}
+        </span>
+      </div>` : ''}
       <div class="panel-row"><span class="panel-row-key">Zone</span><span class="panel-row-val">${escHtml(w.zone)}</span></div>
       <div class="panel-row"><span class="panel-row-key">System</span><span class="panel-row-val">${escHtml(w.system)}</span></div>
+      ${(() => {
+        const asset = w.assetId ? FM.assets.find(a => a.id === w.assetId) : null;
+        return asset ? `<div class="panel-row"><span class="panel-row-key">Asset</span><span class="panel-row-val" style="color:var(--or);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(251,146,60,.3)" onclick="closePanel();navTo('assets',document.querySelector('[data-page=assets]'));setTimeout(()=>Assets.select('${asset.id}'),120)">${escHtml(asset.name)}</span></div>` : '';
+      })()}
+      ${w.recurring ? `<div class="panel-row"><span class="panel-row-key">Recurring</span><span class="panel-row-val"><span class="badge" style="background:rgba(96,165,250,.12);color:#60A5FA;font-size:10px">${typeof w.recurring === 'string' ? escHtml(w.recurring) : 'Yes'}</span></span></div>` : ''}
       <div class="panel-row"><span class="panel-row-key">Created</span><span class="panel-row-val c-txt2">${fmtDate(w.created)}</span></div>
+      ${w.updatedAt ? `<div class="panel-row"><span class="panel-row-key">Updated</span><span class="panel-row-val c-txt2">${fmtDate(w.updatedAt)}</span></div>` : ''}
       <div class="panel-row"><span class="panel-row-key">Due</span>
         <span class="panel-row-val ${w.due && new Date(w.due) < new Date() && w.status !== 'done' ? 'c-red' : 'c-txt2'}">${w.due ? fmtDate(w.due) : '—'}</span>
       </div>
     </div>
+
+    <!-- Procedures -->
+    ${(w.procedures || []).length ? `
+    <div class="panel-section">
+      <div class="panel-section-title">Procedures</div>
+      ${w.procedures.map((step, i) => `
+        <div style="display:flex;gap:10px;padding:6px 0;border-bottom:.5px solid var(--bd);font-size:12px;color:var(--txt2);line-height:1.5">
+          <span style="width:16px;height:16px;border-radius:50%;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--txt3);flex-shrink:0;margin-top:1px">${i+1}</span>
+          <span>${escHtml(step)}</span>
+        </div>`).join('')}
+    </div>` : ''}
 
     <!-- Subtasks -->
     ${subtasksTotal ? `
@@ -426,6 +461,14 @@ WO.setStatus = function(woId, status) {
   const w = FM.getWO(woId);
   if (!w) return;
   w.status = status;
+  if (status === 'done' && w.fromPMS) {
+    const t = (FM.pms || []).find(p => p.id === w.fromPMS);
+    if (t && typeof _pmsReset === 'function') {
+      _pmsReset(t);
+      if (window.renderPMS) renderPMS();
+      showToast('Maintenance schedule updated ✓');
+    }
+  }
   WO.openPanel(woId);
   WO.renderList(WO.allWOs());
   WO.renderStats(WO.allWOs());
@@ -627,6 +670,11 @@ WO.todoDetailHTML = function(w) {
             ${w.due ? fmtDate(w.due) : '—'}
           </div>
         </div>
+        ${(() => {
+          const asset = w.assetId ? FM.assets.find(a => a.id === w.assetId) : null;
+          return asset ? `<div class="wo-detail-field" style="grid-column:1/-1"><div class="wo-detail-label">Asset</div><div class="wo-detail-val" style="color:var(--or)">${escHtml(asset.name)}</div></div>` : '';
+        })()}
+        ${w.recurring ? `<div class="wo-detail-field"><div class="wo-detail-label">Recurring</div><div class="wo-detail-val" style="font-size:11px;color:#60A5FA">${typeof w.recurring === 'string' ? escHtml(w.recurring) : 'Yes'}</div></div>` : ''}
       </div>
 
       ${w.desc ? `
@@ -802,11 +850,15 @@ WO.createNew = function() {
     status: 'open',
     team: document.getElementById('nwo-team')?.value || 'engineering',
     assignee: document.getElementById('nwo-assignee')?.value || null,
+    createdBy: 'c1',
     created: new Date().toISOString().slice(0, 10),
     due: document.getElementById('nwo-due')?.value || null,
+    recurring: false,
     subtasks,
     comments: [],
     parts: [],
+    procedures: [],
+    images: [],
   });
 
   closeModal();
