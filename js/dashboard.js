@@ -74,8 +74,122 @@ Dash.render = function () {
     { label:'Work orders',  page:'work-orders', sev:overdueWOs.length?'red':highWOs.length?'amber':'ok',         val:openWOs.length+' open',                                                                            sub:overdueWOs.length?overdueWOs.length+' overdue':highWOs.length?highWOs.length+' high priority':'No urgent items', icon:'M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z' },
   ];
 
+  /* ── ACTIVITY FEED ─────────────────────────────────────── */
+  const allWOs   = FM.vesselWOs ? FM.vesselWOs(v.id) : FM.workOrders.filter(w => w.vessel === v.id);
+  const doneWOs  = allWOs.filter(w => w.status === 'done').slice(0, 6);
+  const activity = [];
+  allWOs.forEach(w => {
+    w.comments.forEach(c => {
+      const cr = (FM.crew || []).find(x => x.id === c.author);
+      activity.push({ crew: cr, action: 'commented on', wo: w, time: c.time });
+    });
+  });
+  doneWOs.forEach(w => {
+    const cr = (FM.crew || []).find(x => x.id === w.assignee);
+    activity.push({ crew: cr, action: 'completed', wo: w, time: _f(w.created) });
+  });
+  inProgress.slice(0,4).forEach(w => {
+    const cr = (FM.crew || []).find(x => x.id === w.assignee);
+    activity.push({ crew: cr, action: 'started work on', wo: w, time: 'Today' });
+  });
+  activity.sort(() => Math.random() - 0.5);
+
+  const me = (FM.crew || []).find(c => c.id === 'c1');
+  const completedWeek = doneWOs.length;
+
+  /* ── MOBILE HTML ────────────────────────────────────────── */
+  const mobHTML = `
+    <div class="dash-mob-wrap">
+      <div class="dash-mob-hdr">
+        <div>
+          <div class="dash-mob-greeting">Hello, ${escHtml(me?.name?.split(' ')[0] || 'Captain')}!</div>
+          <div class="dash-mob-vessel">${escHtml(v.name)} · ${escHtml(v.type)}</div>
+        </div>
+        <div style="width:38px;height:38px;border-radius:50%;background:${me?.color||'var(--or)'};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">${me?.initials||'?'}</div>
+      </div>
+
+      <div class="dash-mob-section">WORK ORDERS STATUS</div>
+      <div class="dash-mob-stats">
+        <div class="dash-mob-stat" onclick="WO.activeFilter='high';navTo('work-orders',document.querySelector('[data-page=work-orders]'))">
+          <div class="dash-mob-stat-icon" style="color:var(--red)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </div>
+          <div class="dash-mob-stat-num" style="color:var(--red)">${highWOs.length}</div>
+          <div class="dash-mob-stat-lbl">High Priority Work Orders</div>
+          <svg class="dash-mob-stat-arr" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </div>
+        <div class="dash-mob-stat" onclick="WO.activeFilter='open';navTo('work-orders',document.querySelector('[data-page=work-orders]'))">
+          <div class="dash-mob-stat-icon" style="color:var(--red)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="dash-mob-stat-num" style="color:var(--red)">${overdueWOs.length}</div>
+          <div class="dash-mob-stat-lbl">Overdue Work Orders</div>
+          <svg class="dash-mob-stat-arr" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </div>
+        <div class="dash-mob-stat" onclick="WO.activeFilter='in-progress';navTo('work-orders',document.querySelector('[data-page=work-orders]'))">
+          <div class="dash-mob-stat-icon" style="color:var(--or)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+          </div>
+          <div class="dash-mob-stat-num" style="color:var(--or)">${inProgress.length}</div>
+          <div class="dash-mob-stat-lbl">In Progress</div>
+          <svg class="dash-mob-stat-arr" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </div>
+        <div class="dash-mob-stat" onclick="WO.activeFilter='done';navTo('work-orders',document.querySelector('[data-page=work-orders]'))">
+          <div class="dash-mob-stat-icon" style="color:var(--grn)">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <div class="dash-mob-stat-num" style="color:var(--grn)">${completedWeek}</div>
+          <div class="dash-mob-stat-lbl">Completed</div>
+          <svg class="dash-mob-stat-arr" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </div>
+      </div>
+
+      <div class="dash-mob-section">TO DO LIST</div>
+      <div class="dash-mob-card">
+        ${openWOs.slice(0,5).map(w => {
+          const pc = w.priority==='high'?'var(--red)':w.priority==='medium'?'#f59e0b':'var(--txt4)';
+          const late = w.due && w.due < _T;
+          return `<div class="dash-mob-wo" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>{ if(WO.view==='todo'){WO.activeId='${w.id}';WO.renderTodo();}else{WO.openPanel('${w.id}');}},80)">
+            <div style="width:8px;height:8px;border-radius:50%;background:${pc};flex-shrink:0;margin-top:3px"></div>
+            <div style="flex:1;min-width:0">
+              <div class="dash-mob-wo-title">${escHtml(w.title)}</div>
+              <div class="dash-mob-wo-meta">#${w.id} · ${escHtml(w.zone||w.system||'')}</div>
+              <div style="display:flex;gap:6px;margin-top:5px;align-items:center">
+                <span class="badge b-${w.status}" style="font-size:10px">${FM.statusLabel(w.status)}</span>
+                ${late?'<span style="font-size:10px;color:var(--red)">⏰ Overdue</span>':''}
+              </div>
+            </div>
+            <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="color:var(--txt4);flex-shrink:0"><path d="M6 3l5 5-5 5"/></svg>
+          </div>`;
+        }).join('')}
+        <button class="dash-mob-viewall" onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'))">View All</button>
+      </div>
+
+      <div class="dash-mob-section">RECENT ACTIVITY</div>
+      <div class="dash-mob-card" style="padding:0">
+        ${activity.slice(0,8).map(a => {
+          const initials = a.crew?.initials || '?';
+          const color    = a.crew?.color || 'var(--bg5)';
+          const name     = a.crew?.name || 'Someone';
+          return `<div class="dash-mob-act">
+            <div style="width:34px;height:34px;border-radius:50%;background:${color};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${initials}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;color:var(--txt);line-height:1.4">
+                <strong style="font-weight:600">${escHtml(name)}</strong>
+                <span style="color:var(--txt2)"> ${a.action} </span>
+                <span style="color:var(--or);font-weight:500">#${a.wo.id} ${escHtml(a.wo.title.slice(0,36))}${a.wo.title.length>36?'…':''}</span>
+              </div>
+              <div style="font-size:11px;color:var(--txt3);margin-top:2px">${a.time}</div>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
   /* ── HTML ─────────────────────────────────────────────── */
   wrap.innerHTML = `
+    ${mobHTML}
+    <div class="dash-desk-wrap">
     <div class="_dashwrap" style="max-width:1060px;padding:0 22px 60px;margin:0 auto">
 
       <!-- Brief header -->
@@ -219,6 +333,7 @@ Dash.render = function () {
       </div>
 
     </div>
+    </div><!-- /dash-desk-wrap -->
   `;
 
   /* inject responsive rule once */

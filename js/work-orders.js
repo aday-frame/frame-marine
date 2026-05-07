@@ -17,8 +17,33 @@ WO.render = function() {
   const wos = WO.allWOs();
   WO.renderStats(wos);
   WO.initViewSwitcher();
+  WO.initMobTabs();
   if (WO.view === 'todo') WO.renderTodo();
   else WO.renderList(wos);
+};
+
+WO.initMobTabs = function() {
+  const pa = document.getElementById('page-actions');
+  if (!pa) return;
+  if (pa.querySelector('.wo-mob-tabs')) return;
+  const tabs = document.createElement('div');
+  tabs.className = 'wo-mob-tabs';
+  tabs.innerHTML = `
+    <button class="wo-mob-tab${WO.mobTab !== 'done' ? ' active' : ''}" data-tab="todo">To Do</button>
+    <button class="wo-mob-tab${WO.mobTab === 'done' ? ' active' : ''}" data-tab="done">Done</button>`;
+  pa.prepend(tabs);
+  tabs.querySelectorAll('.wo-mob-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      WO.mobTab = btn.dataset.tab;
+      tabs.querySelectorAll('.wo-mob-tab').forEach(b => b.classList.toggle('active', b === btn));
+      if (WO.mobTab === 'done') {
+        WO.activeFilter = 'done';
+      } else {
+        WO.activeFilter = 'all';
+      }
+      WO.renderList(WO.allWOs());
+    });
+  });
 };
 
 WO.renderStats = function(wos) {
@@ -74,6 +99,8 @@ WO.filtered = function(wos) {
 
 WO.sortCol  = 'id';
 WO.sortDir  = 'desc';
+WO.view     = 'table';
+WO.mobTab   = 'todo';
 
 WO.renderList = function(wos) {
   const wrap = document.getElementById('wo-table-wrap');
@@ -329,8 +356,6 @@ WO.setStatus = function(woId, status) {
 };
 
 /* ── VIEW SWITCHER ── */
-WO.view = 'table';
-
 WO.initViewSwitcher = function() {
   const actions = document.getElementById('page-actions');
   if (!actions || actions.querySelector('.wo-view-sw')) return;

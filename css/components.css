@@ -1203,3 +1203,181 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* ── MOBILE DASHBOARD ── */
+.dash-mob-wrap  { display: none; }
+.dash-desk-wrap { display: block; }
+
+@media (max-width: 768px) {
+  .dash-mob-wrap  { display: block; }
+  .dash-desk-wrap { display: none; }
+
+  /* Header */
+  .dash-mob-hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 16px 12px;
+  }
+  .dash-mob-greeting {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--txt);
+    letter-spacing: -.03em;
+    line-height: 1.1;
+  }
+  .dash-mob-vessel {
+    font-size: 12px;
+    color: var(--txt3);
+    margin-top: 3px;
+  }
+
+  /* Section labels */
+  .dash-mob-section {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: var(--txt3);
+    padding: 16px 16px 8px;
+  }
+
+  /* 2×2 stat grid */
+  .dash-mob-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 0 16px;
+  }
+  .dash-mob-stat {
+    background: var(--bg2);
+    border: .5px solid var(--bd);
+    border-radius: 12px;
+    padding: 14px 13px 12px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: background .12s;
+  }
+  .dash-mob-stat:active { background: var(--bg3); }
+  .dash-mob-stat-icon { margin-bottom: 2px; }
+  .dash-mob-stat-num {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .dash-mob-stat-lbl {
+    font-size: 10px;
+    color: var(--txt3);
+    line-height: 1.3;
+  }
+  .dash-mob-stat-arr {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: var(--txt4);
+  }
+
+  /* Shared card wrapper */
+  .dash-mob-card {
+    background: var(--bg2);
+    border: .5px solid var(--bd);
+    border-radius: 12px;
+    margin: 0 16px;
+    overflow: hidden;
+  }
+
+  /* WO row inside card */
+  .dash-mob-wo {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: .5px solid var(--bd);
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .dash-mob-wo:last-of-type { border-bottom: none; }
+  .dash-mob-wo:active { background: var(--bg3); }
+  .dash-mob-wo-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--txt);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dash-mob-wo-meta {
+    font-size: 11px;
+    color: var(--txt3);
+    margin-top: 2px;
+  }
+
+  /* View all button */
+  .dash-mob-viewall {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: none;
+    border-top: .5px solid var(--bd);
+    color: var(--or);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: -.01em;
+  }
+
+  /* Activity row */
+  .dash-mob-act {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 12px 14px;
+    border-bottom: .5px solid var(--bd);
+  }
+  .dash-mob-act:last-child { border-bottom: none; }
+}
+
+/* ── MOBILE WORK ORDERS — To Do / Done tabs ── */
+.wo-mob-tabs {
+  display: none;
+}
+@media (max-width: 768px) {
+  .wo-mob-tabs {
+    display: flex;
+    gap: 0;
+    padding: 0 16px;
+    margin-bottom: 12px;
+    border-bottom: .5px solid var(--bd);
+  }
+  .wo-mob-tab {
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--txt3);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+    letter-spacing: -.01em;
+    transition: color .12s;
+  }
+  .wo-mob-tab.active {
+    color: var(--txt);
+    border-bottom-color: var(--or);
+  }
+  /* On mobile, hide the desktop filter pills and view switcher */
+  .fp-wrap, .wo-view-sw { display: none !important; }
+  /* Full-width card list on mobile */
+  .wo-todo-layout {
+    grid-template-columns: 1fr !important;
+  }
+  .wo-detail-wrap { display: none !important; }
+  .wo-todo-layout.mob-detail .wo-todo-sidebar { display: none; }
+  .wo-todo-layout.mob-detail .wo-todo-detail { display: block !important; }
+}
