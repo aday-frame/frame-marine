@@ -1177,8 +1177,8 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
   /* Fleet card height: auto on mobile */
   #fleet-grid { height: auto !important; overflow-y: visible !important; }
 
-  /* FAB new WO button */
-  .mob-fab {
+  /* FAB new WO button — only shown via .mob-fab-show class set by JS */
+  .mob-fab-show {
     display: flex;
     position: fixed; bottom: calc(68px + env(safe-area-inset-bottom, 0px)); right: 16px;
     height: 44px; border-radius: 22px;
@@ -1187,11 +1187,11 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
     background: var(--or); color: #ffffff;
     align-items: center; justify-content: center;
     border: none; cursor: pointer; z-index: 109;
-    box-shadow: 0 4px 20px rgba(249,115,22,.45);
+    box-shadow: 0 4px 20px rgba(94,106,210,.45);
     font-size: 13px; font-weight: 700; letter-spacing: -.01em;
     transition: transform .15s, box-shadow .15s;
   }
-  .mob-fab:active { transform: scale(.95); }
+  .mob-fab-show:active { transform: scale(.95); }
 }
 
 /* ── RESPONSIVE — TABLET ── */

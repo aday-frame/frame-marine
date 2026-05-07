@@ -456,9 +456,11 @@
   background: var(--bg2); border-top: .5px solid var(--bd);
   z-index: 110;
   padding-bottom: env(safe-area-inset-bottom, 0px);
+  overflow: hidden;
 }
 .mob-nav-inner {
   display: flex; height: 56px;
+  overflow: hidden;
 }
 .mob-nav-item {
   flex: 1; display: flex; flex-direction: column;

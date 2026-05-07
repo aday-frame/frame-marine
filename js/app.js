@@ -117,7 +117,12 @@ function navTo(pageId, clickedEl, skipPush) {
 
   // Show FAB only on work-orders page
   const fab = document.getElementById('mob-fab');
-  if (fab) fab.style.display = pageId === 'work-orders' ? '' : 'none';
+  if (fab) {
+    const show = pageId === 'work-orders';
+    fab.classList.toggle('mob-fab-show', show);
+    fab.style.display   = show ? '' : 'none';
+    fab.style.visibility = show ? '' : 'hidden';
+  }
 }
 
 /* ── MOBILE SIDEBAR TOGGLE ── */
