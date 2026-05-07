@@ -3,34 +3,34 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Backgrounds — 6-step surface ladder (DESIGN.md principle) */
-  --bg:   #060606;   /* canvas — deepest */
-  --bg2:  #0d0d0c;   /* surface-1 — sidebars, topbar */
-  --bg3:  #141413;   /* surface-2 — cards, inputs */
-  --bg4:  #1b1b1a;   /* surface-3 — hover states */
-  --bg5:  #222221;   /* surface-4 — selected states */
-  --bg6:  #292928;   /* surface-5 — highest lift */
+  /* Backgrounds — true black canvas (DESIGN.md: #010102) */
+  --bg:   #010102;
+  --bg2:  #0c0c0e;
+  --bg3:  #131315;
+  --bg4:  #1a1a1d;
+  --bg5:  #212125;
+  --bg6:  #28282d;
 
-  /* Borders — hairlines (DESIGN.md: hairline system) */
-  --bd:   rgba(255,255,255,.06);
-  --bd2:  rgba(255,255,255,.11);
-  --bd3:  rgba(255,255,255,.18);
+  /* Borders */
+  --bd:   rgba(255,255,255,.07);
+  --bd2:  rgba(255,255,255,.12);
+  --bd3:  rgba(255,255,255,.20);
 
-  /* Top-edge highlight for lifted panels (DESIGN.md: "subtle white edge highlight") */
-  --edge: rgba(255,255,255,.07);
+  /* Top-edge highlight */
+  --edge: rgba(255,255,255,.09);
 
   /* Text */
-  --txt:  #F0F0EC;
-  --txt2: #9A9A92;
-  --txt3: #52524A;
-  --txt4: #2e2e28;
+  --txt:  #f7f8f8;
+  --txt2: #a0a0a8;
+  --txt3: #5a5a64;
+  --txt4: #35353d;
 
-  /* Accent — Frame Marine blue */
-  --or:      #0077b6;
-  --or2:     #0096c7;
-  --or-bg:   rgba(0,119,182,.12);
-  --or-bd:   rgba(0,119,182,.30);
-  --or-glow: rgba(0,119,182,.18);
+  /* Accent — Linear lavender (DESIGN.md primary) */
+  --or:      #5e6ad2;
+  --or2:     #828fff;
+  --or-bg:   rgba(94,106,210,.14);
+  --or-bd:   rgba(94,106,210,.35);
+  --or-glow: rgba(94,106,210,.20);
 
   /* Status colors */
   --grn:   #4ADE80;
@@ -99,9 +99,9 @@
   --txt3: #9A9A92;
   --txt4: #C0C0B8;
 
-  --or-bg:   rgba(0,119,182,.09);
-  --or-bd:   rgba(0,119,182,.22);
-  --or-glow: rgba(0,119,182,.14);
+  --or-bg:   rgba(94,106,210,.10);
+  --or-bd:   rgba(94,106,210,.25);
+  --or-glow: rgba(94,106,210,.15);
 
   --grn:    #16A34A;
   --grn-bg: rgba(22,163,74,.10);
@@ -186,7 +186,7 @@ html, body {
   transition: all var(--t1); white-space: nowrap; user-select: none;
 }
 .btn-primary {
-  background: var(--or); color: #080808; font-weight: 600;
+  background: var(--or); color: #ffffff; font-weight: 600;
 }
 .btn-primary:hover { background: var(--or2); }
 .btn-ghost {

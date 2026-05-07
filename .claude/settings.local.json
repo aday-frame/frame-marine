@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m http.server 3000)",
+      "Bash(echo \"Server PID: $!\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/app.html)",
+      "Bash(curl -s http://localhost:3000/css/design-system.css)",
+      "Bash(curl -s http://localhost:3000/js/data.js)",
+      "Bash(open *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/guest.html)",
+      "Bash(pwdx 8218)",
+      "Bash(node *)",
+      "Bash(python3 *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "WebSearch",
+      "WebFetch(domain:yachtwyse.com)",
+      "WebFetch(domain:bestyachtmanagementsoftware.com)",
+      "WebFetch(domain:btmgroupci.com)",
+      "WebFetch(domain:www.volygroup.com)",
+      "WebFetch(domain:www.capterra.com)",
+      "WebFetch(domain:www.sertica.com)",
+      "WebFetch(domain:www.sealogical.com)",
+      "WebFetch(domain:superyachttechnologyshow.com)",
+      "WebFetch(domain:seahubsoftware.com)",
+      "WebFetch(domain:yachtpedia.org)",
+      "WebFetch(domain:www.latitude365.com)",
+      "WebFetch(domain:superyachtos.com)",
+      "WebFetch(domain:www.yms360.com)",
+      "WebFetch(domain:www.boatinternational.com)",
+      "WebFetch(domain:www.pinpointworks.com)",
+      "WebFetch(domain:seazone.app)",
+      "Bash(git commit *)",
+      "Bash(sudo chown *)",
+      "Bash(npm install *)"
+    ]
+  }
+}

@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frame Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,200;0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#090908;--bg2:#111110;--bg3:#1A1A18;--bg4:#222220;--bg5:#2A2A28;
+  --build:#F59E0B;--build2:#FBBF24;--build-dim:rgba(245,158,11,.1);--build-bd:rgba(245,158,11,.25);
+  --txt:#EFEFE9;--txt2:#9A9A90;--txt3:#525248;--txt4:#38382F;
+  --bd:rgba(255,255,255,.055);--bd2:rgba(255,255,255,.1);--bd3:rgba(255,255,255,.15);
+  --grn:#4ADE80;--gbg:rgba(74,222,128,.1);
+  --blu:#60A5FA;--bbg:rgba(96,165,250,.1);
+  --pur:#A78BFA;--pbg:rgba(167,139,250,.1);
+  --red:#F87171;--rbg:rgba(248,113,113,.1);
+  --yel:#FACC15;--ybg:rgba(250,204,21,.1);
+  --or:#F97316;
+  --font-mono:'DM Mono',monospace;
+}
+html{height:100%}
+body{background:var(--black);color:var(--txt);font-family:'DM Sans',-apple-system,sans-serif;height:100%;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── TOP BAR ── */
+.topbar{height:52px;background:var(--bg2);border-bottom:.5px solid var(--bd);display:flex;align-items:center;padding:0 18px;gap:12px;flex-shrink:0;z-index:50}
+.tb-logo{display:flex;align-items:center;gap:7px;text-decoration:none;margin-right:4px}
+.lm{width:26px;height:26px;background:var(--build);border-radius:6px;display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:4.5px}
+.lm s{background:#090908;border-radius:1px;display:block;text-decoration:none}
+.lm s:nth-child(2){opacity:.5}.lm s:nth-child(3){opacity:.5}.lm s:nth-child(4){opacity:.2}
+.tb-name{font-size:14px;font-weight:600;color:var(--txt);letter-spacing:-.02em}
+.tb-module{font-size:11px;font-weight:600;color:var(--build);background:var(--build-dim);border:.5px solid var(--build-bd);padding:2px 8px;border-radius:10px;letter-spacing:.03em}
+.tb-project{display:flex;align-items:center;gap:6px;padding:5px 12px;background:var(--bg3);border:.5px solid var(--bd2);border-radius:8px;cursor:pointer;font-size:13px;color:var(--txt2);margin-left:4px}
+.tb-project-name{color:var(--txt);font-weight:500}
+.tb-sep{color:var(--txt3);font-size:11px;margin:0 2px}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.tb-btn{padding:6px 14px;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tb-btn-ghost{background:transparent;border:.5px solid var(--bd2);color:var(--txt2)}
+.tb-btn-ghost:hover{border-color:var(--build-bd);color:var(--build)}
+.tb-btn-build{background:var(--build);color:#090908;font-weight:600}
+.tb-btn-build:hover{background:var(--build2)}
+.tb-avatar{width:28px;height:28px;border-radius:50%;background:var(--build);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#090908;cursor:pointer}
+.tb-notif{width:28px;height:28px;border-radius:7px;background:var(--bg3);border:.5px solid var(--bd);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+.tb-notif-dot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg2)}
+
+/* ── SHELL ── */
+.shell{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sb{width:200px;background:var(--bg2);border-right:.5px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.sb-proj{padding:14px 12px;border-bottom:.5px solid var(--bd)}
+.sb-proj-name{font-size:13px;font-weight:600;color:var(--txt);margin-bottom:2px}
+.sb-proj-sub{font-size:11px;color:var(--txt3)}
+.sb-proj-badge{display:flex;align-items:center;gap:4px;margin-top:6px}
+.sb-status{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:10px}
+.sb-nav{padding:8px 6px;flex:1}
+.nlbl{font-size:9px;color:var(--txt4);text-transform:uppercase;letter-spacing:.1em;padding:10px 8px 4px;font-weight:600}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:7px;font-size:13px;color:var(--txt2);cursor:pointer;transition:all .12s;margin-bottom:2px;position:relative;user-select:none}
+.ni:hover{background:var(--bg3);color:var(--txt)}
+.ni.on{background:var(--build-dim);color:var(--build);font-weight:500}
+.ni svg{width:14px;height:14px;flex-shrink:0}
+.ni-badge{margin-left:auto;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;line-height:16px}
+.ni-badge-build{background:var(--build-dim);color:var(--build)}
+.sb-projects{padding:8px 6px}
+.sb-proj-item{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;font-size:12px;color:var(--txt2);cursor:pointer;transition:all .12s;margin-bottom:2px}
+.sb-proj-item:hover{background:var(--bg3);color:var(--txt)}
+.sb-proj-item.on{color:var(--build)}
+.sb-proj-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-foot{padding:10px 12px;border-top:.5px solid var(--bd);font-size:11px;color:var(--txt3)}
+.sb-foot-row{display:flex;align-items:center;gap:7px}
+.sb-foot-av{width:24px;height:24px;border-radius:50%;background:var(--build);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#090908}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.page-header{padding:0 22px;height:54px;display:flex;align-items:center;justify-content:space-between;border-bottom:.5px solid var(--bd);flex-shrink:0;gap:12px}
+.page-title{font-size:16px;font-weight:500;color:var(--txt);letter-spacing:-.01em}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg3);border:.5px solid var(--bd2);border-radius:8px;padding:6px 12px;flex:1;max-width:340px}
+.search-bar input{background:transparent;border:none;outline:none;font-size:13px;color:var(--txt);font-family:'DM Sans',sans-serif;width:100%}
+.search-bar input::placeholder{color:var(--txt3)}
+.page-content{flex:1;overflow-y:auto}
+
+/* ── STATS BAR ── */
+.stats-bar{display:grid;gap:0;border-bottom:.5px solid var(--bd);flex-shrink:0}
+.stat-item{padding:12px 18px;display:flex;flex-direction:column;gap:2px;border-right:.5px solid var(--bd)}
+.stat-item:last-child{border-right:none}
+.stat-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.stat-val{font-size:22px;font-weight:400;color:var(--txt);font-variant-numeric:tabular-nums;line-height:1}
+.stat-val.amber{color:var(--build)}
+.stat-val.red{color:var(--red)}
+.stat-val.grn{color:var(--grn)}
+.stat-val.blue{color:var(--blu)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;justify-content:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.b-open{background:var(--bg4);color:var(--txt2)}
+.b-review{background:var(--bbg);color:var(--blu)}
+.b-waiting{background:var(--ybg);color:var(--yel)}
+.b-approved{background:var(--gbg);color:var(--grn)}
+.b-scheduled{background:var(--pbg);color:var(--pur)}
+.b-resolved{background:var(--gbg);color:var(--grn)}
+.b-verified{background:rgba(74,222,128,.2);color:var(--grn);font-weight:600}
+.b-build{background:var(--build-dim);color:var(--build)}
+.b-high{background:var(--rbg);color:var(--red)}
+.b-med{background:var(--build-dim);color:var(--build)}
+.b-low{background:var(--gbg);color:var(--grn)}
+.b-question{background:var(--bbg);color:var(--blu)}
+.b-defect{background:var(--rbg);color:var(--red)}
+.b-decision{background:var(--pbg);color:var(--pur)}
+.b-task{background:var(--bg4);color:var(--txt2)}
+.b-change{background:var(--build-dim);color:var(--build)}
+.b-safety{background:var(--rbg);color:var(--red)}
+
+/* ── FILTERS ── */
+.filters{display:flex;gap:5px;padding:10px 18px;flex-wrap:wrap;border-bottom:.5px solid var(--bd);flex-shrink:0}
+.fp{padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:.5px solid var(--bd2);color:var(--txt2);background:transparent;transition:all .12s;user-select:none}
+.fp:hover{border-color:var(--build-bd);color:var(--build)}
+.fp.on{background:var(--build-dim);border-color:var(--build-bd);color:var(--build)}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:900px}
+.tbl th{padding:9px 14px;background:var(--bg3);font-size:9px;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;font-weight:600;text-align:left;border-bottom:.5px solid var(--bd);white-space:nowrap;cursor:pointer;user-select:none}
+.tbl th:hover{color:var(--txt)}
+.tbl td{padding:10px 14px;border-bottom:.5px solid var(--bd);color:var(--txt2);vertical-align:middle}
+.tbl tr:hover td{background:rgba(255,255,255,.012);cursor:pointer}
+.td-title{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.td-sub{font-size:11px;color:var(--txt3)}
+.td-id{font-size:10px;color:var(--txt3);font-family:var(--font-mono)}
+
+/* ── PANEL ── */
+.panel{position:fixed;top:52px;right:0;bottom:0;width:460px;background:var(--bg2);border-left:.5px solid var(--bd2);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);z-index:40}
+.panel.open{transform:translateX(0)}
+.panel-hdr{padding:14px 16px;border-bottom:.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.panel-title{font-size:14px;font-weight:500;color:var(--txt)}
+.close-btn{background:var(--bg3);border:none;color:var(--txt3);font-size:16px;cursor:pointer;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.close-btn:hover{color:var(--txt);background:var(--bg4)}
+.panel-body{flex:1;overflow-y:auto;padding:16px}
+.panel-foot{padding:12px 16px;border-top:.5px solid var(--bd);display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.p-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.p-field{background:var(--bg3);border-radius:7px;padding:9px 11px;cursor:pointer;transition:background .12s;border:.5px solid transparent}
+.p-field:hover{border-color:var(--build-bd)}
+.p-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;font-weight:600;display:flex;align-items:center;justify-content:space-between}
+.p-val{font-size:13px;color:var(--txt);font-weight:400}
+.p-section{font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.p-section::after{content:'';flex:1;height:.5px;background:var(--bd2)}
+.comment-item{display:flex;gap:9px;padding:10px 0;border-bottom:.5px solid var(--bd)}
+.comment-item:last-child{border-bottom:none}
+.comment-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#090908;flex-shrink:0}
+.comment-author{font-size:11px;font-weight:500;color:var(--txt)}
+.comment-time{font-size:10px;color:var(--txt3);margin-left:5px}
+.comment-text{font-size:12px;color:var(--txt2);line-height:1.55;margin-top:2px}
+.comment-input{width:100%;background:var(--bg3);border:.5px solid var(--bd2);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--txt);outline:none;font-family:'DM Sans',sans-serif;resize:none;line-height:1.5;min-height:36px}
+.comment-input:focus{border-color:var(--build-bd)}
+
+/* ── BUTTONS ── */
+.btn{padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-ghost{background:transparent;border:.5px solid var(--bd2);color:var(--txt2)}
+.btn-ghost:hover{border-color:var(--build-bd);color:var(--build)}
+.btn-build{background:var(--build);color:#090908;font-weight:600}
+.btn-build:hover{background:var(--build2)}
+.btn-sm{padding:5px 12px;font-size:11px}
+.btn-danger{background:transparent;border:.5px solid var(--bd2);color:var(--txt3)}
+.btn-danger:hover{border-color:rgba(248,113,113,.4);color:var(--red)}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:60;display:none;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--bg2);border:.5px solid var(--bd2);border-radius:14px;width:580px;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.modal::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,var(--build-bd),transparent)}
+.modal-hdr{padding:16px 18px;border-bottom:.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.modal-title{font-size:15px;font-weight:500;color:var(--txt)}
+.modal-body{padding:18px;display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.modal-foot{padding:12px 18px;border-top:.5px solid var(--bd);display:flex;gap:8px;flex-shrink:0}
+.modal-foot .btn{flex:1;justify-content:center}
+.fl{font-size:10px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.fi{width:100%;background:var(--bg3);border:.5px solid var(--bd2);border-radius:8px;padding:9px 12px;font-size:13px;color:var(--txt);outline:none;font-family:'DM Sans',sans-serif;transition:border-color .15s}
+.fi:focus{border-color:var(--build-bd)}
+textarea.fi{resize:none;height:72px;line-height:1.5}
+select.fi{appearance:none;cursor:pointer}
+.fi-2col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fi-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.type-btns{display:flex;gap:5px;flex-wrap:wrap}
+.type-btn{padding:6px 12px;border-radius:7px;border:.5px solid var(--bd2);background:transparent;color:var(--txt2);font-size:11px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
+.type-btn:hover{border-color:var(--build-bd);color:var(--build)}
+.type-btn.on{background:var(--build-dim);border-color:var(--build-bd);color:var(--build);font-weight:500}
+.impact-row{display:flex;gap:10px}
+.impact-toggle{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;border:.5px solid var(--bd2);background:var(--bg3);font-size:12px;color:var(--txt2);cursor:pointer;flex:1;transition:all .15s}
+.impact-toggle.on{border-color:var(--red-bd,rgba(248,113,113,.3));background:var(--rbg);color:var(--red)}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;padding:18px}
+.dash-card{background:var(--bg2);border:.5px solid var(--bd2);border-radius:11px;overflow:hidden}
+.dash-card-full{grid-column:1/-1}
+.dash-card-hdr{padding:12px 14px;border-bottom:.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.dash-card-title{font-size:12px;font-weight:600;color:var(--txt);text-transform:uppercase;letter-spacing:.05em}
+.dash-card-action{font-size:11px;color:var(--build);cursor:pointer}
+.dash-issue-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:.5px solid var(--bd);cursor:pointer;transition:background .12s}
+.dash-issue-row:hover{background:var(--bg3)}
+.dash-issue-row:last-child{border-bottom:none}
+.dash-issue-title{font-size:12px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.dash-issue-sub{font-size:10px;color:var(--txt3)}
+.dash-doc-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:.5px solid var(--bd);cursor:pointer;transition:background .12s}
+.dash-doc-row:hover{background:var(--bg3)}
+.dash-doc-row:last-child{border-bottom:none}
+.doc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.dash-budget-row{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:.5px solid var(--bd)}
+.dash-budget-row:last-child{border-bottom:none}
+.dash-budget-lbl{font-size:12px;color:var(--txt2)}
+.dash-budget-val{font-size:13px;font-weight:500;color:var(--txt);font-variant-numeric:tabular-nums}
+.progress-bar{height:3px;background:var(--bg4);border-radius:2px;margin-top:8px;overflow:hidden}
+.progress-fill{height:100%;border-radius:2px;transition:width .5s}
+.milestone-row{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:.5px solid var(--bd)}
+.milestone-row:last-child{border-bottom:none}
+.milestone-date{font-size:10px;color:var(--txt3);font-family:var(--font-mono);width:52px;flex-shrink:0}
+.milestone-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.milestone-title{font-size:12px;color:var(--txt);flex:1}
+.milestone-status{font-size:10px}
+
+/* ── DOCUMENTS ── */
+.doc-grid{padding:14px 18px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.doc-card{background:var(--bg2);border:.5px solid var(--bd2);border-radius:10px;padding:13px;cursor:pointer;transition:all .12s}
+.doc-card:hover{border-color:var(--build-bd);background:var(--bg3)}
+.doc-card-icon{font-size:24px;margin-bottom:10px}
+.doc-card-name{font-size:12px;font-weight:500;color:var(--txt);margin-bottom:3px}
+.doc-card-sub{font-size:10px;color:var(--txt3);margin-bottom:8px}
+.doc-card-meta{display:flex;align-items:center;justify-content:space-between}
+.doc-ver{font-size:9px;font-family:var(--font-mono);color:var(--txt3)}
+
+/* ── SCHEDULE ── */
+.schedule-wrap{padding:14px 18px}
+.milestone-big{background:var(--bg2);border:.5px solid var(--bd2);border-radius:11px;overflow:hidden;margin-bottom:14px}
+.milestone-big-row{display:grid;grid-template-columns:100px 1fr auto auto;gap:14px;align-items:center;padding:12px 16px;border-bottom:.5px solid var(--bd);transition:background .12s;cursor:pointer}
+.milestone-big-row:hover{background:var(--bg3)}
+.milestone-big-row:last-child{border-bottom:none}
+.mlb-date{font-size:11px;color:var(--txt3);font-family:var(--font-mono)}
+.mlb-title{font-size:13px;font-weight:500;color:var(--txt)}
+.mlb-sub{font-size:11px;color:var(--txt3)}
+.mlb-days{font-size:11px;color:var(--txt3);white-space:nowrap}
+.lookahead{background:var(--bg2);border:.5px solid var(--bd2);border-radius:11px;overflow:hidden}
+.la-hdr{display:grid;grid-template-columns:120px repeat(6,1fr);border-bottom:.5px solid var(--bd)}
+.la-hdr-cell{padding:8px 10px;font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;text-align:center;border-right:.5px solid var(--bd)}
+.la-hdr-cell:first-child{text-align:left}
+.la-hdr-cell:last-child{border-right:none}
+.la-row{display:grid;grid-template-columns:120px repeat(6,1fr);border-bottom:.5px solid var(--bd)}
+.la-row:last-child{border-bottom:none}
+.la-row:hover{background:var(--bg3)}
+.la-name{padding:10px;font-size:11px;font-weight:500;color:var(--txt2);border-right:.5px solid var(--bd)}
+.la-cell{padding:6px;border-right:.5px solid var(--bd);display:flex;align-items:center;justify-content:center}
+.la-cell:last-child{border-right:none}
+.la-block{border-radius:4px;padding:3px 6px;font-size:9px;font-weight:600;text-align:center;width:100%}
+
+/* ── BUDGET ── */
+.budget-wrap{padding:14px 18px}
+.budget-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+.budget-card{background:var(--bg2);border:.5px solid var(--bd2);border-radius:10px;padding:14px}
+.bc-lbl{font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;margin-bottom:8px}
+.bc-val{font-size:22px;font-weight:300;color:var(--txt);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.bc-sub{font-size:10px;color:var(--txt3);margin-top:4px}
+.budget-table{background:var(--bg2);border:.5px solid var(--bd2);border-radius:11px;overflow:hidden}
+.bt-hdr{display:grid;grid-template-columns:1fr auto auto auto auto;gap:0;border-bottom:.5px solid var(--bd);padding:0}
+.bt-hdr-cell{padding:9px 14px;font-size:9px;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;text-align:right}
+.bt-hdr-cell:first-child{text-align:left}
+.bt-row{display:grid;grid-template-columns:1fr auto auto auto auto;gap:0;border-bottom:.5px solid var(--bd);transition:background .12s;cursor:pointer}
+.bt-row:hover{background:var(--bg3)}
+.bt-row:last-child{border-bottom:none}
+.bt-cell{padding:11px 14px;font-size:13px;color:var(--txt2);text-align:right}
+.bt-cell:first-child{text-align:left;color:var(--txt);font-weight:500}
+.bt-cell.red{color:var(--red)}
+.bt-cell.grn{color:var(--grn)}
+.bt-cell.amb{color:var(--build)}
+
+/* ── DIRECTORY ── */
+.dir-grid{padding:14px 18px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.dir-card{background:var(--bg2);border:.5px solid var(--bd2);border-radius:10px;padding:14px;cursor:pointer;transition:all .12s}
+.dir-card:hover{border-color:var(--build-bd);background:var(--bg3)}
+.dir-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#090908;margin-bottom:10px}
+.dir-name{font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px}
+.dir-role{font-size:11px;color:var(--txt3);margin-bottom:6px}
+.dir-contact{font-size:11px;color:var(--txt2)}
+.dir-tag{display:inline-flex;font-size:9px;font-weight:600;padding:2px 7px;border-radius:6px;margin-top:6px}
+
+/* ── HANDOFF ── */
+.handoff-wrap{padding:18px}
+.handoff-hero{background:linear-gradient(135deg,var(--build-dim),rgba(74,222,128,.06));border:.5px solid var(--build-bd);border-radius:14px;padding:28px;margin-bottom:16px;position:relative;overflow:hidden}
+.handoff-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;background:radial-gradient(circle,var(--build-dim),transparent);pointer-events:none}
+.handoff-hero-title{font-size:22px;font-weight:500;color:var(--txt);margin-bottom:6px;letter-spacing:-.02em}
+.handoff-hero-sub{font-size:14px;color:var(--txt2);margin-bottom:20px;line-height:1.6}
+.handoff-checklist{display:flex;flex-direction:column;gap:6px;margin-bottom:20px}
+.hc-item{display:flex;align-items:center;gap:10px;padding:10px 13px;background:rgba(0,0,0,.25);border-radius:8px;font-size:13px;color:var(--txt2)}
+.hc-check{width:18px;height:18px;border-radius:5px;border:.5px solid var(--bd2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all .15s;cursor:pointer}
+.hc-check.done{background:var(--grn);border-color:var(--grn);color:#090908}
+.hc-check.done+span{text-decoration:line-through;color:var(--txt3)}
+.handoff-sections{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.handoff-sec{background:var(--bg2);border:.5px solid var(--bd2);border-radius:10px;padding:14px}
+.handoff-sec-title{font-size:11px;font-weight:600;color:var(--txt);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.handoff-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:.5px solid var(--bd);font-size:12px;color:var(--txt2)}
+.handoff-item:last-child{border-bottom:none}
+.handoff-item-status{font-size:10px;font-weight:600}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--bg2);border:.5px solid var(--bd2);border-radius:11px;padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:99;box-shadow:0 8px 32px rgba(0,0,0,.5);transform:translateY(70px);opacity:0;transition:all .25s cubic-bezier(.4,0,.2,1);min-width:260px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{width:28px;height:28px;border-radius:7px;background:var(--gbg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px}
+.toast-title{font-size:13px;font-weight:500;color:var(--txt)}
+.toast-sub{font-size:11px;color:var(--txt3)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:52px 20px;color:var(--txt3);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="#" class="tb-logo">
+    <div class="lm"><s></s><s></s><s></s><s></s></div>
+    <span class="tb-name">Frame</span>
+  </a>
+  <span class="tb-module">Build</span>
+  <div class="tb-project">
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v2H2V3zm0 4h12v6a1 1 0 01-1 1H3a1 1 0 01-1-1V7z"/></svg>
+    <span class="tb-project-name">Lido — Primary Residence</span>
+    <span class="tb-sep">▾</span>
+  </div>
+  <div class="tb-right">
+    <div class="tb-notif">
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a5 5 0 00-5 5v3l-1 2h12l-1-2V6a5 5 0 00-5-5zm0 14a2 2 0 002-2H6a2 2 0 002 2z"/></svg>
+      <div class="tb-notif-dot"></div>
+    </div>
+    <button class="tb-btn tb-btn-ghost" onclick="nav('handoff',null)">🤝 Handoff to Maintenance</button>
+    <button class="tb-btn tb-btn-build" onclick="openNewIssue()">+ New issue</button>
+    <div class="tb-avatar">AJ</div>
+  </div>
+</div>
+
+<div class="shell">
+
+<!-- SIDEBAR -->
+<div class="sb">
+  <div class="sb-proj">
+    <div class="sb-proj-name">Lido Residence</div>
+    <div class="sb-proj-sub">615 Lido Dr · Fort Lauderdale</div>
+    <div class="sb-proj-badge">
+      <span class="sb-status badge b-build" style="font-size:9px">In construction</span>
+    </div>
+  </div>
+  <div class="sb-nav">
+    <div class="nlbl">Project</div>
+    <div class="ni on" onclick="nav('dashboard',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h5v5H2V2zm7 0h5v5H9V2zM2 9h5v5H2V9zm7 0h5v5H9V9z"/></svg>
+      Dashboard
+    </div>
+    <div class="ni" onclick="nav('issues',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 3a1 1 0 011 1v3a1 1 0 01-2 0V5a1 1 0 011-1zm0 8a1 1 0 100-2 1 1 0 000 2z"/></svg>
+      Issues
+      <span class="ni-badge">7</span>
+    </div>
+    <div class="ni" onclick="nav('documents',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 1h6l4 4v9a1 1 0 01-1 1H3a1 1 0 01-1-1V2a1 1 0 011-1zm6 0v4h4"/></svg>
+      Documents
+    </div>
+    <div class="ni" onclick="nav('schedule',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h.5A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14h-9A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H4v-.5a.5.5 0 01.5-.5zm-1 4a.5.5 0 000 1h9a.5.5 0 000-1h-9z"/></svg>
+      Schedule
+    </div>
+    <div class="ni" onclick="nav('budget',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 3.5v.75h.75a.75.75 0 010 1.5h-2a.25.25 0 000 .5h1a1.75 1.75 0 010 3.5H8.75v.75a.75.75 0 01-1.5 0v-.75H6.5a.75.75 0 010-1.5h2a.25.25 0 000-.5H7.5a1.75 1.75 0 010-3.5h.5v-.75a.75.75 0 011.5 0z"/></svg>
+      Budget
+    </div>
+    <div class="ni" onclick="nav('directory',this)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/></svg>
+      Directory
+    </div>
+    <div class="ni" onclick="nav('handoff',this)" style="margin-top:4px;border:.5px solid var(--build-bd);color:var(--build);background:var(--build-dim)">
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 8l4-4v2h6V4l4 4-4 4v-2H5v2L1 8z"/></svg>
+      Handoff
+    </div>
+    <div class="nlbl" style="margin-top:8px">Other projects</div>
+    <div class="sb-proj-item">
+      <div class="sb-proj-dot" style="background:#60A5FA"></div>
+      River Club
+    </div>
+    <div class="sb-proj-item">
+      <div class="sb-proj-dot" style="background:#A78BFA"></div>
+      Starwood
+    </div>
+  </div>
+  <div class="sb-foot">
+    <div class="sb-foot-row">
+      <div class="sb-foot-av">AJ</div>
+      <div>
+        <div style="font-size:11px;font-weight:500;color:var(--txt)">Albert Day</div>
+        <div style="font-size:10px;color:var(--txt3)">Owner · Admin</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page-content" style="display:block">
+    <div class="page-header">
+      <div class="page-title">Dashboard</div>
+      <div style="font-size:12px;color:var(--txt3)">Lido Residence · Last updated just now</div>
+    </div>
+    <div class="stats-bar" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stat-item"><div class="stat-lbl">Open issues</div><div class="stat-val amber">7</div></div>
+      <div class="stat-item"><div class="stat-lbl">Decisions needed</div><div class="stat-val red">3</div></div>
+      <div class="stat-item"><div class="stat-lbl">Days to move-in</div><div class="stat-val">48</div></div>
+      <div class="stat-item"><div class="stat-lbl">Budget remaining</div><div class="stat-val grn">$284K</div></div>
+      <div class="stat-item"><div class="stat-lbl">Docs awaiting approval</div><div class="stat-val amber">5</div></div>
+    </div>
+    <div class="dash-grid">
+      <!-- Open Issues -->
+      <div class="dash-card">
+        <div class="dash-card-hdr">
+          <div class="dash-card-title">⚠ Open issues</div>
+          <div class="dash-card-action" onclick="nav('issues',document.querySelector('.ni[onclick*=issues]'))">View all →</div>
+        </div>
+        <div class="dash-issue-row" onclick="nav('issues',null);setTimeout(function(){selIssue(1)},100)">
+          <div style="flex:1"><div class="dash-issue-title">Fireplace flue clearance — non-compliant</div><div class="dash-issue-sub">Main Level · Assigned to Moberg GC</div></div>
+          <span class="badge b-high">High</span>
+        </div>
+        <div class="dash-issue-row" onclick="nav('issues',null);setTimeout(function(){selIssue(2)},100)">
+          <div style="flex:1"><div class="dash-issue-title">Kitchen island stone selection — decision needed</div><div class="dash-issue-sub">Kitchen · Owner approval required</div></div>
+          <span class="badge b-decision">Decision</span>
+        </div>
+        <div class="dash-issue-row" onclick="nav('issues',null);setTimeout(function(){selIssue(3)},100)">
+          <div style="flex:1"><div class="dash-issue-title">Master bath tile — wrong material delivered</div><div class="dash-issue-sub">Master Bath · Defect</div></div>
+          <span class="badge b-defect">Defect</span>
+        </div>
+        <div class="dash-issue-row" onclick="nav('issues',null)">
+          <div style="flex:1"><div class="dash-issue-title">Pool equipment room ventilation RFI</div><div class="dash-issue-sub">Exterior · Waiting on architect</div></div>
+          <span class="badge b-waiting">Waiting</span>
+        </div>
+      </div>
+      <!-- Milestones -->
+      <div class="dash-card">
+        <div class="dash-card-hdr">
+          <div class="dash-card-title">📅 Next milestones</div>
+          <div class="dash-card-action" onclick="nav('schedule',document.querySelector('.ni[onclick*=schedule]'))">View schedule →</div>
+        </div>
+        <div class="milestone-row">
+          <div class="milestone-date">May 15</div>
+          <div class="milestone-dot" style="background:var(--build)"></div>
+          <div class="milestone-title">MEP rough-in complete</div>
+          <div class="milestone-status"><span class="badge b-build" style="font-size:9px">15 days</span></div>
+        </div>
+        <div class="milestone-row">
+          <div class="milestone-date">May 28</div>
+          <div class="milestone-dot" style="background:var(--yel)"></div>
+          <div class="milestone-title">Drywall &amp; texture complete</div>
+          <div class="milestone-status"><span class="badge b-waiting" style="font-size:9px">28 days</span></div>
+        </div>
+        <div class="milestone-row">
+          <div class="milestone-date">Jun 10</div>
+          <div class="milestone-dot" style="background:var(--txt3)"></div>
+          <div class="milestone-title">Cabinetry install begins</div>
+          <div class="milestone-status"><span style="font-size:10px;color:var(--txt3)">41 days</span></div>
+        </div>
+        <div class="milestone-row">
+          <div class="milestone-date">Jul 1</div>
+          <div class="milestone-dot" style="background:var(--grn)"></div>
+          <div class="milestone-title">Owner move-in</div>
+          <div class="milestone-status"><span style="font-size:10px;color:var(--grn)">62 days</span></div>
+        </div>
+      </div>
+      <!-- Budget -->
+      <div class="dash-card">
+        <div class="dash-card-hdr">
+          <div class="dash-card-title">💰 Budget snapshot</div>
+          <div class="dash-card-action" onclick="nav('budget',document.querySelector('.ni[onclick*=budget]'))">Full budget →</div>
+        </div>
+        <div class="dash-budget-row">
+          <div class="dash-budget-lbl">Original budget</div>
+          <div class="dash-budget-val">$2,850,000</div>
+        </div>
+        <div class="dash-budget-row">
+          <div class="dash-budget-lbl">Approved changes</div>
+          <div class="dash-budget-val" style="color:var(--build)">+$127,400</div>
+        </div>
+        <div class="dash-budget-row">
+          <div class="dash-budget-lbl">Pending changes</div>
+          <div class="dash-budget-val" style="color:var(--yel)">+$44,200</div>
+        </div>
+        <div class="dash-budget-row" style="border-top:.5px solid var(--bd2);margin-top:4px">
+          <div class="dash-budget-lbl" style="color:var(--txt);font-weight:500">Projected final</div>
+          <div class="dash-budget-val">$3,021,600</div>
+        </div>
+        <div style="padding:10px 14px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--txt3);margin-bottom:5px"><span>Spent to date</span><span style="color:var(--txt)">$2,566,000 (85%)</span></div>
+          <div class="progress-bar"><div class="progress-fill" style="width:85%;background:var(--build)"></div></div>
+        </div>
+      </div>
+      <!-- Recent docs -->
+      <div class="dash-card" style="grid-column:span 2">
+        <div class="dash-card-hdr">
+          <div class="dash-card-title">📁 Key documents</div>
+          <div class="dash-card-action" onclick="nav('documents',document.querySelector('.ni[onclick*=documents]'))">All documents →</div>
+        </div>
+        <div class="dash-doc-row" onclick="nav('documents',null)">
+          <div class="doc-icon" style="background:var(--rbg)">📐</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--txt)">Architectural drawings — Rev 7</div><div style="font-size:10px;color:var(--txt3)">Updated Apr 28 · Moberg Architecture</div></div>
+          <span class="badge b-approved" style="font-size:10px">Approved</span>
+        </div>
+        <div class="dash-doc-row" onclick="nav('documents',null)">
+          <div class="doc-icon" style="background:var(--bbg)">📋</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--txt)">Finish schedule — v3</div><div style="font-size:10px;color:var(--txt3)">Updated Apr 30 · Interior Design Collective</div></div>
+          <span class="badge b-review" style="font-size:10px">In review</span>
+        </div>
+        <div class="dash-doc-row" onclick="nav('documents',null)">
+          <div class="doc-icon" style="background:var(--gbg)">📄</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--txt)">MEP specifications — Rev 3</div><div style="font-size:10px;color:var(--txt3)">Updated Apr 25 · Broward MEP</div></div>
+          <span class="badge b-approved" style="font-size:10px">Approved</span>
+        </div>
+        <div class="dash-doc-row" onclick="nav('documents',null)">
+          <div class="doc-icon" style="background:var(--ybg)">🏗</div>
+          <div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--txt)">Structural — Foundation revision</div><div style="font-size:10px;color:var(--txt3)">Updated Apr 20 · SE Engineering</div></div>
+          <span class="badge b-approved" style="font-size:10px">Approved</span>
+        </div>
+      </div>
+      <!-- Activity -->
+      <div class="dash-card">
+        <div class="dash-card-hdr"><div class="dash-card-title">⚡ Recent activity</div></div>
+        <div style="padding:10px 14px;display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:22px;height:22px;border-radius:50%;background:var(--build);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#090908;flex-shrink:0">MG</div><div><div style="font-size:12px;color:var(--txt)">Moberg GC submitted RFI #12</div><div style="font-size:10px;color:var(--txt3)">2 hrs ago</div></div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:22px;height:22px;border-radius:50%;background:#A78BFA;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#090908;flex-shrink:0">ID</div><div><div style="font-size:12px;color:var(--txt)">Finish schedule v3 uploaded</div><div style="font-size:10px;color:var(--txt3)">4 hrs ago</div></div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:22px;height:22px;border-radius:50%;background:var(--build);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#090908;flex-shrink:0">AJ</div><div><div style="font-size:12px;color:var(--txt)">Kitchen stone approved</div><div style="font-size:10px;color:var(--txt3)">Yesterday</div></div></div>
+          <div style="display:flex;gap:8px;align-items:flex-start"><div style="width:22px;height:22px;border-radius:50%;background:#60A5FA;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#090908;flex-shrink:0">BM</div><div><div style="font-size:12px;color:var(--txt)">MEP rough-in 80% complete</div><div style="font-size:10px;color:var(--txt3)">Yesterday</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ISSUES -->
+  <div id="page-issues" class="page-content" style="display:none">
+    <div class="page-header">
+      <div class="page-title">Issues</div>
+      <div class="search-bar"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" style="opacity:.4"><path d="M6.5 1a5.5 5.5 0 014.383 8.823l3.896 3.896a.75.75 0 01-1.06 1.06l-3.896-3.896A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg><input placeholder="Search issues..." oninput="renderIssues()"></div>
+      <button class="btn btn-build btn-sm" onclick="openNewIssue()">+ New issue</button>
+    </div>
+    <div class="stats-bar" style="grid-template-columns:repeat(7,1fr)">
+      <div class="stat-item"><div class="stat-lbl">Total</div><div class="stat-val" id="is-total">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Open</div><div class="stat-val amber" id="is-open">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">In review</div><div class="stat-val blue" id="is-review">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Waiting</div><div class="stat-val" id="is-wait">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Resolved</div><div class="stat-val grn" id="is-res">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Cost impact</div><div class="stat-val red" id="is-cost">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Sched impact</div><div class="stat-val red" id="is-sched">0</div></div>
+    </div>
+    <div class="filters" id="issue-filters">
+      <div class="fp on" data-f="all">All</div>
+      <div class="fp" data-f="open">Open</div>
+      <div class="fp" data-f="in-review">In review</div>
+      <div class="fp" data-f="waiting">Waiting</div>
+      <div class="fp" data-f="resolved">Resolved</div>
+      <div style="width:.5px;background:var(--bd2);margin:0 4px;align-self:stretch"></div>
+      <div class="fp" data-f="type-question">Question</div>
+      <div class="fp" data-f="type-defect">Defect</div>
+      <div class="fp" data-f="type-decision">Decision</div>
+      <div class="fp" data-f="type-change">Change</div>
+    </div>
+    <div class="tbl-wrap" id="issue-list"></div>
+  </div>
+
+  <!-- DOCUMENTS -->
+  <div id="page-documents" class="page-content" style="display:none">
+    <div class="page-header">
+      <div class="page-title">Documents</div>
+      <div class="search-bar"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor" style="opacity:.4"><path d="M6.5 1a5.5 5.5 0 014.383 8.823l3.896 3.896a.75.75 0 01-1.06 1.06l-3.896-3.896A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg><input placeholder="Search documents..."></div>
+      <button class="btn btn-build btn-sm">+ Upload</button>
+    </div>
+    <div class="filters">
+      <div class="fp on">All</div>
+      <div class="fp">Drawings</div>
+      <div class="fp">Specs</div>
+      <div class="fp">Submittals</div>
+      <div class="fp">Contracts</div>
+      <div class="fp">Photos</div>
+      <div class="fp">Manuals</div>
+    </div>
+    <div id="doc-list"></div>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div id="page-schedule" class="page-content" style="display:none">
+    <div class="page-header">
+      <div class="page-title">Schedule</div>
+      <div class="filters" style="padding:0;border:none;gap:6px">
+        <div class="fp on">Milestones</div>
+        <div class="fp">Lookahead</div>
+        <div class="fp">Vendors</div>
+      </div>
+      <button class="btn btn-build btn-sm">+ Add milestone</button>
+    </div>
+    <div id="schedule-body"></div>
+  </div>
+
+  <!-- BUDGET -->
+  <div id="page-budget" class="page-content" style="display:none">
+    <div class="page-header">
+      <div class="page-title">Budget</div>
+      <button class="btn btn-build btn-sm">+ Change request</button>
+    </div>
+    <div id="budget-body"></div>
+  </div>
+
+  <!-- DIRECTORY -->
+  <div id="page-directory" class="page-content" style="display:none">
+    <div class="page-header">
+      <div class="page-title">Directory</div>
+      <button class="btn btn-build btn-sm">+ Add contact</button>
+    </div>
+    <div id="dir-body"></div>
+  </div>
+
+  <!-- HANDOFF -->
+  <div id="page-handoff" class="page-content" style="display:none">
+    <div class="page-header">
+      <div class="page-title">🤝 Handoff to Maintenance</div>
+      <a href="/app.html" class="btn btn-build btn-sm" style="text-decoration:none">Open Frame Maintenance →</a>
+    </div>
+    <div id="handoff-body"></div>
+  </div>
+
+</div><!-- end .main -->
+</div><!-- end .shell -->
+
+<!-- PANEL -->
+<div class="panel" id="panel">
+  <div class="panel-hdr">
+    <div class="panel-title" id="panel-title">Issue</div>
+    <button class="close-btn" onclick="closePanel()">×</button>
+  </div>
+  <div class="panel-body" id="panel-body"></div>
+  <div class="panel-foot" id="panel-foot"></div>
+</div>
+
+<!-- NEW ISSUE MODAL -->
+<div class="modal-bg" id="issue-modal" onclick="if(event.target===this)closeIssueModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title">New issue</div>
+      <button class="close-btn" onclick="closeIssueModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="fl">What needs to be resolved?</label>
+        <input class="fi" id="ni-title" placeholder="Describe the issue clearly...">
+      </div>
+      <div>
+        <label class="fl">Type</label>
+        <div class="type-btns" id="ni-type-btns">
+          <button class="type-btn on" data-type="question">❓ Question</button>
+          <button class="type-btn" data-type="defect">🔴 Defect</button>
+          <button class="type-btn" data-type="decision">✅ Decision needed</button>
+          <button class="type-btn" data-type="task">📋 Task</button>
+          <button class="type-btn" data-type="change">💰 Change request</button>
+          <button class="type-btn" data-type="safety">⚠ Safety</button>
+        </div>
+      </div>
+      <div class="fi-2col">
+        <div>
+          <label class="fl">Location</label>
+          <input class="fi" id="ni-loc" placeholder="e.g. Master bath, Kitchen">
+        </div>
+        <div>
+          <label class="fl">Priority</label>
+          <select class="fi" id="ni-pri"><option value="high">High</option><option value="med" selected>Medium</option><option value="low">Low</option></select>
+        </div>
+      </div>
+      <div class="fi-2col">
+        <div>
+          <label class="fl">Assigned to</label>
+          <select class="fi" id="ni-assign">
+            <option>Moberg GC</option>
+            <option>Moberg Architecture</option>
+            <option>Interior Design Collective</option>
+            <option>Broward MEP</option>
+            <option>SE Engineering</option>
+            <option>Owner (AJ)</option>
+          </select>
+        </div>
+        <div>
+          <label class="fl">Due date</label>
+          <input class="fi" type="date" id="ni-due">
+        </div>
+      </div>
+      <div>
+        <label class="fl">Description</label>
+        <textarea class="fi" id="ni-desc" placeholder="Add details, context, or photos needed..."></textarea>
+      </div>
+      <div>
+        <label class="fl">Impact</label>
+        <div class="impact-row">
+          <div class="impact-toggle" id="ni-cost" onclick="this.classList.toggle('on')">
+            <span>💰</span> Cost impact
+          </div>
+          <div class="impact-toggle" id="ni-sched" onclick="this.classList.toggle('on')">
+            <span>📅</span> Schedule impact
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeIssueModal()">Cancel</button>
+      <button class="btn btn-build" onclick="submitIssue()">Create issue</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon">✓</div>
+  <div><div class="toast-title" id="toast-title">Done</div><div class="toast-sub" id="toast-sub"></div></div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+var issues=[
+  {id:1,title:'Fireplace flue clearance — non-compliant with code',type:'defect',loc:'Main Level · Living Room',assigned:'Moberg GC',priority:'high',status:'open',costImpact:true,schedImpact:true,desc:'Flue clearance to combustibles is 1.5" — code requires minimum 2". Must be corrected before framing inspection. GC to provide solution by May 8.',comments:[{author:'Mike Moberg',initials:'MM',color:'#F59E0B',time:'Yesterday',text:'We are evaluating two options: reframe the surround or use a zero-clearance liner system. Will have a cost estimate by EOD.'}],created:'Apr 28',due:'May 8'},
+  {id:2,title:'Kitchen island stone selection — decision needed',type:'decision',loc:'Kitchen',assigned:'Owner (AJ)',priority:'high',status:'open',costImpact:false,schedImpact:true,desc:'Stone fabricator needs selection confirmed by May 5 or 6-week lead time pushes install past move-in date. Three options presented by IDC — see attached finish schedule.',comments:[{author:'IDC',initials:'ID',color:'#A78BFA',time:'2 days ago',text:'Options are: Calacatta Viola, Statuario Extra, and Paonazzo. Samples in the site trailer.'}],created:'Apr 26',due:'May 5'},
+  {id:3,title:'Master bath floor tile — wrong material delivered',type:'defect',loc:'Master Bath',assigned:'Interior Design Collective',priority:'high',status:'in-review',costImpact:true,schedImpact:false,desc:'Porcelain Grigio Scuro 24x48 delivered instead of specified Bardiglio Imperiale marble. IDC to confirm correct order and new delivery date.',comments:[],created:'Apr 29',due:'May 6'},
+  {id:4,title:'Pool equipment room ventilation — RFI #12',type:'question',loc:'Exterior · Pool',assigned:'Moberg Architecture',priority:'med',status:'waiting',costImpact:false,schedImpact:false,desc:'MEP requires 2 additional vents per current load calc. Structural needs to confirm penetration locations do not conflict with shear wall. Awaiting arch response.',comments:[],created:'Apr 25',due:'May 10'},
+  {id:5,title:'Add USB-C charging outlets to kitchen backsplash',type:'change',loc:'Kitchen',assigned:'Broward MEP',priority:'low',status:'open',costImpact:true,schedImpact:false,desc:'Owner request to add 4x USB-C outlets integrated into backsplash. MEP to price. Estimate ~$1,200.',comments:[],created:'Apr 27',due:'May 12'},
+  {id:6,title:'Guest bath door swing conflicts with vanity',type:'defect',loc:'Guest Bath 2',assigned:'Moberg GC',priority:'med',status:'resolved',costImpact:false,schedImpact:false,desc:'Door swings into vanity with 2" clearance. GC reversed hinge to swing out. Verified by site rep Apr 28.',comments:[{author:'AJ',initials:'AJ',color:'#F59E0B',time:'Apr 28',text:'Confirmed resolved on site visit today.'}],created:'Apr 22',due:'Apr 28'},
+  {id:7,title:'Elevator shaft waterproofing — missing from spec',type:'question',loc:'Elevator · All Levels',assigned:'Moberg Architecture',priority:'high',status:'open',costImpact:true,schedImpact:true,desc:'Current spec does not call out waterproofing membrane at elevator pit. Elevator sub flagged this. Arch to issue spec addendum.',comments:[],created:'Apr 30',due:'May 7'},
+  {id:8,title:'Outdoor kitchen gas line pressure test',type:'task',loc:'Exterior · Terrace',assigned:'Broward MEP',priority:'med',status:'in-review',costImpact:false,schedImpact:false,desc:'Gas line pressure test scheduled for May 3. MEP to witness and certify.',comments:[],created:'Apr 28',due:'May 3'},
+];
+
+var documents=[
+  {id:1,name:'Architectural drawings',rev:'Rev 7',category:'Drawing',status:'approved',author:'Moberg Architecture',updated:'Apr 28',icon:'📐',desc:'Complete architectural drawing set including floor plans, elevations, sections, and details.'},
+  {id:2,name:'Finish schedule',rev:'v3',category:'Spec',status:'in-review',author:'Interior Design Collective',updated:'Apr 30',icon:'📋',desc:'Complete finish schedule with material selections by room, manufacturer specs, and installation notes.'},
+  {id:3,name:'MEP specifications',rev:'Rev 3',category:'Spec',status:'approved',author:'Broward MEP',updated:'Apr 25',icon:'⚡',desc:'Mechanical, electrical, and plumbing specifications and fixture schedules.'},
+  {id:4,name:'Structural drawings',rev:'Rev 4',category:'Drawing',status:'approved',author:'SE Engineering',updated:'Apr 20',icon:'🏗',desc:'Foundation, framing, and structural connection details.'},
+  {id:5,name:'General contractor contract',rev:'v2',category:'Contract',status:'approved',author:'Moberg GC',updated:'Mar 15',icon:'📄',desc:'AIA contract A101 with all exhibits and addenda.'},
+  {id:6,name:'Kitchen cabinetry submittal',rev:'Sub 1',category:'Submittal',status:'approved',author:'Euro Kitchen Design',updated:'Apr 18',icon:'🗂',desc:'Shop drawings and material samples for all kitchen cabinetry.'},
+  {id:7,name:'Pool equipment manual',rev:'v1',category:'Manual',status:'draft',author:'Aqua Systems',updated:'Apr 29',icon:'💧',desc:'Operation and maintenance manual for pool/spa equipment package.'},
+  {id:8,name:'Site photos — April',rev:'Apr 2026',category:'Photo',status:'approved',author:'Site Rep',updated:'Apr 30',icon:'📷',desc:'Progress photos from April site visits covering all active scopes.'},
+];
+
+var milestones=[
+  {date:'May 1',title:'Framing inspection',status:'completed',days:0,color:'#4ADE80'},
+  {date:'May 8',title:'Insulation complete',status:'upcoming',days:8,color:'#F59E0B'},
+  {date:'May 15',title:'MEP rough-in complete',status:'upcoming',days:15,color:'#F59E0B'},
+  {date:'May 22',title:'Drywall hang complete',status:'upcoming',days:22,color:'#60A5FA'},
+  {date:'May 28',title:'Drywall texture complete',status:'upcoming',days:28,color:'#60A5FA'},
+  {date:'Jun 5',title:'Paint complete',status:'upcoming',days:36,color:'#A78BFA'},
+  {date:'Jun 10',title:'Cabinetry install begins',status:'upcoming',days:41,color:'#A78BFA'},
+  {date:'Jun 20',title:'Flooring complete',status:'upcoming',days:51,color:'#FACC15'},
+  {date:'Jun 25',title:'Punch list walkthrough',status:'upcoming',days:56,color:'#F97316'},
+  {date:'Jul 1',title:'Owner move-in',status:'upcoming',days:62,color:'#4ADE80'},
+];
+
+var contacts=[
+  {name:'Moberg GC',role:'General Contractor',initials:'MG',color:'#F59E0B',phone:'954-555-0100',email:'info@moberggc.com',tag:'GC',tagColor:'var(--build)'},
+  {name:'Moberg Architecture',role:'Architect of Record',initials:'MA',color:'#818CF8',phone:'954-555-0101',email:'design@mobergarch.com',tag:'Arch',tagColor:'var(--pur)'},
+  {name:'Interior Design Collective',role:'Interior Designer',initials:'ID',color:'#A78BFA',phone:'305-555-0220',email:'project@idcollective.com',tag:'ID',tagColor:'var(--pur)'},
+  {name:'Broward MEP',role:'Mechanical · Electrical · Plumbing',initials:'BM',color:'#60A5FA',phone:'954-555-0182',email:'field@browardmep.com',tag:'MEP',tagColor:'var(--blu)'},
+  {name:'SE Engineering',role:'Structural Engineer',initials:'SE',color:'#4ADE80',phone:'954-555-0388',email:'lido@seengineering.com',tag:'Struct',tagColor:'var(--grn)'},
+  {name:'Euro Kitchen Design',role:'Cabinetry Fabricator',initials:'EK',color:'#F87171',phone:'954-555-0291',email:'orders@eurokitchen.com',tag:'Vendor',tagColor:'var(--txt3)'},
+  {name:'Aqua Systems',role:'Pool & Spa Contractor',initials:'AS',color:'#38BDF8',phone:'954-555-0412',email:'lido@aquasystems.com',tag:'Vendor',tagColor:'var(--txt3)'},
+  {name:'Albert Day',role:'Owner · Project Lead',initials:'AJ',color:'#F59E0B',phone:'954-555-0100',email:'aday@castellomgmt.com',tag:'Owner',tagColor:'var(--build)'},
+  {name:'Site Representative',role:'Owner\'s Rep on-site',initials:'SR',color:'#94A3B8',phone:'954-555-0500',email:'site@castellomgmt.com',tag:'Owner Rep',tagColor:'var(--txt3)'},
+];
+
+var budget=[
+  {cat:'Site work & foundation',original:185000,committed:185000,changes:0,paid:185000},
+  {cat:'Framing & structural',original:420000,committed:432000,changes:12000,paid:380000},
+  {cat:'MEP — Mechanical',original:310000,committed:310000,changes:0,paid:200000},
+  {cat:'MEP — Electrical',original:280000,committed:294000,changes:14000,paid:180000},
+  {cat:'MEP — Plumbing',original:195000,committed:195000,changes:0,paid:140000},
+  {cat:'Exterior envelope',original:380000,committed:380000,changes:0,paid:350000},
+  {cat:'Drywall & finishes',original:220000,committed:220000,changes:0,paid:80000},
+  {cat:'Cabinetry & millwork',original:310000,committed:326000,changes:16000,paid:100000},
+  {cat:'Flooring',original:175000,committed:175000,changes:0,paid:0},
+  {cat:'Tile & stone',original:145000,committed:160000,changes:15000,paid:0},
+  {cat:'Pool & spa',original:230000,committed:230000,changes:0,paid:180000},
+];
+
+var nextId=9;
+var selIssueId=null;
+var currentPage='dashboard';
+var issueType='question';
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function nav(page,el){
+  currentPage=page;
+  document.querySelectorAll('.page-content').forEach(function(p){p.style.display='none';});
+  var pg=document.getElementById('page-'+page);
+  if(pg)pg.style.display='block';
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('on');});
+  if(el)el.classList.add('on');
+  closePanel();
+  if(page==='issues')renderIssues();
+  if(page==='documents')renderDocs();
+  if(page==='schedule')renderSchedule();
+  if(page==='budget')renderBudget();
+  if(page==='directory')renderDir();
+  if(page==='handoff')renderHandoff();
+}
+
+// ── ISSUES ────────────────────────────────────────────────────────────────────
+function bStatus(s){
+  var map={open:'b-open','in-review':'b-review',waiting:'b-waiting',approved:'b-approved',scheduled:'b-scheduled',resolved:'b-resolved',verified:'b-verified'};
+  var lbl={open:'Open','in-review':'In review',waiting:'Waiting',approved:'Approved',scheduled:'Scheduled',resolved:'Resolved',verified:'Verified ✓'};
+  return '<span class="badge '+(map[s]||'b-open')+'">'+(lbl[s]||s)+'</span>';
+}
+function bType(t){
+  var map={question:'b-question',defect:'b-defect',decision:'b-decision',task:'b-task',change:'b-change',safety:'b-safety'};
+  var lbl={question:'Question',defect:'Defect',decision:'Decision',task:'Task',change:'Change',safety:'Safety'};
+  return '<span class="badge '+(map[t]||'b-task')+'">'+(lbl[t]||t)+'</span>';
+}
+function bPri(p){return '<span class="badge b-'+(p==='high'?'high':p==='med'?'med':'low')+'">'+(p==='high'?'High':p==='med'?'Medium':'Low')+'</span>';}
+
+function renderIssues(){
+  // Stats
+  var totEl=document.getElementById('is-total');
+  if(!totEl)return;
+  document.getElementById('is-total').textContent=issues.length;
+  document.getElementById('is-open').textContent=issues.filter(function(i){return i.status==='open';}).length;
+  document.getElementById('is-review').textContent=issues.filter(function(i){return i.status==='in-review';}).length;
+  document.getElementById('is-wait').textContent=issues.filter(function(i){return i.status==='waiting';}).length;
+  document.getElementById('is-res').textContent=issues.filter(function(i){return i.status==='resolved';}).length;
+  document.getElementById('is-cost').textContent=issues.filter(function(i){return i.costImpact;}).length;
+  document.getElementById('is-sched').textContent=issues.filter(function(i){return i.schedImpact;}).length;
+
+  var fEl=document.querySelector('#issue-filters .fp.on');
+  var f=fEl?fEl.dataset.f:'all';
+  var filtered=issues.filter(function(i){
+    if(f==='all')return true;
+    if(f==='open')return i.status==='open';
+    if(f==='in-review')return i.status==='in-review';
+    if(f==='waiting')return i.status==='waiting';
+    if(f==='resolved')return i.status==='resolved';
+    if(f.startsWith('type-'))return i.type===f.replace('type-','');
+    return true;
+  });
+
+  var html='<table class="tbl"><thead><tr>'
+    +'<th style="width:36px">ID</th>'
+    +'<th>Issue</th>'
+    +'<th style="width:90px">Type</th>'
+    +'<th style="width:140px">Location</th>'
+    +'<th style="width:160px">Assigned to</th>'
+    +'<th style="width:80px">Priority</th>'
+    +'<th style="width:100px">Status</th>'
+    +'<th style="width:80px">Due</th>'
+    +'<th style="width:40px">💰</th>'
+    +'<th style="width:40px">📅</th>'
+    +'</tr></thead><tbody>';
+  
+  if(filtered.length){
+    filtered.forEach(function(i){
+      html+='<tr onclick="selIssue('+i.id+')">'
+        +'<td class="td-id">#'+i.id+'</td>'
+        +'<td><div class="td-title">'+i.title+'</div></td>'
+        +'<td>'+bType(i.type)+'</td>'
+        +'<td style="font-size:12px;color:var(--txt2)">'+i.loc+'</td>'
+        +'<td style="font-size:12px;color:var(--txt2)">'+i.assigned+'</td>'
+        +'<td>'+bPri(i.priority)+'</td>'
+        +'<td>'+bStatus(i.status)+'</td>'
+        +'<td style="font-size:11px;color:var(--txt3)">'+i.due+'</td>'
+        +'<td style="text-align:center;font-size:13px">'+(i.costImpact?'<span style="color:var(--red)">●</span>':'<span style="opacity:.2">○</span>')+'</td>'
+        +'<td style="text-align:center;font-size:13px">'+(i.schedImpact?'<span style="color:var(--red)">●</span>':'<span style="opacity:.2">○</span>')+'</td>'
+        +'</tr>';
+    });
+  } else {
+    html+='<tr><td colspan="10"><div class="empty">No issues match</div></td></tr>';
+  }
+  html+='</tbody></table>';
+  document.getElementById('issue-list').innerHTML='<div class="tbl-wrap">'+html+'</div>';
+}
+
+function selIssue(id){
+  selIssueId=id;
+  var i=issues.find(function(x){return x.id===id;});
+  if(!i)return;
+  document.getElementById('panel-title').textContent='Issue #'+id;
+  
+  var html='';
+  html+='<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px">'+bType(i.type)+bPri(i.priority)+bStatus(i.status)+'</div>';
+  html+='<div style="font-size:15px;font-weight:500;color:var(--txt);margin-bottom:8px;line-height:1.4">'+i.title+'</div>';
+  html+='<div style="font-size:13px;color:var(--txt2);line-height:1.65;background:var(--bg3);border-radius:8px;padding:11px 13px;margin-bottom:13px">'+i.desc+'</div>';
+  
+  html+='<div class="p-grid">';
+  html+='<div class="p-field"><div class="p-lbl">Location</div><div class="p-val">'+i.loc+'</div></div>';
+  html+='<div class="p-field"><div class="p-lbl">Assigned to</div><div class="p-val">'+i.assigned+'</div></div>';
+  html+='<div class="p-field"><div class="p-lbl">Created</div><div class="p-val">'+i.created+'</div></div>';
+  html+='<div class="p-field"><div class="p-lbl">Due</div><div class="p-val">'+i.due+'</div></div>';
+  html+='</div>';
+  
+  if(i.costImpact||i.schedImpact){
+    html+='<div style="display:flex;gap:6px;margin-bottom:12px">';
+    if(i.costImpact)html+='<div style="background:var(--rbg);border:.5px solid rgba(248,113,113,.25);border-radius:7px;padding:6px 11px;font-size:11px;color:var(--red)">💰 Cost impact</div>';
+    if(i.schedImpact)html+='<div style="background:var(--rbg);border:.5px solid rgba(248,113,113,.25);border-radius:7px;padding:6px 11px;font-size:11px;color:var(--red)">📅 Schedule impact</div>';
+    html+='</div>';
+  }
+  
+  html+='<div class="p-section">Comments</div>';
+  if(i.comments&&i.comments.length){
+    i.comments.forEach(function(c){
+      html+='<div class="comment-item"><div class="comment-av" style="background:'+c.color+'">'+c.initials+'</div><div><div><span class="comment-author">'+c.author+'</span><span class="comment-time">· '+c.time+'</span></div><div class="comment-text">'+c.text+'</div></div></div>';
+    });
+  } else {
+    html+='<div style="font-size:12px;color:var(--txt3);padding:8px 0">No comments yet</div>';
+  }
+  
+  document.getElementById('panel-body').innerHTML=html;
+
+  // Foot
+  var ns=i.status==='open'?'in-review':i.status==='in-review'?'resolved':i.status==='resolved'?'verified':'open';
+  var nl=i.status==='open'?'Mark in review':i.status==='in-review'?'Mark resolved':i.status==='resolved'?'Verify ✓':'Reopen';
+  var foot=document.getElementById('panel-foot');
+  foot.innerHTML='<div style="display:flex;gap:6px"><textarea class="comment-input" id="panel-comment" placeholder="Add a comment..."></textarea></div>';
+  foot.innerHTML+='<div style="display:flex;gap:6px"><button class="btn btn-ghost" style="flex:1" onclick="closePanel()">Close</button><button class="btn btn-ghost btn-sm" id="panel-comment-btn">Post</button><button class="btn btn-build" id="panel-status-btn">'+nl+'</button></div>';
+  
+  var pcb=document.getElementById('panel-comment-btn');
+  if(pcb)pcb.addEventListener('click',function(){
+    var inp=document.getElementById('panel-comment');
+    if(!inp||!inp.value.trim())return;
+    i.comments.push({author:'Albert Day',initials:'AJ',color:'#F59E0B',time:'Just now',text:inp.value.trim()});
+    selIssue(id);
+  });
+  var psb=document.getElementById('panel-status-btn');
+  if(psb)psb.addEventListener('click',function(){
+    i.status=ns;renderIssues();selIssue(id);
+    showToast('✓','Status updated to '+ns,null);
+  });
+
+  document.getElementById('panel').classList.add('open');
+}
+
+function closePanel(){document.getElementById('panel').classList.remove('open');selIssueId=null;}
+
+// Issue filters
+document.getElementById('issue-filters').addEventListener('click',function(e){
+  var fp=e.target.closest('.fp');if(!fp)return;
+  document.querySelectorAll('#issue-filters .fp').forEach(function(x){x.classList.remove('on');});
+  fp.classList.add('on');
+  renderIssues();
+});
+
+// ── NEW ISSUE MODAL ───────────────────────────────────────────────────────────
+function openNewIssue(){
+  document.getElementById('issue-modal').classList.add('open');
+  document.getElementById('ni-title').focus();
+}
+function closeIssueModal(){document.getElementById('issue-modal').classList.remove('open');}
+
+document.getElementById('ni-type-btns').addEventListener('click',function(e){
+  var btn=e.target.closest('.type-btn');if(!btn)return;
+  document.querySelectorAll('.type-btn').forEach(function(b){b.classList.remove('on');});
+  btn.classList.add('on');
+  issueType=btn.dataset.type;
+});
+
+function submitIssue(){
+  var title=document.getElementById('ni-title').value.trim();
+  if(!title)return;
+  var newIssue={
+    id:nextId++,title:title,type:issueType,
+    loc:document.getElementById('ni-loc').value||'Unspecified',
+    assigned:document.getElementById('ni-assign').value,
+    priority:document.getElementById('ni-pri').value,
+    status:'open',
+    costImpact:document.getElementById('ni-cost').classList.contains('on'),
+    schedImpact:document.getElementById('ni-sched').classList.contains('on'),
+    desc:document.getElementById('ni-desc').value||'No description.',
+    comments:[],
+    created:'Apr 30',
+    due:document.getElementById('ni-due').value||'TBD'
+  };
+  issues.unshift(newIssue);
+  closeIssueModal();
+  if(currentPage==='issues')renderIssues();
+  showToast('✓','Issue #'+newIssue.id+' created',null);
+  document.getElementById('ni-title').value='';
+  document.getElementById('ni-loc').value='';
+  document.getElementById('ni-desc').value='';
+  document.getElementById('ni-cost').classList.remove('on');
+  document.getElementById('ni-sched').classList.remove('on');
+}
+
+// ── DOCUMENTS ─────────────────────────────────────────────────────────────────
+function renderDocs(){
+  var cats={Drawing:0,Spec:0,Submittal:0,Contract:0,Manual:0,Photo:0};
+  var html='<div class="doc-grid">';
+  documents.forEach(function(d){
+    var sc=d.status==='approved'?'b-approved':d.status==='in-review'?'b-review':'b-open';
+    var sl=d.status==='approved'?'Approved':d.status==='in-review'?'In review':'Draft';
+    html+='<div class="doc-card"><div class="doc-card-icon">'+d.icon+'</div>'
+      +'<div class="doc-card-name">'+d.name+'</div>'
+      +'<div class="doc-card-sub">'+d.category+' · '+d.rev+'</div>'
+      +'<div style="font-size:10px;color:var(--txt3);margin-bottom:8px">'+d.author+' · '+d.updated+'</div>'
+      +'<div class="doc-card-meta"><span class="badge '+sc+'" style="font-size:10px">'+sl+'</span><span class="doc-ver">'+d.rev+'</span></div>'
+      +'</div>';
+  });
+  html+='</div>';
+  document.getElementById('doc-list').innerHTML=html;
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────────
+function renderSchedule(){
+  var html='<div class="schedule-wrap">';
+  html+='<div style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Milestones</div>';
+  html+='<div class="milestone-big">';
+  milestones.forEach(function(m){
+    var doneStyle=m.status==='completed'?'opacity:.5;text-decoration:line-through':'';
+    html+='<div class="milestone-big-row">'
+      +'<div class="mlb-date">'+m.date+'</div>'
+      +'<div style="width:10px;height:10px;border-radius:50%;background:'+m.color+';flex-shrink:0'+(m.status==='completed'?';opacity:.4':'')+'"></div>'
+      +'<div style="'+doneStyle+'"><div class="mlb-title">'+m.title+'</div></div>'
+      +(m.status==='completed'?'<span class="badge b-resolved" style="font-size:9px">Done ✓</span>':m.days<=14?'<span class="badge b-build" style="font-size:9px">'+m.days+' days</span>':'<div class="mlb-days">'+m.days+' days away</div>')
+      +'</div>';
+  });
+  html+='</div>';
+
+  html+='<div style="font-size:11px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:.07em;margin:16px 0 10px">Vendor lookahead — next 2 weeks</div>';
+  html+='<div class="lookahead">';
+  html+='<div class="la-hdr"><div class="la-hdr-cell">Vendor</div><div class="la-hdr-cell">May 1</div><div class="la-hdr-cell">May 5</div><div class="la-hdr-cell">May 8</div><div class="la-hdr-cell">May 12</div><div class="la-hdr-cell">May 15</div><div class="la-hdr-cell">May 19</div></div>';
+  var rows=[
+    {name:'Moberg GC',days:['on','on','on','on','on','on']},
+    {name:'Broward MEP',days:['on','on','on','off','on','on']},
+    {name:'SE Engineering',days:['off','on','off','off','off','on']},
+    {name:'Insulation sub',days:['off','off','on','on','off','off']},
+    {name:'Drywall sub',days:['off','off','off','on','on','on']},
+  ];
+  rows.forEach(function(r){
+    html+='<div class="la-row"><div class="la-name">'+r.name+'</div>';
+    r.days.forEach(function(d){
+      html+='<div class="la-cell"><div class="la-block" style="'+(d==='on'?'background:var(--build-dim);color:var(--build)':'background:var(--bg4);color:var(--txt4)')+'">'+( d==='on'?'On site':'—')+'</div></div>';
+    });
+    html+='</div>';
+  });
+  html+='</div></div>';
+  document.getElementById('schedule-body').innerHTML=html;
+}
+
+// ── BUDGET ────────────────────────────────────────────────────────────────────
+function renderBudget(){
+  var totalOrig=budget.reduce(function(a,b){return a+b.original;},0);
+  var totalComm=budget.reduce(function(a,b){return a+b.committed;},0);
+  var totalChanges=budget.reduce(function(a,b){return a+b.changes;},0);
+  var totalPaid=budget.reduce(function(a,b){return a+b.paid;},0);
+  var forecast=totalOrig+127400+44200;
+  var fmt=function(n){return '$'+n.toLocaleString();};
+  
+  var html='<div class="budget-wrap">';
+  html+='<div class="budget-summary">';
+  html+='<div class="budget-card"><div class="bc-lbl">Original budget</div><div class="bc-val">'+fmt(2850000)+'</div></div>';
+  html+='<div class="budget-card"><div class="bc-lbl">Approved changes</div><div class="bc-val" style="color:var(--build)">+'+fmt(127400)+'</div></div>';
+  html+='<div class="budget-card"><div class="bc-lbl">Pending changes</div><div class="bc-val" style="color:var(--yel)">+'+fmt(44200)+'</div></div>';
+  html+='<div class="budget-card"><div class="bc-lbl">Projected final</div><div class="bc-val">'+fmt(forecast)+'</div><div class="bc-sub" style="color:var(--build)">+'+fmt(forecast-2850000)+' over</div></div>';
+  html+='<div class="budget-card"><div class="bc-lbl">Paid to date</div><div class="bc-val" style="color:var(--grn)">'+fmt(totalPaid)+'</div><div class="bc-sub">'+Math.round(totalPaid/2850000*100)+'% of original</div></div>';
+  html+='</div>';
+
+  html+='<div class="budget-table">';
+  html+='<div class="bt-hdr"><div class="bt-hdr-cell" style="text-align:left">Category</div><div class="bt-hdr-cell">Original</div><div class="bt-hdr-cell">Changes</div><div class="bt-hdr-cell">Committed</div><div class="bt-hdr-cell">Paid</div></div>';
+  budget.forEach(function(b){
+    var over=b.changes>0;
+    html+='<div class="bt-row">'
+      +'<div class="bt-cell">'+b.cat+'</div>'
+      +'<div class="bt-cell">$'+b.original.toLocaleString()+'</div>'
+      +'<div class="bt-cell '+(over?'amb':'')+'">'+( over?'+$'+b.changes.toLocaleString():'—')+'</div>'
+      +'<div class="bt-cell">$'+b.committed.toLocaleString()+'</div>'
+      +'<div class="bt-cell">'+(b.paid>0?'$'+b.paid.toLocaleString():'—')+'</div>'
+      +'</div>';
+  });
+  html+='</div></div>';
+  document.getElementById('budget-body').innerHTML=html;
+}
+
+// ── DIRECTORY ─────────────────────────────────────────────────────────────────
+function renderDir(){
+  var html='<div class="dir-grid">';
+  contacts.forEach(function(c){
+    html+='<div class="dir-card"><div class="dir-av" style="background:'+c.color+'">'+c.initials+'</div>'
+      +'<div class="dir-name">'+c.name+'</div>'
+      +'<div class="dir-role">'+c.role+'</div>'
+      +'<div class="dir-contact">'+c.phone+'</div>'
+      +'<div class="dir-contact">'+c.email+'</div>'
+      +'<div class="dir-tag" style="background:rgba(255,255,255,.05);color:var(--txt3)">'+c.tag+'</div>'
+      +'</div>';
+  });
+  html+='</div>';
+  document.getElementById('dir-body').innerHTML=html;
+}
+
+// ── HANDOFF ───────────────────────────────────────────────────────────────────
+var handoffChecks=[
+  {text:'All open issues resolved or formally accepted',done:false},
+  {text:'Punch list signed off by owner',done:true},
+  {text:'As-built drawings uploaded and approved',done:false},
+  {text:'Equipment manuals and warranties uploaded',done:true},
+  {text:'Vendor contacts added to Frame Maintenance directory',done:true},
+  {text:'All systems tested and commissioned',done:false},
+  {text:'Spare parts and consumables documented',done:false},
+  {text:'Emergency shutoff locations documented',done:true},
+  {text:'Owner walkthrough and acceptance completed',done:false},
+];
+
+function renderHandoff(){
+  var done=handoffChecks.filter(function(c){return c.done;}).length;
+  var pct=Math.round(done/handoffChecks.length*100);
+  
+  var html='<div class="handoff-wrap">';
+  html+='<div class="handoff-hero">';
+  html+='<div class="handoff-hero-title">🤝 Handoff to Frame Maintenance</div>';
+  html+='<div class="handoff-hero-sub">Complete the handoff checklist to transfer this project from Frame Build into Frame Maintenance. Once complete, all vendors, documents, warranties, and open items will be automatically available in the Maintenance module.</div>';
+  
+  html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:13px;font-weight:500;color:var(--txt)">Handoff checklist</div><div style="font-size:13px;color:var(--build);font-weight:500">'+done+' / '+handoffChecks.length+' complete ('+pct+'%)</div></div>';
+  html+='<div style="height:4px;background:rgba(0,0,0,.3);border-radius:2px;margin-bottom:16px"><div style="height:100%;background:var(--build);border-radius:2px;width:'+pct+'%;transition:width .5s"></div></div>';
+  
+  html+='<div class="handoff-checklist">';
+  handoffChecks.forEach(function(c,i){
+    html+='<div class="hc-item"><div class="hc-check'+(c.done?' done':'')+'" onclick="toggleHandoff('+i+')">'+(c.done?'✓':'')+'</div><span>'+c.text+'</span></div>';
+  });
+  html+='</div>';
+  
+  html+='<div style="display:flex;gap:10px">';
+  html+='<a href="/app.html" class="btn btn-ghost" style="text-decoration:none;flex:1;justify-content:center">Open Frame Maintenance</a>';
+  html+='<button class="btn btn-build" style="flex:1;justify-content:center" onclick="showToast(\'🤝\',\'Handoff package generated\',\'Sent to Frame Maintenance\')">Generate handoff package →</button>';
+  html+='</div>';
+  html+='</div>';
+
+  html+='<div class="handoff-sections">';
+  
+  // What transfers
+  html+='<div class="handoff-sec">';
+  html+='<div class="handoff-sec-title">📦 What transfers to Maintenance</div>';
+  var transfers=[
+    {name:'Vendor contacts ('+contacts.length+')',status:'Ready'},
+    {name:'Equipment manuals (2)',status:'Ready'},
+    {name:'As-built drawings',status:'Pending'},
+    {name:'Open issues ('+issues.filter(function(i){return i.status!=='resolved'&&i.status!=='verified';}).length+') → Work orders',status:'Ready'},
+    {name:'Warranty documents',status:'Pending'},
+    {name:'System access codes',status:'Pending'},
+  ];
+  transfers.forEach(function(t){
+    var isReady=t.status==='Ready';
+    html+='<div class="handoff-item"><span>'+t.name+'</span><span class="handoff-item-status" style="color:'+(isReady?'var(--grn)':'var(--yel)')+'">'+t.status+'</span></div>';
+  });
+  html+='</div>';
+
+  // Open issues
+  html+='<div class="handoff-sec">';
+  html+='<div class="handoff-sec-title">⚠ Open issues → Work orders</div>';
+  issues.filter(function(i){return i.status!=='resolved'&&i.status!=='verified';}).forEach(function(i){
+    html+='<div class="handoff-item"><span style="font-size:11px">'+i.title.slice(0,38)+(i.title.length>38?'...':'')+'</span><span class="handoff-item-status" style="color:var(--build)">→ WO</span></div>';
+  });
+  html+='</div>';
+
+  html+='</div></div>';
+  document.getElementById('handoff-body').innerHTML=html;
+}
+
+function toggleHandoff(i){
+  handoffChecks[i].done=!handoffChecks[i].done;
+  renderHandoff();
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+var toastTimer=null;
+function showToast(icon,title,sub){
+  document.getElementById('toast-icon').textContent=icon||'✓';
+  document.getElementById('toast-title').textContent=title||'Done';
+  document.getElementById('toast-sub').textContent=sub||'';
+  var t=document.getElementById('toast');
+  t.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},4000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderIssues();
+</script>
+</body>
+</html>

@@ -34,15 +34,15 @@ WO.renderStats = function(wos) {
       <div class="wo-stat-lbl">Open</div>
     </div>
     <div class="wo-stat">
-      <div class="wo-stat-num">${progress}</div>
+      <div class="wo-stat-num" style="color:var(--txt)">${progress}</div>
       <div class="wo-stat-lbl">In progress</div>
     </div>
     <div class="wo-stat">
       <div class="wo-stat-num" style="color:var(--yel)">${hold}</div>
       <div class="wo-stat-lbl">On hold</div>
     </div>
-    <div class="wo-stat" style="${high > 0 ? 'background:rgba(248,113,113,.04)' : ''}">
-      <div class="wo-stat-num" style="color:${high > 0 ? 'var(--red)' : 'var(--txt)'}">${high}</div>
+    <div class="wo-stat" style="${high > 0 ? 'background:rgba(248,113,113,.05);' : ''}">
+      <div class="wo-stat-num" style="color:${high > 0 ? 'var(--red)' : 'var(--txt3)'}">${high}</div>
       <div class="wo-stat-lbl">High priority</div>
     </div>
   `;
@@ -89,6 +89,7 @@ WO.renderList = function(wos) {
   }
 
   const thead = `<thead><tr>
+    <th style="width:3px;padding:0"></th>
     <th style="width:72px">ID</th>
     <th>Title</th>
     <th style="width:90px">Priority</th>
@@ -97,7 +98,7 @@ WO.renderList = function(wos) {
     <th style="width:76px">Due</th>
   </tr></thead>`;
 
-  const GRP = (t, count) => `<tr class="wo-grp"><td colspan="6">
+  const GRP = (t, count) => `<tr class="wo-grp"><td colspan="7">
     <div class="wo-grp-inner">
       <span class="badge b-${t}">${FM.teamLabel(t)}</span>
       <span class="wo-grp-count">${count} work order${count!==1?'s':''}</span>
@@ -125,15 +126,17 @@ WO.renderList = function(wos) {
 };
 
 WO.rowHTML = function(w) {
-  const pBadge  = `<span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>`;
-  const sBadge  = WO.statusBadge(w.status);
-  const dueStr  = w.due ? fmtDate(w.due) : '—';
-  const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date();
+  const pColors  = { high: 'var(--red)', medium: 'var(--or)', low: 'var(--txt4)' };
+  const pBadge   = `<span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>`;
+  const sBadge   = WO.statusBadge(w.status);
+  const dueStr   = w.due ? fmtDate(w.due) : '—';
+  const overdue  = w.due && w.status !== 'done' && new Date(w.due) < new Date();
   const subtasksDone  = w.subtasks.filter(s => s.done).length;
   const subtasksTotal = w.subtasks.length;
 
   return `
     <tr data-id="${w.id}" class="${WO.activeId === w.id ? 'selected' : ''}">
+      <td class="wo-priority-strip" style="background:${pColors[w.priority]}"></td>
       <td><span class="wo-id">${w.id}</span></td>
       <td class="wo-title-cell">
         <div class="wo-title">${escHtml(w.title)}</div>

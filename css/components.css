@@ -56,7 +56,7 @@
 .wo-comment-av {
   width: 26px; height: 26px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 9px; font-weight: 700; color: #080808; flex-shrink: 0;
+  font-size: 9px; font-weight: 700; color: #ffffff; flex-shrink: 0;
 }
 .wo-comment-body { flex: 1; }
 .wo-comment-meta { font-size: 10px; color: var(--txt3); margin-bottom: 4px; }
@@ -309,7 +309,7 @@
   border-radius: 3px 10px 10px 10px;
 }
 .chat-bubble.me {
-  background: var(--or); color: #080808;
+  background: var(--or); color: #ffffff;
   border-radius: 10px 3px 10px 10px;
 }
 .chat-meta { font-size: 10px; color: var(--txt3); margin-top: 3px; }
@@ -475,7 +475,7 @@
   font-weight: 400; line-height: 1; margin-bottom: 4px; flex-shrink: 0;
 }
 .cal-month-cell.today .cal-day-num {
-  background: var(--or); color: #080808;
+  background: var(--or); color: #ffffff;
   width: 20px; height: 20px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-weight: 700; font-size: 10px;
@@ -872,10 +872,14 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
 }
 .wo-stat:last-child { border-right: none; }
 .wo-stat-num {
-  font-size: 36px; font-weight: 600;
-  letter-spacing: -.045em; line-height: 1;
+  font-size: 52px; font-weight: 600;
+  letter-spacing: -.05em; line-height: 1;
   color: var(--txt);
   font-variant-numeric: tabular-nums;
+}
+.wo-priority-strip {
+  width: 3px; padding: 0 !important;
+  transition: background var(--t1);
 }
 .wo-stat-lbl {
   font-size: 10px; font-weight: 600;
@@ -1058,7 +1062,7 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
   #wo-table-wrap .wo-list-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   #wo-table-wrap .wo-tbl { min-width: 560px; }
   .wo-stat { padding: 14px 16px; }
-  .wo-stat-num { font-size: 28px; }
+  .wo-stat-num { font-size: 36px; }
 
   /* Panel footer: stack buttons */
   .panel-footer { flex-wrap: wrap; }
@@ -1086,7 +1090,7 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
     height: 44px; border-radius: 22px;
     padding: 0 18px 0 14px;
     gap: 7px;
-    background: var(--or); color: #080808;
+    background: var(--or); color: #ffffff;
     align-items: center; justify-content: center;
     border: none; cursor: pointer; z-index: 109;
     box-shadow: 0 4px 20px rgba(249,115,22,.45);
