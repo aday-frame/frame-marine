@@ -1146,44 +1146,120 @@
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }
 
+  const PDF_LIGHT_CSS = `
+    .pdf-cap .canvas { background: #FAFAF9 !important; color: #1A1A18 !important; }
+    .pdf-cap .node { background: #F0F0EE !important; border-color: #DEDED6 !important; }
+    .pdf-cap .node.vessel { background: rgba(249,115,22,.07) !important; border-color: rgba(249,115,22,.2) !important; }
+    .pdf-cap .node.person { background: rgba(167,139,250,.07) !important; border-color: rgba(167,139,250,.2) !important; }
+    .pdf-cap .node.result { background: rgba(74,222,128,.05) !important; border-color: rgba(74,222,128,.18) !important; }
+    .pdf-cap .node.neutral { background: #EEEEED !important; border-color: #DEDED6 !important; }
+    .pdf-cap .node-title,.pdf-cap .pc-title,.pdf-cap .layer-title,.pdf-cap .step-title,.pdf-cap .arch-layer-title,.pdf-cap .product-name,.pdf-cap .banner strong,.pdf-cap .sm-v { color: #1A1A18 !important; }
+    .pdf-cap .node-body,.pdf-cap .pc-body,.pdf-cap .layer-body,.pdf-cap .step-body,.pdf-cap .arch-layer-desc,.pdf-cap .product-desc,.pdf-cap .banner,.pdf-cap .sm-l { color: #525248 !important; }
+    .pdf-cap .node-body li::before,.pdf-cap .pc-body li::before { color: #AEAEA6 !important; }
+    .pdf-cap .banner { background: #EEEEED !important; border-color: #DEDED6 !important; }
+    .pdf-cap .layer-card { background: #F0F0EE !important; border-color: #DEDED6 !important; }
+    .pdf-cap .layer-card.l1 { background: rgba(249,115,22,.06) !important; border-color: rgba(249,115,22,.2) !important; }
+    .pdf-cap .layer-card.l2 { background: rgba(167,139,250,.06) !important; border-color: rgba(167,139,250,.2) !important; }
+    .pdf-cap .layer-example { color: #6A6A62 !important; }
+    .pdf-cap .phase-hdr { background: #E8E8E4 !important; color: #6A6A62 !important; border-color: #DEDED6 !important; }
+    .pdf-cap .phase-cell { background: #F0F0EE !important; border-color: #DEDED6 !important; }
+    .pdf-cap .phase-cell.mar { background: rgba(249,115,22,.06) !important; border-color: rgba(249,115,22,.15) !important; }
+    .pdf-cap .phase-cell.pro { background: rgba(96,165,250,.06) !important; border-color: rgba(96,165,250,.15) !important; }
+    .pdf-cap .phase-cell.pur { background: rgba(167,139,250,.06) !important; border-color: rgba(167,139,250,.15) !important; }
+    .pdf-cap .phase-cell.grn { background: rgba(74,222,128,.05) !important; border-color: rgba(74,222,128,.12) !important; }
+    .pdf-cap .product-top { background: #EEEEED !important; border-color: #DEDED6 !important; }
+    .pdf-cap .product-marine { background: rgba(249,115,22,.04) !important; border-color: rgba(249,115,22,.15) !important; }
+    .pdf-cap .product-property { background: rgba(96,165,250,.04) !important; border-color: rgba(96,165,250,.15) !important; }
+    .pdf-cap .product-eyebrow { color: #8A8A82 !important; }
+    .pdf-cap .product-marine .product-eyebrow { color: #D06818 !important; }
+    .pdf-cap .product-property .product-eyebrow { color: #3A7FD4 !important; }
+    .pdf-cap .pill-base { background: #E4E4E0 !important; color: #525248 !important; border-color: #CECECC !important; }
+    .pdf-cap .arch-wrap { background: #F0F0EE !important; border-color: #DEDED6 !important; }
+    .pdf-cap .arch-l2 { background: rgba(167,139,250,.06) !important; border-color: rgba(167,139,250,.2) !important; }
+    .pdf-cap .arch-l1 { background: rgba(249,115,22,.05) !important; border-color: rgba(249,115,22,.2) !important; }
+    .pdf-cap .arch-pill { background: #E4E4E0 !important; border-color: #CECECC !important; color: #525248 !important; }
+    .pdf-cap .arch-l2 .arch-pill { background: rgba(167,139,250,.1) !important; border-color: rgba(167,139,250,.2) !important; color: #7060B8 !important; }
+    .pdf-cap .arch-l1 .arch-pill { background: rgba(249,115,22,.1) !important; border-color: rgba(249,115,22,.2) !important; color: #C05818 !important; }
+    .pdf-cap .arch-ops { background: #E8E8E4 !important; border-color: #DEDED6 !important; }
+    .pdf-cap .arch-ops-lbl { color: #8A8A82 !important; }
+    .pdf-cap .arch-ops-line { background: #CECECC !important; }
+    .pdf-cap .arch-ops .arch-pill { color: #6A6A62 !important; }
+    .pdf-cap .arch-output { background: #EAEAE8 !important; border-color: #DEDED6 !important; color: #525248 !important; }
+    .pdf-cap .arch-output svg { color: #8A8A82 !important; }
+    .pdf-cap .arch-persona-name { color: #3A3A34 !important; }
+    .pdf-cap .arch-persona-sub { color: #8A8A82 !important; }
+    .pdf-cap .arch-arrow-mid,.pdf-cap .arch-persona::after { color: #CECECC !important; background: #CECECC !important; }
+    .pdf-cap .arch-layer-flag { color: #8A8A82 !important; }
+    .pdf-cap .ops-bar { background: #E8E8E4 !important; border-color: #DEDED6 !important; }
+    .pdf-cap .ops-bar-lbl { color: #8A8A82 !important; }
+    .pdf-cap .ops-pill { background: #DEDED8 !important; color: #525248 !important; border-color: #CECECC !important; }
+    .pdf-cap .step-title { color: #1A1A18 !important; }
+    .pdf-cap .step-body { color: #525248 !important; }
+    .pdf-cap .step-arrow { color: #CECECC !important; }
+    .pdf-cap .step-num { color: #fff !important; }
+    .pdf-cap .sm { background: #EAEAE8 !important; border-color: #DEDED6 !important; }
+    .pdf-cap .sm-row { border-color: #E0E0D8 !important; }
+    .pdf-cap .sec { color: #8A8A82 !important; }
+    .pdf-cap .sec::after { background: #E0E0D8 !important; }
+    .pdf-cap .row-label.mar { background: rgba(249,115,22,.07) !important; }
+    .pdf-cap .row-label.pro { background: rgba(96,165,250,.07) !important; }
+  `;
+
   async function printFlow() {
     const btn = document.querySelector('.pdf-btn');
     btn.textContent = 'Generating…';
     btn.disabled = true;
 
+    // Inject light-theme overrides for capture
+    const styleEl = document.createElement('style');
+    styleEl.textContent = PDF_LIGHT_CSS;
+    document.head.appendChild(styleEl);
+    document.body.classList.add('pdf-cap');
+
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF({ orientation: 'l', unit: 'mm', format: 'letter' });
-    const PW = 279.4, PH = 215.9; // letter landscape mm
+    const PW = 279.4, PH = 215.9;
 
     const canvases = Array.from(document.querySelectorAll('.canvas'));
+    const tabs = Array.from(document.querySelectorAll('.flow-tab'));
     const activeCanvas = document.querySelector('.canvas.active');
 
     let first = true;
-    for (const canv of canvases) {
+    for (let i = 0; i < canvases.length; i++) {
       canvases.forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
-      canv.style.display = 'block';
-      await new Promise(r => setTimeout(r, 120));
+      canvases[i].style.display = 'block';
+      await new Promise(r => setTimeout(r, 150));
 
-      const shot = await html2canvas(canv, {
-        backgroundColor: '#060606',
+      const shot = await html2canvas(canvases[i], {
+        backgroundColor: '#FAFAF9',
         scale: 1.5,
         useCORS: true,
         logging: false,
       });
 
-      const ratio = Math.min(PW / shot.width, PH / shot.height);
+      const ratio = Math.min(PW / shot.width, (PH - 8) / shot.height);
       const w = shot.width * ratio;
       const h = shot.height * ratio;
       const x = (PW - w) / 2;
-      const y = (PH - h) / 2;
+      const y = 0;
 
       if (!first) pdf.addPage('letter', 'l');
-      pdf.setFillColor(6, 6, 6);
+      pdf.setFillColor(250, 250, 249);
       pdf.rect(0, 0, PW, PH, 'F');
-      pdf.addImage(shot.toDataURL('image/jpeg', 0.9), 'JPEG', x, y, w, h);
+      pdf.addImage(shot.toDataURL('image/jpeg', 0.92), 'JPEG', x, y, w, h);
+
+      // Tab label footer
+      const label = tabs[i] ? tabs[i].textContent.trim() : '';
+      pdf.setFontSize(7.5);
+      pdf.setTextColor(180, 180, 172);
+      pdf.text(`Frame  ·  ${label}`, PW / 2, PH - 3, { align: 'center' });
+
       first = false;
     }
 
+    // Restore
+    document.head.removeChild(styleEl);
+    document.body.classList.remove('pdf-cap');
     canvases.forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
     activeCanvas.style.display = 'block';
     activeCanvas.classList.add('active');
