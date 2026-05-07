@@ -52,7 +52,7 @@ function navTo(pageId, clickedEl, skipPush) {
     inventory:     'Inventory',
     budget:        'Budget',
     hours:         'Hours of rest',
-    documents:     'Documents',
+    documents:     'Docs',
     requests:      'Requests',
     hub:           'Hub',
     reports:       'Reports',

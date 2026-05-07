@@ -25,12 +25,12 @@
   --txt3: #5a5a64;
   --txt4: #35353d;
 
-  /* Accent — Linear lavender (DESIGN.md primary) */
-  --or:      #5e6ad2;
-  --or2:     #828fff;
-  --or-bg:   rgba(94,106,210,.14);
-  --or-bd:   rgba(94,106,210,.35);
-  --or-glow: rgba(94,106,210,.20);
+  /* Accent — Frame orange */
+  --or:      #F97316;
+  --or2:     #FB923C;
+  --or-bg:   rgba(249,115,22,.14);
+  --or-bd:   rgba(249,115,22,.35);
+  --or-glow: rgba(249,115,22,.20);
 
   /* Status colors */
   --grn:   #4ADE80;
@@ -58,9 +58,9 @@
   --eng-bg:  rgba(34,211,238,.10);
   --eng-bd:  rgba(34,211,238,.25);
 
-  --amb:     #F97316;   /* amber/orange — on-hold status */
-  --amb-bg:  rgba(249,115,22,.10);
-  --amb-bd:  rgba(249,115,22,.25);
+  --amb:     #FBBF24;   /* amber/yellow — on-hold status */
+  --amb-bg:  rgba(251,191,36,.10);
+  --amb-bd:  rgba(251,191,36,.25);
 
   /* Typography */
   --font:  'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -103,9 +103,9 @@
   --txt3: #9A9A92;
   --txt4: #C0C0B8;
 
-  --or-bg:   rgba(94,106,210,.10);
-  --or-bd:   rgba(94,106,210,.25);
-  --or-glow: rgba(94,106,210,.15);
+  --or-bg:   rgba(249,115,22,.10);
+  --or-bd:   rgba(249,115,22,.25);
+  --or-glow: rgba(249,115,22,.15);
 
   --grn:    #16A34A;
   --grn-bg: rgba(22,163,74,.10);

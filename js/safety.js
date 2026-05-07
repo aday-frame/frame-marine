@@ -86,51 +86,62 @@ const Safety = (() => {
     const drills = (FM.drills || []).filter(d => d.vessel === vessel.id)
       .sort((a, b) => b.date.localeCompare(a.date));
 
-    const scheduled  = drills.filter(d => d.status === 'scheduled');
-    const completed  = drills.filter(d => d.status === 'completed');
+    const scheduled = drills.filter(d => d.status === 'scheduled');
+    const completed = drills.filter(d => d.status === 'completed');
 
-    let html = `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
+    const actions = `<div style="display:flex;justify-content:flex-end;gap:8px;margin-bottom:16px">
       <button class="btn btn-ghost btn-sm" onclick="Safety.openScheduleDrill()">Schedule drill</button>
-      <button class="btn btn-primary btn-sm" onclick="Safety.openLogDrill()">Log completed drill</button>
+      <button class="btn btn-primary btn-sm" onclick="Safety.openLogDrill()">Log drill</button>
     </div>`;
 
-    if (scheduled.length) {
-      html += `<div style="margin-bottom:20px">
-        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">Scheduled</div>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          ${scheduled.map(d => _drillRow(d)).join('')}
-        </div>
-      </div>`;
-    }
+    if (!drills.length) return actions + `<div class="empty" style="padding:40px 0"><div class="empty-title">No drills yet</div><div class="empty-sub">Log or schedule your first drill above</div></div>`;
 
-    html += `<div>
-      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:8px">Completed</div>
-      ${completed.length ? `<div style="display:flex;flex-direction:column;gap:8px">${completed.map(d => _drillRow(d)).join('')}</div>`
-        : `<div style="font-size:13px;color:var(--txt3);padding:12px 0">No completed drills yet.</div>`}
-    </div>`;
+    const row = d => {
+      const dt = DRILL_TYPES[d.type] || { label: d.type, icon: '📋', color: 'var(--txt3)' };
+      const isSched = d.status === 'scheduled';
+      const crewAvatars = (d.crew || []).slice(0,4).map(cid =>
+        `<span style="width:20px;height:20px;border-radius:50%;background:${FM.crewColor(cid)}22;color:${FM.crewColor(cid)};font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center" title="${FM.crewName(cid)}">${FM.crewInitials(cid)}</span>`
+      ).join('');
+      return `<tr>
+        <td style="padding:8px 6px 8px 12px;width:40px">
+          <div style="width:30px;height:30px;border-radius:7px;background:${dt.color}18;display:flex;align-items:center;justify-content:center;font-size:15px">${dt.icon}</div>
+        </td>
+        <td>
+          <div style="font-size:13px;font-weight:500;color:var(--txt)">${dt.label} Drill</div>
+          ${d.location ? `<div style="font-size:11px;color:var(--txt3);margin-top:1px">${escHtml(d.location)}</div>` : ''}
+        </td>
+        <td style="font-size:12px;color:var(--txt2);white-space:nowrap">${fmtDate(d.date)}</td>
+        <td style="font-size:12px;color:var(--txt3)">${d.duration ? d.duration + ' min' : '—'}</td>
+        <td style="font-size:12px;color:var(--txt2)">${d.conductor ? escHtml(FM.crewName(d.conductor)) : '—'}</td>
+        <td><div style="display:flex;gap:3px">${crewAvatars}</div></td>
+        <td><span class="badge ${isSched ? 'b-hold' : 'b-done'}">${isSched ? 'Scheduled' : 'Completed'}</span></td>
+        <td><div style="display:flex;gap:5px">
+          ${isSched ? `<button class="btn btn-ghost btn-xs" onclick="Safety.completeDrill('${d.id}')">Complete</button>` : ''}
+          <button class="btn btn-ghost btn-xs" onclick="Safety.delDrill('${d.id}')">Remove</button>
+        </div></td>
+      </tr>`;
+    };
 
-    return html;
-  }
+    const section = (label, items) => items.length ? `
+      <tr><td colspan="8" style="padding:10px 12px 6px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;background:var(--bg);border-bottom:.5px solid var(--bd)">${label}</td></tr>
+      ${items.map(row).join('')}` : '';
 
-  function _drillRow(d) {
-    const dt = DRILL_TYPES[d.type] || { label: d.type, icon: '📋', color: 'var(--txt3)' };
-    const isScheduled = d.status === 'scheduled';
-    return `<div style="display:flex;gap:14px;padding:14px 16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;align-items:flex-start">
-      <div style="width:36px;height:36px;border-radius:8px;background:${dt.color}18;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${dt.icon}</div>
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
-          <span style="font-size:13px;font-weight:500;color:var(--txt)">${dt.label} Drill</span>
-          <span class="badge ${isScheduled?'b-hold':'b-done'}" style="font-size:9px">${isScheduled?'Scheduled':'Completed'}</span>
-        </div>
-        <div style="font-size:11px;color:var(--txt3);margin-bottom:${d.notes?'6':'0'}px">${fmtDate(d.date)}${d.conductor?' · Conducted by '+escHtml(FM.crewName(d.conductor)):''}${d.duration?' · '+d.duration+' min':''}${d.location?' · '+escHtml(d.location):''}</div>
-        ${d.crew && d.crew.length ? `<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px">${d.crew.map(cid=>`<div style="width:22px;height:22px;border-radius:50%;background:${FM.crewColor(cid)}22;color:${FM.crewColor(cid)};font-size:9px;font-weight:600;display:flex;align-items:center;justify-content:center" title="${FM.crewName(cid)}">${FM.crewInitials(cid)}</div>`).join('')}</div>` : ''}
-        ${d.notes ? `<div style="font-size:11px;color:var(--txt2);line-height:1.5">${escHtml(d.notes)}</div>` : ''}
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
-        ${isScheduled ? `<button class="btn btn-ghost btn-xs" onclick="Safety.completeDrill('${d.id}')">Log complete</button>` : ''}
-        <button class="btn btn-ghost btn-xs" onclick="Safety.delDrill('${d.id}')">Remove</button>
-      </div>
-    </div>`;
+    return actions + `<div class="tbl-wrap"><table class="tbl">
+      <thead><tr>
+        <th style="width:40px"></th>
+        <th>Drill</th>
+        <th style="width:110px">Date</th>
+        <th style="width:80px">Duration</th>
+        <th style="width:140px">Conducted by</th>
+        <th style="width:80px">Crew</th>
+        <th style="width:100px">Status</th>
+        <th style="width:120px"></th>
+      </tr></thead>
+      <tbody>
+        ${section('Scheduled', scheduled)}
+        ${section('Completed', completed)}
+      </tbody>
+    </table></div>`;
   }
 
   /* ── NC TAB ── */
@@ -139,40 +150,73 @@ const Safety = (() => {
     const ncs = (FM.nonConformances || []).filter(n => n.vessel === vessel.id)
       .sort((a, b) => b.date.localeCompare(a.date));
 
-    let html = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    const actions = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
       <button class="btn btn-primary btn-sm" onclick="Safety.openNC()">+ Raise report</button>
     </div>`;
 
-    if (!ncs.length) return html + `<div style="font-size:13px;color:var(--txt3);padding:12px 0">No reports yet.</div>`;
+    if (!ncs.length) return actions + `<div class="empty" style="padding:40px 0"><div class="empty-title">No reports yet</div><div class="empty-sub">All clear — raise a report above if needed</div></div>`;
 
-    html += ncs.map(nc => {
+    const rows = ncs.map(nc => {
       const isOpen = nc.status === 'open';
-      return `<div style="padding:16px;background:var(--bg2);border:.5px solid var(--bd);border-radius:10px;margin-bottom:10px">
-        <div style="display:flex;align-items:flex-start;gap:12px">
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-              <span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(nc.ref)}</span>
-              <span class="badge ${isOpen?'b-high':'b-done'}" style="font-size:9px">${isOpen?'Open':'Closed'}</span>
-              <span class="badge b-hold" style="font-size:9px">${NC_TYPES[nc.type]||nc.type}</span>
-            </div>
-            <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:4px">${escHtml(nc.title)}</div>
-            <div style="font-size:11px;color:var(--txt3);margin-bottom:8px">${fmtDate(nc.date)} · Raised by ${escHtml(FM.crewName(nc.raisedBy))} · Assigned to ${escHtml(FM.crewName(nc.assignee))}</div>
-            <div style="font-size:12px;color:var(--txt2);line-height:1.5;margin-bottom:${nc.correctiveAction?'10':'0'}px">${escHtml(nc.description)}</div>
-            ${nc.correctiveAction ? `<div style="padding:10px;background:var(--bg3);border-radius:6px;margin-top:8px">
-              <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:4px">Corrective action</div>
-              <div style="font-size:12px;color:var(--txt2)">${escHtml(nc.correctiveAction)}</div>
-              ${nc.closedDate?`<div style="font-size:10px;color:var(--grn);margin-top:4px">Closed ${fmtDate(nc.closedDate)}</div>`:''}
-            </div>` : ''}
-          </div>
-          <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-            ${isOpen ? `<button class="btn btn-ghost btn-xs" onclick="Safety.closeNC('${nc.id}')">Close out</button>` : ''}
-            <button class="btn btn-ghost btn-xs" onclick="Safety.delNC('${nc.id}')">Remove</button>
-          </div>
-        </div>
-      </div>`;
+      return `<tr style="cursor:pointer" onclick="Safety._openNCDetail('${nc.id}')">
+        <td><span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(nc.ref)}</span></td>
+        <td><span class="badge b-hold" style="font-size:9px">${NC_TYPES[nc.type]||nc.type}</span></td>
+        <td>
+          <div style="font-size:13px;font-weight:500;color:var(--txt)">${escHtml(nc.title)}</div>
+          ${nc.description ? `<div style="font-size:11px;color:var(--txt3);margin-top:1px;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(nc.description)}</div>` : ''}
+        </td>
+        <td style="font-size:12px;color:var(--txt2);white-space:nowrap">${fmtDate(nc.date)}</td>
+        <td style="font-size:12px;color:var(--txt2)">${escHtml(FM.crewName(nc.raisedBy))}</td>
+        <td style="font-size:12px;color:var(--txt2)">${escHtml(FM.crewName(nc.assignee))}</td>
+        <td><span class="badge ${isOpen ? 'b-high' : 'b-done'}">${isOpen ? 'Open' : 'Closed'}</span></td>
+        <td onclick="event.stopPropagation()"><div style="display:flex;gap:5px">
+          ${isOpen ? `<button class="btn btn-ghost btn-xs" onclick="Safety.closeNC('${nc.id}')">Close out</button>` : ''}
+          <button class="btn btn-ghost btn-xs" onclick="Safety.delNC('${nc.id}')">Remove</button>
+        </div></td>
+      </tr>`;
     }).join('');
 
-    return html;
+    return actions + `<div class="tbl-wrap"><table class="tbl">
+      <thead><tr>
+        <th style="width:90px">Ref</th>
+        <th style="width:120px">Type</th>
+        <th>Title</th>
+        <th style="width:110px">Date</th>
+        <th style="width:130px">Raised by</th>
+        <th style="width:130px">Assignee</th>
+        <th style="width:90px">Status</th>
+        <th style="width:100px"></th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  }
+
+  function _openNCDetail(id) {
+    const nc = (FM.nonConformances || []).find(n => n.id === id);
+    if (!nc) return;
+    const isOpen = nc.status === 'open';
+    openPanel(`
+      <div style="padding:20px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(nc.ref)}</span>
+          <span class="badge ${isOpen ? 'b-high' : 'b-done'}">${isOpen ? 'Open' : 'Closed'}</span>
+          <span class="badge b-hold" style="font-size:9px">${NC_TYPES[nc.type]||nc.type}</span>
+        </div>
+        <div style="font-size:16px;font-weight:600;color:var(--txt);margin-bottom:12px;letter-spacing:-.01em">${escHtml(nc.title)}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Date</div><div style="font-size:12px;color:var(--txt2)">${fmtDate(nc.date)}</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Raised by</div><div style="font-size:12px;color:var(--txt2)">${escHtml(FM.crewName(nc.raisedBy))}</div></div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Assigned to</div><div style="font-size:12px;color:var(--txt2)">${escHtml(FM.crewName(nc.assignee))}</div></div>
+          ${nc.closedDate ? `<div style="background:var(--bg3);border-radius:8px;padding:10px 12px"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Closed</div><div style="font-size:12px;color:var(--grn)">${fmtDate(nc.closedDate)}</div></div>` : ''}
+        </div>
+        ${nc.description ? `<div style="margin-bottom:16px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:6px">Description</div><div style="font-size:13px;color:var(--txt2);line-height:1.6">${escHtml(nc.description)}</div></div>` : ''}
+        ${nc.correctiveAction ? `<div style="padding:12px;background:var(--bg3);border-radius:8px;margin-bottom:16px"><div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:6px">Corrective action</div><div style="font-size:13px;color:var(--txt2);line-height:1.6">${escHtml(nc.correctiveAction)}</div></div>` : ''}
+        <div style="display:flex;gap:8px;padding-top:16px;border-top:.5px solid var(--bd)">
+          ${isOpen ? `<button class="btn btn-primary btn-sm" onclick="closePanel();Safety.closeNC('${nc.id}')">Close out</button>` : ''}
+          <button class="btn btn-ghost btn-sm" onclick="closePanel()">Close</button>
+        </div>
+      </div>
+    `);
   }
 
   /* ── MEETINGS TAB ── */
@@ -506,7 +550,7 @@ const Safety = (() => {
   return {
     render, tab, closeModal,
     openLogDrill, openScheduleDrill, saveDrill, completeDrill, _markComplete, delDrill,
-    openNC, saveNC, closeNC, _saveClose, delNC,
+    openNC, saveNC, closeNC, _saveClose, delNC, _openNCDetail,
     openMeeting, saveMeeting, delMeeting,
   };
 })();
