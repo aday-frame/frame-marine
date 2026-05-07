@@ -110,7 +110,6 @@ WO.renderList = function(wos) {
   };
 
   const thead = `<thead><tr>
-    <th style="width:3px;padding:0"></th>
     ${col('title','Title')}
     ${col('id','ID','76px')}
     ${col('status','Status','110px')}
@@ -149,7 +148,6 @@ WO.rowHTML = function(w) {
 
   return `
     <tr data-id="${w.id}" class="${WO.activeId === w.id ? 'selected' : ''}">
-      <td class="wo-priority-strip" style="background:${pColors[w.priority]}"></td>
       <td class="wo-title-cell">
         <div class="wo-title">${escHtml(w.title)}</div>
         <div class="wo-sub">
@@ -404,7 +402,6 @@ WO.todoCardHTML = function(w) {
   const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date();
   return `
     <div class="wo-card ${WO.activeId === w.id ? 'active' : ''}" data-id="${w.id}">
-      <div class="wo-card-accent" style="background:${pColors[w.priority]}"></div>
       <div class="wo-card-body">
         <div class="wo-card-title">${escHtml(w.title)}</div>
         <div class="wo-card-meta">${FM.crewName(w.assignee)||'Unassigned'} · ${escHtml(w.zone||w.system||'')}</div>
