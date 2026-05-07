@@ -1,0 +1,12 @@
+{
+  "name": "frame-marine",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "tailwindcss -i ./css/input.css -o ./css/tailwind.css --minify",
+    "dev": "tailwindcss -i ./css/input.css -o ./css/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}

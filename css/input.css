@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background-color: theme('colors.canvas');
+    color: theme('colors.ink.DEFAULT');
+    font-family: theme('fontFamily.sans');
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center gap-sm px-md py-xs rounded-lg text-13 font-medium
+           cursor-pointer border-0 whitespace-nowrap select-none transition-all duration-120;
+  }
+  .btn-primary {
+    @apply bg-accent text-canvas font-semibold hover:bg-accent-hover;
+  }
+  .btn-ghost {
+    @apply bg-surface-2 text-ink-muted border-hair border-hairline-strong
+           hover:text-ink hover:border-hairline-bold;
+  }
+  .btn-danger {
+    @apply bg-danger-bg text-danger border-hair border-danger-border
+           hover:bg-opacity-75;
+  }
+  .card {
+    @apply bg-surface-1 border-hair border-hairline rounded-2xl;
+  }
+  .badge {
+    @apply inline-flex items-center px-xs py-xxs rounded-pill text-11 font-medium whitespace-nowrap gap-xs;
+  }
+  .inp {
+    @apply bg-surface-2 border-hair border-hairline-strong rounded-lg px-sm py-xs
+           text-13 text-ink font-sans outline-none w-full
+           transition-colors duration-120
+           placeholder:text-ink-subtle
+           focus:border-accent-border;
+  }
+}
