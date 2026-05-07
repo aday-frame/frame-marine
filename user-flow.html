@@ -2,209 +2,436 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Frame — User Flow</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #080808; font-family: 'DM Sans', system-ui, sans-serif; color: #F0F0EC; min-height: 100vh; }
 
-  /* ── Topbar */
-  .topbar { display:flex; align-items:center; gap:16px; padding:14px 24px; border-bottom:.5px solid #1E1E18; position:sticky; top:0; z-index:100; background:#080808; }
-  .logo { font-size:13px; font-weight:700; letter-spacing:.04em; }
-  .topbar-sub { font-size:11px; color:#52524A; }
+  html { overflow-x: hidden; }
+  body {
+    background: #060606;
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    color: #EDEDEA;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-  /* ── Tabs */
-  .flows-nav { display:flex; gap:6px; padding:20px 24px 0; border-bottom:.5px solid #1E1E18; overflow-x:auto; }
-  .flow-tab { padding:8px 16px; border-radius:8px 8px 0 0; font-size:11px; font-weight:600; cursor:pointer; border:.5px solid #1E1E18; border-bottom:none; background:transparent; color:#6B6B63; transition:all .15s; white-space:nowrap; flex-shrink:0; }
-  .flow-tab.active { background:#111110; color:#F0F0EC; border-color:#2A2A24; }
-  .flow-tab:hover:not(.active) { color:#9A9A92; }
+  /* ── Topbar ── */
+  .topbar {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 28px;
+    border-bottom: .5px solid #1A1A14;
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(6,6,6,.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .logo-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-mark svg { display: block; }
+  .logo { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: #EDEDEA; }
+  .topbar-sub { font-size: 11px; color: #3A3A34; margin-left: 4px; }
+  .topbar-badge {
+    margin-left: auto;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+    padding: 3px 10px; border-radius: 20px;
+    background: rgba(249,115,22,.12); color: #F97316;
+    border: .5px solid rgba(249,115,22,.25);
+  }
 
-  /* ── Canvas */
-  .canvas { display:none; padding:36px 24px 80px; max-width:960px; }
-  .canvas.active { display:block; }
+  /* ── Tab nav ── */
+  .flows-nav {
+    display: flex; gap: 2px;
+    padding: 20px 28px 0;
+    border-bottom: .5px solid #1A1A14;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .flows-nav::-webkit-scrollbar { display: none; }
+  .flow-tab {
+    padding: 9px 18px;
+    border-radius: 8px 8px 0 0;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer;
+    border: .5px solid transparent;
+    border-bottom: none;
+    background: transparent;
+    color: #52524A;
+    transition: all .15s;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .flow-tab.active { background: #0F0F0D; color: #EDEDEA; border-color: #242420; }
+  .flow-tab:hover:not(.active) { color: #9A9A92; }
 
-  /* ── Section label */
-  .sec { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:#3A3A34; display:flex; align-items:center; gap:10px; margin-bottom:18px; }
-  .sec::after { content:''; flex:1; height:.5px; background:#1A1A14; }
+  /* ── Canvas ── */
+  .canvas { display: none; padding: 36px 28px 100px; max-width: 980px; }
+  .canvas.active { display: block; }
 
-  /* ── Nodes */
-  .node { border-radius:10px; padding:14px 16px; border:.5px solid #1E1E18; background:#0D0D0B; }
-  .node.vessel  { border-color:rgba(249,115,22,.35); background:rgba(249,115,22,.05); }
-  .node.person  { border-color:rgba(167,139,250,.35); background:rgba(167,139,250,.05); }
-  .node.result  { border-color:rgba(74,222,128,.35);  background:rgba(74,222,128,.04); }
-  .node.neutral { border-color:#2A2A24; background:#111110; }
-  .node.dim     { border-color:#1E1E18; background:#0A0A08; opacity:.6; }
+  /* ── Section divider ── */
+  .sec {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
+    color: #2E2E28; margin-bottom: 20px;
+  }
+  .sec::after { content: ''; flex: 1; height: .5px; background: #141410; }
 
-  .node-tag { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.09em; margin-bottom:5px; }
-  .node.vessel .node-tag { color:#F97316; }
-  .node.person .node-tag { color:#A78BFA; }
-  .node.result .node-tag { color:#4ADE80; }
-  .node.neutral .node-tag { color:#52524A; }
-  .node.dim    .node-tag { color:#3A3A34; }
+  /* ── Cards / nodes ── */
+  .node { border-radius: 12px; padding: 18px 20px; border: .5px solid #1E1E18; background: #0C0C0A; }
+  .node.vessel  { border-color: rgba(249,115,22,.3); background: rgba(249,115,22,.04); }
+  .node.person  { border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.04); }
+  .node.result  { border-color: rgba(74,222,128,.3);  background: rgba(74,222,128,.03); }
+  .node.neutral { border-color: #242420; background: #0F0F0D; }
 
-  .node-title { font-size:12px; font-weight:600; color:#F0F0EC; margin-bottom:4px; line-height:1.3; }
-  .node-body  { font-size:10px; color:#6B6B63; line-height:1.55; }
-  .node-body li { list-style:none; padding-left:10px; position:relative; }
-  .node-body li::before { content:'—'; position:absolute; left:0; color:#2A2A24; }
+  .node-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px; flex-shrink: 0;
+  }
+  .node.vessel .node-icon  { background: rgba(249,115,22,.15); color: #F97316; }
+  .node.person .node-icon  { background: rgba(167,139,250,.15); color: #A78BFA; }
+  .node.result .node-icon  { background: rgba(74,222,128,.12); color: #4ADE80; }
+  .node.neutral .node-icon { background: #1A1A14; color: #52524A; }
 
-  /* ── Arrow */
-  .arr { display:flex; align-items:center; padding:0 8px; color:#2A2A24; flex-shrink:0; margin-top:18px; }
+  .node-tag { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+  .node.vessel .node-tag  { color: #F97316; }
+  .node.person .node-tag  { color: #A78BFA; }
+  .node.result .node-tag  { color: #4ADE80; }
+  .node.neutral .node-tag { color: #52524A; }
 
-  /* ── Mini screen */
-  .sm { border-radius:7px; border:.5px solid #1E1E18; background:#080808; padding:9px 11px; margin-top:8px; }
-  .sm-row { display:flex; align-items:center; justify-content:space-between; padding:3px 0; border-bottom:.5px solid #111110; font-size:10px; }
-  .sm-row:last-child { border-bottom:none; }
-  .sm-l { color:#52524A; }
-  .sm-v { color:#F0F0EC; font-weight:600; }
-  .sm-tag { font-size:8px; font-weight:700; padding:1px 6px; border-radius:3px; }
+  .node-title { font-size: 15px; font-weight: 600; color: #EDEDEA; margin-bottom: 6px; line-height: 1.3; letter-spacing: -.01em; }
+  .node-body  { font-size: 11px; color: #5C5C54; line-height: 1.65; }
+  .node-body li { list-style: none; padding-left: 12px; position: relative; margin-bottom: 2px; }
+  .node-body li::before { content: '·'; position: absolute; left: 0; color: #2A2A24; }
 
-  /* ── Phase layout (horizontal stages) */
-  .phases { display:grid; gap:2px; margin-bottom:20px; }
-  .phases-3 { grid-template-columns:1fr 1fr 1fr; }
-  .phases-4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+  /* ── Mini screen mockup ── */
+  .sm { border-radius: 8px; border: .5px solid #1A1A14; background: #080806; padding: 10px 12px; margin-top: 12px; }
+  .sm-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; border-bottom: .5px solid #101010; font-size: 10px; gap: 8px; }
+  .sm-row:last-child { border-bottom: none; }
+  .sm-l { color: #3A3A34; white-space: nowrap; flex-shrink: 0; }
+  .sm-v { color: #EDEDEA; font-weight: 600; text-align: right; }
+  .sm-tag { font-size: 8px; font-weight: 700; padding: 2px 7px; border-radius: 4px; flex-shrink: 0; }
+
+  /* ── Phase layout ── */
+  .phases { display: grid; gap: 2px; margin-bottom: 2px; }
+  .phases-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .phases-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  .prod-row { display: grid; gap: 2px; }
+  .prod-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .prod-row-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
 
   .phase-hdr {
-    padding:10px 14px; text-align:center;
-    font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.09em;
-    background:#111110; border:.5px solid #2A2A24; color:#3A3A34;
+    padding: 10px 16px; text-align: center;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    background: #0F0F0D; border: .5px solid #1E1E18; color: #2E2E28;
   }
-  .phase-hdr:first-child { border-radius:8px 0 0 0; }
-  .phase-hdr:last-child  { border-radius:0 8px 0 0; }
+  .phase-hdr:first-child { border-radius: 10px 0 0 0; }
+  .phase-hdr:last-child  { border-radius: 0 10px 0 0; }
 
-  /* ── Product row label */
-  .prod-row { display:grid; gap:2px; }
-  .prod-row-3 { grid-template-columns:1fr 1fr 1fr; }
-  .prod-row-4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+  .phase-cell { padding: 16px; border: .5px solid #1A1A14; background: #0C0C0A; }
+  .phase-cell.mar { border-color: rgba(249,115,22,.18); background: rgba(249,115,22,.03); }
+  .phase-cell.pro { border-color: rgba(96,165,250,.18); background: rgba(96,165,250,.03); }
+  .phase-cell.pur { border-color: rgba(167,139,250,.18); background: rgba(167,139,250,.03); }
+  .phase-cell.grn { border-color: rgba(74,222,128,.15); background: rgba(74,222,128,.02); }
 
-  .phase-cell { padding:14px 14px; border:.5px solid #1E1E18; background:#0D0D0B; }
-  .phase-cell.mar { border-color:rgba(249,115,22,.2); background:rgba(249,115,22,.04); }
-  .phase-cell.pro { border-color:rgba(96,165,250,.2); background:rgba(96,165,250,.04); }
-  .phase-cell.pur { border-color:rgba(167,139,250,.2); background:rgba(167,139,250,.04); }
-  .phase-cell.grn { border-color:rgba(74,222,128,.2); background:rgba(74,222,128,.03); }
-  .phase-cell.dim { background:#080808; border-color:#141410; opacity:.5; }
+  .pc-icon {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 10px;
+  }
+  .mar .pc-icon { background: rgba(249,115,22,.12); color: #F97316; }
+  .pro .pc-icon { background: rgba(96,165,250,.12); color: #60A5FA; }
+  .pur .pc-icon { background: rgba(167,139,250,.12); color: #A78BFA; }
+  .grn .pc-icon { background: rgba(74,222,128,.1);  color: #4ADE80; }
 
-  .pc-tag { font-size:8px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px; }
-  .mar .pc-tag { color:#F97316; }
-  .pro .pc-tag { color:#60A5FA; }
-  .pur .pc-tag { color:#A78BFA; }
-  .grn .pc-tag { color:#4ADE80; }
-  .pc-title { font-size:11px; font-weight:600; color:#F0F0EC; margin-bottom:5px; line-height:1.3; }
-  .pc-body  { font-size:10px; color:#6B6B63; line-height:1.5; }
-  .pc-body li { list-style:none; padding-left:9px; position:relative; font-size:10px; }
-  .pc-body li::before { content:'·'; position:absolute; left:0; color:#3A3A34; }
+  .pc-tag { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; margin-bottom: 4px; }
+  .mar .pc-tag { color: #F97316; }
+  .pro .pc-tag { color: #60A5FA; }
+  .pur .pc-tag { color: #A78BFA; }
+  .grn .pc-tag { color: #4ADE80; }
 
-  /* ── Row label strip */
+  .pc-title { font-size: 12px; font-weight: 600; color: #EDEDEA; margin-bottom: 6px; line-height: 1.3; }
+  .pc-body  { font-size: 10px; color: #525248; line-height: 1.6; }
+  .pc-body li { list-style: none; padding-left: 10px; position: relative; }
+  .pc-body li::before { content: '·'; position: absolute; left: 0; color: #2A2A24; }
+
+  /* ── Row label ── */
   .row-label {
-    display:flex; align-items:center;
-    font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-    padding:8px 14px; border-radius:6px; margin-bottom:2px; gap:8px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em;
+    padding: 8px 14px; border-radius: 6px; margin-bottom: 2px;
   }
-  .row-label.mar { background:rgba(249,115,22,.08); color:#F97316; }
-  .row-label.pro { background:rgba(96,165,250,.08);  color:#60A5FA; }
+  .row-label.mar { background: rgba(249,115,22,.07); color: #F97316; }
+  .row-label.pro { background: rgba(96,165,250,.07);  color: #60A5FA; }
 
-  /* ── Ops bar */
+  /* ── Ops bar ── */
   .ops-bar {
-    display:flex; align-items:center; gap:12px; flex-wrap:wrap;
-    padding:10px 14px; border-radius:0 0 8px 8px;
-    background:#0A0A08; border:.5px solid #1E1E18; border-top:none;
-    margin-top:2px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 12px 16px;
+    background: #0A0A08; border: .5px solid #1A1A14;
+    border-radius: 0 0 10px 10px; margin-top: 2px;
   }
-  .ops-bar-lbl { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#2A2A24; white-space:nowrap; }
-  .ops-pill {
-    font-size:9px; padding:2px 8px; border-radius:4px;
-    background:#111110; color:#3A3A34; border:.5px solid #1A1A14;
-  }
+  .ops-bar-lbl { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: #2E2E28; white-space: nowrap; margin-right: 4px; }
+  .ops-pill { font-size: 9px; padding: 3px 9px; border-radius: 20px; background: #121210; color: #3A3A34; border: .5px solid #1A1A14; white-space: nowrap; }
 
-  /* ── Big step flow (for "Doing work") */
-  .step-flow { display:flex; align-items:flex-start; gap:0; }
-  .step { display:flex; flex-direction:column; align-items:center; flex:1; }
+  /* ── Step flow ── */
+  .step-flow { display: flex; align-items: flex-start; margin-bottom: 36px; }
+  .step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 0 8px; }
   .step-num {
-    width:28px; height:28px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:11px; font-weight:700; margin-bottom:8px; flex-shrink:0;
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; margin-bottom: 12px; flex-shrink: 0;
+    background: #F97316; color: #060606;
+    box-shadow: 0 0 0 6px rgba(249,115,22,.1);
   }
-  .step-connector { flex:1; height:.5px; background:#2A2A24; margin-top:14px; }
+  .step-title { font-size: 13px; font-weight: 600; color: #EDEDEA; margin-bottom: 5px; }
+  .step-body  { font-size: 11px; color: #525248; line-height: 1.6; }
+  .step-arrow {
+    flex-shrink: 0; margin-top: 20px; color: #2A2A24;
+    display: flex; align-items: center;
+  }
 
-  /* ── Two col */
-  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .two-col-3 { display:grid; grid-template-columns:1fr 1fr; gap:2px; }
+  /* ── Two col ── */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-  /* ── Badge */
-  .badge { display:inline-block; font-size:8px; font-weight:700; padding:2px 7px; border-radius:4px; margin-top:6px; }
+  /* ── Banner ── */
+  .banner {
+    border-radius: 10px; padding: 16px 20px;
+    font-size: 12px; line-height: 1.75;
+    border: .5px solid #242420; background: #0F0F0D; color: #7A7A72;
+  }
+  .banner strong { color: #EDEDEA; }
 
-  /* ── Banner */
-  .banner { border-radius:8px; padding:12px 16px; font-size:11px; line-height:1.6; border:.5px solid #2A2A24; background:#111110; color:#9A9A92; }
-  .banner strong { color:#F0F0EC; }
+  /* ── Product hero cards ── */
+  .product-grid {
+    display: flex; flex-direction: column; gap: 2px; margin-bottom: 32px;
+  }
+  .product-top {
+    background: #0F0F0D; border: .5px solid #242420;
+    border-radius: 12px 12px 0 0; padding: 24px 28px;
+  }
+  .product-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .product-marine {
+    background: rgba(249,115,22,.05); border: .5px solid rgba(249,115,22,.2);
+    border-radius: 0 0 0 12px; padding: 24px 28px;
+  }
+  .product-property {
+    background: rgba(96,165,250,.05); border: .5px solid rgba(96,165,250,.2);
+    border-radius: 0 0 12px 0; padding: 24px 28px;
+  }
+
+  .product-eyebrow {
+    font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .12em;
+    margin-bottom: 6px;
+  }
+  .product-top .product-eyebrow  { color: #3A3A34; }
+  .product-marine .product-eyebrow  { color: #F97316; }
+  .product-property .product-eyebrow { color: #60A5FA; }
+
+  .product-name {
+    font-size: 24px; font-weight: 700; color: #EDEDEA; letter-spacing: -.03em;
+    margin-bottom: 6px; line-height: 1.1;
+  }
+  .product-desc { font-size: 12px; color: #525248; line-height: 1.6; margin-bottom: 14px; }
+  .product-pills { display: flex; flex-wrap: wrap; gap: 5px; }
+  .pill {
+    font-size: 9px; padding: 3px 9px; border-radius: 20px;
+    font-weight: 600; letter-spacing: .02em;
+  }
+  .pill-base { background: #1A1A14; color: #525248; border: .5px solid #242420; }
+  .pill-mar  { background: rgba(249,115,22,.1); color: #F97316; border: .5px solid rgba(249,115,22,.2); }
+  .pill-pro  { background: rgba(96,165,250,.1); color: #60A5FA; border: .5px solid rgba(96,165,250,.2); }
+
+  /* ── Layer cards ── */
+  .layer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; margin-bottom: 20px; }
+  .layer-card {
+    padding: 22px 24px; border-radius: 10px;
+    border: .5px solid #242420;
+  }
+  .layer-card.l1 {
+    border-color: rgba(249,115,22,.25);
+    background: rgba(249,115,22,.05);
+    border-radius: 10px 0 0 10px;
+  }
+  .layer-card.l2 {
+    border-color: rgba(167,139,250,.25);
+    background: rgba(167,139,250,.05);
+    border-radius: 0 10px 10px 0;
+  }
+  .layer-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .l1 .layer-icon { background: rgba(249,115,22,.15); color: #F97316; }
+  .l2 .layer-icon { background: rgba(167,139,250,.15); color: #A78BFA; }
+  .layer-eyebrow {
+    font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+    margin-bottom: 6px;
+  }
+  .l1 .layer-eyebrow { color: #F97316; }
+  .l2 .layer-eyebrow { color: #A78BFA; }
+  .layer-title { font-size: 14px; font-weight: 600; color: #EDEDEA; margin-bottom: 6px; letter-spacing: -.01em; }
+  .layer-body  { font-size: 11px; color: #525248; line-height: 1.65; margin-bottom: 12px; }
+  .layer-example { font-size: 10px; color: #3E3E38; line-height: 1.6; }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .canvas { padding: 24px 16px 100px; }
+    .flows-nav { padding: 16px 16px 0; }
+    .topbar { padding: 12px 16px; }
+
+    .product-split { grid-template-columns: 1fr; }
+    .product-marine { border-radius: 0; }
+    .product-property { border-radius: 0 0 12px 12px; }
+
+    .layer-grid { grid-template-columns: 1fr; }
+    .layer-card.l1 { border-radius: 10px 10px 0 0; }
+    .layer-card.l2 { border-radius: 0 0 10px 10px; }
+
+    .two-col { grid-template-columns: 1fr; }
+
+    .step-flow { flex-direction: column; align-items: stretch; gap: 12px; }
+    .step { align-items: flex-start; text-align: left; flex-direction: row; gap: 16px; }
+    .step-num { margin-bottom: 0; flex-shrink: 0; }
+    .step-body-wrap { flex: 1; }
+    .step-arrow { display: none; }
+
+    .phases-3 { grid-template-columns: 1fr; }
+    .phases-4 { grid-template-columns: 1fr 1fr; }
+    .prod-row-3 { grid-template-columns: 1fr; }
+    .prod-row-4 { grid-template-columns: 1fr 1fr; }
+
+    .phase-hdr { border-radius: 0 !important; }
+    .phases-3 .phase-hdr:first-child,
+    .phases-4 .phase-hdr:first-child { border-radius: 10px 10px 0 0 !important; }
+    .phases-3 .phase-hdr:last-child,
+    .phases-4 .phase-hdr:last-child  { border-radius: 0 !important; }
+
+    .topbar-badge { display: none; }
+    .product-name { font-size: 20px; }
+    .product-top { padding: 18px 20px; }
+    .product-marine, .product-property { padding: 18px 20px; }
+  }
+
+  @media (max-width: 460px) {
+    .phases-4 { grid-template-columns: 1fr; }
+    .prod-row-4 { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
 
+<!-- Topbar -->
 <div class="topbar">
-  <div class="logo">FRAME</div>
-  <div class="topbar-sub">User flow · Frame · Frame Marine · Frame Property</div>
+  <div class="logo-mark">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="1" y="1" width="6" height="6" rx="1.5"/>
+      <rect x="9" y="1" width="6" height="6" rx="1.5"/>
+      <rect x="1" y="9" width="6" height="6" rx="1.5"/>
+      <rect x="9" y="9" width="6" height="6" rx="1.5"/>
+    </svg>
+  </div>
+  <div class="logo">Frame</div>
+  <div class="topbar-sub">User flow</div>
+  <div class="topbar-badge">Investor overview</div>
 </div>
 
+<!-- Tab nav -->
 <div class="flows-nav">
-  <div class="flow-tab active" onclick="showFlow('model')">The model</div>
-  <div class="flow-tab" onclick="showFlow('ops')">Doing work</div>
-  <div class="flow-tab" onclick="showFlow('owner')">Owner visit</div>
-  <div class="flow-tab" onclick="showFlow('charter')">Charter / Rental</div>
+  <div class="flow-tab active" onclick="showFlow('model',this)">The platform</div>
+  <div class="flow-tab" onclick="showFlow('ops',this)">Doing work</div>
+  <div class="flow-tab" onclick="showFlow('owner',this)">Owner visit</div>
+  <div class="flow-tab" onclick="showFlow('charter',this)">Charter / Rental</div>
 </div>
 
 
-<!-- ══════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════
      TAB 1 — THE MODEL
-══════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════ -->
 <div class="canvas active" id="flow-model">
 
   <div class="sec">The platform</div>
 
-  <!-- Three sections block -->
-  <div style="display:flex;flex-direction:column;gap:2px;margin-bottom:32px">
-
-    <div style="background:#111110;border:.5px solid #2A2A24;border-radius:10px 10px 0 0;padding:20px 24px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#3A3A34;margin-bottom:5px">01 — Parent platform</div>
-      <div style="font-size:20px;font-weight:700;color:#F0F0EC;margin-bottom:4px">Frame</div>
-      <div style="font-size:11px;color:#6B6B63;margin-bottom:12px">The operating system for complex managed environments. Shared infrastructure across every product.</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px">
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Asset standard</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Person profiles</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Asset register</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Vendor management</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Work orders</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Documents</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Calendar</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Owner reporting</span>
-        <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:#1A1A14;color:#6B6B63">Offline-first</span>
+  <div class="product-grid">
+    <!-- Frame parent -->
+    <div class="product-top">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#1A1A14;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9A9A92" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+        </div>
+        <div>
+          <div class="product-eyebrow">01 · Parent platform</div>
+          <div class="product-name">Frame</div>
+        </div>
+      </div>
+      <div class="product-desc">The operating system for complex managed assets. Shared infrastructure across every vertical — vessels, properties, and beyond.</div>
+      <div class="product-pills">
+        <span class="pill pill-base">Asset register</span>
+        <span class="pill pill-base">Work orders</span>
+        <span class="pill pill-base">Person profiles</span>
+        <span class="pill pill-base">Vendor management</span>
+        <span class="pill pill-base">Documents</span>
+        <span class="pill pill-base">Calendar</span>
+        <span class="pill pill-base">Owner reporting</span>
+        <span class="pill pill-base">Offline-first</span>
       </div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px">
-      <div style="background:rgba(249,115,22,.06);border:.5px solid rgba(249,115,22,.25);border-radius:0 0 0 10px;padding:20px 24px">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#F97316;margin-bottom:5px">02 — Vessel product</div>
-        <div style="font-size:20px;font-weight:700;color:#F0F0EC;margin-bottom:4px">Frame Marine</div>
-        <div style="font-size:11px;color:#6B6B63;margin-bottom:12px">Yachts and professionally managed vessels.</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">PMS</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Live monitoring</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Charter management</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">STCW / ISM</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Logbook</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Hours of rest</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(249,115,22,.1);color:#F97316">Certificates</span>
+    <!-- Marine + Property -->
+    <div class="product-split">
+      <div class="product-marine">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:11px;background:rgba(249,115,22,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 17l4-8h10l4 8H3z"/><path d="M7 17v2a2 2 0 002 2h6a2 2 0 002-2v-2"/>
+              <path d="M12 5V3"/><path d="M9 9l3-4 3 4"/>
+            </svg>
+          </div>
+          <div>
+            <div class="product-eyebrow">02 · Vessel product</div>
+            <div class="product-name" style="font-size:20px">Frame Marine</div>
+          </div>
+        </div>
+        <div class="product-desc">Yachts and professionally managed vessels.</div>
+        <div class="product-pills">
+          <span class="pill pill-mar">Planned maintenance</span>
+          <span class="pill pill-mar">Live monitoring</span>
+          <span class="pill pill-mar">Charter management</span>
+          <span class="pill pill-mar">STCW / ISM</span>
+          <span class="pill pill-mar">Logbook</span>
+          <span class="pill pill-mar">Hours of rest</span>
+          <span class="pill pill-mar">Certificates</span>
         </div>
       </div>
-      <div style="background:rgba(96,165,250,.06);border:.5px solid rgba(96,165,250,.25);border-radius:0 0 10px 0;padding:20px 24px">
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#60A5FA;margin-bottom:5px">03 — Property product</div>
-        <div style="font-size:20px;font-weight:700;color:#F0F0EC;margin-bottom:4px">Frame Property</div>
-        <div style="font-size:11px;color:#6B6B63;margin-bottom:12px">Estates, residences, and managed properties.</div>
-        <div style="display:flex;flex-wrap:wrap;gap:5px">
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">House manual</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Staff management</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Systems monitoring</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Rental / guest</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Seasonal care</span>
-          <span style="font-size:9px;padding:2px 8px;border-radius:4px;background:rgba(96,165,250,.1);color:#60A5FA">Build / refit</span>
+
+      <div class="product-property">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:11px;background:rgba(96,165,250,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div>
+            <div class="product-eyebrow">03 · Property product</div>
+            <div class="product-name" style="font-size:20px">Frame Property</div>
+          </div>
+        </div>
+        <div class="product-desc">Estates, residences, and managed properties.</div>
+        <div class="product-pills">
+          <span class="pill pill-pro">House manual</span>
+          <span class="pill pill-pro">Staff management</span>
+          <span class="pill pill-pro">Systems monitoring</span>
+          <span class="pill pill-pro">Rental / guest</span>
+          <span class="pill pill-pro">Seasonal care</span>
+          <span class="pill pill-pro">Build / refit</span>
         </div>
       </div>
     </div>
@@ -212,23 +439,34 @@
 
   <div class="sec">How both products work — two layers</div>
 
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-bottom:20px">
-    <div style="background:rgba(249,115,22,.06);border:.5px solid rgba(249,115,22,.25);border-radius:10px 0 0 10px;padding:18px 20px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#F97316;margin-bottom:6px">Layer 1 — Asset standard</div>
-      <div style="font-size:13px;font-weight:700;color:#F0F0EC;margin-bottom:6px">How this asset always operates</div>
-      <div style="font-size:10px;color:#6B6B63;line-height:1.6;margin-bottom:10px">Set once. Applies to everyone — owner, charter guest, rental guest, anyone. Never changes per visitor.</div>
-      <div style="font-size:10px;color:#9A9A92">
-        <div style="margin-bottom:3px">Marine: Aesop soap, Frette linens, crew uniform, service style</div>
-        <div>Property: housekeeping standard, welcome setup, systems at arrival temp</div>
+  <div class="layer-grid">
+    <div class="layer-card l1">
+      <div class="layer-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s-8-4.5-8-11.8V4l8-2 8 2v6.2C20 17.5 12 22 12 22z"/>
+        </svg>
+      </div>
+      <div class="layer-eyebrow">Layer 1 · Asset standard</div>
+      <div class="layer-title">How this asset always operates</div>
+      <div class="layer-body">Set once. Applies to everyone — owner, charter guest, rental guest, anyone. Never changes per visitor. This is the baseline the asset is always held to.</div>
+      <div class="layer-example">
+        Marine: Aesop soap, Frette linens, crew uniform, service style<br>
+        Property: housekeeping standard, welcome setup, systems at arrival temp
       </div>
     </div>
-    <div style="background:rgba(167,139,250,.06);border:.5px solid rgba(167,139,250,.25);border-radius:0 10px 10px 0;padding:18px 20px">
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:#A78BFA;margin-bottom:6px">Layer 2 — Person profile</div>
-      <div style="font-size:13px;font-weight:700;color:#F0F0EC;margin-bottom:6px">What's unique to this specific person</div>
-      <div style="font-size:10px;color:#6B6B63;line-height:1.6;margin-bottom:10px">Activates when someone is arriving. Layers on top of the asset standard. Auto-generates the arrival checklist.</div>
-      <div style="font-size:10px;color:#9A9A92">
-        <div style="margin-bottom:3px">Owner: espresso at 6:45, gluten-free, firm pillows</div>
-        <div>Charter guest: shellfish allergy, champagne preference — saved for next time</div>
+    <div class="layer-card l2">
+      <div class="layer-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <div class="layer-eyebrow">Layer 2 · Person profile</div>
+      <div class="layer-title">What's unique to this specific person</div>
+      <div class="layer-body">Activates when someone is arriving. Layers on top of the asset standard automatically. Generates the arrival checklist. Repeats for every visit — no re-entering preferences.</div>
+      <div class="layer-example">
+        Owner: espresso at 6:45, gluten-free, firm pillows<br>
+        Charter guest: shellfish allergy, champagne preference — saved for next time
       </div>
     </div>
   </div>
@@ -240,69 +478,81 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════
      TAB 2 — DOING WORK
-══════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════ -->
 <div class="canvas" id="flow-ops">
 
-  <div class="banner" style="margin-bottom:28px">
-    <strong>The most common flow. Happens 10× more than anything else.</strong> A crew member or staff finds an issue and needs to log it. Three steps. Same every time. Doesn't matter if Mr. Smith is aboard, a charter is running, or the vessel is in yard.
+  <div class="banner" style="margin-bottom:32px">
+    <strong>The most common flow. Happens 10x more than anything else.</strong> A crew member or staff finds an issue and needs to log it. Three steps. Same every time. Doesn't matter if the owner is aboard, a charter is running, or the vessel is in a yard.
   </div>
 
-  <!-- The 3 steps -->
   <div class="sec">Three steps — always the same</div>
 
-  <div style="display:flex;align-items:center;gap:0;margin-bottom:32px">
-
-    <div style="flex:1;text-align:center;padding:0 8px">
-      <div style="width:36px;height:36px;border-radius:50%;background:#F97316;color:#080808;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">1</div>
-      <div style="font-size:12px;font-weight:600;color:#F0F0EC;margin-bottom:4px">Open Frame</div>
-      <div style="font-size:10px;color:#6B6B63">See your tasks and any open alerts. What needs attention today.</div>
+  <div class="step-flow">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body-wrap">
+        <div class="step-title">Open Frame</div>
+        <div class="step-body">See your tasks and any open alerts. What needs attention today — right now, before doing anything else.</div>
+      </div>
     </div>
 
-    <div style="width:40px;height:.5px;background:#2A2A24;flex-shrink:0;margin-bottom:28px"></div>
-
-    <div style="flex:1;text-align:center;padding:0 8px">
-      <div style="width:36px;height:36px;border-radius:50%;background:#F97316;color:#080808;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">2</div>
-      <div style="font-size:12px;font-weight:600;color:#F0F0EC;margin-bottom:4px">Log the issue</div>
-      <div style="font-size:10px;color:#6B6B63">Title, photo, which asset, assign to someone. Ten seconds.</div>
+    <div class="step-arrow">
+      <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+        <path d="M0 8h28M22 2l8 6-8 6" stroke="#2A2A24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
 
-    <div style="width:40px;height:.5px;background:#2A2A24;flex-shrink:0;margin-bottom:28px"></div>
-
-    <div style="flex:1;text-align:center;padding:0 8px">
-      <div style="width:36px;height:36px;border-radius:50%;background:#F97316;color:#080808;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 10px">3</div>
-      <div style="font-size:12px;font-weight:600;color:#F0F0EC;margin-bottom:4px">Back to work</div>
-      <div style="font-size:10px;color:#6B6B63">Ticket is in the system. Captain sees it. Asset history updated. Done.</div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body-wrap">
+        <div class="step-title">Log the issue</div>
+        <div class="step-body">Title, photo, which asset, assign to someone. Ten seconds. No forms, no email threads, no calls.</div>
+      </div>
     </div>
 
+    <div class="step-arrow">
+      <svg width="32" height="16" viewBox="0 0 32 16" fill="none">
+        <path d="M0 8h28M22 2l8 6-8 6" stroke="#2A2A24" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body-wrap">
+        <div class="step-title">Back to work</div>
+        <div class="step-body">Ticket is in the system. Captain or estate manager sees it instantly. Asset history updated. Done.</div>
+      </div>
+    </div>
   </div>
 
-  <!-- Marine vs Property side by side -->
   <div class="sec">Marine vs Property — same flow, different context</div>
 
   <div class="two-col" style="margin-bottom:24px">
 
-    <!-- Marine -->
     <div>
-      <div class="row-label mar" style="border-radius:8px 8px 0 0;margin-bottom:0">Frame Marine</div>
+      <div class="row-label mar" style="border-radius:8px 8px 0 0;margin-bottom:0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l4-8h10l4 8H3z"/></svg>
+        Frame Marine
+      </div>
       <div style="display:flex;flex-direction:column;gap:2px">
 
         <div class="phase-cell mar">
-          <div class="pc-tag">Step 1 — Open Frame</div>
+          <div class="pc-tag">Step 1 · Open Frame</div>
           <div class="pc-title">Dashboard</div>
-          <div class="pc-body">Dmitri opens the app in the engine room. Sees 2 overdue PMS items and 1 alert on port engine coolant temp.</div>
+          <div class="pc-body">Dmitri opens the app in the engine room. Sees 2 overdue maintenance items and a coolant temp alert on the port engine.</div>
           <div class="sm">
             <div class="sm-row"><span class="sm-l">Port engine temp</span><span class="sm-tag" style="background:rgba(248,113,113,.1);color:#F87171">91°C alert</span></div>
-            <div class="sm-row"><span class="sm-l">PMS overdue</span><span class="sm-v" style="color:#F87171">2 items</span></div>
-            <div class="sm-row"><span class="sm-l">My open WOs</span><span class="sm-v">3</span></div>
+            <div class="sm-row"><span class="sm-l">Maintenance overdue</span><span class="sm-v" style="color:#F87171">2 items</span></div>
+            <div class="sm-row"><span class="sm-l">My open work orders</span><span class="sm-v">3</span></div>
           </div>
         </div>
 
         <div class="phase-cell mar">
-          <div class="pc-tag">Step 2 — Log the issue</div>
+          <div class="pc-tag">Step 2 · Log the issue</div>
           <div class="pc-title">New work order</div>
-          <div class="pc-body">Taps + New WO. Types the title. Links to port C32 engine asset. Adds a photo of the temp gauge. Assigns to himself. Priority: High.</div>
+          <div class="pc-body">Taps New. Types the title. Links to port C32 engine. Adds a photo of the temp gauge. Assigns to himself. Priority: High.</div>
           <div class="sm">
             <div class="sm-row"><span class="sm-l">Title</span><span class="sm-v" style="font-size:9px">Port engine coolant high</span></div>
             <div class="sm-row"><span class="sm-l">Asset</span><span class="sm-v" style="font-size:9px">Port CAT C32</span></div>
@@ -311,21 +561,23 @@
         </div>
 
         <div class="phase-cell mar" style="border-radius:0 0 0 8px">
-          <div class="pc-tag">Step 3 — Done</div>
-          <div class="pc-title">WO is live</div>
-          <div class="pc-body">Captain Romain sees it on his dashboard immediately. CAT vendor is linked to the asset — contact is one tap away. Dmitri goes back to the engine room.</div>
+          <div class="pc-tag">Step 3 · Done</div>
+          <div class="pc-title">Work order is live</div>
+          <div class="pc-body">Captain sees it on his dashboard instantly. The CAT vendor is already linked to the asset — one tap to call. Dmitri goes back to the engine room.</div>
         </div>
 
       </div>
     </div>
 
-    <!-- Property -->
     <div>
-      <div class="row-label pro" style="border-radius:8px 8px 0 0;margin-bottom:0">Frame Property</div>
+      <div class="row-label pro" style="border-radius:8px 8px 0 0;margin-bottom:0">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Frame Property
+      </div>
       <div style="display:flex;flex-direction:column;gap:2px">
 
         <div class="phase-cell pro">
-          <div class="pc-tag">Step 1 — Open Frame</div>
+          <div class="pc-tag">Step 1 · Open Frame</div>
           <div class="pc-title">Dashboard</div>
           <div class="pc-body">Maria opens the app walking through the Palm Beach house. Sees her housekeeping tasks for today and a maintenance item flagged yesterday.</div>
           <div class="sm">
@@ -336,9 +588,9 @@
         </div>
 
         <div class="phase-cell pro">
-          <div class="pc-tag">Step 2 — Log the issue</div>
+          <div class="pc-tag">Step 2 · Log the issue</div>
           <div class="pc-title">New work order</div>
-          <div class="pc-body">She notices the master bath faucet is dripping. Taps + New WO. Types it, takes a photo, links to master bathroom zone. Assigns to maintenance. Done.</div>
+          <div class="pc-body">She notices the master bath faucet is dripping. Types it, takes a photo, links to the master bathroom zone. Assigns to maintenance.</div>
           <div class="sm">
             <div class="sm-row"><span class="sm-l">Title</span><span class="sm-v" style="font-size:9px">Master bath faucet dripping</span></div>
             <div class="sm-row"><span class="sm-l">Zone</span><span class="sm-v" style="font-size:9px">Master bathroom</span></div>
@@ -347,9 +599,9 @@
         </div>
 
         <div class="phase-cell pro" style="border-radius:0 0 8px 0">
-          <div class="pc-tag">Step 3 — Done</div>
-          <div class="pc-title">WO is live</div>
-          <div class="pc-body">Estate manager sees it immediately. Plumber vendor is linked — contact one tap away. Maria continues her housekeeping rounds. Ten seconds total.</div>
+          <div class="pc-tag">Step 3 · Done</div>
+          <div class="pc-title">Work order is live</div>
+          <div class="pc-body">Estate manager sees it immediately. Plumber vendor is already linked — one tap to contact. Maria continues her rounds. Ten seconds total.</div>
         </div>
 
       </div>
@@ -364,137 +616,145 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════
      TAB 3 — OWNER VISIT
-══════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════ -->
 <div class="canvas" id="flow-owner">
 
   <div class="banner" style="margin-bottom:28px">
-    The asset standard never changes. When Mr. Smith arrives, his <strong>person profile layers on top</strong> and generates the arrival checklist automatically. Operations continue running underneath — nothing stops.
+    The asset standard never changes. When Mr. Smith arrives, his <strong>person profile layers on top</strong> and generates the arrival checklist automatically. Operations keep running underneath — nothing stops.
   </div>
 
   <div class="sec">Three phases — arriving, in residence, departing</div>
 
-  <!-- Phase headers -->
-  <div class="phases phases-3" style="margin-bottom:2px">
-    <div class="phase-hdr" style="border-radius:8px 0 0 0">Arriving</div>
+  <div class="phases phases-3">
+    <div class="phase-hdr" style="border-radius:10px 0 0 0">Arriving</div>
     <div class="phase-hdr">In residence</div>
-    <div class="phase-hdr" style="border-radius:0 8px 0 0">Departing</div>
+    <div class="phase-hdr" style="border-radius:0 10px 0 0">Departing</div>
   </div>
 
-  <!-- Marine row -->
-  <div class="row-label mar" style="margin:2px 0 2px">Frame Marine</div>
+  <div class="row-label mar" style="margin:2px 0 2px">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l4-8h10l4 8H3z"/></svg>
+    Frame Marine
+  </div>
   <div class="prod-row prod-row-3" style="margin-bottom:2px">
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
       <div class="pc-tag">Owner arriving</div>
       <div class="pc-title">Vessel prep</div>
-      <div class="pc-body">
-        <ul>
-          <li>Smith profile activates</li>
-          <li>Arrival checklist auto-generates</li>
-          <li>Provisions to his spec</li>
-          <li>Peanut-free galley (Emma)</li>
-          <li>Espresso machine ready 6:45</li>
-          <li>Crew briefed on family prefs</li>
-        </ul>
-      </div>
-      <div class="sm" style="margin-top:8px">
+      <div class="pc-body"><ul>
+        <li>Smith profile activates</li>
+        <li>Arrival checklist auto-generates</li>
+        <li>Provisions to his spec</li>
+        <li>Peanut-free galley (Emma)</li>
+        <li>Espresso machine ready 6:45</li>
+        <li>Crew briefed on family prefs</li>
+      </ul></div>
+      <div class="sm" style="margin-top:10px">
         <div class="sm-row"><span class="sm-l">Asset standard</span><span class="sm-tag" style="background:rgba(249,115,22,.1);color:#F97316">Aesop, Frette</span></div>
         <div class="sm-row"><span class="sm-l">+ Smith profile</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Espresso, peanut-free</span></div>
       </div>
     </div>
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      </div>
       <div class="pc-tag">In residence</div>
       <div class="pc-title">Service running</div>
-      <div class="pc-body">
-        <ul>
-          <li>His preferences visible to all crew</li>
-          <li>Any requests become tasks instantly</li>
-          <li>Itinerary managed in calendar</li>
-          <li>Chef sees dietary requirements</li>
-          <li>WOs and PMS continue quietly</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Preferences visible to all crew</li>
+        <li>Requests become tasks instantly</li>
+        <li>Itinerary managed in calendar</li>
+        <li>Chef sees dietary requirements</li>
+        <li>Work orders and PMS continue</li>
+      </ul></div>
     </div>
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </div>
       <div class="pc-tag">Owner departing</div>
       <div class="pc-title">Close-down</div>
-      <div class="pc-body">
-        <ul>
-          <li>Departure checklist runs</li>
-          <li>Vessel secured and stowed</li>
-          <li>Systems to standby mode</li>
-          <li>Crew rotation if needed</li>
-          <li>Smith profile deactivates</li>
-          <li>Back to ops mode</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Departure checklist runs</li>
+        <li>Vessel secured and stowed</li>
+        <li>Systems to standby mode</li>
+        <li>Crew rotation if needed</li>
+        <li>Smith profile deactivates</li>
+        <li>Back to ops mode</li>
+      </ul></div>
     </div>
 
   </div>
 
-  <!-- Property row -->
-  <div class="row-label pro" style="margin:2px 0 2px">Frame Property</div>
+  <div class="row-label pro" style="margin:2px 0 2px">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Frame Property
+  </div>
   <div class="prod-row prod-row-3" style="margin-bottom:2px">
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
       <div class="pc-tag">Owner arriving</div>
       <div class="pc-title">House opening</div>
-      <div class="pc-body">
-        <ul>
-          <li>Smith profile activates</li>
-          <li>House opening checklist runs</li>
-          <li>Systems brought to temp (68°F)</li>
-          <li>Provisions ordered to his spec</li>
-          <li>Staff briefed on family prefs</li>
-          <li>WSJ delivery arranged</li>
-        </ul>
-      </div>
-      <div class="sm" style="margin-top:8px">
+      <div class="pc-body"><ul>
+        <li>Smith profile activates</li>
+        <li>House opening checklist runs</li>
+        <li>Systems brought to 68°F</li>
+        <li>Provisions ordered to his spec</li>
+        <li>Staff briefed on family prefs</li>
+        <li>WSJ delivery arranged</li>
+      </ul></div>
+      <div class="sm" style="margin-top:10px">
         <div class="sm-row"><span class="sm-l">Property standard</span><span class="sm-tag" style="background:rgba(96,165,250,.1);color:#60A5FA">Aesop, linens</span></div>
-        <div class="sm-row"><span class="sm-l">+ Smith profile</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Temp, WSJ, gluten-free</span></div>
+        <div class="sm-row"><span class="sm-l">+ Smith profile</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Temp, WSJ, GF</span></div>
       </div>
     </div>
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      </div>
       <div class="pc-tag">In residence</div>
       <div class="pc-title">Household running</div>
-      <div class="pc-body">
-        <ul>
-          <li>Daily housekeeping schedule active</li>
-          <li>Chef sees all dietary requirements</li>
-          <li>Children's schedules visible to staff</li>
-          <li>Any issues logged as WOs</li>
-          <li>Maintenance continues in background</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Daily housekeeping active</li>
+        <li>Chef sees dietary requirements</li>
+        <li>Children's schedules visible</li>
+        <li>Issues logged as work orders</li>
+        <li>Maintenance continues</li>
+      </ul></div>
     </div>
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      </div>
       <div class="pc-tag">Owner departing</div>
       <div class="pc-title">House closing</div>
-      <div class="pc-body">
-        <ul>
-          <li>Closing checklist — room by room</li>
-          <li>Systems shut down or to standby</li>
-          <li>Seasonal close if applicable</li>
-          <li>Staff schedule reduced</li>
-          <li>Next opening pre-planned</li>
-          <li>Back to maintenance ops</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Closing checklist, room by room</li>
+        <li>Systems shut down or standby</li>
+        <li>Seasonal close if applicable</li>
+        <li>Staff schedule reduced</li>
+        <li>Next opening pre-planned</li>
+        <li>Back to maintenance ops</li>
+      </ul></div>
     </div>
 
   </div>
 
-  <!-- Ops bar -->
   <div class="ops-bar">
-    <div class="ops-bar-lbl">Ops always running →</div>
+    <div class="ops-bar-lbl">Always running</div>
     <span class="ops-pill">Work orders</span>
-    <span class="ops-pill">PMS schedule</span>
+    <span class="ops-pill">Maintenance schedule</span>
     <span class="ops-pill">Monitoring</span>
     <span class="ops-pill">Vendor coordination</span>
     <span class="ops-pill">Documents</span>
@@ -504,154 +764,164 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════
      TAB 4 — CHARTER / RENTAL
-══════════════════════════════════════════════════════════ -->
+══════════════════════════════════════════════ -->
 <div class="canvas" id="flow-charter">
 
   <div class="banner" style="margin-bottom:28px">
-    A third-party guest books the asset. The <strong>asset standard stays exactly the same</strong> — Aesop soap, Frette linens, the lot. Their <strong>person profile layers on top</strong> just like the owner's does. Preferences are saved and ready for next time they book.
+    A third-party guest books the asset. The <strong>asset standard stays exactly the same</strong> — Aesop soap, Frette linens, the lot. Their <strong>person profile layers on top</strong> just like the owner's does. Preferences are saved and ready for their next booking.
   </div>
 
   <div class="sec">Four phases — booking, arrival, in stay, departure</div>
 
-  <!-- Phase headers -->
-  <div class="phases phases-4" style="margin-bottom:2px">
-    <div class="phase-hdr" style="border-radius:8px 0 0 0">Booking</div>
+  <div class="phases phases-4">
+    <div class="phase-hdr" style="border-radius:10px 0 0 0">Booking</div>
     <div class="phase-hdr">Arrival</div>
     <div class="phase-hdr">In stay</div>
-    <div class="phase-hdr" style="border-radius:0 8px 0 0">Departure</div>
+    <div class="phase-hdr" style="border-radius:0 10px 0 0">Departure</div>
   </div>
 
-  <!-- Marine row -->
-  <div class="row-label mar" style="margin:2px 0 2px">Frame Marine — Charter</div>
+  <div class="row-label mar" style="margin:2px 0 2px">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 17l4-8h10l4 8H3z"/></svg>
+    Frame Marine · Charter
+  </div>
   <div class="prod-row prod-row-4" style="margin-bottom:2px">
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      </div>
       <div class="pc-tag">Booking confirmed</div>
       <div class="pc-title">Charter created</div>
-      <div class="pc-body">
-        <ul>
-          <li>Dates, guests, broker, APA</li>
-          <li>Guest profile loaded or created</li>
-          <li>Repeat guests: prefs auto-fill</li>
-          <li>Appears on calendar</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Dates, guests, broker, APA</li>
+        <li>Guest profile loaded or created</li>
+        <li>Repeat guests: prefs auto-fill</li>
+        <li>Appears on calendar</li>
+      </ul></div>
     </div>
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
       <div class="pc-tag">Guest arriving</div>
       <div class="pc-title">Vessel prep</div>
-      <div class="pc-body">
-        <ul>
-          <li>Guest profile activates</li>
-          <li>Checklist: vessel standard + guest prefs</li>
-          <li>Provisioning to their spec</li>
-          <li>Crew briefed</li>
-        </ul>
-      </div>
-      <div class="sm" style="margin-top:8px">
-        <div class="sm-row"><span class="sm-l">Vessel standard</span><span class="sm-tag" style="background:rgba(249,115,22,.1);color:#F97316">Aesop, Frette ✓</span></div>
+      <div class="pc-body"><ul>
+        <li>Guest profile activates</li>
+        <li>Vessel standard + guest prefs</li>
+        <li>Provisioning to their spec</li>
+        <li>Crew briefed</li>
+      </ul></div>
+      <div class="sm" style="margin-top:10px">
+        <div class="sm-row"><span class="sm-l">Vessel standard</span><span class="sm-tag" style="background:rgba(249,115,22,.1);color:#F97316">Aesop, Frette</span></div>
         <div class="sm-row"><span class="sm-l">+ Guest prefs</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">No shellfish</span></div>
       </div>
     </div>
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      </div>
       <div class="pc-tag">Charter active</div>
       <div class="pc-title">Running</div>
-      <div class="pc-body">
-        <ul>
-          <li>Itinerary in calendar</li>
-          <li>APA spend tracked live</li>
-          <li>Requests become tasks</li>
-          <li>WOs and PMS continue</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Itinerary in calendar</li>
+        <li>APA spend tracked live</li>
+        <li>Requests become tasks</li>
+        <li>Work orders and PMS continue</li>
+      </ul></div>
     </div>
 
     <div class="phase-cell mar">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M5 12l7-7M5 12l7 7"/></svg>
+      </div>
       <div class="pc-tag">Charter closes</div>
       <div class="pc-title">Close-out</div>
-      <div class="pc-body">
-        <ul>
-          <li>APA reconciled</li>
-          <li>Final costs to owner P&L</li>
-          <li>Guest profile updated + saved</li>
-          <li>Vessel back to ops mode</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>APA reconciled</li>
+        <li>Final costs to owner P&amp;L</li>
+        <li>Guest profile updated and saved</li>
+        <li>Vessel back to ops mode</li>
+      </ul></div>
     </div>
 
   </div>
 
-  <!-- Property row -->
-  <div class="row-label pro" style="margin:2px 0 2px">Frame Property — Rental / Guest stay</div>
+  <div class="row-label pro" style="margin:2px 0 2px">
+    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    Frame Property · Rental / Guest stay
+  </div>
   <div class="prod-row prod-row-4" style="margin-bottom:2px">
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      </div>
       <div class="pc-tag">Booking confirmed</div>
       <div class="pc-title">Stay created</div>
-      <div class="pc-body">
-        <ul>
-          <li>Dates, guests, rental terms</li>
-          <li>Guest profile loaded or created</li>
-          <li>Repeat guests: prefs auto-fill</li>
-          <li>Appears on calendar</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Dates, guests, rental terms</li>
+        <li>Guest profile loaded or created</li>
+        <li>Repeat guests: prefs auto-fill</li>
+        <li>Appears on calendar</li>
+      </ul></div>
     </div>
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>
       <div class="pc-tag">Guest arriving</div>
       <div class="pc-title">Property prep</div>
-      <div class="pc-body">
-        <ul>
-          <li>Guest profile activates</li>
-          <li>House opening checklist runs</li>
-          <li>Property standard + guest prefs</li>
-          <li>Staff briefed</li>
-        </ul>
-      </div>
-      <div class="sm" style="margin-top:8px">
-        <div class="sm-row"><span class="sm-l">Prop. standard</span><span class="sm-tag" style="background:rgba(96,165,250,.1);color:#60A5FA">Aesop, linens ✓</span></div>
+      <div class="pc-body"><ul>
+        <li>Guest profile activates</li>
+        <li>House opening checklist runs</li>
+        <li>Property standard + guest prefs</li>
+        <li>Staff briefed</li>
+      </ul></div>
+      <div class="sm" style="margin-top:10px">
+        <div class="sm-row"><span class="sm-l">Prop. standard</span><span class="sm-tag" style="background:rgba(96,165,250,.1);color:#60A5FA">Aesop, linens</span></div>
         <div class="sm-row"><span class="sm-l">+ Guest prefs</span><span class="sm-tag" style="background:rgba(167,139,250,.1);color:#A78BFA">Dietary, temp</span></div>
       </div>
     </div>
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 3"/></svg>
+      </div>
       <div class="pc-tag">In stay</div>
       <div class="pc-title">Running</div>
-      <div class="pc-body">
-        <ul>
-          <li>Daily housekeeping continues</li>
-          <li>Guest requests become tasks</li>
-          <li>Costs tracked if applicable</li>
-          <li>Maintenance runs in background</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Daily housekeeping continues</li>
+        <li>Guest requests become tasks</li>
+        <li>Costs tracked if applicable</li>
+        <li>Maintenance runs in background</li>
+      </ul></div>
     </div>
 
     <div class="phase-cell pro">
+      <div class="pc-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 12h14M5 12l7-7M5 12l7 7"/></svg>
+      </div>
       <div class="pc-tag">Guest departs</div>
       <div class="pc-title">Close-out</div>
-      <div class="pc-body">
-        <ul>
-          <li>Departure checklist runs</li>
-          <li>Damage check if needed</li>
-          <li>Guest profile saved for next time</li>
-          <li>Property back to maintenance ops</li>
-        </ul>
-      </div>
+      <div class="pc-body"><ul>
+        <li>Departure checklist runs</li>
+        <li>Damage check if needed</li>
+        <li>Guest profile saved for next time</li>
+        <li>Property back to maintenance ops</li>
+      </ul></div>
     </div>
 
   </div>
 
-  <!-- Ops bar -->
   <div class="ops-bar">
-    <div class="ops-bar-lbl">Ops always running →</div>
+    <div class="ops-bar-lbl">Always running</div>
     <span class="ops-pill">Work orders</span>
-    <span class="ops-pill">PMS schedule</span>
+    <span class="ops-pill">Maintenance schedule</span>
     <span class="ops-pill">Monitoring</span>
     <span class="ops-pill">Vendor coordination</span>
     <span class="ops-pill">Unaffected by charter / rental</span>
@@ -661,11 +931,11 @@
 
 
 <script>
-  function showFlow(id) {
+  function showFlow(id, el) {
     document.querySelectorAll('.canvas').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('flow-' + id).classList.add('active');
-    event.target.classList.add('active');
+    el.classList.add('active');
   }
 </script>
 </body>
