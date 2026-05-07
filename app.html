@@ -188,7 +188,11 @@
         <span>Charter</span>
         <button onclick="event.stopPropagation();Upgrade.show('charter')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(45,212,191,.12);color:#2dd4bf;border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
       </div>
-      <div id="charter-sb"></div>
+
+      <div class="ni" data-page="charter" data-label="Charters" onclick="navTo('charter',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V6.414a1 1 0 00-.293-.707L11 3l-1.293-1.293A1 1 0 009 1.586V2H4zm5-1v1.586l2.707 2.707A2 2 0 0112 6.414V12a3 3 0 01-3 3H4a3 3 0 01-3-3V4a3 3 0 013-3h5zM5 7h6v1H5V7zm0 2h6v1H5V9zm0 2h4v1H5v-1z" opacity=".85"/></svg>
+        <span class="ni-lbl">Charters</span>
+      </div>
 
       <!-- CREW -->
       <div class="sec-lbl">Crew</div>
@@ -402,8 +406,7 @@
       </div>
 
       <!-- CHARTER MODULE PAGES -->
-      <div id="page-charter" class="page-flex" style="padding:0;overflow:hidden">
-        <div id="charter-detail" style="display:flex;flex-direction:column;flex:1;overflow:hidden"></div>
+      <div id="page-charter" class="page">
       </div>
 
       <!-- MONITORING -->

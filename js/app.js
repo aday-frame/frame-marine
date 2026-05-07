@@ -904,6 +904,4 @@ document.addEventListener('DOMContentLoaded', () => {
     navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
   }
 
-  // Populate charter booking list in sidebar
-  if (window.Charter) Charter.renderSidebar();
 });
