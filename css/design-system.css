@@ -414,14 +414,15 @@ textarea.inp { resize: vertical; min-height: 72px; line-height: 1.6; }
 #toast {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(80px);
+  opacity: 0;
   background: var(--bg4); border: .5px solid var(--bd2);
   border-radius: var(--r8); padding: 10px 18px;
   font-size: 13px; color: var(--txt);
-  transition: transform var(--t3); z-index: 9999;
+  transition: transform var(--t3), opacity var(--t3); z-index: 9999;
   pointer-events: none; white-space: nowrap;
   box-shadow: 0 8px 32px rgba(0,0,0,.5);
 }
-#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 #toast.toast-ok  { border-color: var(--grn-bd); color: var(--grn); }
 #toast.toast-err { border-color: var(--red-bd);  color: var(--red); }
 
