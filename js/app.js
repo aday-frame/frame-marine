@@ -239,11 +239,11 @@ function switchVessel(vesselId) {
     if (v) {
       dot.style.background = v.color;
       name.textContent = v.name;
-      type.textContent = v.type;
+      type.innerHTML = escHtml(v.type) + ' &nbsp;<span style="font-size:9px;font-weight:700;color:#60A5FA;letter-spacing:.04em">MARINE</span>';
     } else if (p) {
       dot.style.background = p.color;
       name.textContent = p.name;
-      type.textContent = p.type;
+      type.innerHTML = escHtml(p.type) + ' &nbsp;<span style="font-size:9px;font-weight:700;color:#4ADE80;letter-spacing:.04em">PROPERTIES</span>';
     }
   }
 
