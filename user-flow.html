@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frame — User Flow</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #080808;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    color: #F0F0EC;
+    min-height: 100vh;
+    overflow-x: auto;
+  }
+
+  /* ── Top bar */
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 24px;
+    border-bottom: .5px solid #1E1E18;
+    position: sticky; top: 0; z-index: 100;
+    background: #080808;
+  }
+  .logo { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: #F0F0EC; }
+  .logo span { color: #F97316; }
+  .topbar-sub { font-size: 11px; color: #52524A; }
+
+  /* ── Tab selector */
+  .flows-nav {
+    display: flex; gap: 6px; padding: 20px 24px 0;
+    border-bottom: .5px solid #1E1E18;
+  }
+  .flow-tab {
+    padding: 8px 16px; border-radius: 8px 8px 0 0;
+    font-size: 11px; font-weight: 600; cursor: pointer;
+    border: .5px solid #1E1E18; border-bottom: none;
+    background: transparent; color: #6B6B63;
+    transition: all .15s;
+  }
+  .flow-tab.active { background: #111110; color: #F0F0EC; border-color: #2A2A24; }
+  .flow-tab:hover:not(.active) { color: #9A9A92; }
+
+  /* ── Canvas */
+  .canvas {
+    display: none;
+    padding: 40px 24px 80px;
+    min-width: 900px;
+  }
+  .canvas.active { display: block; }
+
+  /* ── Section label */
+  .section-lbl {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: #52524A; margin-bottom: 20px;
+  }
+
+  /* ── Row of nodes */
+  .flow-row {
+    display: flex; align-items: flex-start; gap: 0;
+    margin-bottom: 0; position: relative;
+  }
+
+  /* ── Column group */
+  .flow-col {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px; flex-shrink: 0;
+  }
+
+  /* ── Arrow connector */
+  .arr {
+    display: flex; align-items: center;
+    padding: 0 8px; margin-top: 20px; flex-shrink: 0;
+  }
+  .arr svg { color: #2A2A24; }
+  .arr-down {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 4px 0; flex-shrink: 0;
+  }
+
+  /* ── Node */
+  .node {
+    border-radius: 10px;
+    border: .5px solid #1E1E18;
+    background: #0D0D0B;
+    padding: 14px 16px;
+    width: 180px;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .node.entry {
+    border-color: #F97316;
+    background: rgba(249,115,22,.06);
+  }
+  .node.screen {
+    border-color: #2A2A24;
+    background: #111110;
+  }
+  .node.decision {
+    border-color: #A78BFA;
+    background: rgba(167,139,250,.06);
+  }
+  .node.action {
+    border-color: #4ADE80;
+    background: rgba(74,222,128,.05);
+  }
+  .node.knowledge {
+    border-color: #60A5FA;
+    background: rgba(96,165,250,.05);
+  }
+  .node.end {
+    border-color: #2A2A24;
+    background: #0D0D0B;
+    opacity: .7;
+  }
+
+  .node-tag {
+    font-size: 8px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; margin-bottom: 6px;
+  }
+  .node.entry .node-tag  { color: #F97316; }
+  .node.screen .node-tag { color: #6B6B63; }
+  .node.decision .node-tag { color: #A78BFA; }
+  .node.action .node-tag { color: #4ADE80; }
+  .node.knowledge .node-tag { color: #60A5FA; }
+  .node.end .node-tag { color: #52524A; }
+
+  .node-title {
+    font-size: 12px; font-weight: 600; color: #F0F0EC;
+    margin-bottom: 4px; line-height: 1.3;
+  }
+  .node-body {
+    font-size: 10px; color: #6B6B63; line-height: 1.5;
+  }
+  .node-body li { list-style: none; padding-left: 8px; position: relative; }
+  .node-body li::before { content: '·'; position: absolute; left: 0; color: #3A3A34; }
+
+  /* ── Badge on node */
+  .node-badge {
+    display: inline-block;
+    font-size: 8px; font-weight: 700; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 4px; margin-top: 6px;
+  }
+
+  /* ── Flow paths */
+  .flow-stage {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 32px 0;
+    border-bottom: .5px solid #1A1A14;
+    margin-bottom: 0;
+  }
+  .flow-stage:last-child { border-bottom: none; }
+
+  .stage-label {
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .1em; color: #3A3A34; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .stage-label::after {
+    content: ''; flex: 1; height: .5px; background: #1A1A14;
+  }
+
+  /* ── Split path */
+  .split {
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .split-branch {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+  }
+  .split-label {
+    font-size: 9px; font-weight: 600; color: #52524A;
+    text-transform: uppercase; letter-spacing: .06em;
+    text-align: center; margin-bottom: 4px;
+  }
+
+  /* ── Connector lines between stages */
+  .down-arrow {
+    display: flex; justify-content: center;
+    padding: 8px 0; color: #2A2A24;
+  }
+
+  /* ── Wide node */
+  .node.wide { width: 380px; }
+  .node.full { width: 100%; max-width: 760px; }
+
+  /* ── Persona header */
+  .persona-bar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .persona-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; flex-shrink: 0;
+  }
+  .persona-name { font-size: 16px; font-weight: 600; }
+  .persona-role { font-size: 11px; color: #6B6B63; }
+
+  /* ── Mode badge */
+  .mode-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 6px;
+    font-size: 10px; font-weight: 600;
+    border: .5px solid;
+  }
+  .mode-badge.owner { border-color: #F97316; color: #F97316; background: rgba(249,115,22,.08); }
+  .mode-badge.charter { border-color: #A78BFA; color: #A78BFA; background: rgba(167,139,250,.08); }
+  .mode-badge.ops { border-color: #60A5FA; color: #60A5FA; background: rgba(96,165,250,.08); }
+
+  /* ── Three-mode overview */
+  .mode-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+    margin-bottom: 32px;
+  }
+  .mode-card {
+    border-radius: 10px; padding: 16px;
+    border: .5px solid;
+  }
+  .mode-card.owner { border-color: rgba(249,115,22,.3); background: rgba(249,115,22,.05); }
+  .mode-card.charter { border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.05); }
+  .mode-card.ops { border-color: rgba(96,165,250,.3); background: rgba(96,165,250,.05); }
+  .mode-card-title { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .mode-card.owner .mode-card-title { color: #F97316; }
+  .mode-card.charter .mode-card-title { color: #A78BFA; }
+  .mode-card.ops .mode-card-title { color: #60A5FA; }
+  .mode-card-sub { font-size: 10px; color: #6B6B63; line-height: 1.5; }
+
+  /* ── Screen mockup mini */
+  .screen-mock {
+    border-radius: 8px; border: .5px solid #2A2A24;
+    background: #0A0A08; padding: 10px 12px;
+    font-size: 10px; margin-top: 8px;
+  }
+  .sm-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 5px 0; border-bottom: .5px solid #1A1A14;
+  }
+  .sm-row:last-child { border-bottom: none; }
+  .sm-lbl { color: #6B6B63; }
+  .sm-val { color: #F0F0EC; font-weight: 600; }
+  .sm-badge {
+    font-size: 8px; font-weight: 700; padding: 1px 6px;
+    border-radius: 3px;
+  }
+
+  /* ── Legend */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 10px; color: #6B6B63;
+  }
+  .legend-dot {
+    width: 10px; height: 10px; border-radius: 3px; border: .5px solid;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">FRAME <span>·</span> MARINE</div>
+  <div class="topbar-sub">User flow — structural overview</div>
+</div>
+
+<div class="flows-nav">
+  <div class="flow-tab active" onclick="showFlow('overview')">Overview</div>
+  <div class="flow-tab" onclick="showFlow('owner')">Owner flow</div>
+  <div class="flow-tab" onclick="showFlow('charter')">Charter guest flow</div>
+  <div class="flow-tab" onclick="showFlow('captain')">Captain / crew flow</div>
+</div>
+
+
+<!-- ═══════════════════════════════════ OVERVIEW ═══════════════════════════════════ -->
+<div class="canvas active" id="flow-overview">
+
+  <div class="section-lbl">Three modes — one vessel</div>
+
+  <div class="mode-grid">
+    <div class="mode-card owner">
+      <div class="mode-card-title">Owner mode</div>
+      <div class="mode-card-sub">
+        Mr. Smith is aboard or arriving.<br>
+        His personal profile drives the experience — preferences, standards, family, routines surface automatically.<br><br>
+        <strong style="color:#F0F0EC">Primary object: the person.</strong>
+      </div>
+    </div>
+    <div class="mode-card charter">
+      <div class="mode-card-title">Charter mode</div>
+      <div class="mode-card-sub">
+        A paying guest has booked the vessel.<br>
+        Their profile drives the experience for this booking. Preferences are captured and retained for repeat charters.<br><br>
+        <strong style="color:#F0F0EC">Primary object: the booking.</strong>
+      </div>
+    </div>
+    <div class="mode-card ops">
+      <div class="mode-card-title">Ops mode</div>
+      <div class="mode-card-sub">
+        No guest aboard. Vessel is in maintenance, yard, or transit.<br>
+        Operations are the primary view — WOs, PMS, monitoring, provisioning.<br><br>
+        <strong style="color:#F0F0EC">Primary object: the vessel.</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-lbl" style="margin-top:32px">Who uses Frame and how they enter</div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:40px">
+
+    <!-- Owner -->
+    <div class="node entry" style="width:220px">
+      <div class="node-tag">Owner / Principal</div>
+      <div class="node-title">Mr. Smith</div>
+      <div class="node-body">
+        <ul>
+          <li>Sees his full portfolio</li>
+          <li>Yacht, estates, jet — all assets</li>
+          <li>His preferences live here</li>
+          <li>Owner reports & financials</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(249,115,22,.12);color:#F97316">Cross-asset profile</div>
+    </div>
+
+    <!-- Captain -->
+    <div class="node screen" style="width:220px">
+      <div class="node-tag">Captain / Manager</div>
+      <div class="node-title">Romain</div>
+      <div class="node-body">
+        <ul>
+          <li>Full operational access</li>
+          <li>Sees today's priorities first</li>
+          <li>Manages crew & work orders</li>
+          <li>Owns the vessel's day-to-day</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(240,240,236,.06);color:#9A9A92">Operations-first view</div>
+    </div>
+
+    <!-- Chief Eng -->
+    <div class="node screen" style="width:220px">
+      <div class="node-tag">Chief Engineer</div>
+      <div class="node-title">Dmitri</div>
+      <div class="node-body">
+        <ul>
+          <li>Engineering WOs & PMS</li>
+          <li>Monitoring dashboard</li>
+          <li>Parts & inventory</li>
+          <li>Vendor coordination</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(240,240,236,.06);color:#9A9A92">Technical view</div>
+    </div>
+
+    <!-- Charter guest -->
+    <div class="node decision" style="width:220px">
+      <div class="node-tag">Charter Guest</div>
+      <div class="node-title">The Johnsons</div>
+      <div class="node-body">
+        <ul>
+          <li>Temporary booking relationship</li>
+          <li>Profile captured at booking</li>
+          <li>Preferences persist for next time</li>
+          <li>Guest portal (roadmap)</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(167,139,250,.1);color:#A78BFA">Booking-scoped</div>
+    </div>
+
+    <!-- Vendor -->
+    <div class="node end" style="width:220px">
+      <div class="node-tag">Vendor / Contractor</div>
+      <div class="node-title">CAT Dealer, Teak Masters</div>
+      <div class="node-body">
+        <ul>
+          <li>Assigned WOs only</li>
+          <li>No internal data visible</li>
+          <li>Photo upload, status update</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(240,240,236,.04);color:#52524A">Roadmap</div>
+    </div>
+
+  </div>
+
+  <div class="section-lbl">The three knowledge layers</div>
+
+  <div style="display:flex;gap:12px;flex-wrap:wrap">
+
+    <div class="node knowledge" style="width:260px">
+      <div class="node-tag">Layer 1 — Person</div>
+      <div class="node-title">Mr. Smith's profile</div>
+      <div class="node-body">
+        <ul>
+          <li>Soap brand, pillow preference</li>
+          <li>Dietary requirements</li>
+          <li>Morning routine, wake time</li>
+          <li>Family members & their prefs</li>
+          <li>Pets, allergies, quirks</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(96,165,250,.1);color:#60A5FA">Travels across all assets</div>
+    </div>
+
+    <div class="node knowledge" style="width:260px">
+      <div class="node-tag">Layer 2 — Vessel / Property</div>
+      <div class="node-title">Lady M manual</div>
+      <div class="node-body">
+        <ul>
+          <li>How this vessel works</li>
+          <li>System references & specs</li>
+          <li>Bridge & engine procedures</li>
+          <li>Guest standards on board</li>
+          <li>Emergency contacts & protocols</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(96,165,250,.1);color:#60A5FA">Stays with the vessel</div>
+    </div>
+
+    <div class="node knowledge" style="width:260px">
+      <div class="node-tag">Layer 3 — Asset / System</div>
+      <div class="node-title">Port CAT C32 engine</div>
+      <div class="node-body">
+        <ul>
+          <li>Specs, serial, install date</li>
+          <li>Full service history</li>
+          <li>Linked vendor (CAT Dealer)</li>
+          <li>Linked parts (thermostat, filters)</li>
+          <li>All WOs ever raised on it</li>
+        </ul>
+      </div>
+      <div class="node-badge" style="background:rgba(96,165,250,.1);color:#60A5FA">Stays with the asset</div>
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════ OWNER FLOW ═══════════════════════════════════ -->
+<div class="canvas" id="flow-owner">
+
+  <div class="persona-bar">
+    <div class="persona-dot" style="background:#F97316;color:#080808">MS</div>
+    <div>
+      <div class="persona-name">Mr. Smith — Owner</div>
+      <div class="persona-role">Owns Lady M, 5 estates, G650. Checks in occasionally, expects everything to be ready.</div>
+    </div>
+  </div>
+
+  <!-- Stage 1 -->
+  <div class="flow-stage">
+    <div class="stage-label">Entry</div>
+    <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+
+      <div class="node entry" style="width:200px">
+        <div class="node-tag">Opens Frame</div>
+        <div class="node-title">Portfolio view</div>
+        <div class="node-body">All his assets at a glance. Lady M, estates, jet. Each showing current mode and any alerts.</div>
+        <div class="screen-mock">
+          <div class="sm-row"><span class="sm-lbl">Lady M</span><span class="sm-badge" style="background:rgba(96,165,250,.1);color:#60A5FA">Ops mode</span></div>
+          <div class="sm-row"><span class="sm-lbl">Palm Beach</span><span class="sm-badge" style="background:rgba(249,115,22,.1);color:#F97316">Owner arrives Fri</span></div>
+          <div class="sm-row"><span class="sm-lbl">Aspen</span><span class="sm-badge" style="background:rgba(74,222,128,.1);color:#4ADE80">Ready</span></div>
+        </div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node screen" style="width:200px">
+        <div class="node-tag">Taps Lady M</div>
+        <div class="node-title">Vessel overview</div>
+        <div class="node-body">Current status, upcoming events, open alerts, recent activity. One screen, no clutter.</div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node decision" style="width:200px">
+        <div class="node-tag">What does he want?</div>
+        <div class="node-title">Intent branches here</div>
+        <div class="node-body">Check status? Review finances? Look at upcoming charter? Each takes a different path.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stage 2 — Branches -->
+  <div class="flow-stage">
+    <div class="stage-label">What the owner actually does</div>
+    <div class="split">
+
+      <div class="split-branch">
+        <div class="split-label">Check financials</div>
+        <div class="node action" style="width:170px">
+          <div class="node-tag">Owner Suite</div>
+          <div class="node-title">P&L view</div>
+          <div class="node-body">YTD revenue, costs, charter breakdown. One page, clear numbers.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">Preparing to arrive</div>
+        <div class="node action" style="width:170px">
+          <div class="node-tag">His profile</div>
+          <div class="node-title">Arrival mode</div>
+          <div class="node-body">His preferences auto-generate the arrival checklist. Captain sees it immediately.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">Upcoming charter</div>
+        <div class="node action" style="width:170px">
+          <div class="node-tag">Charter</div>
+          <div class="node-title">Charter detail</div>
+          <div class="node-body">Guest profile, itinerary, APA balance, open costs.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">Check maintenance</div>
+        <div class="node action" style="width:170px">
+          <div class="node-tag">Work orders</div>
+          <div class="node-title">Open items</div>
+          <div class="node-body">What's open, what's overdue, what needs his approval.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stage 3 — Profile -->
+  <div class="flow-stage">
+    <div class="stage-label">His profile — the cross-asset layer</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+
+      <div class="node knowledge" style="width:240px">
+        <div class="node-tag">Mr. Smith profile</div>
+        <div class="node-title">Personal standards</div>
+        <div class="node-body">
+          <ul>
+            <li>Soap: Aesop Geranium bar</li>
+            <li>Pillow: firm, 4 per side</li>
+            <li>Coffee: double espresso, 6:45am</li>
+            <li>Room temp: 68°F always</li>
+            <li>No overhead lighting</li>
+            <li>WSJ print edition daily</li>
+          </ul>
+        </div>
+        <div class="node-badge" style="background:rgba(96,165,250,.1);color:#60A5FA">Visible at every asset</div>
+      </div>
+
+      <div class="node knowledge" style="width:240px">
+        <div class="node-tag">Family</div>
+        <div class="node-title">Mrs. Smith + kids</div>
+        <div class="node-body">
+          <ul>
+            <li>Mrs. Smith: gluten-free</li>
+            <li>Emma (8): peanut allergy</li>
+            <li>Max (11): vegetarian</li>
+            <li>Dog: Rufus, golden retriever</li>
+            <li>Nanny: travels with family</li>
+          </ul>
+        </div>
+        <div class="node-badge" style="background:rgba(96,165,250,.1);color:#60A5FA">Visible at every asset</div>
+      </div>
+
+      <div class="node knowledge" style="width:240px">
+        <div class="node-tag">What this unlocks</div>
+        <div class="node-title">Arrival checklist — auto</div>
+        <div class="node-body">
+          Captain sees "Smith family arriving Friday." Frame generates checklist from his profile: Aesop soap stocked, firm pillows, gluten-free provisions, peanut-free galley, dog bedding out.
+        </div>
+        <div class="node-badge" style="background:rgba(249,115,22,.1);color:#F97316">Auto from profile</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════ CHARTER FLOW ═══════════════════════════════════ -->
+<div class="canvas" id="flow-charter">
+
+  <div class="persona-bar">
+    <div class="persona-dot" style="background:#A78BFA;color:#080808">JG</div>
+    <div>
+      <div class="persona-name">The Johnsons — Charter Guests</div>
+      <div class="persona-role">Chartering Lady M for 7 days. 4 guests, broker arranged. Second time chartering.</div>
+    </div>
+  </div>
+
+  <!-- Stage 1 — Pre-charter -->
+  <div class="flow-stage">
+    <div class="stage-label">Before they arrive — captain's side</div>
+    <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+
+      <div class="node screen" style="width:190px">
+        <div class="node-tag">Booking confirmed</div>
+        <div class="node-title">Charter created</div>
+        <div class="node-body">Dates, broker, guests, APA amount. Status: Upcoming.</div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node knowledge" style="width:190px">
+        <div class="node-tag">Guest profile pulled</div>
+        <div class="node-title">Johnson prefs</div>
+        <div class="node-body">They chartered before. Their preferences load automatically: shellfish allergy, champagne on arrival, specific room layout.</div>
+        <div class="node-badge" style="background:rgba(167,139,250,.1);color:#A78BFA">Retained from last charter</div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node action" style="width:190px">
+        <div class="node-tag">Checklist generated</div>
+        <div class="node-title">Pre-charter prep</div>
+        <div class="node-body">Provisioning list, cabin setup, champagne stocked, shellfish-free galley confirmed. Assigned to crew.</div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node screen" style="width:190px">
+        <div class="node-tag">Charter active</div>
+        <div class="node-title">Itinerary running</div>
+        <div class="node-body">Port schedule, APA spend tracking, any guest requests logged as tasks.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stage 2 — During charter -->
+  <div class="flow-stage">
+    <div class="stage-label">During the charter</div>
+    <div class="split">
+
+      <div class="split-branch">
+        <div class="split-label">Guest requests</div>
+        <div class="node screen" style="width:170px">
+          <div class="node-tag">Task created</div>
+          <div class="node-title">Ad-hoc requests</div>
+          <div class="node-body">Mr. Johnson wants snorkelling gear moved to swim platform. Logged, assigned to deck crew.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">APA tracking</div>
+        <div class="node action" style="width:170px">
+          <div class="node-tag">Costs tab</div>
+          <div class="node-title">Running spend</div>
+          <div class="node-body">Fuel, provisions, marina fees logged against APA. Running balance visible in real time.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">Ops still running</div>
+        <div class="node screen" style="width:170px">
+          <div class="node-tag">Background</div>
+          <div class="node-title">Crew handles ops</div>
+          <div class="node-body">PMS, monitoring, engine logs continue in background. Guest never sees this.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stage 3 — Post charter -->
+  <div class="flow-stage">
+    <div class="stage-label">After — what persists</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+
+      <div class="node action" style="width:220px">
+        <div class="node-tag">Charter closes</div>
+        <div class="node-title">APA reconciliation</div>
+        <div class="node-body">Final costs tallied. APA balance settled. P&L recorded — feeds owner's financial view.</div>
+      </div>
+
+      <div class="node knowledge" style="width:220px">
+        <div class="node-tag">Profile updated</div>
+        <div class="node-title">Johnsons saved</div>
+        <div class="node-body">Any new preferences noted this charter are saved to their profile. Next time they charter, everything is already there.</div>
+        <div class="node-badge" style="background:rgba(167,139,250,.1);color:#A78BFA">Persists for next charter</div>
+      </div>
+
+      <div class="node screen" style="width:220px">
+        <div class="node-tag">Vessel reverts</div>
+        <div class="node-title">Back to ops mode</div>
+        <div class="node-body">Charter is closed. WOs and PMS become the primary view again. Maintenance window opens.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════ CAPTAIN FLOW ═══════════════════════════════════ -->
+<div class="canvas" id="flow-captain">
+
+  <div class="persona-bar">
+    <div class="persona-dot" style="background:#4ADE80;color:#080808">RC</div>
+    <div>
+      <div class="persona-name">Romain — Captain</div>
+      <div class="persona-role">Opens Frame every morning. Needs to know what's urgent, what's coming, and what he needs to tell the crew.</div>
+    </div>
+  </div>
+
+  <!-- Stage 1 — Morning -->
+  <div class="flow-stage">
+    <div class="stage-label">Morning — first open of the day</div>
+    <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+
+      <div class="node entry" style="width:190px">
+        <div class="node-tag">Opens Frame</div>
+        <div class="node-title">Dashboard</div>
+        <div class="node-body">What's open, what's overdue, what's coming today. Alerts front and centre.</div>
+        <div class="screen-mock">
+          <div class="sm-row"><span class="sm-lbl">Open WOs</span><span class="sm-val">4</span></div>
+          <div class="sm-row"><span class="sm-lbl">PMS overdue</span><span class="sm-val" style="color:#F87171">2</span></div>
+          <div class="sm-row"><span class="sm-lbl">Charter in</span><span class="sm-val">3 days</span></div>
+        </div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node decision" style="width:190px">
+        <div class="node-tag">Priority check</div>
+        <div class="node-title">What needs action?</div>
+        <div class="node-body">Port engine WO-001 is high priority. Generator service is overdue. Charter prep needs to start.</div>
+      </div>
+
+      <div class="arr"><svg width="20" height="16" viewBox="0 0 20 16" fill="currentColor"><path d="M12 0l8 8-8 8-1.4-1.4L17.2 9H0V7h17.2L10.6 1.4z"/></svg></div>
+
+      <div class="node action" style="width:190px">
+        <div class="node-tag">Work orders</div>
+        <div class="node-title">Opens WO-001</div>
+        <div class="node-body">Port engine coolant. Sees subtasks, Dmitri's comments, CAT vendor linked. Updates status to In Progress.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stage 2 — Branches by task type -->
+  <div class="flow-stage">
+    <div class="stage-label">Romain's three daily jobs</div>
+    <div class="split">
+
+      <div class="split-branch">
+        <div class="split-label">Operations</div>
+        <div class="node screen" style="width:175px">
+          <div class="node-tag">Work orders</div>
+          <div class="node-title">Assign & track</div>
+          <div class="node-body">Creates new WOs, assigns to crew, updates status, signs off on completions.</div>
+        </div>
+        <div class="down-arrow">
+          <svg width="12" height="16" viewBox="0 0 12 16" fill="#2A2A24"><path d="M6 16l6-6H7V0H5v10H0z"/></svg>
+        </div>
+        <div class="node screen" style="width:175px">
+          <div class="node-tag">PMS</div>
+          <div class="node-title">Maintenance</div>
+          <div class="node-body">Reviews overdue items, works with Dmitri to schedule service windows.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">Charter prep</div>
+        <div class="node decision" style="width:175px">
+          <div class="node-tag">Charter</div>
+          <div class="node-title">Johnson arrival</div>
+          <div class="node-body">Opens charter. Checks guest profile — shellfish allergy flagged. Reviews itinerary.</div>
+        </div>
+        <div class="down-arrow">
+          <svg width="12" height="16" viewBox="0 0 12 16" fill="#2A2A24"><path d="M6 16l6-6H7V0H5v10H0z"/></svg>
+        </div>
+        <div class="node action" style="width:175px">
+          <div class="node-tag">Checklist</div>
+          <div class="node-title">Pre-arrival list</div>
+          <div class="node-body">Provisioning, cabin setup, welcome setup. Assigns to stewardess and chef.</div>
+        </div>
+      </div>
+
+      <div class="split-branch">
+        <div class="split-label">Vessel knowledge</div>
+        <div class="node knowledge" style="width:175px">
+          <div class="node-tag">Asset hub</div>
+          <div class="node-title">Port engine page</div>
+          <div class="node-body">Opens from WO. Sees full history, specs, CAT vendor, linked parts, all past WOs.</div>
+        </div>
+        <div class="down-arrow">
+          <svg width="12" height="16" viewBox="0 0 12 16" fill="#2A2A24"><path d="M6 16l6-6H7V0H5v10H0z"/></svg>
+        </div>
+        <div class="node knowledge" style="width:175px">
+          <div class="node-tag">Vessel manual</div>
+          <div class="node-title">SOP reference</div>
+          <div class="node-body">Pulls up engine room entry SOP. Links to Dmitri for the procedure.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Stage 3 — End of day -->
+  <div class="flow-stage">
+    <div class="stage-label">End of day — what Romain logs</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+
+      <div class="node screen" style="width:200px">
+        <div class="node-tag">Logbook</div>
+        <div class="node-title">Passage entry</div>
+        <div class="node-body">Logs today's movements, weather, crew on watch. Official record.</div>
+      </div>
+
+      <div class="node action" style="width:200px">
+        <div class="node-tag">Hours of rest</div>
+        <div class="node-title">Crew compliance</div>
+        <div class="node-body">Logs crew hours. STCW compliance checked automatically. Any violations flagged.</div>
+      </div>
+
+      <div class="node screen" style="width:200px">
+        <div class="node-tag">Tomorrow</div>
+        <div class="node-title">Calendar check</div>
+        <div class="node-body">Provisions delivery at 0800. Generator service at 1000. Charter guests arrive Friday.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+  function showFlow(id) {
+    document.querySelectorAll('.canvas').forEach(c => c.classList.remove('active'));
+    document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('flow-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+
+</body>
+</html>
