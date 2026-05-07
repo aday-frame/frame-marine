@@ -1146,12 +1146,54 @@
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
   }
 
-  function printFlow() {
-    document.querySelectorAll('.canvas').forEach(c => c.style.display = 'block');
-    window.print();
-    document.querySelectorAll('.canvas').forEach(c => c.style.display = '');
-    document.querySelector('.canvas.active').style.display = 'block';
+  async function printFlow() {
+    const btn = document.querySelector('.pdf-btn');
+    btn.textContent = 'Generating…';
+    btn.disabled = true;
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'l', unit: 'mm', format: 'letter' });
+    const PW = 279.4, PH = 215.9; // letter landscape mm
+
+    const canvases = Array.from(document.querySelectorAll('.canvas'));
+    const activeCanvas = document.querySelector('.canvas.active');
+
+    let first = true;
+    for (const canv of canvases) {
+      canvases.forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+      canv.style.display = 'block';
+      await new Promise(r => setTimeout(r, 120));
+
+      const shot = await html2canvas(canv, {
+        backgroundColor: '#060606',
+        scale: 1.5,
+        useCORS: true,
+        logging: false,
+      });
+
+      const ratio = Math.min(PW / shot.width, PH / shot.height);
+      const w = shot.width * ratio;
+      const h = shot.height * ratio;
+      const x = (PW - w) / 2;
+      const y = (PH - h) / 2;
+
+      if (!first) pdf.addPage('letter', 'l');
+      pdf.setFillColor(6, 6, 6);
+      pdf.rect(0, 0, PW, PH, 'F');
+      pdf.addImage(shot.toDataURL('image/jpeg', 0.9), 'JPEG', x, y, w, h);
+      first = false;
+    }
+
+    canvases.forEach(c => { c.style.display = 'none'; c.classList.remove('active'); });
+    activeCanvas.style.display = 'block';
+    activeCanvas.classList.add('active');
+
+    pdf.save('frame-overview.pdf');
+    btn.textContent = 'PDF';
+    btn.disabled = false;
   }
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </body>
 </html>
