@@ -69,7 +69,7 @@ const Owner = (() => {
     const reportDate = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
 
     wrap.innerHTML = `
-      <div style="max-width:1100px;padding:18px 20px 48px">
+      <div style="padding:18px 20px 48px">
 
         <!-- Header -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
@@ -85,7 +85,7 @@ const Owner = (() => {
         </div>
 
         <!-- KPI row -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
+        <div class="_ownerkpi" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
           ${_kpi('YTD Revenue',   USD(totalRev),   'charter fees received',        'var(--grn)')}
           ${_kpi('YTD Costs',     USD(totalCosts), 'operational expenses',         'var(--or)')}
           ${_kpi('YTD Net P&L',   (totalNet>=0?'+':'')+USD(totalNet), 'after all costs', totalNet >= 0 ? 'var(--grn)' : 'var(--red)')}
@@ -217,7 +217,7 @@ const Owner = (() => {
   if (!document.getElementById('_owner_css')) {
     const s = document.createElement('style');
     s.id = '_owner_css';
-    s.textContent = '@media(max-width:768px){._ownergrid{grid-template-columns:1fr!important}}';
+    s.textContent = '@media(max-width:768px){._ownergrid{grid-template-columns:1fr!important}._ownerkpi{grid-template-columns:1fr 1fr!important}}';
     document.head.appendChild(s);
   }
 

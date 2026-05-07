@@ -1149,14 +1149,16 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
     grid-template-columns: 1fr !important;
   }
 
-  /* Horizontal scroll for any tbl-scroll container */
-  .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Horizontal scroll for any tbl-scroll or tbl-wrap container */
+  .tbl-scroll, .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tbl { min-width: 480px; }
 
   /* Work orders table: horizontal scroll */
   #wo-table-wrap .wo-list-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   #wo-table-wrap .wo-tbl { min-width: 560px; }
   .wo-stat { padding: 14px 16px; }
   .wo-stat-num { font-size: 36px; }
+
 
   /* Panel footer: stack buttons */
   .panel-footer { flex-wrap: wrap; }

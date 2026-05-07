@@ -18,14 +18,26 @@ const Inventory = (() => {
     const wrap = document.getElementById('page-inventory');
     if (!wrap) return;
     const items = _items();
-    const low   = items.filter(i => i.qty <= i.reorderAt);
+    const low   = items.filter(i => i.qty <= i.reorderAt && i.qty > 0);
+    const out   = items.filter(i => i.qty === 0);
+    const totalVal = items.reduce((s, i) => s + (i.qty * (i.cost || 0)), 0);
     const visible = _tab === 'All' ? items : items.filter(i => i.category === _tab);
 
     wrap.innerHTML = `
-      <div style="padding:18px 20px 48px">
+      <div style="padding:0 0 48px">
+
+        <!-- Stat bar -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd)">
+          <div class="wo-stat"><div class="wo-stat-num">${items.length}</div><div class="wo-stat-lbl">Total items</div></div>
+          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${low.length}</div><div class="wo-stat-lbl">Low stock</div></div>
+          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--red)">${out.length}</div><div class="wo-stat-lbl">Out of stock</div></div>
+          <div class="wo-stat" style="border-right:none"><div class="wo-stat-num" style="font-size:18px">${_fmt(totalVal)}</div><div class="wo-stat-lbl">Total value</div></div>
+        </div>
+
+        <div style="padding:14px 20px 0">
 
         <!-- Low stock alert -->
-        ${low.length ? `
+        ${low.length || out.length ? `
         <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(251,191,36,.08);border:.5px solid rgba(251,191,36,.3);border-radius:8px;margin-bottom:20px">
           <svg viewBox="0 0 16 16" fill="var(--yel)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
           <span style="font-size:12px;color:var(--yel);font-weight:500">${low.length} item${low.length > 1 ? 's' : ''} at or below reorder level. Time to restock.</span>
@@ -79,14 +91,7 @@ const Inventory = (() => {
           return `<div class="tbl-wrap"><table class="tbl">${THEAD}<tbody>${tbody || EMPTY}</tbody></table></div>`;
         })()}
 
-        <!-- Value summary -->
-        ${items.length ? `
-        <div style="margin-top:16px;display:flex;gap:20px;font-size:11px;color:var(--txt3)">
-          <span>Total items: <strong style="color:var(--txt)">${items.length}</strong></span>
-          <span>Total value: <strong style="color:var(--txt)">${_fmt(items.reduce((s,i) => s + i.qty * i.cost, 0))}</strong></span>
-          <span>Low stock: <strong style="color:${low.length ? 'var(--yel)' : 'var(--grn)'}">${low.length}</strong></span>
-        </div>` : ''}
-
+        </div>
       </div>
     `;
   }

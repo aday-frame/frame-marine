@@ -762,6 +762,7 @@
 <script>
 /* ── REQUESTS ── */
 const Requests = window.Requests = {};
+Requests._filter = 'all';
 
 Requests._demo = [
   { id:'REQ-001', vessel:'v1', title:'Hot tub not heating', desc:'The hot tub on the upper deck has not been heating since yesterday evening. We noticed it around 7pm.', location:'Upper Deck', contact:'Sarah Collins — sarah@charterguest.com', submitted:'2026-05-07T08:14:00', status:'new' },
@@ -824,6 +825,8 @@ Requests.openDetail = function(id) {
   `);
 };
 
+Requests.setFilter = function(f) { Requests._filter = f; Requests.render(); };
+
 Requests.render = function() {
   const wrap = document.getElementById('page-requests');
   if (!wrap) return;
@@ -831,22 +834,31 @@ Requests.render = function() {
   const newCount  = reqs.filter(r => r.status === 'new').length;
   const revCount  = reqs.filter(r => r.status === 'reviewing').length;
   const convCount = reqs.filter(r => r.status === 'converted').length;
+  const closedCount = reqs.filter(r => r.status === 'closed').length;
+
+  const f = Requests._filter;
+  const visible = f === 'all' ? reqs : reqs.filter(r => r.status === f);
 
   const statsBar = `
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd)">
       <div class="wo-stat"><div class="wo-stat-num" style="color:var(--or)">${newCount}</div><div class="wo-stat-lbl">New</div></div>
       <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${revCount}</div><div class="wo-stat-lbl">Reviewing</div></div>
       <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${convCount}</div><div class="wo-stat-lbl">Converted</div></div>
-      <div class="wo-stat"><div class="wo-stat-num">${reqs.length}</div><div class="wo-stat-lbl">Total</div></div>
+      <div class="wo-stat" style="border-right:none"><div class="wo-stat-num" style="color:var(--txt3)">${reqs.length}</div><div class="wo-stat-lbl">Total</div></div>
     </div>`;
 
-  const topBar = `<div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px">
-    <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none">Share portal link ↗</a>
+  const filterBar = `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0 4px;flex-wrap:wrap;gap:8px">
+    <div class="wo-status-tabs">
+      ${[['all','All',reqs.length],['new','New',newCount],['reviewing','Reviewing',revCount],['converted','Converted',convCount],['closed','Closed',closedCount]].map(([val,lbl,cnt]) =>
+        `<button class="wo-status-tab ${f===val?'active':''}" onclick="Requests.setFilter('${val}')">${lbl}${cnt?' ('+cnt+')':''}</button>`
+      ).join('')}
+    </div>
+    <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none;flex-shrink:0">Share portal link ↗</a>
   </div>`;
 
-  const empty = `<div class="empty"><div class="empty-title">No requests yet</div><div class="empty-sub">Share the portal link with guests or crew to receive requests</div></div>`;
+  const empty = `<div class="empty"><div class="empty-title">No requests${f !== 'all' ? ' matching this filter' : ' yet'}</div><div class="empty-sub">${f === 'all' ? 'Share the portal link with guests or crew to receive requests' : ''}</div></div>`;
 
-  const rows = reqs.map(r => {
+  const rows = visible.map(r => {
     const submitted = new Date(r.submitted).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const time = new Date(r.submitted).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
     return `<tr style="cursor:pointer" onclick="Requests.openDetail('${r.id}')">
@@ -866,20 +878,22 @@ Requests.render = function() {
     </tr>`;
   }).join('');
 
-  wrap.innerHTML = `<div style="padding:18px 20px 80px">
+  wrap.innerHTML = `<div style="padding:0 0 80px">
     ${statsBar}
-    ${topBar}
-    ${reqs.length === 0 ? empty : `<div class="tbl-wrap"><table class="tbl">
-      <thead><tr>
-        <th>Request</th>
-        <th style="width:180px">Contact</th>
-        <th style="width:140px">Location</th>
-        <th style="width:110px">Submitted</th>
-        <th style="width:110px">Status</th>
-        <th style="width:80px"></th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`}
+    <div style="padding:0 20px">
+      ${filterBar}
+      ${visible.length === 0 ? empty : `<div class="tbl-wrap" style="margin-top:8px"><table class="tbl">
+        <thead><tr>
+          <th>Request</th>
+          <th style="width:180px">Contact</th>
+          <th style="width:140px">Location</th>
+          <th style="width:110px">Submitted</th>
+          <th style="width:110px">Status</th>
+          <th style="width:80px"></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`}
+    </div>
   </div>`;
   Requests.updateBadge();
 };

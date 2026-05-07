@@ -81,7 +81,7 @@ Charter._renderList = function() {
     <div style="padding:0 0 60px">
       <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd)">
         <div class="wo-stat"><div class="wo-stat-num">${charters.length}</div><div class="wo-stat-lbl">Total</div></div>
-        <div class="wo-stat"><div class="wo-stat-num" style="color:#2dd4bf">${active}</div><div class="wo-stat-lbl">Active</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${active}</div><div class="wo-stat-lbl">Active</div></div>
         <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${upcoming}</div><div class="wo-stat-lbl">Upcoming</div></div>
         <div class="wo-stat" style="border-right:none"><div class="wo-stat-num" style="color:var(--txt3)">${completed}</div><div class="wo-stat-lbl">Completed</div></div>
       </div>
@@ -252,7 +252,7 @@ Charter._tabItinerary = function(c) {
     <div style="display:grid;grid-template-columns:40px 1fr;gap:16px;padding:14px 0;border-bottom:.5px solid var(--bd)">
       <div style="text-align:center">
         <div style="font-size:9px;font-weight:700;color:var(--txt4);text-transform:uppercase">Day</div>
-        <div style="font-size:18px;font-weight:600;color:#2dd4bf">${i + 1}</div>
+        <div style="font-size:18px;font-weight:600;color:var(--or)">${i + 1}</div>
         <div style="font-size:9px;color:var(--txt4)">${_chFmt(d.date).slice(0,6)}</div>
       </div>
       <div>
@@ -278,7 +278,7 @@ Charter._tabAPA = function(c, apaExp, apaLeft) {
     </tr>`).join('');
 
   const pct = c.apa ? Math.min(100, Math.round((apaExp / c.apa) * 100)) : 0;
-  const barColor = pct > 90 ? 'var(--red)' : pct > 70 ? 'var(--yel)' : '#2dd4bf';
+  const barColor = pct > 90 ? 'var(--red)' : pct > 70 ? 'var(--yel)' : 'var(--grn)';
 
   return `
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px">

@@ -129,7 +129,7 @@
 .shell.sb-collapsed .sb-toggle-btn { margin-left: 0; }
 .shell.sb-collapsed .sb-toggle-btn svg { transform: rotate(180deg); }
 .shell.sb-collapsed .sb-scroll { padding: 4px; }
-.shell.sb-collapsed .sec-lbl { display: none; }
+.shell.sb-collapsed .sec-lbl { display: none !important; }
 .shell.sb-collapsed .ni {
   justify-content: center; padding: 9px 4px;
   position: relative;
@@ -194,7 +194,7 @@
 }
 
 /* Page body */
-.page-body { flex: 1; overflow-y: auto; position: relative; }
+.page-body { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
 
 /* Pages (show/hide) */
 .page { display: none; }

@@ -336,6 +336,7 @@ textarea.inp { resize: vertical; min-height: 72px; line-height: 1.6; }
 .fp-sep   { width: .5px; background: var(--bd2); margin: 0 6px; align-self: stretch; flex-shrink: 0; }
 
 /* ── TABLES ── */
+.tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; }
 .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
 .tbl thead th {
   padding: 8px 12px; background: var(--bg2);
