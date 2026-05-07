@@ -108,8 +108,14 @@ WO.renderList = function(wos) {
     return 0;
   });
 
+  // Mobile: render card list instead of table
+  if (window.innerWidth <= 768) {
+    WO.renderMobCards(wrap, list);
+    return;
+  }
+
   if (list.length === 0) {
-    wrap.innerHTML = `${WO._mobTabsHTML()}
+    wrap.innerHTML = `
       <div class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -118,7 +124,6 @@ WO.renderList = function(wos) {
         <div class="empty-title">No work orders</div>
         <div class="empty-sub">Adjust your filters or create a new work order</div>
       </div>`;
-    WO._bindMobTabs(wrap);
     return;
   }
 
@@ -142,9 +147,8 @@ WO.renderList = function(wos) {
 
   const tbody = list.map(w => WO.rowHTML(w)).join('');
 
-  wrap.innerHTML = `${WO._mobTabsHTML()}<div class="wo-list-wrap"><table class="wo-tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
+  wrap.innerHTML = `<div class="wo-list-wrap"><table class="wo-tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
 
-  WO._bindMobTabs(wrap);
   wrap.querySelectorAll('tbody tr[data-id]').forEach(row => {
     row.addEventListener('click', () => WO.openPanel(row.dataset.id));
   });
@@ -192,6 +196,53 @@ WO.rowHTML = function(w) {
 WO.statusBadge = function(s) {
   const map = { open: 'b-open', 'in-progress': 'b-progress', done: 'b-done', 'on-hold': 'b-hold' };
   return `<span class="badge ${map[s] || 'b-open'}">${FM.statusLabel(s)}</span>`;
+};
+
+/* ── MOBILE CARD LIST ── */
+WO.renderMobCards = function(wrap, list) {
+  const pColors = { high: 'var(--red)', medium: '#f59e0b', low: 'var(--txt4)' };
+  const pLabels = { high: 'High', medium: 'Medium', low: 'Low' };
+
+  const cards = list.map(w => {
+    const pc      = pColors[w.priority] || 'var(--txt4)';
+    const overdue = w.due && w.status !== 'done' && w.due < '2026-05-07';
+    const dueStr  = w.due ? fmtDate(w.due) : null;
+    const cr      = FM.getCrew(w.assignee);
+    const subtasksDone  = (w.subtasks || []).filter(s => s.done).length;
+    const subtasksTotal = (w.subtasks || []).length;
+
+    return `
+      <div class="wo-mob-card-row" data-id="${w.id}">
+        <div class="wo-mob-card-pip" style="background:${pc}"></div>
+        <div class="wo-mob-card-body">
+          <div class="wo-mob-card-title">${escHtml(w.title)}</div>
+          <div class="wo-mob-card-meta">
+            <span class="wo-id" style="font-size:10px">${w.id}</span>
+            ${w.system ? `<span class="wo-mob-dot">·</span><span>${escHtml(w.system)}</span>` : ''}
+            ${subtasksTotal ? `<span class="wo-mob-dot">·</span><span>${subtasksDone}/${subtasksTotal} tasks</span>` : ''}
+          </div>
+          <div class="wo-mob-card-foot">
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+              ${WO.statusBadge(w.status)}
+              <span class="wo-mob-pri" style="color:${pc}">
+                <span class="wo-pip" style="background:${pc}"></span>${pLabels[w.priority]}
+              </span>
+              ${overdue ? `<span class="wo-mob-overdue">Overdue</span>` : (dueStr ? `<span class="wo-mob-due">${dueStr}</span>` : '')}
+            </div>
+            ${cr ? `<div class="wo-av" style="background:${cr.color};flex-shrink:0" title="${escHtml(cr.name)}">${cr.initials}</div>` : ''}
+          </div>
+        </div>
+        <svg class="wo-mob-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+      </div>`;
+  }).join('');
+
+  const empty = `<div style="padding:40px 24px;text-align:center;color:var(--txt3);font-size:13px">No work orders</div>`;
+
+  wrap.innerHTML = `${WO._mobTabsHTML()}<div class="wo-mob-list">${list.length ? cards : empty}</div>`;
+  WO._bindMobTabs(wrap);
+  wrap.querySelectorAll('.wo-mob-card-row').forEach(row => {
+    row.addEventListener('click', () => WO.openPanel(row.dataset.id));
+  });
 };
 
 /* ── DETAIL PANEL ── */
