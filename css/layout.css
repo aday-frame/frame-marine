@@ -502,7 +502,11 @@
 @media (max-width: 768px) {
   .mob-nav { display: block; }
   .mob-hamburger { display: flex; }
-  .page-body { padding-bottom: 72px; }
+  /* All page containers need enough bottom room to clear the fixed bottom nav */
+  .page-body { padding-bottom: 80px; }
+  /* Inner page wrappers that set their own padding also need clearance */
+  .page > div:last-child,
+  .page > [style*="padding"] { padding-bottom: max(80px, calc(env(safe-area-inset-bottom, 0px) + 72px)) !important; }
   .page-hdr { height: 46px; padding: 0 14px; }
   .page-title { font-size: 14px; }
   #new-btn { display: none !important; }
@@ -510,4 +514,7 @@
   .tb-right .btn-icon:not(#notif-btn) { display: none !important; }
   .tb-avatar { display: none !important; }
   .sb-foot { display: none; }
+  /* Modal full-height fix for mobile keyboard/nav bar */
+  .modal-overlay { align-items: flex-end; }
+  .modal-box { border-radius: 16px 16px 0 0; max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 48px); }
 }

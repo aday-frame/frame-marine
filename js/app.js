@@ -56,6 +56,7 @@ function navTo(pageId, clickedEl, skipPush) {
     hub:           'Hub',
     reports:       'Reports',
     kb:            'Vessel manual',
+    notifications: 'Notifications',
   };
   const titleEl = document.getElementById('page-title');
   if (titleEl) titleEl.textContent = titles[pageId] || pageId;
@@ -89,6 +90,7 @@ function navTo(pageId, clickedEl, skipPush) {
     hub:           () => window.Hub && Hub.render(),
     reports:       () => window.Reports && Reports.render(),
     kb:            () => window.KB && KB.render(),
+    notifications: () => renderNotifications(),
     settings:      () => window.Settings && Settings.init(),
   };
   if (inits[pageId]) inits[pageId]();
@@ -184,9 +186,9 @@ function renderVesselDropdown() {
     </div>
   `).join('') + `
     <div class="dropdown-sep"></div>
-    <div class="dropdown-item" onclick="showToast('Vessel management coming soon')">
-      <svg viewBox="0 0 16 16" fill="currentColor" style="width:13px;height:13px">
-        <path d="M8 1a7 7 0 100 14A7 7 0 008 1zm.75 3.5v3.19l2.28 2.28-1.06 1.06-2.5-2.5A.75.75 0 017.25 8V4.5h1.5z"/>
+    <div class="dropdown-item" onclick="openManageVessels()">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:13px;height:13px">
+        <circle cx="8" cy="8" r="6"/><path d="M8 5v6M5 8h6"/>
       </svg>
       Manage vessels
     </div>
@@ -387,6 +389,284 @@ function showToast(msg, type = '') {
   App._toastTimer = setTimeout(() => { t.className = ''; }, 2800);
 }
 
+/* ── MANAGE VESSELS ── */
+function openManageVessels() {
+  document.getElementById('vessel-dropdown').classList.remove('open');
+  const vesselRows = FM.vessels.map(v => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--bd)">
+      <div style="width:10px;height:10px;border-radius:50%;background:${v.color};flex-shrink:0"></div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500;color:var(--txt)">${escHtml(v.name)}</div>
+        <div style="font-size:11px;color:var(--txt3)">${escHtml(v.type)} · ${escHtml(v.loa)} · ${escHtml(v.flag)}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-xs" onclick="openTransferVessel('${v.id}')">Transfer</button>
+        <button class="btn btn-danger btn-xs" onclick="confirmDeleteVessel('${v.id}','${escHtml(v.name).replace(/'/g,"\\'")}')">Remove</button>
+      </div>
+    </div>`).join('');
+
+  openModal(`
+    <div style="display:flex;flex-direction:column;gap:20px">
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:12px">Your vessels</div>
+        ${vesselRows}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button class="btn btn-primary" onclick="openAddVessel()">+ Add vessel</button>
+      </div>
+      <div style="font-size:11px;color:var(--txt4);text-align:center">To transfer a vessel, the new owner must have a Frame account.</div>
+    </div>
+  `, 'Manage vessels');
+}
+window.openManageVessels = openManageVessels;
+
+function openAddVessel() {
+  openModal(`
+    <form onsubmit="saveNewVessel(event)" style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Vessel name *</label>
+          <input class="inp" id="av-name" placeholder="Lady M" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Type *</label>
+          <select class="inp" id="av-type">
+            <option>Motor Yacht</option><option>Sailing Yacht</option><option>Catamaran</option><option>Superyacht</option><option>RIB</option><option>Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">LOA *</label>
+          <input class="inp" id="av-loa" placeholder="48m">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Flag state</label>
+          <input class="inp" id="av-flag" placeholder="CYM">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Home port</label>
+          <input class="inp" id="av-port" placeholder="Gustavia, St. Barths">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">MMSI</label>
+          <input class="inp" id="av-mmsi" placeholder="319123456">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary btn-sm">Add vessel</button>
+      </div>
+    </form>
+  `, 'Add vessel');
+}
+window.openAddVessel = openAddVessel;
+
+function saveNewVessel(e) {
+  e.preventDefault();
+  const name = document.getElementById('av-name').value.trim();
+  const type = document.getElementById('av-type').value;
+  const loa  = document.getElementById('av-loa').value.trim();
+  const flag = document.getElementById('av-flag').value.trim() || 'INT';
+  const port = document.getElementById('av-port').value.trim();
+  const mmsi = document.getElementById('av-mmsi').value.trim();
+  if (!name || !loa) return;
+  const colors = ['#60A5FA','#4ADE80','#F87171','#FACC15','#A78BFA','#2DD4BF'];
+  const newV = {
+    id: 'v' + Date.now(), name, type, loa, flag, port: port || 'Unknown', mmsi: mmsi || '',
+    color: colors[FM.vessels.length % colors.length], status: 'In service',
+    zones: [], systems: [],
+  };
+  FM.vessels.push(newV);
+  renderVesselDropdown();
+  closeModal();
+  showToast(name + ' added', 'ok');
+}
+window.saveNewVessel = saveNewVessel;
+
+function openTransferVessel(vesselId) {
+  const v = FM.vessels.find(x => x.id === vesselId);
+  if (!v) return;
+  openModal(`
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <p style="font-size:13px;color:var(--txt2);line-height:1.6">Transfer <strong style="color:var(--txt)">${escHtml(v.name)}</strong> to another Frame account. The new owner will be invited to accept the transfer.</p>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">New owner email *</label>
+        <input class="inp" id="transfer-email" placeholder="captain@example.com" type="email">
+      </div>
+      <div>
+        <label style="font-size:11px;font-weight:600;color:var(--txt3);display:block;margin-bottom:5px">Reason (optional)</label>
+        <input class="inp" id="transfer-reason" placeholder="Sale, management change…">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="submitTransfer('${vesselId}','${escHtml(v.name).replace(/'/g,"\\'")}')">Send transfer request</button>
+      </div>
+    </div>
+  `, 'Transfer vessel');
+}
+window.openTransferVessel = openTransferVessel;
+
+function submitTransfer(vesselId, name) {
+  const email = (document.getElementById('transfer-email')?.value || '').trim();
+  if (!email) { showToast('Enter a valid email', 'err'); return; }
+  closeModal();
+  showToast('Transfer request sent to ' + email, 'ok');
+}
+window.submitTransfer = submitTransfer;
+
+function confirmDeleteVessel(vesselId, name) {
+  openModal(`
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <p style="font-size:13px;color:var(--txt2);line-height:1.6">Remove <strong style="color:var(--txt)">${escHtml(name)}</strong> from your account? All associated data (work orders, documents, logs) will be archived.</p>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteVessel('${vesselId}')">Remove vessel</button>
+      </div>
+    </div>
+  `, 'Remove vessel');
+}
+window.confirmDeleteVessel = confirmDeleteVessel;
+
+function deleteVessel(vesselId) {
+  FM.vessels = FM.vessels.filter(v => v.id !== vesselId);
+  if (App.currentVesselId === vesselId) switchVessel(FM.vessels[0]?.id || 'all');
+  renderVesselDropdown();
+  closeModal();
+  showToast('Vessel removed', 'ok');
+}
+window.deleteVessel = deleteVessel;
+
+/* ── CRAFT DETAIL ── */
+function openCraftDetail(craftId) {
+  const c = (FM.fleet || []).find(x => x.id === craftId);
+  if (!c) return;
+  const vessel = FM.vessels.find(v => v.id === c.vessel);
+  const logs   = (FM.fleetLog || []).filter(l => l.craftId === craftId).slice(0, 6);
+  const docs   = (FM.vesselDocs || []).filter(d => d.vessel === c.vessel && (d.notes || '').toLowerCase().includes(c.name.toLowerCase()));
+  const certs  = (FM.certificates || []).filter(cert => (cert.vessel === c.vessel) && ((cert.item||'').toLowerCase().includes(c.name.toLowerCase()) || (cert.notes||'').toLowerCase().includes(c.name.toLowerCase())));
+  const wos    = (FM.workOrders || []).filter(w => {
+    const terms = [c.name, c.make, c.model].map(s => s.toLowerCase());
+    return terms.some(t => w.title.toLowerCase().includes(t)) || w.zone === 'Tender Garage';
+  }).filter(w => w.status !== 'done').slice(0, 5);
+
+  const fuelPct  = c.fuelPct || 0;
+  const fuelCol  = fuelPct < 25 ? 'var(--red)' : fuelPct < 50 ? 'var(--yel)' : 'var(--grn)';
+  const typeEmoji = { Tender:'⛵', 'Jet Ski':'🏄', Seabob:'🌊', Dinghy:'🚣' };
+
+  const logHTML = logs.length ? logs.map(l => {
+    const crew = (FM.crew || []).find(cr => cr.id === l.crew);
+    return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:.5px solid var(--bd)">
+      <div>
+        <div style="font-size:12px;color:var(--txt)">${escHtml(l.note || '')}</div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:2px">${l.date} · ${crew ? escHtml(crew.name) : l.crew}</div>
+      </div>
+      <div style="font-size:12px;color:var(--txt2);text-align:right;flex-shrink:0;margin-left:12px">
+        ${l.hours ? `${l.hours}h` : l.litres ? `${l.litres}L` : l.fuelPct ? `${l.fuelPct}% charged` : ''}
+      </div>
+    </div>`;
+  }).join('') : `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No activity logged</div>`;
+
+  const woHTML = wos.length ? wos.map(w => `
+    <div onclick="closeModal();navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)"
+         style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:.5px solid var(--bd);cursor:pointer">
+      <span style="font-family:var(--mono);font-size:10px;color:var(--txt3);flex-shrink:0">${w.id}</span>
+      <span style="font-size:12px;color:var(--txt);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.title)}</span>
+      <span class="badge b-${w.status === 'in-progress' ? 'progress' : w.status === 'on-hold' ? 'hold' : 'open'}" style="font-size:9px">${FM.statusLabel(w.status)}</span>
+    </div>`).join('') : `<div style="font-size:12px;color:var(--txt3);padding:8px 0">No open work orders</div>`;
+
+  openModal(`
+    <div style="display:flex;flex-direction:column;gap:20px;max-height:72vh;overflow-y:auto;padding-bottom:4px">
+
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:52px;height:52px;border-radius:14px;background:${c.color}22;border:.5px solid ${c.color}44;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${typeEmoji[c.type]||'⛵'}</div>
+        <div>
+          <div style="font-size:18px;font-weight:700;color:var(--txt);letter-spacing:-.02em">${escHtml(c.name)}</div>
+          <div style="font-size:12px;color:var(--txt3)">${c.year} ${c.make} ${c.model} · ${escHtml(vessel?.name||'')}</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+        ${[['Hours', c.hours.toLocaleString()], ['LOA', c.loa], ['Engine', c.engine]].map(([l,v]) => `
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px">
+            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:4px">${l}</div>
+            <div style="font-size:13px;font-weight:500;color:var(--txt)">${v}</div>
+          </div>`).join('')}
+      </div>
+
+      <!-- Fuel -->
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:11px;color:var(--txt3);width:60px;flex-shrink:0">${c.fuel === 'electric' ? 'Battery' : 'Fuel'}</span>
+        <div style="flex:1;height:6px;border-radius:3px;background:var(--bg4);overflow:hidden"><div style="height:100%;width:${fuelPct}%;background:${fuelCol};border-radius:3px"></div></div>
+        <span style="font-size:12px;font-weight:500;color:${fuelCol};width:34px;text-align:right">${fuelPct}%</span>
+      </div>
+
+      <!-- Work orders -->
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:10px">Open work orders</div>
+        ${woHTML}
+      </div>
+
+      <!-- Activity log -->
+      <div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);margin-bottom:10px">Recent activity</div>
+        ${logHTML}
+      </div>
+
+      <!-- Notes -->
+      ${c.notes ? `<div style="background:var(--bg3);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--txt2);line-height:1.6">${escHtml(c.notes)}</div>` : ''}
+    </div>
+  `, escHtml(c.name));
+}
+window.openCraftDetail = openCraftDetail;
+
+/* ── NOTIFICATIONS PAGE ── */
+function renderNotifications() {
+  const wrap = document.getElementById('page-notifications');
+  if (!wrap) return;
+  const notifs = FM.notifications || [];
+  const typeIcon = t => t === 'alert'
+    ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+  const iconColor = t => t === 'alert' ? 'color:var(--red);background:var(--red-bg)' : 'color:var(--blu);background:var(--blu-bg)';
+
+  const unread = notifs.filter(n => !n.read);
+  const read   = notifs.filter(n =>  n.read);
+
+  const renderGroup = (list, label) => {
+    if (!list.length) return '';
+    return `
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--txt3);padding:16px 20px 8px">${label}</div>
+      <div style="background:var(--bg2);border-top:.5px solid var(--bd);border-bottom:.5px solid var(--bd)">
+        ${list.map((n, i) => `
+          <div style="display:flex;gap:14px;padding:14px 20px;${i < list.length-1 ? 'border-bottom:.5px solid var(--bd);':''};background:${n.read ? 'transparent' : 'rgba(94,106,210,.04)'}">
+            <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;${iconColor(n.type)}">${typeIcon(n.type)}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:${n.read ? '400' : '500'};color:var(--txt);margin-bottom:3px">${escHtml(n.title)}</div>
+              ${n.body ? `<div style="font-size:12px;color:var(--txt3);line-height:1.55">${escHtml(n.body)}</div>` : ''}
+              ${n.time ? `<div style="font-size:11px;color:var(--txt4);margin-top:5px">${escHtml(n.time)}</div>` : ''}
+            </div>
+            ${!n.read ? `<div style="width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0;margin-top:5px"></div>` : ''}
+          </div>`).join('')}
+      </div>`;
+  };
+
+  const empty = `<div style="padding:60px 24px;text-align:center;color:var(--txt3)">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" style="opacity:.3;display:block;margin:0 auto 12px"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+    <div style="font-size:13px">No notifications</div>
+  </div>`;
+
+  wrap.innerHTML = `
+    <div style="padding:0 0 80px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
+        <span style="font-size:11px;color:var(--txt3)">${notifs.length} total</span>
+        ${unread.length ? `<button class="btn btn-ghost btn-xs" onclick="markAllRead()">Mark all read</button>` : ''}
+      </div>
+      ${!notifs.length ? empty : renderGroup(unread, 'New') + renderGroup(read, 'Earlier')}
+    </div>`;
+}
+window.renderNotifications = renderNotifications;
+
 /* ── HELPERS ── */
 function escHtml(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -449,7 +729,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initVesselPicker();
   initOffline();
 
-  const _knownPages = new Set(['dashboard','work-orders','calendar','monitoring','assets','parts','vendors','team','chat','logbook','pms','fleet','checklists','charter','owner','certificates','safety','inventory','budget','hours','documents','reports','kb','settings']);
+  const _knownPages = new Set(['dashboard','work-orders','calendar','monitoring','assets','parts','vendors','team','chat','logbook','pms','fleet','checklists','charter','owner','certificates','safety','inventory','budget','hours','documents','reports','kb','notifications','hub','requests','settings']);
   function _parsePage(pathname) {
     const p = pathname.replace(/^\//, '').replace(/\/$/, '').replace(/\.html$/, '');
     return _knownPages.has(p) ? p : 'dashboard';

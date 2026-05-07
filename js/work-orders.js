@@ -216,7 +216,7 @@ WO.renderMobCards = function(wrap, list) {
       ? `<img class="wo-mob-thumb" src="${escHtml(img)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
       : '';
     const placeholderEl = `<div class="wo-mob-thumb-ph" style="${img ? 'display:none' : ''}">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--txt4)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--txt3)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
       </div>`;
 
     return `

@@ -58,6 +58,10 @@
   --eng-bg:  rgba(34,211,238,.10);
   --eng-bd:  rgba(34,211,238,.25);
 
+  --amb:     #F97316;   /* amber/orange — on-hold status */
+  --amb-bg:  rgba(249,115,22,.10);
+  --amb-bd:  rgba(249,115,22,.25);
+
   /* Typography */
   --font:  'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --mono:  'DM Mono', 'Courier New', monospace;
@@ -126,6 +130,10 @@
   --eng:    #0369A1;
   --eng-bg: rgba(3,105,161,.10);
   --eng-bd: rgba(3,105,161,.25);
+
+  --amb:    #EA6C00;
+  --amb-bg: rgba(234,108,0,.10);
+  --amb-bd: rgba(234,108,0,.25);
 }
 
 html, body {
@@ -227,7 +235,7 @@ html, body {
 .b-open     { background: var(--blu-bg);  color: var(--blu); }
 .b-progress { background: var(--yel-bg);  color: var(--yel); }
 .b-done     { background: var(--grn-bg);  color: var(--grn); }
-.b-hold     { background: var(--bg5);     color: var(--txt3); }
+.b-hold     { background: var(--amb-bg);  color: var(--amb);  border: .5px solid var(--amb-bd); }
 .b-critical { background: var(--red-bg);  color: var(--red); border: .5px solid var(--red-bd); }
 
 /* Teams */
