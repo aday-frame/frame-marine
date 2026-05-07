@@ -3,24 +3,27 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  /* Backgrounds */
-  --bg:   #080808;
-  --bg2:  #0f0f0e;
-  --bg3:  #171716;
-  --bg4:  #1e1e1d;
-  --bg5:  #252524;
-  --bg6:  #2c2c2b;
+  /* Backgrounds — 6-step surface ladder (DESIGN.md principle) */
+  --bg:   #060606;   /* canvas — deepest */
+  --bg2:  #0d0d0c;   /* surface-1 — sidebars, topbar */
+  --bg3:  #141413;   /* surface-2 — cards, inputs */
+  --bg4:  #1b1b1a;   /* surface-3 — hover states */
+  --bg5:  #222221;   /* surface-4 — selected states */
+  --bg6:  #292928;   /* surface-5 — highest lift */
 
-  /* Borders */
-  --bd:   rgba(255,255,255,.055);
-  --bd2:  rgba(255,255,255,.10);
-  --bd3:  rgba(255,255,255,.16);
+  /* Borders — hairlines (DESIGN.md: hairline system) */
+  --bd:   rgba(255,255,255,.06);
+  --bd2:  rgba(255,255,255,.11);
+  --bd3:  rgba(255,255,255,.18);
+
+  /* Top-edge highlight for lifted panels (DESIGN.md: "subtle white edge highlight") */
+  --edge: rgba(255,255,255,.07);
 
   /* Text */
   --txt:  #F0F0EC;
   --txt2: #9A9A92;
   --txt3: #52524A;
-  --txt4: #38382F;
+  --txt4: #2e2e28;
 
   /* Accent — Frame Marine blue */
   --or:      #0077b6;
@@ -71,6 +74,11 @@
   --t1: .12s ease;
   --t2: .2s ease;
   --t3: .3s cubic-bezier(.4,0,.2,1);
+
+  /* Tracking — negative on display, positive on eyebrows (DESIGN.md) */
+  --track-tight:  -.025em;
+  --track-tighter: -.035em;
+  --track-eye:     .06em;
 }
 
 /* ── LIGHT THEME ── */
@@ -144,6 +152,21 @@ html, body {
 .t-13 { font-size: 13px; }
 .t-14 { font-size: 14px; }
 .t-15 { font-size: 15px; }
+
+/* Display-level type gets negative tracking (DESIGN.md principle) */
+.t-display {
+  letter-spacing: var(--track-tighter);
+  font-weight: 600; line-height: 1.1;
+}
+.t-headline {
+  letter-spacing: var(--track-tight);
+  font-weight: 500; line-height: 1.2;
+}
+.t-eye {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: var(--track-eye);
+  color: var(--txt3);
+}
 
 .c-txt  { color: var(--txt); }
 .c-txt2 { color: var(--txt2); }
@@ -334,11 +357,12 @@ textarea.inp { resize: vertical; min-height: 72px; line-height: 1.6; }
 .stat:last-child { border-right: none; }
 .stat-lbl {
   font-size: 9px; color: var(--txt3); text-transform: uppercase;
-  letter-spacing: .07em; font-weight: 600;
+  letter-spacing: var(--track-eye); font-weight: 600;
 }
 .stat-val {
   font-size: 22px; font-weight: 300; color: var(--txt);
   line-height: 1; font-variant-numeric: tabular-nums;
+  letter-spacing: var(--track-tight);
 }
 .stat-val.or  { color: var(--or); }
 .stat-val.grn { color: var(--grn); }
@@ -346,10 +370,24 @@ textarea.inp { resize: vertical; min-height: 72px; line-height: 1.6; }
 .stat-val.yel { color: var(--yel); }
 .stat-val.blu { color: var(--blu); }
 
-/* ── CARDS ── */
+/* ── CARDS — surface lift + top-edge highlight (DESIGN.md elevation principle) ── */
 .card {
   background: var(--bg2); border: .5px solid var(--bd);
-  border-radius: var(--r10);
+  border-radius: var(--r10); position: relative; overflow: hidden;
+}
+.card::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: var(--edge); pointer-events: none;
+}
+.card-2 {
+  background: var(--bg3); border: .5px solid var(--bd2);
+  border-radius: var(--r10); position: relative; overflow: hidden;
+}
+.card-2::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: var(--edge); pointer-events: none;
 }
 .card-alert {
   background: var(--red-bg); border: .5px solid var(--red-bd);
