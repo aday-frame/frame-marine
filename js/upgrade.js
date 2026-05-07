@@ -119,7 +119,7 @@ const Upgrade = (() => {
       name: 'Charter',
       tagline: 'Bookings · Guests · APA · Documents',
       description: 'Manage every charter from enquiry to handover — booking calendar, guest preferences, APA tracking, and a pre-departure document pack in one place.',
-      color: '#2dd4bf',
+      color: '#F97316',
       pages: ['charter'],
       price: '$49',
       period: '/vessel/month',
@@ -133,7 +133,7 @@ const Upgrade = (() => {
       screenHtml: `
         <div style="display:flex;gap:6px;margin-bottom:8px">
           <div style="flex:1;background:#0f0f0e;border-radius:5px;padding:8px;text-align:center">
-            <div style="font-size:14px;font-weight:600;color:#2dd4bf">4</div>
+            <div style="font-size:14px;font-weight:600;color:#F97316">4</div>
             <div style="font-size:8px;color:#52524A">Bookings</div>
           </div>
           <div style="flex:1;background:#0f0f0e;border-radius:5px;padding:8px;text-align:center">
@@ -148,7 +148,7 @@ const Upgrade = (() => {
         <div style="display:flex;flex-direction:column;gap:3px">
           <div style="display:flex;justify-content:space-between;align-items:center;background:#0f0f0e;border-radius:4px;padding:6px 8px">
             <span style="font-size:9px;color:#9A9A92">Collins family — 7 May</span>
-            <span style="font-size:9px;font-weight:600;color:#2dd4bf">● Active</span>
+            <span style="font-size:9px;font-weight:600;color:#F97316">● Active</span>
           </div>
           <div style="display:flex;justify-content:space-between;align-items:center;background:#0f0f0e;border-radius:4px;padding:6px 8px">
             <span style="font-size:9px;color:#9A9A92">Martinez party — 18 May</span>
