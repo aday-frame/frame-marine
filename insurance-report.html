@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Vessel Risk & Compliance Report — Frame Marine</title>
   <script src="js/data.js"></script>
   <style>
@@ -396,7 +396,7 @@
       color: var(--txt);
       letter-spacing: -.01em;
     }
-    .ins-banner-item { flex: 1; }
+    .ins-banner-item { flex: 1; min-width: 0; }
     .ins-banner-divider {
       width: 1px;
       height: 32px;
@@ -462,20 +462,68 @@
     /* ── SECTION SCROLL OFFSET ── */
     .section { scroll-margin-top: 48px; }
 
-    /* ── RESPONSIVE ── */
+    /* ── RESPONSIVE — 680px ── */
     @media (max-width: 680px) {
-      .header { padding: 28px 20px 24px; }
-      .body { padding: 24px 16px 40px; }
-      .footer { padding: 16px 20px; flex-direction: column; gap: 6px; align-items: flex-start; }
-      .no-print { padding: 16px 20px; }
-      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+      .header { padding: 24px 16px 20px; }
+      .header-title { font-size: 19px; }
+      .header-vessel { font-size: 11px; }
+      .seal-ring { width: 64px; height: 64px; }
+
+      .ins-banner {
+        padding: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+      .ins-banner-icon { display: none; }
+      .ins-banner-divider { display: none; }
+      .ins-banner-item {
+        flex: none;
+        padding: 12px 16px;
+        border-right: 1px solid var(--blu-bd);
+        border-bottom: 1px solid var(--blu-bd);
+      }
+      .ins-banner-item:nth-child(2n) { border-right: none; }
+      .ins-banner-item:nth-last-child(-n+2) { border-bottom: none; }
+
+      .compliance-wrap { flex-wrap: wrap; gap: 10px; }
+      .compliance-badge-text { flex-shrink: 0; }
+
+      .stats-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
       .particulars { grid-template-columns: repeat(2, 1fr); }
-      .part-item:nth-child(4n)       { border-right: 1px solid var(--bd); }
-      .part-item:nth-last-child(-n+4){ border-bottom: 1px solid var(--bd); }
-      .part-item:nth-child(2n)       { border-right: none; }
-      .part-item:nth-last-child(-n+2){ border-bottom: none; }
-      .header-title { font-size: 20px; }
-      .seal-ring { width: 68px; height: 68px; }
+      .part-item:nth-child(4n)        { border-right: 1px solid var(--bd); }
+      .part-item:nth-last-child(-n+4) { border-bottom: 1px solid var(--bd); }
+      .part-item:nth-child(2n)        { border-right: none; }
+      .part-item:nth-last-child(-n+2) { border-bottom: none; }
+
+      .body { padding: 20px 16px 40px; }
+      .footer { padding: 14px 16px; flex-direction: column; gap: 6px; align-items: flex-start; }
+      .no-print { padding: 14px 16px; flex-direction: column; align-items: flex-start; }
+      .anchor-nav a { padding: 10px 12px; font-size: 9px; }
+
+      .crew-member-header { flex-wrap: wrap; gap: 8px; }
+      .crew-member-header > span:last-child { margin-left: 0 !important; }
+    }
+
+    /* ── RESPONSIVE — 420px ── */
+    @media (max-width: 420px) {
+      .header-inner { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .cert-seal { flex-direction: row; align-items: center; gap: 10px; }
+      .header-title { font-size: 17px; }
+      .seal-ring { width: 52px; height: 52px; }
+      .seal-text { font-size: 6px; }
+
+      .ins-banner { grid-template-columns: 1fr; }
+      .ins-banner-item { border-right: none !important; border-bottom: 1px solid var(--blu-bd) !important; }
+      .ins-banner-item:last-child { border-bottom: none !important; }
+
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .stat-val { font-size: 17px; }
+
+      table { min-width: 420px; }
+      .section-title { font-size: 8px; }
+      .compliance-wrap { padding: 12px 14px; }
     }
 
     @media print {
