@@ -95,6 +95,7 @@ function navTo(pageId, clickedEl, skipPush) {
     notifications: () => renderNotifications(),
     settings:      () => window.Settings && Settings.init(),
     portfolio:     () => window.renderPortfolio && renderPortfolio(),
+    charter:       () => window.Charter && Charter.render('overview'),
   };
   if (inits[pageId]) inits[pageId]();
 
@@ -295,42 +296,7 @@ function switchVessel(vesselId) {
   showToast('Switched to ' + vLabel);
 }
 
-/* ── MODULE TABS ── */
-App.currentModule = 'operations';
-
-function switchModule(mod, el) {
-  const locked = ['build', 'insights', 'finance'];
-  if (locked.includes(mod)) {
-    showToast('Coming soon');
-    return;
-  }
-
-  document.querySelectorAll('.module-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  App.currentModule = mod;
-
-  const opsSb      = document.querySelector('.sb-scroll');
-  const charterSb  = document.getElementById('charter-sb');
-
-  if (mod === 'charter') {
-    if (opsSb)     opsSb.style.display     = 'none';
-    if (charterSb) charterSb.style.display = 'block';
-    // Update new button
-    const newBtn = document.getElementById('new-btn');
-    if (newBtn) { newBtn.textContent = '+ New charter'; newBtn.onclick = () => showToast('New charter coming soon'); }
-    navTo('charter', null);
-    setTimeout(() => Charter.render('overview'), 50);
-  } else {
-    if (opsSb)     opsSb.style.display     = '';
-    if (charterSb) charterSb.style.display = 'none';
-    const newBtn = document.getElementById('new-btn');
-    if (newBtn) {
-      newBtn.innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:12px;height:12px"><path d="M8 2v12M2 8h12"/></svg> New work order`;
-      newBtn.onclick = () => WO.openNewModal();
-    }
-    navTo('dashboard', document.querySelector('.ni[data-page="dashboard"]'));
-  }
-}
+function switchModule() { /* removed — charter is now a sidebar nav item */ }
 
 /* ── PANEL ── */
 function openPanel(content) {
