@@ -231,6 +231,12 @@
         <span class="ni-count ni-count-red" id="sb-wo-count">5</span>
       </div>
 
+      <div class="ni" data-page="requests" data-label="Requests" onclick="navTo('requests',this)">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M13 2H3a1 1 0 00-1 1v8a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M5 6h6M5 9h4"/></svg>
+        <span class="ni-lbl">Requests</span>
+        <span class="ni-count ni-count-or" id="sb-req-count" style="display:none"></span>
+      </div>
+
       <div class="ni" data-page="pms" data-label="Maintenance" onclick="navTo('pms',this)">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1"/></svg>
         <span class="ni-lbl">Maintenance</span>
@@ -591,6 +597,9 @@
       <!-- DOCUMENTS -->
       <div id="page-documents" class="page"></div>
 
+      <!-- REQUESTS -->
+      <div id="page-requests" class="page"></div>
+
       <!-- HUB -->
       <div id="page-hub" class="page"></div>
 
@@ -742,6 +751,100 @@
 <script src="js/offline.js"></script>
 
 <script>
+/* ── REQUESTS ── */
+const Requests = window.Requests = {};
+
+Requests._demo = [
+  { id:'REQ-001', vessel:'v1', title:'Hot tub not heating', desc:'The hot tub on the upper deck has not been heating since yesterday evening. We noticed it around 7pm.', location:'Upper Deck', contact:'Sarah Collins — sarah@charterguest.com', submitted:'2026-05-07T08:14:00', status:'new' },
+  { id:'REQ-002', vessel:'v1', title:'Cabin 2 — shower drain blocked', desc:'Water is pooling in the shower and draining very slowly.', location:'Guest Cabin 2', contact:'Marco Ferretti — +39 335 123 4567', submitted:'2026-05-06T19:45:00', status:'new' },
+  { id:'REQ-003', vessel:'v1', title:'WiFi not connecting in salon', desc:'The WiFi drops every few minutes in the main salon. Works fine in cabins.', location:'Main Salon', contact:'James Park', submitted:'2026-05-06T14:22:00', status:'reviewing' },
+  { id:'REQ-004', vessel:'v1', title:'TV remote not working in owner cabin', desc:'Batteries may need replacing, or the remote may need pairing.', location:'Owner Cabin', contact:'Amanda Reyes', submitted:'2026-05-05T11:00:00', status:'converted', woId:'WO-010' },
+];
+
+Requests.data = function() {
+  try {
+    const stored = JSON.parse(localStorage.getItem('fm_requests') || '[]');
+    return [...stored, ...Requests._demo].filter((r,i,a) => a.findIndex(x=>x.id===r.id)===i);
+  } catch(e) { return Requests._demo; }
+};
+
+Requests.save = function(reqs) {
+  try { localStorage.setItem('fm_requests', JSON.stringify(reqs.filter(r => !Requests._demo.find(d=>d.id===r.id)))); } catch(e) {}
+};
+
+Requests.updateBadge = function() {
+  const newCount = Requests.data().filter(r => r.status === 'new').length;
+  const el = document.getElementById('sb-req-count');
+  if (el) { el.textContent = newCount; el.style.display = newCount ? '' : 'none'; }
+};
+
+Requests.render = function() {
+  const wrap = document.getElementById('page-requests');
+  if (!wrap) return;
+  const reqs = Requests.data();
+  const statusMap = { new:'New', reviewing:'Reviewing', converted:'Converted to WO', closed:'Closed' };
+  const statusColor = { new:'var(--or)', reviewing:'var(--yel)', converted:'var(--grn)', closed:'var(--txt4)' };
+
+  wrap.innerHTML = `
+    <div style="max-width:680px;padding:0 0 80px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0 14px;border-bottom:.5px solid var(--bd);margin-bottom:4px">
+        <div style="font-size:11px;color:var(--txt3)">${reqs.filter(r=>r.status==='new').length} new · ${reqs.length} total</div>
+        <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none">Share portal link ↗</a>
+      </div>
+      ${reqs.length === 0 ? `<div class="empty"><div class="empty-title">No requests yet</div><div class="empty-sub">Share the portal link with guests or crew</div></div>` : ''}
+      ${reqs.map(r => `
+        <div class="req-card" id="req-${r.id}">
+          <div class="req-card-hdr">
+            <div style="flex:1;min-width:0">
+              <div class="req-title">${escHtml(r.title)}</div>
+              <div class="req-meta">
+                <span style="color:${statusColor[r.status]};font-weight:500">${statusMap[r.status]}</span>
+                <span class="wo-mob-dot">·</span>${escHtml(r.contact)}
+                <span class="wo-mob-dot">·</span>${r.location ? escHtml(r.location)+' · ' : ''}${new Date(r.submitted).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+              </div>
+            </div>
+            ${r.status === 'converted' && r.woId ? `<span class="wo-id" style="font-size:10px;flex-shrink:0">${r.woId}</span>` : ''}
+          </div>
+          ${r.desc ? `<div class="req-desc">${escHtml(r.desc)}</div>` : ''}
+          ${r.status === 'new' || r.status === 'reviewing' ? `
+          <div class="req-actions">
+            <button class="btn btn-primary btn-sm" onclick="Requests.convert('${r.id}')">Convert to Work Order</button>
+            <button class="btn btn-ghost btn-sm" onclick="Requests.setStatus('${r.id}','reviewing')">Mark Reviewing</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--txt4)" onclick="Requests.setStatus('${r.id}','closed')">Close</button>
+          </div>` : ''}
+        </div>
+      `).join('')}
+    </div>`;
+  Requests.updateBadge();
+};
+
+Requests.setStatus = function(id, status) {
+  const all = Requests.data();
+  const r = all.find(x => x.id === id);
+  if (r) r.status = status;
+  Requests.save(all);
+  Requests.render();
+};
+
+Requests.convert = function(id) {
+  const all = Requests.data();
+  const r = all.find(x => x.id === id);
+  if (!r) return;
+  const newId = 'WO-' + String(FM.workOrders.length + 1).padStart(3,'0');
+  FM.workOrders.unshift({
+    id: newId, vessel: r.vessel || 'v1',
+    title: r.title, desc: r.desc || '',
+    status: 'open', priority: 'medium', team: 'deck',
+    zone: r.location || '', system: 'General',
+    assignee: null, due: null, created: new Date().toISOString().slice(0,10),
+    subtasks: [], parts: [], comments: [{ author:'c1', time:'Now', text:'Converted from guest request. Contact: ' + r.contact }],
+  });
+  r.status = 'converted'; r.woId = newId;
+  Requests.save(all);
+  Requests.render();
+  showToast('Work order ' + newId + ' created', 'ok');
+};
+
 /* ── HUB ── */
 const Hub = window.Hub = {};
 Hub.render = function() {
@@ -767,6 +870,8 @@ Hub.render = function() {
       icon:'<path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z" stroke-linecap="round" stroke-linejoin="round"/>' },
     { page:'budget',       label:'Budget',         color:'#fbbf24', bg:'rgba(251,191,36,.15)',
       icon:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" stroke-linecap="round"/>' },
+    { page:'requests',     label:'Requests',       color:'#34d399', bg:'rgba(52,211,153,.15)',
+      icon:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>' },
   ];
 
   wrap.innerHTML = `

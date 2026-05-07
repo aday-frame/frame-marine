@@ -1560,3 +1560,48 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
 }
 .hub-list-row:last-child { border-bottom: none; }
 .hub-list-row:active { background: var(--bg3); }
+
+/* ── REQUESTS INBOX ── */
+.req-card {
+  background: var(--bg2);
+  border: .5px solid var(--bd);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  margin-top: 8px;
+}
+.req-card-hdr {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.req-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--txt);
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.req-meta {
+  font-size: 11px;
+  color: var(--txt3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.req-desc {
+  font-size: 13px;
+  color: var(--txt2);
+  line-height: 1.6;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--bg3);
+  border-radius: 7px;
+}
+.req-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}

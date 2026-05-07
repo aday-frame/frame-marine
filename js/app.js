@@ -52,6 +52,7 @@ function navTo(pageId, clickedEl, skipPush) {
     budget:        'Budget',
     hours:         'Hours of rest',
     documents:     'Documents',
+    requests:      'Requests',
     hub:           'Hub',
   };
   const titleEl = document.getElementById('page-title');
@@ -82,6 +83,7 @@ function navTo(pageId, clickedEl, skipPush) {
     budget:        () => window.Budget && Budget.render(),
     hours:         () => window.Hours && Hours.render(),
     documents:     () => window.Documents && Documents.render(),
+    requests:      () => window.Requests && Requests.render(),
     hub:           () => window.Hub && Hub.render(),
   };
   if (inits[pageId]) inits[pageId]();
