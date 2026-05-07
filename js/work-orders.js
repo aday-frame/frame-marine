@@ -17,30 +17,22 @@ WO.render = function() {
   const wos = WO.allWOs();
   WO.renderStats(wos);
   WO.initViewSwitcher();
-  WO.initMobTabs();
   if (WO.view === 'todo') WO.renderTodo();
   else WO.renderList(wos);
 };
 
-WO.initMobTabs = function() {
-  const pa = document.getElementById('page-actions');
-  if (!pa) return;
-  if (pa.querySelector('.wo-mob-tabs')) return;
-  const tabs = document.createElement('div');
-  tabs.className = 'wo-mob-tabs';
-  tabs.innerHTML = `
+WO._mobTabsHTML = function() {
+  return `<div class="wo-mob-tabs">
     <button class="wo-mob-tab${WO.mobTab !== 'done' ? ' active' : ''}" data-tab="todo">To Do</button>
-    <button class="wo-mob-tab${WO.mobTab === 'done' ? ' active' : ''}" data-tab="done">Done</button>`;
-  pa.prepend(tabs);
-  tabs.querySelectorAll('.wo-mob-tab').forEach(btn => {
+    <button class="wo-mob-tab${WO.mobTab === 'done' ? ' active' : ''}" data-tab="done">Done</button>
+  </div>`;
+};
+
+WO._bindMobTabs = function(wrap) {
+  wrap.querySelectorAll('.wo-mob-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       WO.mobTab = btn.dataset.tab;
-      tabs.querySelectorAll('.wo-mob-tab').forEach(b => b.classList.toggle('active', b === btn));
-      if (WO.mobTab === 'done') {
-        WO.activeFilter = 'done';
-      } else {
-        WO.activeFilter = 'all';
-      }
+      WO.activeFilter = WO.mobTab === 'done' ? 'done' : 'all';
       WO.renderList(WO.allWOs());
     });
   });
@@ -117,7 +109,7 @@ WO.renderList = function(wos) {
   });
 
   if (list.length === 0) {
-    wrap.innerHTML = `
+    wrap.innerHTML = `${WO._mobTabsHTML()}
       <div class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
           <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -126,6 +118,7 @@ WO.renderList = function(wos) {
         <div class="empty-title">No work orders</div>
         <div class="empty-sub">Adjust your filters or create a new work order</div>
       </div>`;
+    WO._bindMobTabs(wrap);
     return;
   }
 
@@ -149,8 +142,9 @@ WO.renderList = function(wos) {
 
   const tbody = list.map(w => WO.rowHTML(w)).join('');
 
-  wrap.innerHTML = `<div class="wo-list-wrap"><table class="wo-tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
+  wrap.innerHTML = `${WO._mobTabsHTML()}<div class="wo-list-wrap"><table class="wo-tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
 
+  WO._bindMobTabs(wrap);
   wrap.querySelectorAll('tbody tr[data-id]').forEach(row => {
     row.addEventListener('click', () => WO.openPanel(row.dataset.id));
   });
@@ -399,7 +393,7 @@ WO.renderTodo = function() {
     ? WO.todoDetailHTML(FM.getWO(WO.activeId))
     : `<div class="wo-todo-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".25"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 8h6M9 16h4"/></svg><p>Select a work order</p></div>`;
 
-  wrap.innerHTML = `
+  wrap.innerHTML = `${WO._mobTabsHTML()}
     <div class="wo-todo-layout">
       <div class="wo-todo-sidebar" id="wo-todo-sidebar">
         <div class="wo-todo-hdr">
@@ -410,6 +404,7 @@ WO.renderTodo = function() {
       <div class="wo-todo-detail" id="wo-todo-detail">${detail}</div>
     </div>`;
 
+  WO._bindMobTabs(wrap);
   wrap.querySelectorAll('.wo-card').forEach(c => {
     c.addEventListener('click', () => {
       WO.activeId = c.dataset.id;
