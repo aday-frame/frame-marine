@@ -246,9 +246,9 @@
         <span class="ni-lbl">Inventory</span>
       </div>
 
-      <div class="ni" data-page="fleet" data-label="Tenders & fleet" onclick="navTo('fleet',this)">
+      <div class="ni" data-page="fleet" data-label="Tenders" onclick="navTo('fleet',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 11l2-6h10l2 6H1zm3-4h8l-1 3H5L4 7zm3-6a1 1 0 011 1v1H7V2a1 1 0 011-1z" opacity=".85"/></svg>
-        <span class="ni-lbl">Tenders &amp; fleet</span>
+        <span class="ni-lbl">Tenders</span>
       </div>
 
       <div class="ni" data-page="monitoring" data-label="Monitoring" onclick="navTo('monitoring',this)">
@@ -953,7 +953,7 @@ Hub.render = function() {
 
   const rows = [
     { page:'work-orders',  label:'Work orders',   color:'#60a5fa', bg:'rgba(59,130,246,.15)',  icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 8h6M9 16h4"/>' },
-    { page:'fleet',        label:'Fleet & tenders',color:'#fb923c', bg:'rgba(251,146,60,.15)', icon:'<path d="M3 17h18M3 11l9-8 9 8" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'fleet',        label:'Tenders',        color:'#fb923c', bg:'rgba(251,146,60,.15)', icon:'<path d="M3 17h18M3 11l9-8 9 8" stroke-linecap="round" stroke-linejoin="round"/>' },
     { page:'monitoring',   label:'Monitoring',    color:'#22d3ee', bg:'rgba(34,211,238,.15)',  icon:'<path d="M2 12l4-6 4 8 3-4 3 4 4-7" stroke-linecap="round" stroke-linejoin="round"/>' },
     { page:'calendar',     label:'Calendar',      color:'#a78bfa', bg:'rgba(167,139,250,.15)', icon:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/>' },
     { page:'charter',      label:'Charter',       color:'#2dd4bf', bg:'rgba(20,184,166,.15)',  icon:'<path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-2M12 17l-5 4 5-4z" stroke-linecap="round" stroke-linejoin="round"/>' },
@@ -1407,82 +1407,41 @@ function renderFleet() {
 
   const craft = (FM.fleet || []).filter(c => !vessel || c.vessel === vessel.id);
 
-  grid.innerHTML = vesselSummary + craft.map(c => {
-    const fuelPct   = c.fuelPct || 0;
-    const fuelColor = fuelPct < 25 ? 'var(--red)' : fuelPct < 50 ? 'var(--yel)' : 'var(--grn)';
-    const hoursLeft = c.nextServiceHours - c.hours;
-    const svcPct    = Math.max(0, Math.min(100, c.hours / c.nextServiceHours * 100));
-    const svcColor  = hoursLeft <= 0 ? 'var(--red)' : hoursLeft <= 30 ? 'var(--yel)' : 'var(--or)';
-    const statusMap = { 'in-water': 'b-done', 'davits': 'b-progress', 'swim-platform': 'b-done', 'charged': 'b-done' };
-    const labelMap  = { 'in-water': 'In water', 'davits': 'On davits', 'swim-platform': 'Deployed', 'charged': 'Charged' };
+  // Compact tender cards — click for detail modal
+  grid.innerHTML = vesselSummary + `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px">` +
+  craft.map(c => {
+    const fuelPct  = c.fuelPct || 0;
+    const fuelCol  = fuelPct < 25 ? 'var(--red)' : fuelPct < 50 ? 'var(--yel)' : 'var(--grn)';
+    const statusMap = { 'in-water':'b-done','davits':'b-progress','swim-platform':'b-done','charged':'b-done' };
+    const labelMap  = { 'in-water':'In water','davits':'On davits','swim-platform':'Deployed','charged':'Charged' };
+    const openWOs = allWOs.filter(w => {
+      const terms = [c.name, c.make, c.model].map(s => s.toLowerCase());
+      return terms.some(t => w.title.toLowerCase().includes(t));
+    }).length;
 
-    // Match WOs to this craft by name/make/model in title, or zone 'Tender Garage' as fallback
-    const nameTerms = [c.name, c.make, c.model].map(s => s.toLowerCase());
-    let craftWOs = allWOs.filter(w => nameTerms.some(t => w.title.toLowerCase().includes(t)));
-    if (!craftWOs.length) craftWOs = allWOs.filter(w => w.zone === 'Tender Garage');
-
-    const priW = { high: 0, medium: 1, low: 2 };
-    craftWOs = craftWOs.sort((a, b) => (priW[a.priority] ?? 9) - (priW[b.priority] ?? 9)).slice(0, 3);
-
-    return `<div class="fleet-card" onclick="openCraftDetail('${c.id}')" style="cursor:pointer">
-      <div class="fleet-card-photo" style="background:linear-gradient(145deg,${c.color}22,${c.color}08);overflow:hidden">
-        ${c.photo ? `<img src="${c.photo}" alt="${escHtml(c.name)}" style="width:100%;height:100%;object-fit:cover;display:block">` : ''}
-        <span class="badge ${statusMap[c.status] || 'b-hold'}" style="position:absolute;top:10px;right:10px;font-size:9px">${labelMap[c.status] || c.status}</span>
+    return `<div onclick="openCraftDetail('${c.id}')"
+      style="background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;overflow:hidden;cursor:pointer;transition:border-color .12s"
+      onmouseover="this.style.borderColor='var(--bd2)'" onmouseout="this.style.borderColor='var(--bd)'">
+      <!-- Photo -->
+      <div style="height:110px;background:linear-gradient(145deg,${c.color}22,${c.color}08);position:relative;overflow:hidden">
+        ${c.photo ? `<img src="${c.photo}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">` : ''}
+        <span class="badge ${statusMap[c.status]||'b-hold'}" style="position:absolute;top:7px;right:7px;font-size:9px">${labelMap[c.status]||c.status}</span>
+        ${openWOs ? `<span style="position:absolute;top:7px;left:7px;background:var(--amb);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px">${openWOs} WO</span>` : ''}
       </div>
-      <div class="fleet-card-body">
-        <div class="fleet-card-name">${c.name}</div>
-        <div class="fleet-card-sub">${c.year} ${c.make} ${c.model} · ${c.loa}</div>
-
-        <!-- Stats: compact, site-style -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px 0;border-top:.5px solid var(--bd);border-bottom:.5px solid var(--bd);margin-bottom:10px">
-          <div>
-            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:3px">Hours</div>
-            <div style="font-size:14px;font-weight:500;color:var(--txt)">${c.hours.toLocaleString()}</div>
+      <!-- Info -->
+      <div style="padding:10px 12px 12px">
+        <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:1px">${escHtml(c.name)}</div>
+        <div style="font-size:10px;color:var(--txt3);margin-bottom:8px">${c.year} ${c.make} · ${c.loa}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:11px;color:var(--txt3)">${c.hours}h</div>
+          <div style="display:flex;align-items:center;gap:4px">
+            <div style="width:36px;height:4px;border-radius:2px;background:var(--bg4);overflow:hidden"><div style="width:${fuelPct}%;height:100%;background:${fuelCol};border-radius:2px"></div></div>
+            <span style="font-size:10px;color:${fuelCol}">${fuelPct}%</span>
           </div>
-          <div>
-            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:3px">Engine</div>
-            <div style="font-size:10px;color:var(--txt2);line-height:1.3">${c.engine}</div>
-          </div>
-          <div>
-            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3);margin-bottom:3px">Last svc</div>
-            <div style="font-size:11px;color:var(--txt2)">${c.lastService}</div>
-          </div>
-        </div>
-
-        <!-- Bars -->
-        <div class="fleet-bar-row">
-          <span class="fleet-bar-lbl">${c.fuel === 'electric' ? 'Battery' : 'Fuel'}</span>
-          <div class="fleet-bar-track"><div class="fleet-bar-fill" style="width:${fuelPct}%;background:${fuelColor}"></div></div>
-          <span class="fleet-bar-val" style="color:${fuelColor}">${fuelPct}%</span>
-        </div>
-        <div class="fleet-bar-row" style="margin-bottom:10px">
-          <span class="fleet-bar-lbl">Next svc</span>
-          <div class="fleet-bar-track"><div class="fleet-bar-fill" style="width:${svcPct}%;background:${svcColor}"></div></div>
-          <span class="fleet-bar-val" style="color:${svcColor}">${hoursLeft > 0 ? hoursLeft + 'h' : 'Due'}</span>
-        </div>
-
-        <!-- Work orders -->
-        <div style="background:var(--bg);border:.5px solid var(--bd);border-radius:8px;padding:8px 10px;margin-bottom:12px">
-          <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:7px">Work orders</div>
-          ${craftWOs.length ? craftWOs.map(w => `
-            <div onclick="navTo('work-orders',document.querySelector('[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${w.id}'),80)"
-                 style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--bd);cursor:pointer">
-              <span style="font-family:var(--mono);font-size:10px;color:var(--txt3);flex-shrink:0">${w.id}</span>
-              <span style="font-size:11px;color:var(--txt2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escHtml(w.title)}</span>
-              <span class="badge b-${w.priority}" style="font-size:9px;flex-shrink:0">${FM.priorityLabel(w.priority)}</span>
-            </div>`).join('') : `
-          <div style="font-size:11px;color:var(--txt3)">No open work orders</div>`}
-        </div>
-
-        <!-- Actions -->
-        <div style="display:flex;gap:6px" onclick="event.stopPropagation()">
-          <button class="btn btn-ghost btn-sm" onclick="fleetLogHours('${c.id}','${c.name}')">Log hours</button>
-          <button class="btn btn-ghost btn-sm" onclick="${c.fuel === 'electric' ? `fleetCharge('${c.id}','${c.name}')` : `fleetFuelUp('${c.id}','${c.name}')`}">${c.fuel === 'electric' ? 'Charge' : 'Fuel up'}</button>
-          <button class="btn btn-ghost btn-sm" onclick="WO.openNewModal()">+ Work order</button>
         </div>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + `</div>`;
 }
 window.renderFleet = renderFleet;
 

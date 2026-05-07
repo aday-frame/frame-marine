@@ -43,7 +43,7 @@ function navTo(pageId, clickedEl, skipPush) {
     charter:     'Charter',
     logbook:     'Logbook',
     pms:         'Planned maintenance',
-    fleet:       'Tender & fleet',
+    fleet:       'Tenders',
     checklists:    'Checklists',
     owner:         'Owner view',
     certificates:  'Certificates',
@@ -216,7 +216,7 @@ function switchVessel(vesselId) {
 
   // "All vessels" → fleet page is the natural fleet overview
   if (vesselId === 'all') {
-    navTo('fleet', document.querySelector('.ni[data-page="fleet"]'));
+    navTo('dashboard', document.querySelector('.ni[data-page="dashboard"]'));
     return;
   }
 
