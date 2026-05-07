@@ -37,7 +37,7 @@ const Budget = (() => {
     const totalVariance = totalActual - totalBudgeted;
 
     wrap.innerHTML = `
-      <div style="max-width:760px;padding:18px 20px 48px">
+      <div style="padding:18px 20px 48px">
 
         <!-- Actions -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">

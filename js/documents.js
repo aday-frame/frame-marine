@@ -53,7 +53,7 @@ const Documents = (() => {
     const expiring = docs.filter(d => { const dd = _daysUntil(d.expires); return dd !== null && dd <= 90; });
 
     wrap.innerHTML = `
-      <div style="max-width:1100px;padding:18px 20px 48px">
+      <div style="padding:18px 20px 48px">
 
         <!-- Expiry alert -->
         ${expiring.length ? `

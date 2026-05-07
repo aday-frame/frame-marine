@@ -6,6 +6,7 @@ const WO = window.WO = {};
 WO.activeFilter = 'all';
 WO.searchQ = '';
 WO.activeId = null;
+WO._pendingSubtasks = null;
 
 /* ── RENDER LIST ── */
 WO.allWOs = function() {
@@ -309,18 +310,23 @@ WO.setStatus = function(woId, status) {
 };
 
 /* ── NEW WORK ORDER MODAL ── */
-WO.openNewModal = function() {
+WO.openNewModal = function(prefill) {
   const vessel = FM.currentVessel() || FM.vessels[0];
   if (!vessel) return;
+  const p = prefill || {};
   const zoneOpts = vessel.zones.map(z => `<option>${z}</option>`).join('');
-  const sysOpts  = vessel.systems.map(s => `<option>${s}</option>`).join('');
+  const sysOpts  = vessel.systems.map(s => `<option value="${s}"${p.system === s ? ' selected' : ''}>${s}</option>`).join('');
   const crewOpts = FM.crew.filter(c => c.vessel === vessel.id)
     .map(c => `<option value="${c.id}">${c.name} — ${c.role}</option>`).join('');
+  const teamOpts = ['engineering','deck','interior','charter']
+    .map(t => `<option value="${t}"${p.team === t ? ' selected' : ''}>${FM.teamLabel(t)}</option>`).join('');
+  const prioOpts = [['high','High'],['medium','Medium'],['low','Low']]
+    .map(([v,l]) => `<option value="${v}"${(p.priority||'medium') === v ? ' selected' : ''}>${l}</option>`).join('');
 
   const body = `
     <div class="inp-group">
       <label class="inp-lbl">Title</label>
-      <input class="inp" id="nwo-title" placeholder="Brief description of the issue">
+      <input class="inp" id="nwo-title" placeholder="Brief description of the issue" value="${p.title ? escHtml(p.title) : ''}">
     </div>
     <div class="inp-group">
       <label class="inp-lbl">Description</label>
@@ -339,20 +345,11 @@ WO.openNewModal = function() {
     <div class="inp-row" style="margin-top:14px">
       <div class="inp-group" style="margin-bottom:0">
         <label class="inp-lbl">Priority</label>
-        <select class="inp" id="nwo-priority">
-          <option value="high">High</option>
-          <option value="medium" selected>Medium</option>
-          <option value="low">Low</option>
-        </select>
+        <select class="inp" id="nwo-priority">${prioOpts}</select>
       </div>
       <div class="inp-group" style="margin-bottom:0">
         <label class="inp-lbl">Team</label>
-        <select class="inp" id="nwo-team">
-          <option value="engineering">Engineering</option>
-          <option value="deck">Deck</option>
-          <option value="interior">Interior</option>
-          <option value="charter">Charter</option>
-        </select>
+        <select class="inp" id="nwo-team">${teamOpts}</select>
       </div>
     </div>
     <div class="inp-row" style="margin-top:14px">
@@ -365,6 +362,11 @@ WO.openNewModal = function() {
         <input class="inp" id="nwo-due" type="date">
       </div>
     </div>
+    ${p.steps ? `<div style="background:var(--bg3);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--txt3);margin-top:4px">
+      <div style="font-weight:600;color:var(--txt2);margin-bottom:4px">Template: ${escHtml(p.title)}</div>
+      ${p.steps.slice(0,3).map(s => `<div style="padding:2px 0">· ${escHtml(s)}</div>`).join('')}
+      ${p.steps.length > 3 ? `<div style="color:var(--txt4)">+${p.steps.length - 3} more steps</div>` : ''}
+    </div>` : ''}
   `;
 
   openModal(body, 'New work order');
@@ -379,6 +381,9 @@ WO.createNew = function() {
   const nextNum = Math.max(...FM.workOrders.map(w => parseInt(w.id.replace('WO-','')))) + 1;
   const id = 'WO-' + String(nextNum).padStart(3, '0');
 
+  const subtasks = (WO._pendingSubtasks || []).map((text, i) => ({ id: 'st-' + i, text, done: false }));
+  WO._pendingSubtasks = null;
+
   FM.workOrders.unshift({
     id,
     vessel: App.currentVesselId,
@@ -392,13 +397,14 @@ WO.createNew = function() {
     assignee: document.getElementById('nwo-assignee')?.value || null,
     created: new Date().toISOString().slice(0, 10),
     due: document.getElementById('nwo-due')?.value || null,
-    subtasks: [],
+    subtasks,
     comments: [],
     parts: [],
   });
 
   closeModal();
   WO.render();
+  WO.openPanel(id);
   showToast(id + ' created', 'ok');
 
   // Queue for offline sync

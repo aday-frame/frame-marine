@@ -19,7 +19,7 @@ const Inventory = (() => {
     const visible = _tab === 'All' ? items : items.filter(i => i.category === _tab);
 
     wrap.innerHTML = `
-      <div style="max-width:1100px;padding:18px 20px 48px">
+      <div style="padding:18px 20px 48px">
 
         <!-- Low stock alert -->
         ${low.length ? `

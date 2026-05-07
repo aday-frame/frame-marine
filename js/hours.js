@@ -50,7 +50,7 @@ const Hours = (() => {
     const weekViolations = recs.filter(r => days.includes(r.date) && _violation(r));
 
     wrap.innerHTML = `
-      <div style="max-width:860px;padding:18px 20px 48px">
+      <div style="padding:18px 20px 48px">
 
         <!-- Context -->
         <div style="margin-bottom:24px">

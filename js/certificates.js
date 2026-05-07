@@ -61,7 +61,7 @@ const Certs = (() => {
     }).length;
 
     wrap.innerHTML = `
-      <div style="max-width:1100px;padding:18px 20px 40px">
+      <div style="padding:18px 20px 40px">
 
         <!-- Summary bar -->
         ${alertCount ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(248,113,113,.08);border:.5px solid rgba(248,113,113,.25);border-radius:8px;margin-bottom:20px">
