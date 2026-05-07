@@ -29,21 +29,21 @@ WO.renderStats = function(wos) {
 
   bar.style.gridTemplateColumns = 'repeat(4,1fr)';
   bar.innerHTML = `
-    <div class="pms-stat">
-      <div class="pms-stat-lbl">Open</div>
-      <div class="pms-stat-val" style="color:var(--or)">${open}</div>
+    <div class="wo-stat">
+      <div class="wo-stat-num" style="color:var(--or)">${open}</div>
+      <div class="wo-stat-lbl">Open</div>
     </div>
-    <div class="pms-stat">
-      <div class="pms-stat-lbl">In progress</div>
-      <div class="pms-stat-val">${progress}</div>
+    <div class="wo-stat">
+      <div class="wo-stat-num">${progress}</div>
+      <div class="wo-stat-lbl">In progress</div>
     </div>
-    <div class="pms-stat">
-      <div class="pms-stat-lbl">On hold</div>
-      <div class="pms-stat-val" style="color:var(--yel)">${hold}</div>
+    <div class="wo-stat">
+      <div class="wo-stat-num" style="color:var(--yel)">${hold}</div>
+      <div class="wo-stat-lbl">On hold</div>
     </div>
-    <div class="pms-stat" style="${high > 0 ? 'background:rgba(248,113,113,.06)' : ''}">
-      <div class="pms-stat-lbl">High priority</div>
-      <div class="pms-stat-val" style="color:${high > 0 ? 'var(--red)' : 'var(--txt)'}">${high}</div>
+    <div class="wo-stat" style="${high > 0 ? 'background:rgba(248,113,113,.04)' : ''}">
+      <div class="wo-stat-num" style="color:${high > 0 ? 'var(--red)' : 'var(--txt)'}">${high}</div>
+      <div class="wo-stat-lbl">High priority</div>
     </div>
   `;
 };
@@ -89,18 +89,19 @@ WO.renderList = function(wos) {
   }
 
   const thead = `<thead><tr>
-    <th style="width:80px">ID</th>
+    <th style="width:72px">ID</th>
     <th>Title</th>
-    <th style="width:130px">System</th>
-    <th style="width:80px">Priority</th>
-    <th style="width:90px">Status</th>
-    <th style="width:80px">Assignee</th>
-    <th style="width:80px">Due</th>
+    <th style="width:90px">Priority</th>
+    <th style="width:100px">Status</th>
+    <th style="width:36px"></th>
+    <th style="width:76px">Due</th>
   </tr></thead>`;
 
-  const GRP = (t, count) => `<tr><td colspan="7" style="padding:10px 12px 6px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;background:var(--bg);border-bottom:.5px solid var(--bd)">
-    <span class="badge b-${t}" style="margin-right:6px">${FM.teamLabel(t)}</span>
-    <span style="font-weight:400;text-transform:none;letter-spacing:0">${count} work order${count!==1?'s':''}</span>
+  const GRP = (t, count) => `<tr class="wo-grp"><td colspan="6">
+    <div class="wo-grp-inner">
+      <span class="badge b-${t}">${FM.teamLabel(t)}</span>
+      <span class="wo-grp-count">${count} work order${count!==1?'s':''}</span>
+    </div>
   </td></tr>`;
 
   let tbody;
@@ -116,7 +117,7 @@ WO.renderList = function(wos) {
       }).join('');
   }
 
-  wrap.innerHTML = `<div class="tbl-wrap"><table class="tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
+  wrap.innerHTML = `<div class="wo-list-wrap"><table class="wo-tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
 
   wrap.querySelectorAll('tbody tr[data-id]').forEach(row => {
     row.addEventListener('click', () => WO.openPanel(row.dataset.id));
@@ -126,27 +127,33 @@ WO.renderList = function(wos) {
 WO.rowHTML = function(w) {
   const pBadge  = `<span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>`;
   const sBadge  = WO.statusBadge(w.status);
-  const dueStr  = w.due ? fmtDate(w.due) : '<span class="c-txt3">—</span>';
+  const dueStr  = w.due ? fmtDate(w.due) : '—';
   const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date();
+  const subtasksDone  = w.subtasks.filter(s => s.done).length;
+  const subtasksTotal = w.subtasks.length;
 
   return `
     <tr data-id="${w.id}" class="${WO.activeId === w.id ? 'selected' : ''}">
-      <td class="tbl-mono">${w.id}</td>
-      <td>
-        <div class="tbl-title">${escHtml(w.title)}</div>
-        <div class="tbl-sub">${escHtml(w.zone)}</div>
+      <td><span class="wo-id">${w.id}</span></td>
+      <td class="wo-title-cell">
+        <div class="wo-title">${escHtml(w.title)}</div>
+        <div class="wo-sub">
+          <span>${escHtml(w.zone)}</span>
+          ${w.zone && w.system ? '<span class="wo-sub-dot"></span>' : ''}
+          <span>${escHtml(w.system)}</span>
+          ${subtasksTotal ? `<span class="wo-sub-dot"></span><span>${subtasksDone}/${subtasksTotal}</span>` : ''}
+        </div>
       </td>
-      <td class="c-txt2 t-11">${escHtml(w.system)}</td>
       <td>${pBadge}</td>
       <td>${sBadge}</td>
       <td>
-        <span style="width:20px;height:20px;border-radius:50%;background:${FM.crewColor(w.assignee)};
-          display:inline-flex;align-items:center;justify-content:center;
-          font-size:8px;font-weight:700;color:#080808;flex-shrink:0">
+        <span class="wo-av" style="background:${FM.crewColor(w.assignee)}">
           ${FM.crewInitials(w.assignee)}
         </span>
       </td>
-      <td class="${overdue ? 'c-red' : 'c-txt3'} t-11">${dueStr}</td>
+      <td style="font-size:12px;color:${overdue ? 'var(--red)' : 'var(--txt3)'}">
+        ${dueStr}
+      </td>
     </tr>
   `;
 };
@@ -173,80 +180,93 @@ WO.openPanel = function(id) {
   const progress = subtasksTotal ? Math.round(subtasksDone / subtasksTotal * 100) : 0;
 
   const content = `
-    <div class="panel-section">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-        ${WO.statusBadge(w.status)}
-        <span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>
-        <span class="badge b-${w.team}">${FM.teamLabel(w.team)}</span>
-      </div>
-      <p style="font-size:13px;color:var(--txt2);line-height:1.65;margin-bottom:0">${escHtml(w.desc)}</p>
+    <!-- Status + badges -->
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
+      ${WO.statusBadge(w.status)}
+      <span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>
+      <span class="badge b-${w.team}">${FM.teamLabel(w.team)}</span>
     </div>
 
+    <!-- Description -->
+    ${w.desc ? `<p style="font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:20px;letter-spacing:-.01em">${escHtml(w.desc)}</p>` : ''}
+
+    <!-- Details -->
     <div class="panel-section">
       <div class="panel-section-title">Details</div>
-      <div class="panel-row"><span class="panel-row-key">Zone</span><span class="panel-row-val">${w.zone}</span></div>
-      <div class="panel-row"><span class="panel-row-key">System</span><span class="panel-row-val">${w.system}</span></div>
       <div class="panel-row">
         <span class="panel-row-key">Assignee</span>
         <span class="panel-row-val" style="display:flex;align-items:center;gap:7px">
-          <span style="width:22px;height:22px;border-radius:50%;background:${FM.crewColor(w.assignee)};
-            display:inline-flex;align-items:center;justify-content:center;
-            font-size:9px;font-weight:700;color:#080808">
-            ${FM.crewInitials(w.assignee)}
-          </span>
+          <span class="wo-av" style="background:${FM.crewColor(w.assignee)}">${FM.crewInitials(w.assignee)}</span>
           ${FM.crewName(w.assignee)}
         </span>
       </div>
+      <div class="panel-row"><span class="panel-row-key">Zone</span><span class="panel-row-val">${escHtml(w.zone)}</span></div>
+      <div class="panel-row"><span class="panel-row-key">System</span><span class="panel-row-val">${escHtml(w.system)}</span></div>
       <div class="panel-row"><span class="panel-row-key">Created</span><span class="panel-row-val c-txt2">${fmtDate(w.created)}</span></div>
-      <div class="panel-row"><span class="panel-row-key">Due</span><span class="panel-row-val ${w.due && new Date(w.due) < new Date() ? 'c-red' : 'c-txt2'}">${w.due ? fmtDate(w.due) : '—'}</span></div>
+      <div class="panel-row"><span class="panel-row-key">Due</span>
+        <span class="panel-row-val ${w.due && new Date(w.due) < new Date() && w.status !== 'done' ? 'c-red' : 'c-txt2'}">${w.due ? fmtDate(w.due) : '—'}</span>
+      </div>
     </div>
 
+    <!-- Subtasks -->
     ${subtasksTotal ? `
     <div class="panel-section">
       <div class="panel-section-title">
         Sub-tasks
-        <span class="c-txt3 t-11" style="font-weight:400">${subtasksDone}/${subtasksTotal}</span>
-        <div style="flex:1;background:var(--bg4);border-radius:2px;height:3px;max-width:80px">
-          <div style="width:${progress}%;height:3px;border-radius:2px;background:${progress===100?'var(--grn)':'var(--or)'}"></div>
+        <span style="color:var(--txt3);font-weight:400;font-size:11px">${subtasksDone}/${subtasksTotal}</span>
+        <div style="flex:1;background:var(--bg5);border-radius:2px;height:2px;max-width:72px">
+          <div style="width:${progress}%;height:2px;border-radius:2px;background:${progress===100?'var(--grn)':'var(--or)'}"></div>
         </div>
       </div>
-      <div>
-        ${w.subtasks.map(s => `
-          <div class="subtask" onclick="WO.toggleSubtask('${w.id}','${s.id}')">
-            <div class="subtask-check ${s.done ? 'checked' : ''}">
-              ${s.done ? '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#080808" stroke-width="2.5" stroke-linecap="round"><path d="M3 8l4 4 6-6"/></svg>' : ''}
-            </div>
-            <span class="subtask-text ${s.done ? 'done' : ''}">${escHtml(s.text)}</span>
+      ${w.subtasks.map(s => `
+        <div class="subtask" onclick="WO.toggleSubtask('${w.id}','${s.id}')">
+          <div class="subtask-check ${s.done ? 'checked' : ''}">
+            ${s.done ? '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#060606" stroke-width="2.5" stroke-linecap="round"><path d="M3 8l4 4 6-6"/></svg>' : ''}
           </div>
-        `).join('')}
-      </div>
-    </div>
-    ` : ''}
-
-    ${w.parts.length ? `
-    <div class="panel-section">
-      <div class="panel-section-title">Parts required</div>
-      ${w.parts.map(p => `
-        <div style="font-size:12px;color:var(--txt2);padding:5px 0;border-bottom:.5px solid var(--bd)">
-          <span style="font-family:var(--mono);color:var(--txt3);margin-right:6px">—</span>${escHtml(p)}
+          <span class="subtask-text ${s.done ? 'done' : ''}">${escHtml(s.text)}</span>
         </div>
       `).join('')}
     </div>
     ` : ''}
 
+    <!-- Parts -->
+    ${w.parts.length ? `
     <div class="panel-section">
-      <div class="panel-section-title">Comments <span class="c-txt3 t-11" style="font-weight:400">${w.comments.length}</span></div>
+      <div class="panel-section-title">Parts required</div>
+      ${w.parts.map(p => `
+        <div style="font-size:12px;color:var(--txt2);padding:7px 0;border-bottom:.5px solid var(--bd);display:flex;gap:8px;align-items:center">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--txt4)">—</span>
+          ${escHtml(p)}
+        </div>
+      `).join('')}
+    </div>
+    ` : ''}
+
+    <!-- Status -->
+    <div class="panel-section">
+      <div class="panel-section-title">Status</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${['open','in-progress','on-hold','done'].map(s => `
+          <button class="btn btn-xs ${w.status === s ? 'btn-primary' : 'btn-ghost'}"
+                  onclick="WO.setStatus('${w.id}','${s}')">
+            ${FM.statusLabel(s)}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Comments -->
+    <div class="panel-section">
+      <div class="panel-section-title">Comments${w.comments.length ? ` <span style="color:var(--txt3);font-weight:400;font-size:11px">${w.comments.length}</span>` : ''}</div>
       <div class="wo-comments">
-        ${w.comments.length === 0 ? `<div class="c-txt3 t-12">No comments yet.</div>` : ''}
+        ${w.comments.length === 0 ? `<p style="font-size:12px;color:var(--txt3)">No comments yet.</p>` : ''}
         ${w.comments.map(c => {
-          const crew = FM.getCrew(c.author);
+          const cr = FM.getCrew(c.author);
           return `
             <div class="wo-comment">
-              <div class="wo-comment-av" style="background:${crew?.color||'#555'}">
-                ${crew?.initials||'?'}
-              </div>
+              <div class="wo-comment-av" style="background:${cr?.color||'#555'}">${cr?.initials||'?'}</div>
               <div class="wo-comment-body">
-                <div class="wo-comment-meta">${crew?.name||'Unknown'} · ${c.time}</div>
+                <div class="wo-comment-meta">${cr?.name||'Unknown'} · ${c.time}</div>
                 <div class="wo-comment-text">${escHtml(c.text)}</div>
               </div>
             </div>
@@ -254,25 +274,14 @@ WO.openPanel = function(id) {
         }).join('')}
       </div>
       <div style="margin-top:12px;display:flex;gap:8px;align-items:flex-end">
-        <textarea class="inp" id="panel-comment" placeholder="Add a comment…" rows="2" style="margin-bottom:0;resize:none"></textarea>
-        <button class="btn btn-ghost btn-sm" onclick="WO.addComment('${w.id}')">Post</button>
-      </div>
-    </div>
-
-    <div class="panel-section">
-      <div class="panel-section-title">Change status</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${['open','in-progress','on-hold','done'].map(s => `
-          <button class="btn btn-ghost btn-xs ${w.status === s ? 'btn-primary' : ''}"
-                  onclick="WO.setStatus('${w.id}','${s}')">
-            ${FM.statusLabel(s)}
-          </button>
-        `).join('')}
+        <textarea class="inp" id="panel-comment" placeholder="Add a comment…" rows="2" style="margin-bottom:0;resize:none;flex:1"></textarea>
+        <button class="btn btn-ghost btn-sm" style="flex-shrink:0" onclick="WO.addComment('${w.id}')">Post</button>
       </div>
     </div>
   `;
 
-  document.getElementById('panel-title').textContent = w.id + ' — ' + w.title.slice(0, 38) + (w.title.length > 38 ? '…' : '');
+  const titleEl = document.getElementById('panel-title');
+  titleEl.innerHTML = `<span style="font-family:var(--mono);font-size:11px;color:var(--txt3);font-weight:400;letter-spacing:0;margin-right:8px">${w.id}</span>${escHtml(w.title.slice(0,44))}${w.title.length > 44 ? '…' : ''}`;
   openPanel(content);
 };
 

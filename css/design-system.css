@@ -311,21 +311,21 @@ textarea.inp { resize: vertical; min-height: 72px; line-height: 1.6; }
 }
 .search input::placeholder { color: var(--txt3); }
 
-/* ── FILTER PILLS ── */
+/* ── FILTER PILLS — DESIGN.md pricing-tab pattern ── */
 .filters {
-  display: flex; gap: 5px; padding: 10px 16px;
+  display: flex; gap: 2px; padding: 8px 14px;
   flex-wrap: wrap; border-bottom: .5px solid var(--bd);
   flex-shrink: 0; align-items: center;
 }
 .fp {
-  padding: 4px 11px; border-radius: 20px; font-size: 11px;
-  cursor: pointer; border: .5px solid var(--bd2);
-  color: var(--txt2); background: transparent;
+  padding: 5px 12px; border-radius: 9999px; font-size: 12px;
+  font-weight: 500; cursor: pointer; border: none;
+  color: var(--txt3); background: transparent;
   transition: all var(--t1); user-select: none; white-space: nowrap;
 }
-.fp:hover { border-color: var(--or-bd); color: var(--or); }
-.fp.on    { background: var(--or-bg); border-color: var(--or-bd); color: var(--or); }
-.fp-sep   { width: .5px; background: var(--bd2); margin: 0 3px; align-self: stretch; }
+.fp:hover { color: var(--txt2); background: var(--bg3); }
+.fp.on    { background: var(--bg4); color: var(--txt); }
+.fp-sep   { width: .5px; background: var(--bd2); margin: 0 6px; align-self: stretch; flex-shrink: 0; }
 
 /* ── TABLES ── */
 .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }

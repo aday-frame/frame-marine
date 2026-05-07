@@ -861,7 +861,91 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
 .cl-sidebar { border-right: .5px solid var(--bd); overflow-y: auto; }
 .cl-main { overflow-y: auto; }
 
-/* ── WO GROUP HEADER ── */
+/* ── WORK ORDERS REDESIGN ── */
+
+/* Stat cards */
+.wo-stat {
+  padding: 18px 22px;
+  border-right: .5px solid var(--bd);
+  display: flex; flex-direction: column; gap: 8px;
+  position: relative;
+}
+.wo-stat:last-child { border-right: none; }
+.wo-stat-num {
+  font-size: 36px; font-weight: 600;
+  letter-spacing: -.045em; line-height: 1;
+  color: var(--txt);
+  font-variant-numeric: tabular-nums;
+}
+.wo-stat-lbl {
+  font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--txt3);
+}
+
+/* Table */
+.wo-tbl { width: 100%; border-collapse: collapse; }
+.wo-tbl thead th {
+  padding: 0 16px; height: 34px;
+  background: var(--bg); color: var(--txt3);
+  text-align: left; font-weight: 600;
+  font-size: 10px; text-transform: uppercase; letter-spacing: .08em;
+  border-bottom: .5px solid var(--bd);
+  white-space: nowrap; position: sticky; top: 0; z-index: 2;
+}
+.wo-tbl tbody td {
+  padding: 12px 16px;
+  border-bottom: .5px solid var(--bd);
+  vertical-align: middle;
+}
+.wo-tbl tbody tr { cursor: pointer; transition: background var(--t1); }
+.wo-tbl tbody tr:hover td { background: rgba(255,255,255,.02); }
+.wo-tbl tbody tr.selected td { background: var(--or-bg); }
+
+/* Group header row */
+.wo-grp td {
+  padding: 8px 16px !important;
+  background: var(--bg) !important;
+  border-bottom: .5px solid var(--bd) !important;
+  position: sticky; top: 34px; z-index: 1;
+}
+.wo-grp-inner { display: flex; align-items: center; gap: 8px; }
+.wo-grp-count {
+  font-size: 11px; font-weight: 400;
+  color: var(--txt3); letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Row cells */
+.wo-id {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--txt3); letter-spacing: 0;
+}
+.wo-title-cell { max-width: 320px; }
+.wo-title {
+  font-size: 13px; font-weight: 500;
+  color: var(--txt); letter-spacing: -.018em;
+  margin-bottom: 2px; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  max-width: 300px;
+}
+.wo-sub {
+  font-size: 11px; color: var(--txt3);
+  display: flex; gap: 6px; align-items: center;
+}
+.wo-sub-dot {
+  width: 3px; height: 3px; border-radius: 50%;
+  background: var(--txt4); flex-shrink: 0;
+}
+
+/* Assignee avatar */
+.wo-av {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; color: #060606; flex-shrink: 0;
+}
+
+/* WO Group header (old — kept for compatibility) */
 .wo-group-hdr { display: flex; align-items: center; padding: 10px 16px 8px; background: var(--bg2); border-bottom: .5px solid var(--bd); position: sticky; top: 0; z-index: 2; }
 
 /* ── CHARTER QUOTE DOCUMENT ── */
@@ -971,8 +1055,10 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
   .tbl-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
   /* Work orders table: horizontal scroll */
-  #wo-table-wrap .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  #wo-table-wrap .tbl-wrap table { min-width: 580px; }
+  #wo-table-wrap .wo-list-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #wo-table-wrap .wo-tbl { min-width: 560px; }
+  .wo-stat { padding: 14px 16px; }
+  .wo-stat-num { font-size: 28px; }
 
   /* Panel footer: stack buttons */
   .panel-footer { flex-wrap: wrap; }
