@@ -60,20 +60,28 @@ const Certs = (() => {
       return d !== null && d <= 90;
     }).length;
 
+    // Populate shared stats bar
+    const certsStatsEl = document.getElementById('certs-stats');
+    if (certsStatsEl) {
+      const expired = [...vc, ...cc].filter(c => { const d = daysUntil(c.expires); return d !== null && d < 0; }).length;
+      certsStatsEl.style.gridTemplateColumns = 'repeat(4,1fr)';
+      certsStatsEl.innerHTML = `
+        <div class="wo-stat"><div class="wo-stat-num">${vc.length + cc.length}</div><div class="wo-stat-lbl">Total</div></div>
+        <div class="wo-stat"><div class="wo-stat-num">${vc.length}</div><div class="wo-stat-lbl">Vessel certs</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="${alertCount?'color:var(--yel)':''}">${alertCount}</div><div class="wo-stat-lbl">Expiring (90d)</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="${expired?'color:var(--red)':''}">${expired}</div><div class="wo-stat-lbl">Expired</div></div>`;
+    }
+    // Sync filter pill
+    document.querySelectorAll('#certs-filters .fp').forEach(p => p.classList.toggle('on', p.dataset.ct === _tab));
+
     wrap.innerHTML = `
       <div style="padding:18px 20px 40px">
 
-        <!-- Summary bar -->
-        ${alertCount ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(248,113,113,.08);border:.5px solid rgba(248,113,113,.25);border-radius:8px;margin-bottom:20px">
+        <!-- Expiry alert -->
+        ${alertCount ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(248,113,113,.08);border:.5px solid rgba(248,113,113,.25);border-radius:8px;margin-bottom:16px">
           <svg viewBox="0 0 16 16" fill="var(--red)" style="width:14px;height:14px;flex-shrink:0"><path d="M8 1a.5.5 0 01.443.27l6.5 12A.5.5 0 0114.5 14h-13a.5.5 0 01-.443-.73l6.5-12A.5.5 0 018 1zm0 4a.5.5 0 00-.5.5v3a.5.5 0 001 0v-3A.5.5 0 008 5zm0 6.5a.5.5 0 100 1 .5.5 0 000-1z"/></svg>
-          <span style="font-size:12px;color:var(--red);font-weight:500">${alertCount} certificate${alertCount>1?'s':''} expiring within 90 days. Give them a look.</span>
+          <span style="font-size:12px;color:var(--red);font-weight:500">${alertCount} certificate${alertCount>1?'s':''} expiring within 90 days.</span>
         </div>` : ''}
-
-        <!-- Tabs -->
-        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:.5px solid var(--bd);padding-bottom:0">
-          <button onclick="Certs.tab('vessel')"  id="ct-vessel" class="tab-btn ${_tab==='vessel'?'tab-btn-active':''}">Vessel (${vc.length})</button>
-          <button onclick="Certs.tab('crew')"    id="ct-crew"   class="tab-btn ${_tab==='crew'?'tab-btn-active':''}">Crew (${cc.length})</button>
-        </div>
 
         <div id="certs-content"></div>
       </div>
@@ -88,6 +96,7 @@ const Certs = (() => {
   function _renderContent() {
     const el = document.getElementById('certs-content');
     if (!el) return;
+    document.querySelectorAll('#certs-filters .fp').forEach(p => p.classList.toggle('on', p.dataset.ct === _tab));
     if (_tab === 'vessel') el.innerHTML = _vesselTab();
     else el.innerHTML = _crewTab();
   }

@@ -358,6 +358,41 @@
       <div class="fp" data-rf="closed">Closed</div>
     </div>
 
+    <!-- Stats + Filters: Inventory -->
+    <div class="stats" id="inv-stats" style="display:none"></div>
+    <div class="filters" id="inv-filters" style="display:none">
+      <div class="fp on" data-inv="All">All</div>
+      <div class="fp" data-inv="Engineering">Engineering</div>
+      <div class="fp" data-inv="Safety">Safety</div>
+      <div class="fp" data-inv="Provisions">Provisions</div>
+      <div class="fp" data-inv="Deck">Deck</div>
+    </div>
+
+    <!-- Stats + Filters: Certificates -->
+    <div class="stats" id="certs-stats" style="display:none"></div>
+    <div class="filters" id="certs-filters" style="display:none">
+      <div class="fp on" data-ct="vessel">Vessel</div>
+      <div class="fp" data-ct="crew">Crew</div>
+    </div>
+
+    <!-- Stats + Filters: Safety & ISM -->
+    <div class="stats" id="safety-stats" style="display:none"></div>
+    <div class="filters" id="safety-filters" style="display:none">
+      <div class="fp on" data-sf="drills">Drills</div>
+      <div class="fp" data-sf="nc">Non-conformances</div>
+      <div class="fp" data-sf="meetings">Safety meetings</div>
+    </div>
+
+    <!-- Stats + Filters: Documents -->
+    <div class="stats" id="docs-stats" style="display:none"></div>
+    <div class="filters" id="docs-filters" style="display:none">
+      <div class="fp on" data-df="All">All</div>
+      <div class="fp" data-df="Registration">Registration</div>
+      <div class="fp" data-df="Insurance">Insurance</div>
+      <div class="fp" data-df="Contracts">Contracts</div>
+      <div class="fp" data-df="Manuals">Manuals</div>
+    </div>
+
     <!-- ── PAGE CONTENT ── -->
     <div class="page-body">
 
@@ -1067,6 +1102,42 @@ document.addEventListener('DOMContentLoaded', () => {
       Requests.render();
     });
   });
+
+  // Wire up inventory filters
+  document.querySelectorAll('#inv-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#inv-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Inventory.setTab(this.dataset.inv);
+    });
+  });
+
+  // Wire up certificates filters
+  document.querySelectorAll('#certs-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#certs-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Certs.tab(this.dataset.ct);
+    });
+  });
+
+  // Wire up safety filters
+  document.querySelectorAll('#safety-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#safety-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Safety.tab(this.dataset.sf);
+    });
+  });
+
+  // Wire up documents filters
+  document.querySelectorAll('#docs-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#docs-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Documents.setTab(this.dataset.df);
+    });
+  });
 });
 
 // Show/hide chrome per page
@@ -1082,19 +1153,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     origNav(pageId, el, skipPush);
 
-    const hasStats    = ['work-orders'].includes(pageId);
-    const hasFilters  = ['work-orders'].includes(pageId);
-    const hasSearch   = ['work-orders'].includes(pageId);
-    const hasMonStats = ['monitoring'].includes(pageId);
-    const hasReqStats   = ['requests'].includes(pageId);
-    const hasReqFilters = ['requests'].includes(pageId);
-
-    document.getElementById('wo-stats').style.display    = hasStats      ? 'grid' : 'none';
-    document.getElementById('wo-filters').style.display  = hasFilters    ? 'flex' : 'none';
-    document.getElementById('main-search').style.display = hasSearch     ? 'flex' : 'none';
-    document.getElementById('mon-stats').style.display   = hasMonStats   ? 'grid' : 'none';
-    document.getElementById('req-stats').style.display   = hasReqStats   ? 'grid' : 'none';
-    document.getElementById('req-filters').style.display = hasReqFilters ? 'flex' : 'none';
+    const p = pageId;
+    document.getElementById('wo-stats').style.display     = p==='work-orders'  ? 'grid' : 'none';
+    document.getElementById('wo-filters').style.display   = p==='work-orders'  ? 'flex' : 'none';
+    document.getElementById('main-search').style.display  = p==='work-orders'  ? 'flex' : 'none';
+    document.getElementById('mon-stats').style.display    = p==='monitoring'   ? 'grid' : 'none';
+    document.getElementById('req-stats').style.display    = p==='requests'     ? 'grid' : 'none';
+    document.getElementById('req-filters').style.display  = p==='requests'     ? 'flex' : 'none';
+    document.getElementById('inv-stats').style.display    = p==='inventory'    ? 'grid' : 'none';
+    document.getElementById('inv-filters').style.display  = p==='inventory'    ? 'flex' : 'none';
+    document.getElementById('certs-stats').style.display  = p==='certificates' ? 'grid' : 'none';
+    document.getElementById('certs-filters').style.display= p==='certificates' ? 'flex' : 'none';
+    document.getElementById('safety-stats').style.display = p==='safety'       ? 'grid' : 'none';
+    document.getElementById('safety-filters').style.display=p==='safety'       ? 'flex' : 'none';
+    document.getElementById('docs-stats').style.display   = p==='documents'    ? 'grid' : 'none';
+    document.getElementById('docs-filters').style.display = p==='documents'    ? 'flex' : 'none';
 
     // Show templates button only on work orders page
     const tmplBtn = document.getElementById('template-btn');

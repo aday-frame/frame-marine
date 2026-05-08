@@ -40,25 +40,22 @@ const Safety = (() => {
 
     const completed = drills.filter(d => d.status === 'completed').length;
 
+    // Populate shared stats bar
+    const safetyStatsEl = document.getElementById('safety-stats');
+    if (safetyStatsEl) {
+      safetyStatsEl.style.gridTemplateColumns = 'repeat(4,1fr)';
+      safetyStatsEl.innerHTML = `
+        <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${completed}</div><div class="wo-stat-lbl">Drills completed</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${scheduledD}</div><div class="wo-stat-lbl">Drills scheduled</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="${openNCs?'color:var(--red)':''}">${openNCs}</div><div class="wo-stat-lbl">Open NCs</div></div>
+        <div class="wo-stat"><div class="wo-stat-num">${meetings.length}</div><div class="wo-stat-lbl">Safety meetings</div></div>`;
+    }
+    // Sync filter pill
+    document.querySelectorAll('#safety-filters .fp').forEach(p => p.classList.toggle('on', p.dataset.sf === _tab));
+
     wrap.innerHTML = `
-      <div style="padding:0 0 40px">
-
-        <!-- Stat bar -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd);margin-bottom:0">
-          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${completed}</div><div class="wo-stat-lbl">Drills completed</div></div>
-          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--yel)">${scheduledD}</div><div class="wo-stat-lbl">Drills scheduled</div></div>
-          <div class="wo-stat"><div class="wo-stat-num" style="${openNCs ? 'color:var(--red)' : ''}">${openNCs}</div><div class="wo-stat-lbl">Open non-conformances</div></div>
-          <div class="wo-stat" style="border-right:none"><div class="wo-stat-num">${meetings.length}</div><div class="wo-stat-lbl">Safety meetings</div></div>
-        </div>
-
-        <!-- Tabs -->
-        <div style="display:flex;gap:4px;padding:0 20px;margin-top:20px;margin-bottom:20px;border-bottom:.5px solid var(--bd)">
-          <button onclick="Safety.tab('drills')"   id="st-drills"   class="tab-btn ${_tab==='drills'?'tab-btn-active':''}">Drills</button>
-          <button onclick="Safety.tab('nc')"       id="st-nc"       class="tab-btn ${_tab==='nc'?'tab-btn-active':''}">Non-conformances ${openNCs?`<span class="ni-count ni-count-red" style="position:relative;top:-1px">${openNCs}</span>`:''}</button>
-          <button onclick="Safety.tab('meetings')" id="st-meetings" class="tab-btn ${_tab==='meetings'?'tab-btn-active':''}">Safety meetings</button>
-        </div>
-
-        <div id="safety-content" style="padding:0 20px"></div>
+      <div style="padding:18px 20px 40px">
+        <div id="safety-content"></div>
       </div>
 
       ${_modalHtml()}
@@ -70,6 +67,7 @@ const Safety = (() => {
   function _renderContent() {
     const el = document.getElementById('safety-content');
     if (!el) return;
+    document.querySelectorAll('#safety-filters .fp').forEach(p => p.classList.toggle('on', p.dataset.sf === _tab));
     if (_tab === 'drills')   el.innerHTML = _drillsTab();
     else if (_tab === 'nc')  el.innerHTML = _ncTab();
     else                     el.innerHTML = _meetingsTab();

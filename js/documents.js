@@ -89,6 +89,21 @@ const Documents = (() => {
     const docs    = _docs();
     const visible = _tab === 'All' ? docs : docs.filter(d => d.category === _tab);
     const expiring = docs.filter(d => { const dd = _daysUntil(d.expires); return dd !== null && dd <= 90; });
+    const expired  = docs.filter(d => { const dd = _daysUntil(d.expires); return dd !== null && dd < 0; });
+    const valid    = docs.filter(d => { const dd = _daysUntil(d.expires); return dd === null || dd >= 0; });
+
+    // Populate shared stats bar
+    const docsStatsEl = document.getElementById('docs-stats');
+    if (docsStatsEl) {
+      docsStatsEl.style.gridTemplateColumns = 'repeat(4,1fr)';
+      docsStatsEl.innerHTML = `
+        <div class="wo-stat"><div class="wo-stat-num">${docs.length}</div><div class="wo-stat-lbl">Total</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${valid.length}</div><div class="wo-stat-lbl">Valid</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="${expiring.length?'color:var(--yel)':''}">${expiring.length}</div><div class="wo-stat-lbl">Expiring (90d)</div></div>
+        <div class="wo-stat"><div class="wo-stat-num" style="${expired.length?'color:var(--red)':''}">${expired.length}</div><div class="wo-stat-lbl">Expired</div></div>`;
+    }
+    // Sync filter pill
+    document.querySelectorAll('#docs-filters .fp').forEach(p => p.classList.toggle('on', p.dataset.df === _tab));
 
     const isMob = window.innerWidth <= 768;
 
@@ -112,7 +127,6 @@ const Documents = (() => {
     wrap.innerHTML = `
       <div style="padding:18px 20px 80px">
         ${_alertBanner(expiring)}
-        ${_tabBar(docs)}
         <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
           <button class="btn btn-primary btn-sm" onclick="Documents.openAdd()">+ Add document</button>
         </div>
