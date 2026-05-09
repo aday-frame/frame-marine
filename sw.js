@@ -1,9 +1,20 @@
 /* ── FRAME MARINE — SERVICE WORKER ── */
 'use strict';
 
-const CACHE = 'frame-marine-v26';
+// Self-destruct: unregister and delete all caches so fresh files always load
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))))
+      .then(() => self.registration.unregister())
+      .then(() => self.clients.matchAll()).then(clients => clients.forEach(c => c.navigate(c.url)))
+  );
+});
+
+const CACHE = 'frame-marine-v3';
 
 const PRECACHE = [
+  '/',
   '/app.html',
   '/css/design-system.css',
   '/css/layout.css',
@@ -13,27 +24,8 @@ const PRECACHE = [
   '/js/work-orders.js',
   '/js/dashboard.js',
   '/js/monitoring.js',
-  '/js/charter.js',
-  '/js/owner.js',
-  '/js/certificates.js',
-  '/js/safety.js',
-  '/js/inventory.js',
-  '/js/budget.js',
-  '/js/hours.js',
-  '/js/documents.js',
-  '/js/reports.js',
-  '/js/kb.js',
-  '/js/upgrade.js',
-  '/js/roles.js',
-  '/js/properties.js',
-  '/js/procurement.js',
-  '/js/compliance.js',
-  '/js/search.js',
   '/js/offline.js',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png',
-  '/apple-touch-icon.png',
+  'https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap',
 ];
 
 self.addEventListener('install', e => {
@@ -55,10 +47,8 @@ self.addEventListener('activate', e => {
 });
 
 self.addEventListener('fetch', e => {
-  const url = e.request.url;
-
-  // Fonts: cache-first
-  if (url.includes('fonts.googleapis.com') || url.includes('fonts.gstatic.com') || url.includes('unpkg.com')) {
+  // Network-first for fonts (cache fallback)
+  if (e.request.url.includes('fonts.googleapis.com') || e.request.url.includes('fonts.gstatic.com')) {
     e.respondWith(
       caches.match(e.request).then(cached => {
         if (cached) return cached;
@@ -72,14 +62,13 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // All other requests: network-first, fall back to cache
+  // Network-first for all local app files — always serve fresh
   e.respondWith(
     fetch(e.request)
       .then(resp => {
-        if (resp && resp.status === 200 && resp.type !== 'opaque') {
-          const clone = resp.clone();
-          caches.open(CACHE).then(c => c.put(e.request, clone));
-        }
+        if (!resp || resp.status !== 200 || resp.type === 'opaque') return resp;
+        const clone = resp.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
         return resp;
       })
       .catch(() => caches.match(e.request))

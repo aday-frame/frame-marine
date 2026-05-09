@@ -9,15 +9,6 @@ const App = window.App = {
   modalOpen: false,
 };
 
-/* ── NAV GROUP ACCORDION ── */
-function toggleNavGroup(id) {
-  const grp = document.querySelector(`.nav-group[data-group="${id}"]`);
-  if (!grp) return;
-  const isOpen = grp.classList.contains('open');
-  document.querySelectorAll('.nav-group.open').forEach(g => g.classList.remove('open'));
-  if (!isOpen) grp.classList.add('open');
-}
-
 /* ── ROUTER ── */
 function navTo(pageId, clickedEl, skipPush) {
   // Hide all pages
@@ -32,14 +23,6 @@ function navTo(pageId, clickedEl, skipPush) {
   else {
     const match = document.querySelector(`.ni[data-page="${pageId}"]`);
     if (match) match.classList.add('active');
-  }
-
-  // Open the nav group containing the active item
-  const activeNi = clickedEl || document.querySelector(`.ni[data-page="${pageId}"]`);
-  const parentGroup = activeNi?.closest('.nav-group');
-  if (parentGroup) {
-    document.querySelectorAll('.nav-group.open').forEach(g => g.classList.remove('open'));
-    parentGroup.classList.add('open');
   }
 
   // Update topbar title
@@ -67,8 +50,6 @@ function navTo(pageId, clickedEl, skipPush) {
     certificates:  'Certificates',
     safety:        'Safety & ISM',
     inventory:     'Inventory',
-    procurement:   'Procurement',
-    compliance:    'Compliance',
     budget:        'Budget',
     hours:         'Hours of rest',
     documents:     'Docs',
@@ -104,8 +85,6 @@ function navTo(pageId, clickedEl, skipPush) {
     certificates:  () => window.Certs && Certs.render(),
     safety:        () => window.Safety && Safety.render(),
     inventory:     () => window.Inventory && Inventory.render(),
-    procurement:   () => window.Procurement && Procurement.render(),
-    compliance:    () => window.Compliance && Compliance.render(),
     budget:        () => window.Budget && Budget.render(),
     hours:         () => window.Hours && Hours.render(),
     documents:     () => window.Documents && Documents.render(),
@@ -136,10 +115,7 @@ function navTo(pageId, clickedEl, skipPush) {
   const woCount = (FM.openWOs(App.currentVesselId) || []).length;
   ['sb-wo-count', 'mobnav-wo-badge'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      el.textContent = woCount; el.style.display = woCount ? '' : 'none';
-      el.closest('.ni')?.classList.toggle('has-alert', woCount > 0);
-    }
+    if (el) { el.textContent = woCount; el.style.display = woCount ? '' : 'none'; }
   });
 
   // Update cert expiry badge
@@ -151,10 +127,7 @@ function navTo(pageId, clickedEl, skipPush) {
     return n.vessel === (cr && cr.id) && n.status === 'open';
   }).length;
   const ncEl = document.getElementById('sb-nc-count');
-  if (ncEl) {
-    ncEl.textContent = ncCount; ncEl.style.display = ncCount ? '' : 'none';
-    ncEl.closest('.ni')?.classList.toggle('has-alert', ncCount > 0);
-  }
+  if (ncEl) { ncEl.textContent = ncCount; ncEl.style.display = ncCount ? '' : 'none'; }
 
   // Show FAB only on work-orders page
   const fab = document.getElementById('mob-fab');
@@ -174,7 +147,6 @@ function toggleMobSidebar() {
   const isOpen = sb.classList.contains('mob-open');
   sb.classList.toggle('mob-open', !isOpen);
   bd?.classList.toggle('open', !isOpen);
-  if (!isOpen && window.Roles) Roles.applyNav();
 }
 window.toggleMobSidebar = toggleMobSidebar;
 
@@ -288,13 +260,9 @@ function switchVessel(vesselId) {
     return;
   }
 
-  // If switching to a property, go to that property's detail view
+  // If switching to a property, go to portfolio view
   if ((FM.properties || []).find(x => x.id === vesselId)) {
-    if (window.Properties) {
-      Properties.switchTo(vesselId);
-    } else {
-      navTo('portfolio', document.querySelector('.ni[data-page="portfolio"]'));
-    }
+    navTo('portfolio', document.querySelector('.ni[data-page="portfolio"]'));
     return;
   }
 
@@ -306,13 +274,8 @@ function switchVessel(vesselId) {
     calendar:      () => Cal?.render(),
     team:          () => Team?.render(),
     chat:          () => Chat?.render(),
-    parts:         () => window.Parts && Parts.render(),
-    vendors:       () => window.Vendors && Vendors.render(),
-    assets:        () => window.Assets && Assets.render(),
     safety:        () => Safety?.render(),
     inventory:     () => Inventory?.render(),
-    procurement:   () => Procurement?.render(),
-    compliance:    () => Compliance?.render(),
     requests:      () => Requests?.render(),
     certificates:  () => Certs?.render(),
     logbook:       () => window.renderLogbook?.(),
@@ -326,7 +289,6 @@ function switchVessel(vesselId) {
     budget:        () => Budget?.render(),
     hub:           () => Hub?.render(),
     owner:         () => Owner?.render(),
-    charter:       () => window.Charter && Charter.render(),
   };
   if (inits[App.currentPage]) inits[App.currentPage]();
 
@@ -352,11 +314,9 @@ function closePanel() {
 }
 
 /* ── MODAL ── */
-function openModal(content, title, opts = {}) {
+function openModal(content, title) {
   if (title) document.getElementById('modal-title').textContent = title;
   if (content) document.getElementById('modal-body').innerHTML = content;
-  const footer = document.getElementById('modal-footer');
-  if (footer) footer.style.display = opts.hideFooter ? 'none' : '';
   document.getElementById('modal-overlay').classList.add('open');
   App.modalOpen = true;
 }
@@ -803,7 +763,7 @@ function renderNotifications() {
   </div>`;
 
   wrap.innerHTML = `
-    <div style="padding:0 0 max(100px, calc(env(safe-area-inset-bottom, 0px) + 80px))">
+    <div style="padding:0 0 80px">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px">
         <span style="font-size:11px;color:var(--txt3)">${notifs.length} total</span>
         ${unread.length ? `<button class="btn btn-ghost btn-xs" onclick="markAllRead()">Mark all read</button>` : ''}
@@ -857,7 +817,7 @@ function openPersonalSettings() {
         <button class="btn btn-danger btn-sm" onclick="showToast('Signed out');closeModal()">Sign out</button>
       </div>
     </div>
-  `, 'Account', { hideFooter: true });
+  `, 'Account');
   setTimeout(() => {
     const mode = document.body.dataset.theme || 'dark';
     document.getElementById('seg-dark')?.classList.toggle('active', mode === 'dark');

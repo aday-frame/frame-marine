@@ -144,10 +144,9 @@ const Inventory = (() => {
         </div>
       </div>
 
-      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;margin-bottom:20px">
         <button class="btn btn-primary btn-sm" onclick="Inventory.use('${i.id}');closePanel();Inventory.render()">Use 1</button>
         <button class="btn btn-ghost btn-sm" onclick="closePanel();Inventory.openEdit('${i.id}')">Edit item</button>
-        <button class="btn btn-ghost btn-sm" onclick="closePanel();Inventory.openTransfer('${i.id}')">Transfer</button>
       </div>
     `);
   }
@@ -230,56 +229,6 @@ const Inventory = (() => {
     showToast(id ? 'Item updated' : 'Item added');
   }
 
-  function openTransfer(id) {
-    const item = (FM.inventory || []).find(i => i.id === id);
-    if (!item) return;
-    const vessels = (FM.vessels || []).filter(v => v.id !== item.vessel);
-    openModal(`
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <div style="padding:10px 14px;background:var(--bg3);border-radius:8px">
-          <div style="font-size:12px;font-weight:600;color:var(--txt)">${escHtml(item.name)}</div>
-          <div style="font-size:11px;color:var(--txt4);margin-top:2px">${item.qty} ${escHtml(item.unit)} on hand · ${escHtml(item.location)}</div>
-        </div>
-        <div>
-          <label class="inp-lbl">Transfer to vessel</label>
-          <select class="inp" id="xfr-dest">
-            ${vessels.length ? vessels.map(v=>`<option value="${v.id}">${escHtml(v.name)}</option>`).join('') : '<option value="">No other vessels</option>'}
-          </select>
-        </div>
-        <div>
-          <label class="inp-lbl">Quantity to transfer</label>
-          <input class="inp" id="xfr-qty" type="number" min="1" max="${item.qty}" value="1">
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
-          <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
-          <button class="btn btn-primary btn-sm" onclick="Inventory.confirmTransfer('${id}')">Transfer</button>
-        </div>
-      </div>
-    `, 'Transfer inventory', { hideFooter: true });
-  }
-
-  function confirmTransfer(id) {
-    const item = (FM.inventory || []).find(i => i.id === id);
-    if (!item) return;
-    const destId = document.getElementById('xfr-dest')?.value;
-    const qty    = parseInt(document.getElementById('xfr-qty')?.value) || 0;
-    if (!destId) { showToast('No destination vessel', 'error'); return; }
-    if (qty <= 0 || qty > item.qty) { showToast('Invalid quantity', 'error'); return; }
-    // Decrement source
-    item.qty -= qty;
-    // Find or create destination item
-    const existing = (FM.inventory || []).find(i => i.vessel === destId && i.name === item.name);
-    if (existing) {
-      existing.qty += qty;
-    } else {
-      FM.inventory.push({ ...item, id: 'inv-' + Date.now(), vessel: destId, qty });
-    }
-    const destVessel = (FM.vessels || []).find(v => v.id === destId);
-    closeModal();
-    render();
-    showToast(`Transferred ${qty} × ${item.name} to ${destVessel?.name || destId}`);
-  }
-
   function del(id) {
     FM.inventory = (FM.inventory || []).filter(i => i.id !== id);
     closeModal();
@@ -287,7 +236,7 @@ const Inventory = (() => {
     showToast('Item removed');
   }
 
-  return { render, setTab, use, openAdd, openEdit, openDetail, openTransfer, confirmTransfer, save, del };
+  return { render, setTab, use, openAdd, openEdit, openDetail, save, del };
 })();
 
 window.Inventory = Inventory;

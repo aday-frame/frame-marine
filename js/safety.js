@@ -89,32 +89,6 @@ const Safety = (() => {
 
     if (!drills.length) return actions + `<div class="empty" style="padding:40px 0"><div class="empty-title">No drills yet</div><div class="empty-sub">Log or schedule your first drill above</div></div>`;
 
-    if (window.innerWidth <= 768) {
-      const mobCard = d => {
-        const dt = DRILL_TYPES[d.type] || { label: d.type, icon: '📋', color: 'var(--txt3)' };
-        const isSched = d.status === 'scheduled';
-        return `<div class="wo-mob-card-row" style="align-items:center">
-          <div style="width:38px;height:38px;border-radius:9px;background:${dt.color}18;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${dt.icon}</div>
-          <div class="wo-mob-card-body">
-            <div class="wo-mob-card-title">${dt.label} Drill</div>
-            <div class="wo-mob-card-meta">
-              ${d.conductor ? `<span>${escHtml(FM.crewName(d.conductor))}</span>` : ''}
-              ${d.location ? `<span class="wo-mob-dot">·</span><span>${escHtml(d.location)}</span>` : ''}
-            </div>
-            <div class="wo-mob-card-foot">
-              <div style="display:flex;gap:6px;align-items:center">
-                <span class="badge ${isSched ? 'b-hold' : 'b-done'}">${isSched ? 'Scheduled' : 'Completed'}</span>
-                ${d.duration ? `<span style="font-size:11px;color:var(--txt3)">${d.duration} min</span>` : ''}
-              </div>
-              <span class="wo-mob-due">${fmtDate(d.date)}</span>
-            </div>
-          </div>
-          ${isSched ? `<button class="btn btn-ghost btn-xs" style="flex-shrink:0" onclick="event.stopPropagation();Safety.completeDrill('${d.id}')">Done</button>` : ''}
-        </div>`;
-      };
-      return actions + `<div class="wo-mob-list">${drills.map(mobCard).join('')}</div>`;
-    }
-
     const row = d => {
       const dt = DRILL_TYPES[d.type] || { label: d.type, icon: '📋', color: 'var(--txt3)' };
       const isSched = d.status === 'scheduled';
@@ -174,28 +148,6 @@ const Safety = (() => {
     </div>`;
 
     if (!ncs.length) return actions + `<div class="empty" style="padding:40px 0"><div class="empty-title">No reports yet</div><div class="empty-sub">All clear — raise a report above if needed</div></div>`;
-
-    if (window.innerWidth <= 768) {
-      const mobCard = nc => {
-        const isOpen = nc.status === 'open';
-        return `<div class="wo-mob-card-row" style="cursor:pointer" onclick="Safety._openNCDetail('${nc.id}')">
-          <div class="wo-mob-card-body">
-            <div class="wo-mob-card-title">${escHtml(nc.title)}</div>
-            <div class="wo-mob-card-meta">
-              <span style="font-family:var(--mono);font-size:10px;color:var(--txt4)">${escHtml(nc.ref)}</span>
-              <span class="wo-mob-dot">·</span>
-              <span>${NC_TYPES[nc.type]||nc.type}</span>
-            </div>
-            <div class="wo-mob-card-foot">
-              <span class="badge ${isOpen ? 'b-high' : 'b-done'}">${isOpen ? 'Open' : 'Closed'}</span>
-              <span class="wo-mob-due">${fmtDate(nc.date)}</span>
-            </div>
-          </div>
-          <svg class="wo-mob-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
-        </div>`;
-      };
-      return actions + `<div class="wo-mob-list">${ncs.map(mobCard).join('')}</div>`;
-    }
 
     const rows = ncs.map(nc => {
       const isOpen = nc.status === 'open';
@@ -342,7 +294,7 @@ const Safety = (() => {
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
         <div>
           <label class="inp-lbl">Date</label>
-          <input class="inp" id="dm-date" type="date" value="2026-05-07">
+          <input class="inp" id="dm-date" type="date" value="${new Date().toISOString().slice(0,10)}">
         </div>
         <div>
           <label class="inp-lbl">Conducted by</label>
@@ -382,7 +334,7 @@ const Safety = (() => {
     const type   = document.getElementById('dm-type')?.value;
     const date   = document.getElementById('dm-date')?.value;
     const cond   = document.getElementById('dm-conductor')?.value;
-    if (!date) { showToast('Date is required', 'error'); return; }
+    if (!date) { alert('Date is required.'); return; }
 
     const drill = {
       id: 'dr' + Date.now(), vessel: vessel.id, type, date, conductor: cond,
@@ -442,9 +394,9 @@ const Safety = (() => {
   }
 
   function delDrill(id) {
+    if (!confirm('Remove this drill record?')) return;
     FM.drills = FM.drills.filter(d => d.id !== id);
     render();
-    showToast('Drill removed');
   }
 
   /* ── NC MODAL ── */
@@ -469,7 +421,7 @@ const Safety = (() => {
         <textarea class="inp" id="nc-desc" rows="3" placeholder="What happened, when, where, who was involved…"></textarea>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label class="inp-lbl">Date</label><input class="inp" id="nc-date" type="date" value="2026-05-07"></div>
+        <div><label class="inp-lbl">Date</label><input class="inp" id="nc-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
         <div><label class="inp-lbl">Raised by</label><select class="inp" id="nc-raised">${crewOpts}</select></div>
       </div>
       <div style="margin-bottom:16px">
@@ -486,7 +438,7 @@ const Safety = (() => {
   function saveNC() {
     const title = document.getElementById('nc-title')?.value.trim();
     const desc  = document.getElementById('nc-desc')?.value.trim();
-    if (!title) { showToast('Title is required', 'error'); return; }
+    if (!title) { alert('Title is required.'); return; }
 
     const vessel = FM.currentVessel();
     FM.nonConformances.push({
@@ -528,15 +480,15 @@ const Safety = (() => {
     if (!nc) return;
     nc.correctiveAction = document.getElementById('nc-ca')?.value.trim() || '';
     nc.status     = 'closed';
-    nc.closedDate = '2026-05-07';
+    nc.closedDate = new Date().toISOString().slice(0,10);
     closeModal();
     render();
   }
 
   function delNC(id) {
+    if (!confirm('Remove this report?')) return;
     FM.nonConformances = FM.nonConformances.filter(n => n.id !== id);
     render();
-    showToast('Report removed');
   }
 
   /* ── MEETING MODAL ── */
@@ -552,7 +504,7 @@ const Safety = (() => {
         <input class="inp" id="sm-topic" placeholder="e.g. Emergency procedure review">
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
-        <div><label class="inp-lbl">Date</label><input class="inp" id="sm-date" type="date" value="2026-05-07"></div>
+        <div><label class="inp-lbl">Date</label><input class="inp" id="sm-date" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
         <div><label class="inp-lbl">Duration (minutes)</label><input class="inp" id="sm-dur" type="number" placeholder="e.g. 30"></div>
       </div>
       <div style="margin-bottom:14px">
@@ -576,7 +528,7 @@ const Safety = (() => {
 
   function saveMeeting() {
     const topic = document.getElementById('sm-topic')?.value.trim();
-    if (!topic) { showToast('Topic is required', 'error'); return; }
+    if (!topic) { alert('Topic is required.'); return; }
     const vessel = FM.currentVessel();
     FM.safetyMeetings.push({
       id:        'sm' + Date.now(),
@@ -593,9 +545,9 @@ const Safety = (() => {
   }
 
   function delMeeting(id) {
+    if (!confirm('Remove this meeting record?')) return;
     FM.safetyMeetings = FM.safetyMeetings.filter(m => m.id !== id);
     render();
-    showToast('Meeting removed');
   }
 
   function tab(t) {

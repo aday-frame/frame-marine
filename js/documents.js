@@ -24,16 +24,20 @@ const Documents = (() => {
 
   function _docRow(d) {
     const exp = _expStatus(d.expires);
-    return `<tr style="cursor:pointer" onclick="Documents.view('${d.id}')">
+    return `<tr>
       <td style="font-weight:500;color:var(--txt)">${escHtml(d.name)}${d.notes ? `<div style="font-size:10px;color:var(--txt3);font-weight:400;margin-top:1px">${escHtml(d.notes)}</div>` : ''}</td>
       <td style="font-family:var(--mono);font-size:10px;color:var(--txt3)">${escHtml(d.docRef || '—')}</td>
       <td style="color:var(--txt3)">${d.uploadedAt || '—'}</td>
       <td style="color:${exp.color};font-weight:${d.expires ? '500' : '400'}">${_fmtDate(d.expires)}</td>
       <td><span class="badge ${exp.cls}" style="font-size:9px">${exp.label}</span></td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-xs" onclick="Documents.openEdit('${d.id}')">Edit</button>
+        <button class="btn btn-ghost btn-xs" onclick="Documents.view('${d.id}')">View ↗</button>
+      </div></td>
     </tr>`;
   }
 
-  const _THEAD = `<thead><tr><th>Document</th><th>Doc ref</th><th>Uploaded</th><th>Expires</th><th>Status</th></tr></thead>`;
+  const _THEAD = `<thead><tr><th>Document</th><th>Doc ref</th><th>Uploaded</th><th>Expires</th><th>Status</th><th></th></tr></thead>`;
   const _GRP   = n => `<tr><td colspan="6" style="padding:10px 12px 6px;font-size:9px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.09em;background:var(--bg);border-bottom:.5px solid var(--bd)">${escHtml(n)}</td></tr>`;
   function _fmtDate(s) {
     if (!s) return '—';
@@ -60,7 +64,7 @@ const Documents = (() => {
     const CAT_COL = { Registration:'#60A5FA', Insurance:'#A78BFA', Contracts:'#4ADE80', Manuals:'#FACC15' };
     const col = CAT_COL[d.category] || 'var(--txt3)';
     return `
-      <div class="doc-mob-card" style="cursor:pointer" onclick="Documents.view('${d.id}')">
+      <div class="doc-mob-card">
         <div class="doc-mob-icon" style="background:${col}22;color:${col}">
           <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h3.586a1 1 0 01.707.293L8.707 3.707A1 1 0 019.414 4H13a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/></svg>
         </div>
@@ -72,7 +76,10 @@ const Documents = (() => {
             <span style="font-size:11px;color:var(--txt4)">${escHtml(d.category)}</span>
           </div>
         </div>
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--txt4)" stroke-width="1.5" stroke-linecap="round" style="flex-shrink:0"><path d="M6 3l5 5-5 5"/></svg>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex-shrink:0">
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();Documents.view('${d.id}')">View</button>
+          <button class="btn btn-ghost btn-xs" onclick="event.stopPropagation();Documents.openEdit('${d.id}')">Edit</button>
+        </div>
       </div>`;
   }
 
@@ -148,7 +155,7 @@ const Documents = (() => {
       </div>`;
 
     const metaRow = `
-      <div class="tbl-wrap" style="border-radius:0 0 8px 8px;margin-bottom:20px"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:.5px solid var(--bd);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;min-width:300px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0;border:.5px solid var(--bd);border-top:none;border-radius:0 0 8px 8px;overflow:hidden;margin-bottom:20px">
         <div style="padding:10px 14px;border-right:.5px solid var(--bd)">
           <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Vessel</div>
           <div style="font-size:12px;color:var(--txt)">${escHtml(vName)}</div>
@@ -161,7 +168,7 @@ const Documents = (() => {
           <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt4);margin-bottom:3px">Updated</div>
           <div style="font-size:12px;color:var(--txt)">${d.uploadedAt || 'On file'}</div>
         </div>
-      </div></div>`;
+      </div>`;
 
     let body = '';
 
@@ -246,15 +253,16 @@ const Documents = (() => {
   function view(id) {
     const d = (FM.vesselDocs || []).find(x => x.id === id);
     if (!d) return;
-    const titleEl = document.getElementById('panel-title');
-    if (titleEl) titleEl.textContent = d.name;
-    openPanel(`
-      ${_docPreviewHTML(d)}
-      ${d.notes && d.category !== 'Manuals' ? `<div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--txt3)">${escHtml(d.notes)}</div>` : ''}
-      <div style="display:flex;gap:8px;margin-top:20px">
-        <button class="btn btn-ghost btn-sm" onclick="Documents.openEdit('${id}');closePanel()">Edit</button>
+    openModal(`
+      <div style="display:flex;flex-direction:column;gap:0;max-height:70vh;overflow-y:auto">
+        ${_docPreviewHTML(d)}
+        ${d.notes && d.category !== 'Manuals' ? `<div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--txt3)">${escHtml(d.notes)}</div>` : ''}
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="Documents.openEdit('${id}');closeModal()">Edit</button>
+          <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+        </div>
       </div>
-    `);
+    `, escHtml(d.name));
   }
 
   function openAdd() { _showModal(); }
