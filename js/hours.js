@@ -15,7 +15,7 @@ const Hours = (() => {
   function _last7() {
     const days = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date('2026-05-07');
       d.setDate(d.getDate() - i);
       days.push(d.toISOString().slice(0,10));
     }
@@ -115,7 +115,36 @@ const Hours = (() => {
           </div>
         </div>
 
-        <!-- Daily log -->
+        <!-- 7-day visual bars -->
+        <div class="tbl-scroll"><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;min-width:420px">
+          ${days.map(date => {
+            const rec  = recs.find(r => r.date === date);
+            const viol = rec ? _violation(rec) : null;
+            const isToday = date === new Date('2026-05-07').toISOString().slice(0,10);
+            const restPct = rec ? Math.round(rec.restHours / 24 * 100) : 0;
+            const workPct = rec ? Math.round(rec.workHours / 24 * 100) : 0;
+            const restClr = !rec ? 'var(--bg4)' : viol ? 'var(--red)' : rec.restHours >= 12 ? 'var(--grn)' : 'var(--yel)';
+            return `
+            <div style="background:var(--bg2);border:.5px solid ${isToday?'rgba(249,115,22,.3)':viol?'rgba(239,68,68,.3)':'var(--bd)'};border-radius:10px;padding:10px 8px;text-align:center;cursor:pointer" onclick="Hours.openLog('${date}')">
+              <div style="font-size:9px;font-weight:600;color:${isToday?'var(--or)':viol?'var(--red)':'var(--txt4)'};text-transform:uppercase;margin-bottom:6px">${_fmtDay(date).slice(0,3)}</div>
+              <div style="font-size:9px;color:var(--txt4);margin-bottom:8px">${date.slice(8)}</div>
+              <!-- Stacked bar -->
+              <div style="height:60px;background:var(--bg3);border-radius:4px;overflow:hidden;display:flex;flex-direction:column-reverse;margin-bottom:6px;position:relative">
+                ${rec ? `
+                  <div style="height:${restPct}%;background:${restClr};transition:height .3s;flex-shrink:0"></div>
+                  <div style="height:${workPct}%;background:rgba(96,165,250,.35);flex-shrink:0"></div>
+                ` : `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><span style="font-size:9px;color:var(--txt4)">—</span></div>`}
+              </div>
+              ${rec
+                ? `<div style="font-size:11px;font-weight:700;color:${restClr}">${rec.restHours}h</div>
+                   <div style="font-size:9px;color:var(--txt4)">rest</div>
+                   ${viol ? `<div style="font-size:8px;font-weight:700;color:var(--red);margin-top:3px">VIOLATION</div>` : ''}`
+                : `<button class="btn btn-ghost btn-xs" style="margin-top:4px;font-size:10px" onclick="event.stopPropagation();Hours.openLog('${date}')">Log</button>`}
+            </div>`;
+          }).join('')}
+        </div></div>
+
+        <!-- Daily log table -->
         <div style="border-radius:10px;overflow:hidden;margin-bottom:16px;border:.5px solid var(--bd)">
         <div class="tbl-scroll">
         <div style="background:var(--bg2);min-width:560px">
@@ -126,35 +155,36 @@ const Hours = (() => {
           ${days.map(date => {
             const rec  = recs.find(r => r.date === date);
             const viol = rec ? _violation(rec) : null;
-            const isToday = date === new Date().toISOString().slice(0,10);
+            const isToday = date === '2026-05-07';
             return `
-            <div style="display:grid;grid-template-columns:160px 1fr 1fr 80px 120px;align-items:center;padding:11px 16px;border-bottom:.5px solid var(--bd);${isToday ? 'background:var(--bg3)' : ''}">
+            <div style="display:grid;grid-template-columns:160px 80px 80px 1fr 120px;align-items:center;padding:10px 16px;border-bottom:.5px solid var(--bd);${isToday ? 'background:rgba(249,115,22,.03)' : ''}">
               <div>
                 <div style="font-size:12px;font-weight:${isToday?'600':'400'};color:${isToday?'var(--txt)':'var(--txt2)'}">${_fmtDay(date)}</div>
-                ${isToday ? `<div style="font-size:9px;color:var(--or);font-weight:600">TODAY</div>` : ''}
+                ${isToday ? `<div style="font-size:9px;color:var(--or);font-weight:700;letter-spacing:.04em">TODAY</div>` : ''}
               </div>
               ${rec ? `
-                <div>
-                  <div style="font-size:10px;color:var(--txt3);margin-bottom:3px">Work</div>
-                  <div style="font-size:14px;font-weight:600;color:var(--txt)">${rec.workHours}h</div>
+                <div style="text-align:center">
+                  <div style="font-size:9px;color:var(--txt4);margin-bottom:2px">Work</div>
+                  <div style="font-size:14px;font-weight:700;color:var(--txt2)">${rec.workHours}h</div>
+                </div>
+                <div style="text-align:center">
+                  <div style="font-size:9px;color:var(--txt4);margin-bottom:2px">Rest</div>
+                  <div style="font-size:14px;font-weight:700;color:${rec.restHours<10?'var(--red)':rec.restHours>=12?'var(--grn)':'var(--yel)'}">${rec.restHours}h</div>
                 </div>
                 <div>
-                  <div style="font-size:10px;color:var(--txt3);margin-bottom:3px">Rest</div>
-                  <div style="font-size:14px;font-weight:600;color:${rec.restHours < 10 ? 'var(--red)' : 'var(--grn)'}">${rec.restHours}h</div>
-                </div>
-                <div>
-                  <div style="height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;width:60px">
+                  <div style="height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:3px">
                     <div style="height:100%;width:${Math.round(rec.restHours/24*100)}%;background:${rec.restHours<10?'var(--red)':'var(--grn)'};border-radius:3px"></div>
                   </div>
-                  <div style="font-size:9px;color:var(--txt3);margin-top:2px">${Math.round(rec.restHours/24*100)}% rest</div>
+                  <div style="font-size:9px;color:var(--txt4)">${Math.round(rec.restHours/24*100)}% rest</div>
                 </div>
                 <div style="text-align:right">
                   ${viol
-                    ? `<span style="font-size:10px;font-weight:600;color:var(--red);background:rgba(239,68,68,.1);padding:3px 8px;border-radius:4px">⚠ Violation</span>`
+                    ? `<span style="font-size:10px;font-weight:700;color:var(--red)">⚠ Violation</span>`
                     : `<span style="font-size:10px;font-weight:600;color:var(--grn)">✓ OK</span>`}
+                  <button class="btn btn-ghost btn-xs" style="margin-left:8px" onclick="Hours.openLog('${date}')">Edit</button>
                 </div>
               ` : `
-                <div style="grid-column:span 3;font-size:11px;color:var(--txt3);font-style:italic">No hours logged</div>
+                <div style="grid-column:span 3;font-size:11px;color:var(--txt3)">No hours logged</div>
                 <div style="text-align:right">
                   <button class="btn btn-ghost btn-xs" onclick="Hours.openLog('${date}')">Log</button>
                 </div>

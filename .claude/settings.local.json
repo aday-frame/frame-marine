@@ -34,7 +34,20 @@
       "Bash(git commit *)",
       "Bash(sudo chown *)",
       "Bash(npm install *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(npx vercel *)",
+      "Bash(npm_config_cache=/tmp/npm-cache-vercel npx vercel *)",
+      "Bash(npm_config_cache=/tmp/npm-cache-vercel npx --yes vercel --prod)",
+      "Bash(grep -n \"openModal\\(\\\\`\" /Users/albertday/Downloads/frame-marine/app.html)",
+      "Bash(ls /Users/albertday/.claude/plugins/cache/superpowers-marketplace/superpowers/5.1.0/skills/subagent-driven-development/)",
+      "Read(//Users/albertday/.claude/plugins/cache/superpowers-marketplace/superpowers/5.1.0/skills/subagent-driven-development/**)",
+      "Read(//Users/albertday/Downloads/**)",
+      "Bash(npx create-next-app@latest frame-marine-app --typescript --tailwind --app --src-dir --import-alias '@/*' --no-eslint --yes)",
+      "Bash(ls -la /Users/albertday/.npm/_cacache/index-v5/b1/ 2>/dev/null | head -5)",
+      "Read(//Users/albertday/.npm/_cacache/index-v5/b1/**)",
+      "Bash(npx tsc *)",
+      "Bash(npm list *)",
+      "Bash(vercel --prod)"
     ]
   }
 }

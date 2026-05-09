@@ -1,0 +1,7 @@
+{"type":"server-started","port":61450,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:61450","screen_dir":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/49060-1778263051/content","state_dir":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/49060-1778263051/state"}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/49060-1778263051/content/shell-layout.html"}
+{"source":"user-event","type":"click","text":"A — Icon Sidebar + Topbar (Recommended)\n      Narrow icon-only sidebar (matches current app). Topbar holds vessel switcher and user menu. Most screen real estate for content. Familiar to current users. Expandable to show labels on hover.","choice":"a","id":null,"timestamp":1778263421104}
+{"source":"user-event","type":"click","text":"A — Icon Sidebar + Topbar (Recommended)\n      Narrow icon-only sidebar (matches current app). Topbar holds vessel switcher and user menu. Most screen real estate for content. Familiar to current users. Expandable to show labels on hover.","choice":"a","id":null,"timestamp":1778263445330}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/49060-1778263051/content/waiting.html"}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/49060-1778263051/content/app-shell.html"}
+{"type":"server-stopped","reason":"idle timeout"}

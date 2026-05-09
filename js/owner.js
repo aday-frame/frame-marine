@@ -12,7 +12,7 @@ const Owner = (() => {
 
   function daysUntil(s) {
     if (!s) return null;
-    return Math.ceil((new Date(s) - new Date()) / 86400000);
+    return Math.ceil((new Date(s) - new Date('2026-05-07')) / 86400000);
   }
 
   function render() {
@@ -53,7 +53,7 @@ const Owner = (() => {
       return d !== null && d <= 90;
     });
     const openNCs = (FM.nonConformances || []).filter(n => (!vessel || n.vessel === vessel.id) && n.status === 'open');
-    const overdueD = (FM.drills || []).filter(d => (!vessel || d.vessel === vessel.id) && d.status === 'scheduled' && d.date < new Date().toISOString().slice(0,10));
+    const overdueD = (FM.drills || []).filter(d => (!vessel || d.vessel === vessel.id) && d.status === 'scheduled' && d.date < '2026-05-07');
 
     // ── Spend by category
     const allCosts = charters.flatMap(c => c.costs || []);
@@ -65,32 +65,69 @@ const Owner = (() => {
     const catSorted = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
 
     const complianceOk = expiringCerts.length === 0 && openNCs.length === 0 && overdueD.length === 0;
-    const now = new Date();
+    const now = new Date('2026-05-07');
     const reportDate = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
 
+    // Monthly revenue chart data
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const monthlyRev = Array(12).fill(0);
+    ytd2026.forEach(c => {
+      const m = parseInt((c.end || '').split('-')[1]) - 1;
+      if (m >= 0 && m < 12) monthlyRev[m] += (c.revenue || 0);
+    });
+    const maxMonthRev = Math.max(...monthlyRev, 1);
+
     wrap.innerHTML = `
-      <div style="padding:18px 20px 48px">
+      <div style="padding:0 0 60px">
 
-        <!-- Header -->
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
-          <div>
-            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:4px">Owner Report</div>
-            <div style="font-size:20px;font-weight:500;color:var(--txt)">${vessel ? escHtml(vessel.name) : 'All Vessels'}</div>
-            <div style="font-size:11px;color:var(--txt3)">As of ${reportDate} · YTD figures include all charters ending in 2026</div>
+        <!-- Hero header KPIs -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:.5px solid var(--bd)">
+          <div style="padding:20px 24px;border-right:.5px solid var(--bd)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt4);margin-bottom:5px">YTD Revenue</div>
+            <div style="font-size:28px;font-weight:700;color:var(--grn);letter-spacing:-.02em">${USD(totalRev)}</div>
+            <div style="font-size:11px;color:var(--txt4);margin-top:3px">${ytd2026.length} charter${ytd2026.length!==1?'s':''} · ${charterDays} days</div>
           </div>
-          <button class="btn btn-ghost btn-sm" onclick="window.open('insurance-report.html','_blank')">
-            <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;margin-right:4px"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm-.5 3.5h1V9h-1V4.5zm0 5h1v1h-1v-1z"/></svg>
-            Insurance report ↗
-          </button>
+          <div style="padding:20px 24px;border-right:.5px solid var(--bd)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt4);margin-bottom:5px">YTD Costs</div>
+            <div style="font-size:28px;font-weight:700;color:var(--or);letter-spacing:-.02em">${USD(totalCosts)}</div>
+            <div style="font-size:11px;color:var(--txt4);margin-top:3px">charter operating costs</div>
+          </div>
+          <div style="padding:20px 24px;border-right:.5px solid var(--bd)">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt4);margin-bottom:5px">Net P&amp;L</div>
+            <div style="font-size:28px;font-weight:700;color:${totalNet>=0?'var(--grn)':'var(--red)'};letter-spacing:-.02em">${totalNet>=0?'+':''}${USD(totalNet)}</div>
+            <div style="font-size:11px;color:var(--txt4);margin-top:3px">${totalRev>0?Math.round(totalNet/totalRev*100):'—'}% margin after costs</div>
+          </div>
+          <div style="padding:20px 24px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--txt4);margin-bottom:5px">Compliance</div>
+            <div style="font-size:28px;font-weight:700;color:${complianceOk?'var(--grn)':'var(--red)'};letter-spacing:-.02em">${complianceOk?'✓':'⚠'}</div>
+            <div style="font-size:11px;color:var(--txt4);margin-top:3px">${complianceOk?'All clear':'Action required'} · ${expiringCerts.length} cert${expiringCerts.length!==1?'s':''} expiring</div>
+          </div>
         </div>
 
-        <!-- KPI row -->
-        <div class="_ownerkpi" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px">
-          ${_kpi('YTD Revenue',   USD(totalRev),   'charter fees received',        'var(--grn)')}
-          ${_kpi('YTD Costs',     USD(totalCosts), 'operational expenses',         'var(--or)')}
-          ${_kpi('YTD Net P&L',   (totalNet>=0?'+':'')+USD(totalNet), 'after all costs', totalNet >= 0 ? 'var(--grn)' : 'var(--red)')}
-          ${_kpi('Charter Days',  charterDays + 'd', 'YTD · ' + ytd2026.length + ' charters', 'var(--txt)')}
+        <!-- Monthly revenue chart -->
+        <div style="padding:18px 20px;border-bottom:.5px solid var(--bd)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3)">Monthly charter revenue — 2026</div>
+            <div style="font-size:11px;color:var(--txt3)">As of ${reportDate}</div>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:8px;height:88px">
+            ${MONTHS.map((m, i) => {
+              const rev = monthlyRev[i];
+              const pct = Math.round(rev / maxMonthRev * 100);
+              const isFuture = i > 4;
+              const hasRev = rev > 0;
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;flex:1;display:flex;align-items:flex-end;min-height:72px">
+                  <div style="width:100%;height:${Math.max(pct, 2)}%;background:${hasRev ? 'var(--grn)' : 'var(--bg4)'};border-radius:3px 3px 0 0;opacity:${isFuture ? '.25' : '1'};min-height:3px;transition:height .3s" title="${m}: ${USD(rev)}"></div>
+                </div>
+                ${hasRev && !isFuture ? `<div style="font-size:8px;font-weight:600;color:var(--grn)">${(rev/1000).toFixed(0)}k</div>` : ''}
+                <div style="font-size:9px;color:${hasRev&&!isFuture?'var(--txt3)':'var(--txt4)'}">${m}</div>
+              </div>`;
+            }).join('')}
+          </div>
         </div>
+
+        <div style="padding:18px 20px 0">
 
         <!-- Two-column: P&L table + Compliance/Fleet -->
         <div class="_ownergrid" style="display:grid;grid-template-columns:1fr 380px;gap:20px;margin-bottom:28px;align-items:start">
@@ -176,25 +213,26 @@ const Owner = (() => {
         </div>
 
         <!-- Spend by category -->
-        ${catSorted.length ? `<div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:12px">Spend by category — all charters</div>
-          <div style="display:flex;flex-direction:column;gap:8px;max-width:600px">
+        ${catSorted.length ? `<div style="margin-top:20px">
+          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--txt3);margin-bottom:14px">Charter spend by category</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
             ${catSorted.map(([cat, amt]) => {
               const pct = catTotal > 0 ? Math.round(amt / catTotal * 100) : 0;
               const colors = { 'Broker':'#A78BFA', 'Provisioning':'#4ADE80', 'Fuel':'#60A5FA', 'Port / marina':'#FACC15', 'Crew':'#F97316', 'Other':'#9CA3AF' };
               const col = colors[cat] || '#9CA3AF';
-              return `<div style="display:flex;align-items:center;gap:10px">
-                <div style="width:110px;font-size:11px;color:var(--txt2);flex-shrink:0">${escHtml(cat)}</div>
-                <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
-                  <div style="height:100%;width:${pct}%;background:${col};border-radius:3px"></div>
+              return `<div style="display:flex;align-items:center;gap:12px">
+                <div style="width:120px;font-size:12px;color:var(--txt2);flex-shrink:0">${escHtml(cat)}</div>
+                <div style="flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden">
+                  <div style="height:100%;width:${pct}%;background:${col};border-radius:4px;transition:width .4s"></div>
                 </div>
-                <div style="width:70px;font-size:11px;color:var(--txt);text-align:right;flex-shrink:0">${USD(amt)}</div>
-                <div style="width:30px;font-size:10px;color:var(--txt3);flex-shrink:0">${pct}%</div>
+                <div style="width:76px;font-size:12px;font-weight:500;color:var(--txt);text-align:right;flex-shrink:0">${USD(amt)}</div>
+                <div style="width:32px;font-size:10px;color:var(--txt4);flex-shrink:0">${pct}%</div>
               </div>`;
             }).join('')}
           </div>
         </div>` : ''}
 
+        </div><!-- end padding div -->
       </div>
     `;
   }

@@ -1,0 +1,176 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+* { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
+
+.layout-wrap { display: flex; gap: 16px; margin-top: 16px; }
+.layout-card {
+  flex: 1; border: 1.5px solid rgba(255,255,255,.1); border-radius: 10px;
+  overflow: hidden; cursor: pointer; transition: border-color .15s;
+}
+.layout-card:hover { border-color: rgba(249,115,22,.5); }
+.layout-card.selected { border-color: #F97316; }
+.layout-label {
+  padding: 10px 14px; font-size: 13px; font-weight: 600; color: #f5f6f7;
+  background: rgba(255,255,255,.04); border-bottom: .5px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; gap: 8px;
+}
+.layout-label .badge {
+  font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+  background: rgba(249,115,22,.15); color: #F97316;
+}
+
+/* MINI SHELL */
+.mini-shell { display: flex; height: 260px; background: #080808; }
+.mini-sidebar { width: 36px; background: #0d0e0f; border-right: .5px solid rgba(255,255,255,.07); flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 6px; }
+.mini-sb-dot { width: 8px; height: 8px; border-radius: 2px; background: rgba(255,255,255,.12); }
+.mini-sb-dot.active { background: #F97316; }
+.mini-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.mini-topbar { height: 30px; background: #0c0c0e; border-bottom: .5px solid rgba(255,255,255,.07); flex-shrink: 0; display: flex; align-items: center; padding: 0 10px; gap: 6px; }
+.mini-topbar-pill { height: 16px; width: 50px; background: #131415; border: .5px solid rgba(255,255,255,.09); border-radius: 4px; }
+.mini-page { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+.mini-page-title { height: 14px; width: 80px; background: rgba(255,255,255,.15); border-radius: 3px; }
+
+/* Option A - Two pane */
+.two-pane { display: flex; flex: 1; gap: 0; min-height: 0; overflow: hidden; }
+.pane-list { width: 45%; border-right: .5px solid rgba(255,255,255,.07); display: flex; flex-direction: column; padding: 6px; gap: 3px; }
+.pane-detail { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 5px; }
+.mini-row { height: 24px; background: rgba(255,255,255,.05); border-radius: 4px; display: flex; align-items: center; padding: 0 6px; gap: 5px; flex-shrink: 0; }
+.mini-row.active { background: rgba(249,115,22,.13); }
+.mini-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.mini-line { height: 5px; border-radius: 2px; background: rgba(255,255,255,.12); }
+.mini-line.short { width: 40%; }
+.mini-line.med { width: 65%; }
+.mini-line.long { width: 85%; }
+.detail-header { height: 18px; width: 70%; background: rgba(255,255,255,.18); border-radius: 3px; }
+.detail-section { background: rgba(255,255,255,.04); border-radius: 5px; padding: 5px 6px; display: flex; flex-direction: column; gap: 3px; }
+.detail-section .mini-line { background: rgba(255,255,255,.1); }
+
+/* Option B - Full page */
+.full-page-list { flex: 1; display: flex; flex-direction: column; padding: 6px; gap: 3px; }
+.full-row { height: 24px; background: rgba(255,255,255,.05); border-radius: 4px; display: flex; align-items: center; padding: 0 8px; gap: 6px; flex-shrink: 0; }
+.full-stat { display: flex; gap: 4px; margin-bottom: 2px; }
+.full-stat-card { flex: 1; height: 28px; background: rgba(255,255,255,.05); border-radius: 4px; border: .5px solid rgba(255,255,255,.07); }
+</style>
+
+<h2>Work Orders layout</h2>
+<p class="subtitle">How should the work order list and detail relate to each other?</p>
+
+<div class="layout-wrap">
+
+  <!-- Option A: Two-pane split -->
+  <div class="layout-card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="layout-label">
+      A — Two-pane split
+      <span class="badge">Recommended</span>
+    </div>
+    <div class="mini-shell">
+      <div class="mini-sidebar">
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot active"></div>
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot"></div>
+      </div>
+      <div class="mini-main">
+        <div class="mini-topbar">
+          <div class="mini-topbar-pill"></div>
+        </div>
+        <div class="mini-page">
+          <div class="mini-page-title"></div>
+          <div class="two-pane">
+            <div class="pane-list">
+              <div class="mini-row">
+                <div class="mini-dot" style="background:#f87171"></div>
+                <div class="mini-line med"></div>
+              </div>
+              <div class="mini-row active">
+                <div class="mini-dot" style="background:#F97316"></div>
+                <div class="mini-line long"></div>
+              </div>
+              <div class="mini-row">
+                <div class="mini-dot" style="background:#FBBF24"></div>
+                <div class="mini-line short"></div>
+              </div>
+              <div class="mini-row">
+                <div class="mini-dot" style="background:rgba(255,255,255,.2)"></div>
+                <div class="mini-line med"></div>
+              </div>
+              <div class="mini-row">
+                <div class="mini-dot" style="background:rgba(255,255,255,.2)"></div>
+                <div class="mini-line long"></div>
+              </div>
+              <div class="mini-row">
+                <div class="mini-dot" style="background:rgba(255,255,255,.2)"></div>
+                <div class="mini-line short"></div>
+              </div>
+            </div>
+            <div class="pane-detail">
+              <div class="detail-header"></div>
+              <div class="detail-section">
+                <div class="mini-line short"></div>
+                <div class="mini-line med"></div>
+              </div>
+              <div class="detail-section">
+                <div class="mini-line long"></div>
+                <div class="mini-line med"></div>
+                <div class="mini-line short"></div>
+              </div>
+              <div class="detail-section">
+                <div class="mini-line med"></div>
+                <div class="mini-line short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;font-size:12px;color:#8a8f98;border-top:.5px solid rgba(255,255,255,.07)">
+      List on left, detail on right. Click a row — detail loads inline. No page navigation. Fast to scan and read.
+    </div>
+  </div>
+
+  <!-- Option B: List → separate detail page -->
+  <div class="layout-card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="layout-label">B — List then full detail page</div>
+    <div class="mini-shell">
+      <div class="mini-sidebar">
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot active"></div>
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot"></div>
+      </div>
+      <div class="mini-main">
+        <div class="mini-topbar">
+          <div class="mini-topbar-pill"></div>
+        </div>
+        <div class="mini-page">
+          <div class="mini-page-title"></div>
+          <div class="full-stat">
+            <div class="full-stat-card"></div>
+            <div class="full-stat-card"></div>
+            <div class="full-stat-card"></div>
+            <div class="full-stat-card"></div>
+          </div>
+          <div class="full-page-list">
+            <div class="full-row" style="background:rgba(255,255,255,.07)">
+              <div class="mini-dot" style="background:#8a8f98;width:8px;height:8px;border-radius:2px"></div>
+              <div class="mini-line short" style="background:rgba(255,255,255,.2)"></div>
+              <div class="mini-line med"></div>
+              <div class="mini-line short"></div>
+              <div class="mini-line short"></div>
+              <div class="mini-line med"></div>
+            </div>
+            <div class="full-row"><div class="mini-dot" style="background:#f87171"></div><div class="mini-line med"></div><div class="mini-line long"></div><div class="mini-line short"></div><div class="mini-line med"></div></div>
+            <div class="full-row"><div class="mini-dot" style="background:#F97316"></div><div class="mini-line short"></div><div class="mini-line med"></div><div class="mini-line long"></div></div>
+            <div class="full-row"><div class="mini-dot" style="background:#FBBF24"></div><div class="mini-line med"></div><div class="mini-line short"></div><div class="mini-line med"></div></div>
+            <div class="full-row"><div class="mini-dot" style="background:rgba(255,255,255,.2)"></div><div class="mini-line long"></div><div class="mini-line short"></div></div>
+            <div class="full-row"><div class="mini-dot" style="background:rgba(255,255,255,.2)"></div><div class="mini-line med"></div><div class="mini-line med"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;font-size:12px;color:#8a8f98;border-top:.5px solid rgba(255,255,255,.07)">
+      Full-width table with stat strip. Click a row → navigate to dedicated detail page with full-width layout. More room for content.
+    </div>
+  </div>
+
+</div>

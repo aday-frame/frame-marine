@@ -69,7 +69,126 @@ FM.properties = [
     color: '#FACC15', status: 'occupied', guests: 2,
     checkIn: '2026-05-06', checkOut: '2026-05-10', staff: 1, openIssues: 1,
     desc: 'South Beach oceanfront residence',
+    rooms: ['Master Bedroom','Guest Bedroom','Living Room','Kitchen','Bathrooms','Terrace','Garage'],
+    systems: ['HVAC','Plumbing','Electrical','Security','A/V','Pool & Spa','Exterior'],
   },
+];
+
+/* Update other properties with rooms/systems */
+FM.properties[0].rooms   = ['Master Suite','Guest Bedroom 1','Guest Bedroom 2','Guest Bedroom 3','Guest Bedroom 4','Guest Bedroom 5','Kitchen','Dining Room','Living Room','Pool Terrace','Garden','Garage'];
+FM.properties[0].systems = ['HVAC','Plumbing','Electrical','Pool & Spa','Security','A/V','Exterior / Grounds'];
+FM.properties[1].rooms   = ['Master Suite','Guest Bedroom 1','Guest Bedroom 2','Guest Bedroom 3','Living Room','Kitchen','Study','Terrace'];
+FM.properties[1].systems = ['HVAC','Plumbing','Electrical','Security','A/V','Building Services'];
+FM.properties[2].rooms   = ['Master Suite','Guest Bedroom 1','Guest Bedroom 2','Guest Bedroom 3','Guest Bedroom 4','Living Room','Kitchen','Ski Room','Hot Tub Deck'];
+FM.properties[2].systems = ['HVAC / Radiant Heat','Plumbing','Electrical','Security','A/V','Hot Tub'];
+FM.properties[3].rooms   = ['Master Bedroom','Guest Bedroom 1','Guest Bedroom 2','Reception Room','Kitchen','Study'];
+FM.properties[3].systems = ['Boiler / Heating','Plumbing','Electrical','Security','A/V','Exterior'];
+
+/* ── PROPERTY WORK ORDERS ── */
+FM.propertyWorkOrders = [
+  {
+    id: 'PWO-001', property: 'p1',
+    title: 'Pool pump seal replacement — intermittent leak',
+    desc: 'Pool pump housing showing intermittent water loss at front seal. Pool level dropping ~2cm/day. Contractor inspection required.',
+    room: 'Pool Terrace', system: 'Pool & Spa',
+    priority: 'high', status: 'open', created: '2026-05-01', due: '2026-05-08',
+    assignee: 'ps1',
+  },
+  {
+    id: 'PWO-002', property: 'p1',
+    title: 'Master suite A/C — insufficient cooling',
+    desc: 'Master suite ceiling unit not reaching set temperature. Filter checked, refrigerant level suspected. HVAC engineer needed.',
+    room: 'Master Suite', system: 'HVAC',
+    priority: 'medium', status: 'in-progress', created: '2026-04-28', due: '2026-05-10',
+    assignee: 'ps1',
+  },
+  {
+    id: 'PWO-003', property: 'p2',
+    title: 'Building elevator modernisation — unit access coordination',
+    desc: 'Building management scheduling elevator upgrade in June. Coordinate access and prepare for 3-day outage period.',
+    room: 'Building Services', system: 'Building Services',
+    priority: 'low', status: 'open', created: '2026-04-20', due: '2026-06-01',
+    assignee: 'ps3',
+  },
+  {
+    id: 'PWO-004', property: 'p2',
+    title: 'Security system panel firmware update',
+    desc: 'Alarm panel requires firmware update to v4.1. Vendor scheduled but requires unit access during weekday 9–12 window.',
+    room: 'Lobby', system: 'Security',
+    priority: 'medium', status: 'open', created: '2026-05-02', due: '2026-05-15',
+    assignee: 'ps3',
+  },
+  {
+    id: 'PWO-005', property: 'p4',
+    title: 'Boiler annual service — Gas Safe registered engineer',
+    desc: 'Annual boiler service due. Gas Safe registered contractor needed. Last service Apr 2025. Certificate to be filed on completion.',
+    room: 'Kitchen', system: 'Boiler / Heating',
+    priority: 'high', status: 'open', created: '2026-04-25', due: '2026-05-20',
+    assignee: 'ps4',
+  },
+  {
+    id: 'PWO-006', property: 'p4',
+    title: 'Sash window re-sealing — master and guest rooms',
+    desc: 'Draught coming through master and one guest bedroom sash windows. Seals perished. Specialist glazier required for period windows.',
+    room: 'Master Bedroom', system: 'Exterior',
+    priority: 'medium', status: 'open', created: '2026-04-30', due: '2026-05-25',
+    assignee: 'ps4',
+  },
+  {
+    id: 'PWO-007', property: 'p4',
+    title: 'Study AV rack — router & switch replacement',
+    desc: 'Network switch failed. Temporary workaround in place. New Ubiquiti hardware sourced. Install and configure new rack.',
+    room: 'Study', system: 'A/V',
+    priority: 'medium', status: 'in-progress', created: '2026-05-03', due: '2026-05-09',
+    assignee: 'ps4',
+  },
+  {
+    id: 'PWO-008', property: 'p5',
+    title: 'Hot tub heater element replacement',
+    desc: 'Hot tub not reaching target temperature. Heating element tested and confirmed failed. Replacement part on order.',
+    room: 'Terrace', system: 'Pool & Spa',
+    priority: 'medium', status: 'open', created: '2026-05-05', due: '2026-05-11',
+    assignee: 'ps5',
+  },
+];
+
+/* ── PROPERTY DOCUMENTS ── */
+FM.propertyDocs = [
+  { id: 'pd-01', property: 'p1', name: 'Lease Agreement — Mallorca Villa', category: 'Lease', expires: '2027-12-31', notes: 'Long-term rental agreement with Castello Management' },
+  { id: 'pd-02', property: 'p1', name: 'Buildings Insurance — AXA Spain', category: 'Insurance', expires: '2026-12-01', notes: 'Combined buildings & contents €8M' },
+  { id: 'pd-03', property: 'p1', name: 'Pool Maintenance Contract — AquaServ', category: 'Contracts', expires: '2026-10-31', notes: 'Weekly service & chemical balance' },
+  { id: 'pd-04', property: 'p1', name: 'CCTV & Alarm Certificate — 2026', category: 'Compliance', expires: '2027-01-15', notes: 'Andalusia security compliance' },
+  { id: 'pd-05', property: 'p2', name: 'Proprietary Lease — NYC Penthouse', category: 'Lease', expires: null, notes: 'Co-op proprietary lease — perpetual' },
+  { id: 'pd-06', property: 'p2', name: 'Co-op Insurance Certificate', category: 'Insurance', expires: '2026-11-01', notes: 'Chubb — $5M contents & liability' },
+  { id: 'pd-07', property: 'p2', name: 'Building HOA Rules & Regs', category: 'Compliance', expires: null, notes: '740 Park Avenue house rules' },
+  { id: 'pd-08', property: 'p3', name: 'Lease Agreement — Aspen Chalet', category: 'Lease', expires: '2027-09-30', notes: 'Seasonal lease with renewal option' },
+  { id: 'pd-09', property: 'p3', name: 'Homeowner Insurance — State Farm', category: 'Insurance', expires: '2026-09-01', notes: '$12M replacement cost policy' },
+  { id: 'pd-10', property: 'p4', name: 'Assured Shorthold Tenancy — Mayfair Flat', category: 'Lease', expires: '2026-12-31', notes: '12-month AST — London Mayfair' },
+  { id: 'pd-11', property: 'p4', name: 'Buildings Insurance — Aviva', category: 'Insurance', expires: '2026-10-31', notes: 'Listed building cover — £3.5M' },
+  { id: 'pd-12', property: 'p4', name: 'Gas Safety Certificate 2025', category: 'Compliance', expires: '2026-04-30', notes: 'Annual CP12 — due for renewal' },
+  { id: 'pd-13', property: 'p5', name: 'Condominium Agreement — Miami Beach', category: 'Lease', expires: null, notes: 'Owner-occupied — perpetual' },
+  { id: 'pd-14', property: 'p5', name: 'Condo Association Insurance', category: 'Insurance', expires: '2026-12-31', notes: 'HOA master policy — structural coverage' },
+];
+
+/* ── PROPERTY BOOKINGS ── */
+FM.propertyBookings = [
+  { id: 'pb-01', property: 'p1', guest: 'Rossi Family', guests: 4, checkIn: '2026-05-05', checkOut: '2026-05-12', rate: 18500, status: 'active', source: 'Direct' },
+  { id: 'pb-02', property: 'p1', guest: 'Brennan — Corporate', guests: 6, checkIn: '2026-05-20', checkOut: '2026-05-27', rate: 19500, status: 'confirmed', source: 'Castello Mgmt' },
+  { id: 'pb-03', property: 'p1', guest: 'García Family', guests: 8, checkIn: '2026-06-10', checkOut: '2026-06-24', rate: 38000, status: 'confirmed', source: 'Direct' },
+  { id: 'pb-04', property: 'p3', guest: 'Wheeler Group', guests: 6, checkIn: '2026-05-04', checkOut: '2026-05-11', rate: 28000, status: 'active', source: 'Direct' },
+  { id: 'pb-05', property: 'p5', guest: 'Park & Torres', guests: 2, checkIn: '2026-05-06', checkOut: '2026-05-10', rate: 6800, status: 'active', source: 'Castello Mgmt' },
+  { id: 'pb-06', property: 'p5', guest: 'Cohen Family', guests: 4, checkIn: '2026-05-18', checkOut: '2026-05-25', rate: 11900, status: 'confirmed', source: 'Direct' },
+];
+
+/* ── PROPERTY STAFF ── */
+FM.propertyStaff = [
+  { id: 'ps1', property: 'p1', name: 'Lucia Fernández', role: 'Property Manager', phone: '+34 610 555 001', email: 'lucia@mallorcavilla.es', status: 'onsite', initials: 'LF', color: '#F97316' },
+  { id: 'ps2', property: 'p1', name: 'Carlos Ruiz', role: 'Groundskeeper', phone: '+34 610 555 002', email: '', status: 'onsite', initials: 'CR', color: '#4ADE80' },
+  { id: 'ps3', property: 'p2', name: 'James Okafor', role: 'Building Manager Liaison', phone: '+1 212 555 0301', email: 'jokafor@740park.com', status: 'onsite', initials: 'JO', color: '#60A5FA' },
+  { id: 'ps4', property: 'p4', name: 'Sophie Wright', role: 'Property Manager', phone: '+44 7700 555 401', email: 'sophiew@castellomgmt.com', status: 'onsite', initials: 'SW', color: '#A78BFA' },
+  { id: 'ps5', property: 'p5', name: 'Marco Reyes', role: 'Concierge', phone: '+1 305 555 0501', email: 'mreyes@miamicondo.com', status: 'onsite', initials: 'MR', color: '#FACC15' },
+  { id: 'ps6', property: 'p3', name: 'Tyler Brooks', role: 'Caretaker', phone: '+1 970 555 0301', email: 'tbrooks@aspenchalet.com', status: 'onsite', initials: 'TB', color: '#F87171' },
+  { id: 'ps7', property: 'p3', name: 'Jessica Holt', role: 'Housekeeper', phone: '+1 970 555 0302', email: '', status: 'onsite', initials: 'JH', color: '#4ADE80' },
 ];
 
 /* ── CREW ── */
@@ -82,6 +201,10 @@ FM.crew = [
   { id: 'c6', initials: 'SN', name: 'Sara Novak',     role: 'Stewardess',      vessel: 'v1', color: '#F87171', phone: '+1 305 555 0133', email: 'snovak@ladym.com', status: 'onboard' },
   { id: 'c7', initials: 'TK', name: 'Tom Keane',      role: 'Deckhand',        vessel: 'v1', color: '#60A5FA', phone: '+1 305 555 0166', email: 'tkeane@ladym.com', status: 'onboard' },
   { id: 'c8', initials: 'EP', name: 'Elena Petrov',   role: 'Chef',            vessel: 'v1', color: '#4ADE80', phone: '+1 305 555 0155', email: 'epetrov@ladym.com', status: 'ashore' },
+  // Naiad crew
+  { id: 'c9',  initials: 'MS', name: 'Marco Silva',   role: 'Captain',         vessel: 'v2', color: '#4ADE80', phone: '+1 401 555 0201', email: 'msilva@naiad.com', status: 'onboard' },
+  { id: 'c10', initials: 'HL', name: 'Hannah Lee',    role: 'First Mate',      vessel: 'v2', color: '#60A5FA', phone: '+1 401 555 0202', email: 'hlee@naiad.com', status: 'onboard' },
+  { id: 'c11', initials: 'PW', name: 'Pete Walsh',    role: 'Engineer',        vessel: 'v2', color: '#22D3EE', phone: '+1 401 555 0203', email: 'pwalsh@naiad.com', status: 'ashore' },
 ];
 
 /* ── WORK ORDERS ── */
@@ -463,15 +586,6 @@ FM.assets = [
   { id:'a5', vessel:'v1', name:'Spectra Newport 400 Watermaker', zone:'Engine Room', system:'Systems', make:'Spectra', model:'Newport 400', serial:'SPC-NP400-0823', year:2021, lastService:'2026-04-10', nextService:'2026-05-10', status:'due-soon', photoColor:'#60A5FA', photoIcon:'💧', specs:{ Output:'400 GPD', Pressure:'800 PSI', Motor:'1.2 kW', Membranes:'2 × 40"', 'Pre-filter':'5 micron' }, notes:'Membrane flush due 2026-05-10. Vessel has been inactive past 3 weeks — pickling required.', parts:['p8','p11'], vendor:'vnd4' },
 ];
 
-/* ── VENDORS ── */
-FM.vendors = [
-  { id: 'vnd1', name: 'CAT Dealer Fort Lauderdale', trade: 'Propulsion / Mechanical', contact: 'Jim Farley', phone: '+1 954 555 0110', email: 'service@catmarine-fll.com', vessel: 'v1' },
-  { id: 'vnd2', name: 'Naiad Dynamics',             trade: 'Stabilizers',             contact: 'Tech Support', phone: '+1 800 555 0120', email: 'service@naiad.com', vessel: 'v1' },
-  { id: 'vnd3', name: 'YachtAV Solutions',          trade: 'AV / IT',                 contact: 'Mark Chen',  phone: '+1 305 555 0188', email: 'mark@yachtav.com', vessel: 'v1' },
-  { id: 'vnd4', name: 'Blue Water Provisioning',    trade: 'Provisioning',            contact: 'Ana Costa',  phone: '+1 305 555 0199', email: 'ana@bwprov.com', vessel: 'v1' },
-  { id: 'vnd5', name: 'Teak Masters Ltd',           trade: 'Deck / Joinery',          contact: 'Lars Oberg', phone: '+1 954 555 0177', email: 'lars@teakmasters.com', vessel: 'v1' },
-];
-
 /* ── CHAT CHANNELS ── */
 FM.channels = [
   { id: 'ch1', name: 'Lady M — Bridge', vessel: 'v1', unread: 3 },
@@ -789,6 +903,127 @@ FM.guestRequests = [
 
 FM.activeCharter = () => FM.charters.find(c => (c.vessel === FM.currentVesselId || FM.currentVesselId === 'all') && c.status === 'active');
 FM.charterGuest = id => FM.guests.find(g => g.id === id);
+
+/* ── VENDORS ── */
+FM.vendors = [
+  { id: 'v-nm', name: 'National Marine Suppliers', category: 'Technical', specialty: 'Engine parts, safety equipment, electrical, deck hardware', location: 'Fort Lauderdale, FL', contact: 'Jake Moretti', email: 'j.moretti@nationalmarine.com', phone: '+1 954 555 0182', leadTime: '3–5 days', preferred: true, rating: 5, notes: 'Primary technical supplier. Net-30 account. Free shipping on orders over $500. Frame preferred partner.' },
+  { id: 'v-pf', name: 'Palate Foods Caribbean', category: 'Provisioning', specialty: 'Premium charter provisioning — food, beverages, specialty items', location: 'Gustavia, St. Barths', contact: 'Amélie Fontaine', email: 'a.fontaine@palatefoods.com', phone: '+590 590 555 0241', leadTime: '24–48 hrs', preferred: true, rating: 5, notes: 'Preferred provisioner in St. Barths and Anguilla. Handles all Day family charter provisions. Cold chain guaranteed.' },
+  { id: 'v-lc', name: 'La Cave de St. Barths', category: 'Wine & Spirits', specialty: 'Fine wine, Champagne, premium spirits — Caribbean\'s best selection', location: 'Gustavia, St. Barths', contact: 'Pierre Dubois', email: 'p.dubois@lacave-stbarths.com', phone: '+590 590 555 0318', leadTime: '24 hrs', preferred: true, rating: 5, notes: 'Best fine wine selection in the Caribbean. Personal wine consultant on request. Can source rare bottles to order.' },
+  { id: 'v-iw', name: 'Island Water Products', category: 'Provisioning', specialty: 'Water, soft drinks, juices, mixers, ice', location: 'Sint Maarten', contact: 'Carlos Mendez', email: 'c.mendez@islandwater.com', phone: '+1 721 555 0094', leadTime: '48 hrs', preferred: false, rating: 4, notes: 'Reliable bulk water and soft drink supplier. Delivers to dock.' },
+  { id: 'v-gc', name: 'Gustavia Chandlery', category: 'Technical', specialty: 'General chandlery, safety gear, rope, deck hardware', location: 'Gustavia, St. Barths', contact: 'Marc Leroy', email: 'm.leroy@gustavia-chandlery.com', phone: '+590 590 555 0187', leadTime: '1–2 days', preferred: false, rating: 4, notes: 'Good for urgent local needs. Limited spares depth on engine parts.' },
+  { id: 'v-ll', name: 'Linen & Luxury Marine', category: 'Interior', specialty: 'Hotel-grade linens, towels, bathrobes, guest amenities', location: 'Fort Lauderdale, FL', contact: 'Sarah Chen', email: 's.chen@linenandluxury.com', phone: '+1 954 555 0229', leadTime: '5–7 days', preferred: true, rating: 4, notes: 'Custom monogramming available. Preferred interior supplier since 2024.' },
+  { id: 'v-ep', name: 'Engine Parts Direct', category: 'Technical', specialty: 'MTU, CAT, Volvo Penta, Cummins — engine parts specialist', location: 'Miami, FL', contact: 'Dave Kowalski', email: 'd.kowalski@enginepartsdirect.com', phone: '+1 305 555 0156', leadTime: '2–4 days', preferred: false, rating: 4, notes: 'Specialist for Lady M MTU 16V2000 M96 engines. Good pricing on genuine parts.' },
+  { id: 'v-mc', name: 'Med Chandlers Palma', category: 'Technical', specialty: 'Full chandlery, rigging, electronics — Mediterranean specialist', location: 'Palma de Mallorca, Spain', contact: 'Antoni Puig', email: 'a.puig@medchandlers.es', phone: '+34 971 555 0284', leadTime: '1–3 days', preferred: false, rating: 4, notes: 'Primary technical supplier for Mediterranean season. Strong stock of Garmin and FLIR electronics.' },
+];
+
+/* ── CELLAR & BAR ── */
+FM.cellar = [
+  /* Champagne */
+  { id: 'cel-001', vessel: 'v1', category: 'Champagne',          name: 'Krug Grande Cuvée NV',               producer: 'Krug',               vintage: 'NV',   region: 'Champagne, France',    qty: 6,  par: 12, unit: 'bottle', bin: 'C-A1', cost: 220 },
+  { id: 'cel-002', vessel: 'v1', category: 'Champagne',          name: 'Dom Pérignon 2015',                  producer: 'Moët & Chandon',     vintage: '2015', region: 'Champagne, France',    qty: 3,  par: 6,  unit: 'bottle', bin: 'C-A2', cost: 380 },
+  { id: 'cel-003', vessel: 'v1', category: 'Champagne',          name: 'Veuve Clicquot Yellow Label NV',     producer: 'Veuve Clicquot',     vintage: 'NV',   region: 'Champagne, France',    qty: 18, par: 24, unit: 'bottle', bin: 'C-A3', cost: 75  },
+  { id: 'cel-004', vessel: 'v1', category: 'Champagne',          name: 'Billecart-Salmon Rosé NV',           producer: 'Billecart-Salmon',   vintage: 'NV',   region: 'Champagne, France',    qty: 4,  par: 12, unit: 'bottle', bin: 'C-A4', cost: 90  },
+  /* White Wine */
+  { id: 'cel-005', vessel: 'v1', category: 'White Wine',         name: 'Puligny-Montrachet 1er Cru 2021',    producer: 'Louis Jadot',        vintage: '2021', region: 'Burgundy, France',     qty: 4,  par: 6,  unit: 'bottle', bin: 'C-B1', cost: 110 },
+  { id: 'cel-006', vessel: 'v1', category: 'White Wine',         name: 'Sancerre Les Romains 2022',          producer: 'Henri Bourgeois',    vintage: '2022', region: 'Loire, France',        qty: 8,  par: 12, unit: 'bottle', bin: 'C-B2', cost: 48  },
+  { id: 'cel-007', vessel: 'v1', category: 'White Wine',         name: 'Gavi di Gavi La Scolca 2022',        producer: 'La Scolca',          vintage: '2022', region: 'Piedmont, Italy',      qty: 6,  par: 8,  unit: 'bottle', bin: 'C-B3', cost: 35  },
+  /* Red Wine */
+  { id: 'cel-008', vessel: 'v1', category: 'Red Wine',           name: 'Château Margaux 2018',               producer: 'Château Margaux',    vintage: '2018', region: 'Bordeaux, France',     qty: 2,  par: 4,  unit: 'bottle', bin: 'C-C1', cost: 1100},
+  { id: 'cel-009', vessel: 'v1', category: 'Red Wine',           name: 'Château Pétrus 2015',                producer: 'Pétrus',             vintage: '2015', region: 'Pomerol, France',      qty: 1,  par: 0,  unit: 'bottle', bin: 'C-C2', cost: 4800},
+  { id: 'cel-010', vessel: 'v1', category: 'Red Wine',           name: 'Barolo Brunate 2019',                producer: 'Ceretto',            vintage: '2019', region: 'Piedmont, Italy',      qty: 3,  par: 6,  unit: 'bottle', bin: 'C-C3', cost: 95  },
+  { id: 'cel-011', vessel: 'v1', category: 'Red Wine',           name: 'Opus One 2019',                      producer: 'Opus One Winery',    vintage: '2019', region: 'Napa Valley, USA',     qty: 2,  par: 4,  unit: 'bottle', bin: 'C-C4', cost: 380 },
+  { id: 'cel-012', vessel: 'v1', category: 'Red Wine',           name: 'Brunello di Montalcino 2018',        producer: 'Banfi',              vintage: '2018', region: 'Tuscany, Italy',       qty: 0,  par: 4,  unit: 'bottle', bin: 'C-C5', cost: 145 },
+  /* Spirits */
+  { id: 'cel-013', vessel: 'v1', category: 'Spirits',            name: 'Glenfarclas 25yr',                   producer: 'Glenfarclas',        vintage: '',     region: 'Speyside, Scotland',   qty: 1,  par: 2,  unit: 'bottle', bin: 'C-D1', cost: 320 },
+  { id: 'cel-014', vessel: 'v1', category: 'Spirits',            name: 'Grey Goose Vodka',                   producer: 'Grey Goose',         vintage: '',     region: 'France',               qty: 4,  par: 4,  unit: 'bottle', bin: 'C-D2', cost: 45  },
+  { id: 'cel-015', vessel: 'v1', category: 'Spirits',            name: 'Hendrick\'s Gin',                    producer: 'William Grant',      vintage: '',     region: 'Scotland',             qty: 2,  par: 3,  unit: 'bottle', bin: 'C-D3', cost: 42  },
+  { id: 'cel-016', vessel: 'v1', category: 'Spirits',            name: 'Don Julio 1942 Tequila',             producer: 'Don Julio',          vintage: '',     region: 'Jalisco, Mexico',      qty: 2,  par: 2,  unit: 'bottle', bin: 'C-D4', cost: 180 },
+  { id: 'cel-017', vessel: 'v1', category: 'Spirits',            name: 'Diplomatico Reserva Rum',            producer: 'Diplomatico',        vintage: '',     region: 'Venezuela',            qty: 2,  par: 3,  unit: 'bottle', bin: 'C-D5', cost: 55  },
+  { id: 'cel-018', vessel: 'v1', category: 'Spirits',            name: 'Aperol',                             producer: 'Campari Group',      vintage: '',     region: 'Italy',                qty: 3,  par: 4,  unit: 'bottle', bin: 'C-D6', cost: 28  },
+  /* Water & Soft Drinks */
+  { id: 'cel-019', vessel: 'v1', category: 'Water & Soft Drinks',name: 'Evian 1.5L',                         producer: 'Evian',              vintage: '',     region: 'France',               qty: 72, par: 96, unit: 'bottle', bin: 'G-A1', cost: 3.5 },
+  { id: 'cel-020', vessel: 'v1', category: 'Water & Soft Drinks',name: 'San Pellegrino 750ml',               producer: 'San Pellegrino',     vintage: '',     region: 'Italy',                qty: 48, par: 72, unit: 'bottle', bin: 'G-A2', cost: 3.8 },
+  { id: 'cel-021', vessel: 'v1', category: 'Water & Soft Drinks',name: 'Fever-Tree Tonic Water',             producer: 'Fever-Tree',         vintage: '',     region: 'UK',                   qty: 24, par: 48, unit: 'can',    bin: 'G-A3', cost: 2.2 },
+  { id: 'cel-022', vessel: 'v1', category: 'Water & Soft Drinks',name: 'Fever-Tree Ginger Beer',             producer: 'Fever-Tree',         vintage: '',     region: 'UK',                   qty: 12, par: 24, unit: 'can',    bin: 'G-A4', cost: 2.2 },
+];
+
+FM.cellarLog = [
+  { id: 'cl-001', itemId: 'cel-001', charter: 'ch-001', qty: 4, date: '2026-05-05', note: 'Welcome dinner service', crew: 'c4' },
+  { id: 'cl-002', itemId: 'cel-003', charter: 'ch-001', qty: 6, date: '2026-05-05', note: 'Day family welcome aboard', crew: 'c4' },
+  { id: 'cl-003', itemId: 'cel-013', charter: 'ch-001', qty: 1, date: '2026-05-07', note: 'W. Day — sundeck evening', crew: 'c4' },
+  { id: 'cl-004', itemId: 'cel-009', charter: 'ch-003', qty: 1, date: '2026-01-04', note: 'Chen NYE — Pétrus farewell dinner', crew: 'c4' },
+];
+
+/* ── PROVISIONING REQUESTS ── */
+FM.provisioningRequests = [
+  {
+    id: 'pr-001', charter: 'ch-001', vessel: 'v1', status: 'delivered',
+    created: '2026-05-03', vendor: 'v-pf', deliveryDate: '2026-05-04',
+    notes: 'Day Family — Bermuda charter. Vegan selections for Sophie Day (g4), gluten-free flagged.',
+    items: [
+      { id: 'pri-1-1', category: 'Food',                desc: 'Premium provisions package — 8 nights, 6 guests',          qty: 1,  unit: 'package', unitCost: 8400, total: 8400 },
+      { id: 'pri-1-2', category: 'Food',                desc: 'Vegan & gluten-free selections (Sophie Day)',               qty: 1,  unit: 'order',   unitCost: 680,  total: 680  },
+      { id: 'pri-1-3', category: 'Water & Soft Drinks', desc: 'Evian 1.5L × 48',                                           qty: 48, unit: 'bottle',  unitCost: 3.5,  total: 168  },
+      { id: 'pri-1-4', category: 'Champagne',           desc: 'Veuve Clicquot NV × 12',                                    qty: 12, unit: 'bottle',  unitCost: 75,   total: 900  },
+      { id: 'pri-1-5', category: 'Spirits',             desc: 'Glenfarclas 25yr × 2 (W. Day preference)',                  qty: 2,  unit: 'bottle',  unitCost: 320,  total: 640  },
+      { id: 'pri-1-6', category: 'Fresh Produce',       desc: 'Organic tropical fruit & vegetables',                       qty: 1,  unit: 'order',   unitCost: 520,  total: 520  },
+    ],
+  },
+  {
+    id: 'pr-002', charter: 'ch-002', vessel: 'v1', status: 'draft',
+    created: '2026-05-07', vendor: null, deliveryDate: '2026-07-09',
+    notes: 'Rossi Group — Mediterranean. Auto-generated from guest preferences.',
+    items: [
+      { id: 'pri-2-1', category: 'Food',        desc: 'Mediterranean premium provisions — 14 nights, 4 guests',           qty: 1,  unit: 'package', unitCost: 16800, total: 16800 },
+      { id: 'pri-2-2', category: 'Food',        desc: 'Vegetarian selections — Giulia Rossi & Sofia Bianchi',             qty: 1,  unit: 'order',   unitCost: 1200,  total: 1200  },
+      { id: 'pri-2-3', category: 'Red Wine',    desc: 'Barolo Brunate 2019 × 6 (M. Rossi preference)',                   qty: 6,  unit: 'bottle',  unitCost: 95,    total: 570   },
+      { id: 'pri-2-4', category: 'Red Wine',    desc: 'Brunello di Montalcino 2018 × 4',                                 qty: 4,  unit: 'bottle',  unitCost: 145,   total: 580   },
+      { id: 'pri-2-5', category: 'Champagne',   desc: 'Krug Grande Cuvée NV × 6',                                        qty: 6,  unit: 'bottle',  unitCost: 220,   total: 1320  },
+      { id: 'pri-2-6', category: 'Champagne',   desc: 'Billecart-Salmon Rosé NV × 6',                                    qty: 6,  unit: 'bottle',  unitCost: 90,    total: 540   },
+      { id: 'pri-2-7', category: 'Spirits',     desc: 'Aperol × 4 (aperitivo preference)',                               qty: 4,  unit: 'bottle',  unitCost: 28,    total: 112   },
+    ],
+  },
+];
+
+/* ── PURCHASE ORDERS ── */
+FM.purchaseOrders = [
+  {
+    id: 'po-001', vessel: 'v1', vendor: 'v-nm', category: 'Technical',
+    ref: 'PO-2026-001', status: 'received',
+    created: '2026-04-15', ordered: '2026-04-15', expected: '2026-04-20', received: '2026-04-20',
+    woRef: 'WO-003', notes: 'Urgent — port engine raw water impeller replacement',
+    items: [
+      { desc: 'Raw water impeller — MTU 16V2000',    partNo: 'MTU-IMP-2026P', qty: 2, unitCost: 285, total: 570 },
+      { desc: 'Impeller housing gasket set',          partNo: 'MTU-GSK-226P',  qty: 1, unitCost: 145, total: 145 },
+      { desc: 'Priority shipping — Miami to Bermuda', partNo: 'SHIP-PRI',      qty: 1, unitCost: 132, total: 132 },
+    ],
+  },
+  {
+    id: 'po-002', vessel: 'v1', vendor: 'v-lc', category: 'Wine & Spirits',
+    ref: 'PO-2026-002', status: 'ordered',
+    created: '2026-05-06', ordered: '2026-05-06', expected: '2026-07-08', received: null,
+    woRef: null, notes: 'Rossi Group charter — cellar restock for Mediterranean season',
+    items: [
+      { desc: 'Barolo Brunate 2019 — Ceretto × 6',       partNo: '', qty: 6, unitCost: 95,  total: 570  },
+      { desc: 'Brunello di Montalcino 2018 × 4',          partNo: '', qty: 4, unitCost: 145, total: 580  },
+      { desc: 'Krug Grande Cuvée NV × 6',                 partNo: '', qty: 6, unitCost: 220, total: 1320 },
+      { desc: 'Billecart-Salmon Rosé NV × 6',             partNo: '', qty: 6, unitCost: 90,  total: 540  },
+      { desc: 'Glenfarclas 25yr × 2',                     partNo: '', qty: 2, unitCost: 320, total: 640  },
+      { desc: 'Delivery — Palma de Mallorca, July 8',     partNo: '', qty: 1, unitCost: 104, total: 104  },
+    ],
+  },
+  {
+    id: 'po-003', vessel: 'v1', vendor: 'v-ll', category: 'Interior',
+    ref: 'PO-2026-003', status: 'draft',
+    created: '2026-05-07', ordered: null, expected: null, received: null,
+    woRef: null, notes: 'Linen restock after Day Family charter — pre-Mediterranean',
+    items: [
+      { desc: 'Egyptian cotton bath sheets 700gsm × 24', partNo: 'LUX-BS-700', qty: 24, unitCost: 48, total: 1152 },
+      { desc: 'Monogrammed pool towels × 12',            partNo: 'LUX-PT-MON', qty: 12, unitCost: 38, total: 456  },
+      { desc: 'Aesop Departure amenity kit × 12',        partNo: 'AES-DEP-12', qty: 12, unitCost: 19, total: 228  },
+    ],
+  },
+];
 
 /* ── TENDER FLEET ── */
 FM.fleet = [
@@ -1514,5 +1749,112 @@ FM.kbArticles = [
       'Starlink Maritime does not work while underway in some regions. If internet drops on passage, this is normal and expected until the vessel exits the restricted zone.',
     ],
     relatedVendors:[], relatedAssets:[], updatedAt:'2026-02-20', author:'Chief Eng. Santos',
+  },
+];
+
+/* ── COMPLIANCE ── */
+FM.flagState = { flag: 'Cayman Islands', code: 'KY', authority: 'Cayman Islands Shipping Registry', surveyor: 'Bureau Veritas', classNo: 'BV-LM-2018-045', imo: '9832174', mmsi: '319128400', callSign: 'ZCBT4', grossTonnage: 499, certPort: 'George Town, Cayman Islands' };
+
+FM.complianceItems = [
+  /* ── FLAG STATE ── */
+  { id: 'ci-001', vessel: 'v1', category: 'Flag State', title: 'Cayman Islands Certificate of Registry', ref: 'COR-KY-9832174', status: 'current', issueDate: '2024-03-01', expiryDate: '2026-03-01', authority: 'Cayman Islands Shipping Registry', surveyDue: null, notes: 'Annual fee paid. Renewal due March 2026.', docs: [] },
+  { id: 'ci-002', vessel: 'v1', category: 'Flag State', title: 'Load Line Certificate', ref: 'LLC-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2029-06-14', authority: 'Bureau Veritas', surveyDue: '2027-06-14', notes: 'Intermediate survey due mid-2027.', docs: [] },
+  { id: 'ci-003', vessel: 'v1', category: 'Flag State', title: 'Safety Construction Certificate', ref: 'SCC-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2029-06-14', authority: 'Bureau Veritas', surveyDue: '2027-06-14', notes: 'Renewal survey at 5 years. Structural survey last completed 2024.', docs: [] },
+  { id: 'ci-004', vessel: 'v1', category: 'Flag State', title: 'Safety Equipment Certificate', ref: 'SEC-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2025-06-14', authority: 'Bureau Veritas', surveyDue: '2026-06-14', notes: 'Annual endorsement due June 2026.', docs: [] },
+  { id: 'ci-005', vessel: 'v1', category: 'Flag State', title: 'Safety Radio Certificate', ref: 'SRC-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2025-06-14', authority: 'Bureau Veritas', surveyDue: '2026-06-14', notes: 'GMDSS equipment annual inspection required.', docs: [] },
+  { id: 'ci-006', vessel: 'v1', category: 'Flag State', title: 'Tonnage Certificate', ref: 'TC-KY-9832174', status: 'current', issueDate: '2018-11-01', expiryDate: null, authority: 'Cayman Islands Shipping Registry', surveyDue: null, notes: 'Permanent — no expiry unless structural modification.', docs: [] },
+
+  /* ── MLC 2006 ── */
+  { id: 'ci-010', vessel: 'v1', category: 'MLC 2006', title: 'Maritime Labour Certificate', ref: 'MLC-KY-2024-019', status: 'current', issueDate: '2024-04-01', expiryDate: '2029-03-31', authority: 'Bureau Veritas', surveyDue: '2027-03-31', notes: 'Intermediate inspection due 2027. DMLC Part I & II on board.', docs: [] },
+  { id: 'ci-011', vessel: 'v1', category: 'MLC 2006', title: 'Seafarer Employment Agreements (SEAs)', ref: 'SEA-2026', status: 'current', issueDate: '2026-01-01', expiryDate: '2026-12-31', authority: 'Captain / Owner', surveyDue: null, notes: 'All 8 crew have signed SEAs. Annual renewal January 2027.', docs: [] },
+  { id: 'ci-012', vessel: 'v1', category: 'MLC 2006', title: 'Minimum Safe Manning Document', ref: 'MMS-KY-2024-019', status: 'current', issueDate: '2024-04-01', expiryDate: '2029-03-31', authority: 'Cayman Islands Shipping Registry', surveyDue: null, notes: 'Minimum: Master, 2 officers, 2 engineers, 1 AB. Currently fully crewed.', docs: [] },
+  { id: 'ci-013', vessel: 'v1', category: 'MLC 2006', title: 'Hours of Work & Rest Records', ref: 'HOWR-2026', status: 'current', issueDate: '2026-01-01', expiryDate: null, authority: 'Captain', surveyDue: null, notes: 'Updated monthly. Available in Hours of Rest module. ILO 180 / STCW compliant.', docs: [] },
+  { id: 'ci-014', vessel: 'v1', category: 'MLC 2006', title: 'Onboard Complaint Procedure', ref: 'OCP-2026', status: 'current', issueDate: '2026-01-01', expiryDate: null, authority: 'Captain', surveyDue: null, notes: 'Posted in crew mess and crew cabins. Complaint form in safety management binder.', docs: [] },
+
+  /* ── MARPOL ── */
+  { id: 'ci-020', vessel: 'v1', category: 'MARPOL', title: 'International Oil Pollution Prevention Certificate', ref: 'IOPPC-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2029-06-14', authority: 'Bureau Veritas', surveyDue: '2026-06-14', notes: 'Annual survey due June 2026. ORB Part I up to date.', docs: [] },
+  { id: 'ci-021', vessel: 'v1', category: 'MARPOL', title: 'Oil Record Book Part I (Machinery)', ref: 'ORB-I-2026', status: 'current', issueDate: '2026-01-01', expiryDate: null, authority: 'Captain', surveyDue: null, notes: 'All bilge pump operations and oil transfers logged. Retained on board 3 years.', docs: [] },
+  { id: 'ci-022', vessel: 'v1', category: 'MARPOL', title: 'Garbage Management Plan & Record Book', ref: 'GMP-2026', status: 'current', issueDate: '2026-01-01', expiryDate: null, authority: 'Captain', surveyDue: null, notes: 'Segregated waste bins in galley and engine room. Shore disposal receipts filed.', docs: [] },
+  { id: 'ci-023', vessel: 'v1', category: 'MARPOL', title: 'Sewage Pollution Prevention Certificate', ref: 'ISPP-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2029-06-14', authority: 'Bureau Veritas', surveyDue: '2027-06-14', notes: 'Holding tank fitted. No overboard discharge in territorial waters.', docs: [] },
+  { id: 'ci-024', vessel: 'v1', category: 'MARPOL', title: 'Ballast Water Management Certificate', ref: 'BWMC-KY-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2029-06-14', authority: 'Bureau Veritas', surveyDue: '2027-06-14', notes: 'Ballast Water Record Book maintained. D-2 standard compliant system fitted.', docs: [] },
+
+  /* ── PSC READINESS ── */
+  { id: 'ci-030', vessel: 'v1', category: 'PSC', title: 'Last PSC Inspection', ref: 'PSC-2025-FLL', status: 'current', issueDate: '2025-10-14', expiryDate: null, authority: 'USCG Port State Control', surveyDue: null, notes: '0 deficiencies. Clear. Fort Lauderdale USCG inspection. Certificate on board.', docs: [] },
+  { id: 'ci-031', vessel: 'v1', category: 'PSC', title: 'ISM Document of Compliance (DOC)', ref: 'DOC-KY-2024-019', status: 'current', issueDate: '2024-04-01', expiryDate: '2029-03-31', authority: 'Bureau Veritas', surveyDue: null, notes: 'Issued to owner company Frame Marine Holdings Ltd. Annual audits required.', docs: [] },
+  { id: 'ci-032', vessel: 'v1', category: 'PSC', title: 'Safety Management Certificate (SMC)', ref: 'SMC-KY-2024-047', status: 'current', issueDate: '2024-04-01', expiryDate: '2029-03-31', authority: 'Bureau Veritas', surveyDue: '2027-03-31', notes: 'Intermediate audit due Q1 2027.', docs: [] },
+  { id: 'ci-033', vessel: 'v1', category: 'PSC', title: 'Fire Extinguisher Service', ref: 'FE-2026-SVC', status: 'due-soon', issueDate: '2025-05-01', expiryDate: '2026-05-01', authority: 'SOLAS / Flag State', surveyDue: '2026-05-01', notes: 'Annual service due May 2026. CO₂ fixed system inspection also required. Book service before charter season.', docs: [] },
+  { id: 'ci-034', vessel: 'v1', category: 'PSC', title: 'Life Raft Service', ref: 'LR-2026-SVC', status: 'current', issueDate: '2025-06-15', expiryDate: '2026-06-15', authority: 'SOLAS / Flag State', surveyDue: '2026-06-15', notes: 'Annual service at approved station. Due June 2026.', docs: [] },
+  { id: 'ci-035', vessel: 'v1', category: 'PSC', title: 'EPIRB Registration & Battery', ref: 'EPIRB-2024', status: 'current', issueDate: '2024-01-20', expiryDate: '2029-01-20', authority: 'FCC / Flag State', surveyDue: '2029-01-20', notes: 'Registered with NOAA. Battery and hydrostatic release replaced 2024.', docs: [] },
+  { id: 'ci-036', vessel: 'v1', category: 'PSC', title: 'Lifebuoy & Pyrotechnic Inspection', ref: 'LBP-2026', status: 'overdue', issueDate: '2025-01-01', expiryDate: '2026-01-01', authority: 'SOLAS', surveyDue: '2026-01-01', notes: 'Annual check of pyrotechnics expiry dates, lifebuoy lights, self-activating smoke. OVERDUE — action required.', docs: [] },
+
+  /* ── LY3 / MCA ── */
+  { id: 'ci-040', vessel: 'v1', category: 'LY3', title: 'Commercial Yacht Code (CY) Compliance', ref: 'CY-BV-2024-047', status: 'current', issueDate: '2024-06-15', expiryDate: '2029-06-14', authority: 'Bureau Veritas for MCA', surveyDue: '2027-06-14', notes: 'LY3 ≤500GT. All MCA MGN requirements met. Annual LY3 endorsement from class surveyor.', docs: [] },
+  { id: 'ci-041', vessel: 'v1', category: 'LY3', title: 'MCA Crew Certification Review', ref: 'MCA-CREW-2026', status: 'current', issueDate: '2026-01-01', expiryDate: null, authority: 'Captain / MCA', surveyDue: null, notes: 'Captain: MCA OOW 3000GT unlimited. Chief Eng: Y3 Engineer. All STCW 2010 compliant. Medical certs current.', docs: [] },
+];
+
+FM.pscChecklist = [
+  { id: 'psc-01', category: 'Documentation', item: 'Certificates of Registry', required: true, status: 'ok', notes: 'On board, current' },
+  { id: 'psc-02', category: 'Documentation', item: 'Load Line Certificate', required: true, status: 'ok', notes: '' },
+  { id: 'psc-03', category: 'Documentation', item: 'Safety Construction Certificate', required: true, status: 'ok', notes: '' },
+  { id: 'psc-04', category: 'Documentation', item: 'Safety Equipment Certificate', required: true, status: 'ok', notes: '' },
+  { id: 'psc-05', category: 'Documentation', item: 'Safety Radio Certificate', required: true, status: 'ok', notes: '' },
+  { id: 'psc-06', category: 'Documentation', item: 'IOPPC / Oil Record Book', required: true, status: 'ok', notes: 'ORB up to date' },
+  { id: 'psc-07', category: 'Documentation', item: 'Maritime Labour Certificate + DMLC', required: true, status: 'ok', notes: '' },
+  { id: 'psc-08', category: 'Documentation', item: 'ISM SMC + DOC copy', required: true, status: 'ok', notes: '' },
+  { id: 'psc-09', category: 'Documentation', item: 'Garbage Management Plan', required: true, status: 'ok', notes: '' },
+  { id: 'psc-10', category: 'Documentation', item: 'Ballast Water Record Book', required: true, status: 'ok', notes: '' },
+  { id: 'psc-11', category: 'Manning', item: 'Crew COC/STCW certificates valid', required: true, status: 'ok', notes: 'All current' },
+  { id: 'psc-12', category: 'Manning', item: 'SEAs signed and on board', required: true, status: 'ok', notes: '' },
+  { id: 'psc-13', category: 'Manning', item: 'MLC rest hours records available', required: true, status: 'ok', notes: '' },
+  { id: 'psc-14', category: 'Manning', item: 'Medical fitness certificates', required: true, status: 'ok', notes: '' },
+  { id: 'psc-15', category: 'Safety Equipment', item: 'Life jackets — all crew & pax, serviced', required: true, status: 'ok', notes: '' },
+  { id: 'psc-16', category: 'Safety Equipment', item: 'Immersion suits — crew, serviced', required: true, status: 'ok', notes: '' },
+  { id: 'psc-17', category: 'Safety Equipment', item: 'Life rafts — annual service current', required: true, status: 'ok', notes: 'Due June 2026' },
+  { id: 'psc-18', category: 'Safety Equipment', item: 'Fire extinguishers — serviced', required: true, status: 'warn', notes: 'Due May 2026 — book service' },
+  { id: 'psc-19', category: 'Safety Equipment', item: 'EPIRB — registered, battery current', required: true, status: 'ok', notes: '' },
+  { id: 'psc-20', category: 'Safety Equipment', item: 'Pyrotechnics in date', required: true, status: 'fail', notes: 'OVERDUE — check and replace' },
+  { id: 'psc-21', category: 'Safety Equipment', item: 'CO₂ fixed fire fighting system', required: true, status: 'ok', notes: '' },
+  { id: 'psc-22', category: 'Navigation', item: 'Radar operational', required: true, status: 'ok', notes: '' },
+  { id: 'psc-23', category: 'Navigation', item: 'AIS operational and transmitting', required: true, status: 'ok', notes: '' },
+  { id: 'psc-24', category: 'Navigation', item: 'GPS / ECDIS operational', required: true, status: 'ok', notes: '' },
+  { id: 'psc-25', category: 'Navigation', item: 'GMDSS — DSC controller, NAVTEX', required: true, status: 'ok', notes: '' },
+  { id: 'psc-26', category: 'ISM', item: 'Muster list posted', required: true, status: 'ok', notes: '' },
+  { id: 'psc-27', category: 'ISM', item: 'Safety drills records available', required: true, status: 'ok', notes: 'Monthly drills logged' },
+  { id: 'psc-28', category: 'ISM', item: 'Non-conformance records', required: true, status: 'ok', notes: '' },
+  { id: 'psc-29', category: 'ISM', item: 'Onboard complaint procedure posted', required: true, status: 'ok', notes: '' },
+  { id: 'psc-30', category: 'ISM', item: 'Emergency contact list posted', required: true, status: 'ok', notes: '' },
+];
+
+/* ── VOYAGES ── */
+FM.voyages = [
+  {
+    id: 'voy-001', vessel: 'v1', name: 'Miami to Bahamas', type: 'cruise',
+    start: '2026-03-15', end: '2026-03-22', distance: 180,
+    notes: 'Owner cruise, Exumas and Nassau.',
+    costs: [
+      { category: 'Fuel', amount: 3200, notes: '320 gal @ $10' },
+      { category: 'Port & Marina', amount: 850, notes: 'Nassau marina 7 nights' },
+      { category: 'Provisions', amount: 1200, notes: '' },
+    ]
+  },
+  {
+    id: 'voy-002', vessel: 'v1', name: 'Fort Lauderdale to Newport', type: 'delivery',
+    start: '2026-04-28', end: '2026-05-04', distance: 1340,
+    notes: 'Pre-season delivery north for summer programme.',
+    costs: [
+      { category: 'Fuel', amount: 8400, notes: '840 gal offshore' },
+      { category: 'Port & Marina', amount: 1100, notes: 'Charleston + Norfolk stops' },
+      { category: 'Crew expenses', amount: 2400, notes: 'Captain + engineer 7 days' },
+    ]
+  },
+  {
+    id: 'voy-003', vessel: 'v2', name: 'Newport to Bermuda Race', type: 'race',
+    start: '2026-06-19', end: '2026-06-23', distance: 635,
+    notes: 'Newport Bermuda Race 2026. Delivery crew.',
+    costs: [
+      { category: 'Entry fees', amount: 500, notes: 'NBYC race entry' },
+      { category: 'Provisions', amount: 800, notes: '' },
+      { category: 'Port & Marina', amount: 400, notes: 'RBYC Bermuda' },
+    ]
   },
 ];

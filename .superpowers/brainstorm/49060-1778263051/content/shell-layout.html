@@ -1,0 +1,158 @@
+<h2>App Shell Layout</h2>
+<p class="subtitle">Which navigation structure should the rebuilt app use? All options use the Frame design system: #080808 background, orange accent, Inter font.</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#080808;border-radius:6px;overflow:hidden;height:200px;display:flex;font-family:Inter,sans-serif;">
+        <!-- Sidebar -->
+        <div style="width:52px;background:#0d0e0f;border-right:1px solid #242628;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:6px;flex-shrink:0;">
+          <div style="width:28px;height:28px;background:#F97316;border-radius:6px;margin-bottom:8px;"></div>
+          <div style="width:32px;height:32px;background:#1e1f21;border-radius:6px;border:1px solid #F97316;"></div>
+          <div style="width:32px;height:32px;background:#131415;border-radius:6px;"></div>
+          <div style="width:32px;height:32px;background:#131415;border-radius:6px;"></div>
+          <div style="width:32px;height:32px;background:#131415;border-radius:6px;"></div>
+          <div style="width:32px;height:32px;background:#131415;border-radius:6px;"></div>
+          <div style="margin-top:auto;width:26px;height:26px;background:#1e1f21;border-radius:50%;border:1px solid #2e3033;"></div>
+        </div>
+        <!-- Main -->
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <!-- Topbar -->
+          <div style="height:40px;background:#0d0e0f;border-bottom:1px solid #242628;display:flex;align-items:center;padding:0 12px;gap:8px;">
+            <div style="background:#1e1f21;border:1px solid #2e3033;border-radius:4px;height:22px;width:110px;display:flex;align-items:center;padding:0 8px;">
+              <div style="width:6px;height:6px;background:#F97316;border-radius:50%;margin-right:5px;"></div>
+              <div style="height:6px;background:#545861;border-radius:2px;flex:1;"></div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:6px;">
+              <div style="width:22px;height:22px;background:#1e1f21;border-radius:4px;border:1px solid #2e3033;"></div>
+              <div style="width:22px;height:22px;background:#1e1f21;border-radius:50%;border:1px solid #2e3033;"></div>
+            </div>
+          </div>
+          <!-- Content -->
+          <div style="flex:1;padding:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+            <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:8px;">
+              <div style="height:5px;background:#2e3033;border-radius:2px;width:60%;margin-bottom:5px;"></div>
+              <div style="height:18px;background:#F97316;border-radius:2px;width:40%;"></div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:8px;">
+              <div style="height:5px;background:#2e3033;border-radius:2px;width:70%;margin-bottom:5px;"></div>
+              <div style="height:18px;background:#22c55e;opacity:0.4;border-radius:2px;width:55%;"></div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:8px;">
+              <div style="height:5px;background:#2e3033;border-radius:2px;width:50%;margin-bottom:5px;"></div>
+              <div style="height:18px;background:#60A5FA;opacity:0.4;border-radius:2px;width:45%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Icon Sidebar + Topbar (Recommended)</h3>
+      <p>Narrow icon-only sidebar (matches current app). Topbar holds vessel switcher and user menu. Most screen real estate for content. Familiar to current users. Expandable to show labels on hover.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#080808;border-radius:6px;overflow:hidden;height:200px;display:flex;flex-direction:column;font-family:Inter,sans-serif;">
+        <!-- Topbar -->
+        <div style="height:44px;background:#0d0e0f;border-bottom:1px solid #242628;display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;">
+          <div style="width:22px;height:22px;background:#F97316;border-radius:5px;"></div>
+          <div style="background:#1e1f21;border:1px solid #2e3033;border-radius:4px;height:22px;width:100px;display:flex;align-items:center;padding:0 8px;margin-right:6px;">
+            <div style="width:6px;height:6px;background:#F97316;border-radius:50%;margin-right:4px;"></div>
+            <div style="height:5px;background:#545861;border-radius:2px;flex:1;"></div>
+          </div>
+          <div style="height:22px;width:1px;background:#242628;"></div>
+          <div style="height:22px;padding:0 8px;background:#1e1f21;border-radius:4px;border:1px solid #F97316;font-size:10px;color:#F97316;display:flex;align-items:center;">Dashboard</div>
+          <div style="height:22px;padding:0 8px;font-size:10px;color:#545861;display:flex;align-items:center;">Work Orders</div>
+          <div style="height:22px;padding:0 8px;font-size:10px;color:#545861;display:flex;align-items:center;">Inventory</div>
+          <div style="height:22px;padding:0 8px;font-size:10px;color:#545861;display:flex;align-items:center;">Safety</div>
+          <div style="margin-left:auto;display:flex;gap:6px;">
+            <div style="width:22px;height:22px;background:#1e1f21;border-radius:50%;border:1px solid #2e3033;"></div>
+          </div>
+        </div>
+        <!-- Content -->
+        <div style="flex:1;padding:10px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:8px;">
+            <div style="height:5px;background:#2e3033;border-radius:2px;width:60%;margin-bottom:5px;"></div>
+            <div style="height:18px;background:#F97316;border-radius:2px;width:40%;"></div>
+          </div>
+          <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:8px;">
+            <div style="height:5px;background:#2e3033;border-radius:2px;width:70%;margin-bottom:5px;"></div>
+            <div style="height:18px;background:#22c55e;opacity:0.4;border-radius:2px;width:55%;"></div>
+          </div>
+          <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:8px;">
+            <div style="height:5px;background:#2e3033;border-radius:2px;width:50%;margin-bottom:5px;"></div>
+            <div style="height:18px;background:#60A5FA;opacity:0.4;border-radius:2px;width:45%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Top Navigation Only</h3>
+      <p>All nav in a single topbar. Vessel switcher on the left, module tabs across the middle. More horizontal space lost to labels. Works well on mobile. Gets crowded with 10+ modules.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#080808;border-radius:6px;overflow:hidden;height:200px;display:flex;font-family:Inter,sans-serif;">
+        <!-- Sidebar expanded -->
+        <div style="width:140px;background:#0d0e0f;border-right:1px solid #242628;display:flex;flex-direction:column;padding:10px 0;flex-shrink:0;">
+          <div style="padding:0 10px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            <div style="width:22px;height:22px;background:#F97316;border-radius:5px;flex-shrink:0;"></div>
+            <div style="height:6px;background:#f5f6f7;border-radius:2px;flex:1;opacity:0.8;"></div>
+          </div>
+          <div style="padding:0 8px;margin-bottom:4px;">
+            <div style="background:#1e1f21;border:1px solid #2e3033;border-radius:4px;height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+              <div style="width:6px;height:6px;background:#F97316;border-radius:50%;"></div>
+              <div style="height:5px;background:#c8ccd4;border-radius:2px;flex:1;"></div>
+            </div>
+          </div>
+          <div style="height:1px;background:#242628;margin:6px 0;"></div>
+          <div style="padding:0 8px;display:flex;flex-direction:column;gap:2px;">
+            <div style="height:22px;background:#1e1f21;border-radius:4px;border-left:2px solid #F97316;display:flex;align-items:center;padding:0 6px;gap:4px;">
+              <div style="width:8px;height:8px;background:#F97316;opacity:0.5;border-radius:1px;"></div>
+              <div style="height:5px;background:#f5f6f7;border-radius:2px;width:55%;"></div>
+            </div>
+            <div style="height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+              <div style="width:8px;height:8px;background:#545861;border-radius:1px;"></div>
+              <div style="height:5px;background:#545861;border-radius:2px;width:65%;"></div>
+            </div>
+            <div style="height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+              <div style="width:8px;height:8px;background:#545861;border-radius:1px;"></div>
+              <div style="height:5px;background:#545861;border-radius:2px;width:50%;"></div>
+            </div>
+            <div style="height:22px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+              <div style="width:8px;height:8px;background:#545861;border-radius:1px;"></div>
+              <div style="height:5px;background:#545861;border-radius:2px;width:70%;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex:1;display:flex;flex-direction:column;">
+          <div style="height:36px;background:#0d0e0f;border-bottom:1px solid #242628;display:flex;align-items:center;padding:0 10px;gap:6px;">
+            <div style="height:5px;background:#545861;border-radius:2px;width:80px;"></div>
+            <div style="margin-left:auto;width:20px;height:20px;background:#1e1f21;border-radius:50%;border:1px solid #2e3033;"></div>
+          </div>
+          <div style="flex:1;padding:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:6px;">
+              <div style="height:5px;background:#2e3033;border-radius:2px;width:60%;margin-bottom:5px;"></div>
+              <div style="height:16px;background:#F97316;border-radius:2px;width:40%;"></div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:4px;padding:6px;">
+              <div style="height:5px;background:#2e3033;border-radius:2px;width:70%;margin-bottom:5px;"></div>
+              <div style="height:16px;background:#22c55e;opacity:0.4;border-radius:2px;width:55%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Expanded Sidebar with Labels</h3>
+      <p>Full-width sidebar always showing module names and vessel switcher. Takes more horizontal space but more readable. Good for desktop-first use. Common in tools like Linear and Notion.</p>
+    </div>
+  </div>
+
+</div>

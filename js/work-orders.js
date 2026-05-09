@@ -70,6 +70,7 @@ WO.renderStats = function(wos) {
 WO.filtered = function(wos) {
   let list = [...wos];
   const f = WO.activeFilter;
+  if (f === 'todo')        list = list.filter(w => w.status !== 'done');
   if (f === 'open')        list = list.filter(w => w.status === 'open');
   if (f === 'in-progress') list = list.filter(w => w.status === 'in-progress');
   if (f === 'done')        list = list.filter(w => w.status === 'done');
@@ -168,7 +169,7 @@ WO.rowHTML = function(w) {
   const pDot    = `<span class="wo-pip" style="background:${pColors[w.priority]}"></span>${FM.priorityLabel(w.priority)}`;
   const sBadge  = WO.statusBadge(w.status);
   const dueStr  = w.due ? fmtDate(w.due) : '—';
-  const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date();
+  const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date('2026-05-07');
   const subtasksDone  = w.subtasks.filter(s => s.done).length;
   const subtasksTotal = w.subtasks.length;
 
@@ -268,95 +269,119 @@ WO.openPanel = function(id) {
   if (!w) return;
   WO.activeId = id;
 
-  // Highlight row
   document.querySelectorAll('#wo-table-wrap tbody tr').forEach(r => {
     r.classList.toggle('selected', r.dataset.id === id);
   });
 
-  const crew = FM.getCrew(w.assignee);
-  const subtasksDone = w.subtasks.filter(s => s.done).length;
+  const pColors      = { high: 'var(--red)', medium: '#f59e0b', low: 'var(--txt3)' };
+  const subtasksDone  = w.subtasks.filter(s => s.done).length;
   const subtasksTotal = w.subtasks.length;
-  const progress = subtasksTotal ? Math.round(subtasksDone / subtasksTotal * 100) : 0;
+  const progress      = subtasksTotal ? Math.round(subtasksDone / subtasksTotal * 100) : 0;
+  const asset         = w.assetId ? FM.assets.find(a => a.id === w.assetId) : null;
 
   const content = `
-    <!-- Status + badges -->
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px">
-      ${WO.statusBadge(w.status)}
-      <span class="badge b-${w.priority}">${FM.priorityLabel(w.priority)}</span>
-      <span class="badge b-${w.team}">${FM.teamLabel(w.team)}</span>
-      ${w.fromPMS ? `<span class="badge" style="background:rgba(251,146,60,.1);color:var(--or);cursor:pointer" onclick="navTo('pms',document.querySelector('[data-page=pms]'))">⚙ Maintenance schedule</span>` : ''}
+    <div class="wo-status-tabs" style="margin-bottom:20px">
+      ${['open','in-progress','on-hold','done'].map(s => `
+        <button class="wo-status-tab ${w.status===s?'active':''}" data-status="${s}" data-woid="${w.id}">
+          ${FM.statusLabel(s)}
+        </button>`).join('')}
     </div>
 
-    <!-- Description -->
-    ${w.desc ? `<p style="font-size:13px;color:var(--txt2);line-height:1.7;margin-bottom:20px;letter-spacing:-.01em">${escHtml(w.desc)}</p>` : ''}
-
-    <!-- Details -->
-    <div class="panel-section">
-      <div class="panel-section-title">Details</div>
-      <div class="panel-row">
-        <span class="panel-row-key">Assignee</span>
-        <span class="panel-row-val" style="display:flex;align-items:center;gap:7px">
+    <div class="wo-detail-grid">
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Priority</div>
+        <div class="wo-detail-val"><span class="wo-pip" style="background:${pColors[w.priority]}"></span>${FM.priorityLabel(w.priority)}</div>
+      </div>
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Team</div>
+        <div class="wo-detail-val"><span class="badge b-${w.team}">${FM.teamLabel(w.team)}</span></div>
+      </div>
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Assigned to</div>
+        <div class="wo-detail-val" style="display:flex;align-items:center;gap:7px">
           <span class="wo-av" style="background:${FM.crewColor(w.assignee)}">${FM.crewInitials(w.assignee)}</span>
-          ${FM.crewName(w.assignee)}
-        </span>
+          ${FM.crewName(w.assignee)||'—'}
+        </div>
+      </div>
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Zone</div>
+        <div class="wo-detail-val">${escHtml(w.zone)||'—'}</div>
+      </div>
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">System</div>
+        <div class="wo-detail-val">${escHtml(w.system)||'—'}</div>
+      </div>
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Due</div>
+        <div class="wo-detail-val" style="color:${w.due&&new Date(w.due)<new Date('2026-05-07')&&w.status!=='done'?'var(--red)':'inherit'}">
+          ${w.due ? fmtDate(w.due) : '—'}
+        </div>
       </div>
       ${w.createdBy ? `
-      <div class="panel-row">
-        <span class="panel-row-key">Created by</span>
-        <span class="panel-row-val" style="display:flex;align-items:center;gap:7px">
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Created by</div>
+        <div class="wo-detail-val" style="display:flex;align-items:center;gap:7px">
           <span class="wo-av" style="background:${FM.crewColor(w.createdBy)};width:20px;height:20px;font-size:8px">${FM.crewInitials(w.createdBy)}</span>
           ${FM.crewName(w.createdBy)}
-        </span>
+        </div>
       </div>` : ''}
-      <div class="panel-row"><span class="panel-row-key">Zone</span><span class="panel-row-val">${escHtml(w.zone)}</span></div>
-      <div class="panel-row"><span class="panel-row-key">System</span><span class="panel-row-val">${escHtml(w.system)}</span></div>
-      ${(() => {
-        const asset = w.assetId ? FM.assets.find(a => a.id === w.assetId) : null;
-        return asset ? `<div class="panel-row"><span class="panel-row-key">Asset</span><span class="panel-row-val" style="color:var(--or);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(251,146,60,.3)" onclick="closePanel();navTo('assets',document.querySelector('[data-page=assets]'));setTimeout(()=>Assets.select('${asset.id}'),120)">${escHtml(asset.name)}</span></div>` : '';
-      })()}
-      ${w.recurring ? `<div class="panel-row"><span class="panel-row-key">Recurring</span><span class="panel-row-val"><span class="badge" style="background:rgba(96,165,250,.12);color:#60A5FA;font-size:10px">${typeof w.recurring === 'string' ? escHtml(w.recurring) : 'Yes'}</span></span></div>` : ''}
-      <div class="panel-row"><span class="panel-row-key">Created</span><span class="panel-row-val c-txt2">${fmtDate(w.created)}</span></div>
-      ${w.updatedAt ? `<div class="panel-row"><span class="panel-row-key">Updated</span><span class="panel-row-val c-txt2">${fmtDate(w.updatedAt)}</span></div>` : ''}
-      <div class="panel-row"><span class="panel-row-key">Due</span>
-        <span class="panel-row-val ${w.due && new Date(w.due) < new Date() && w.status !== 'done' ? 'c-red' : 'c-txt2'}">${w.due ? fmtDate(w.due) : '—'}</span>
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Created</div>
+        <div class="wo-detail-val" style="color:var(--txt3)">${fmtDate(w.created)}</div>
       </div>
+      ${asset ? `
+      <div class="wo-detail-field" style="grid-column:1/-1">
+        <div class="wo-detail-label">Asset</div>
+        <div class="wo-detail-val" style="color:var(--or);cursor:pointer;text-decoration:underline;text-decoration-color:rgba(251,146,60,.3)" onclick="closePanel();navTo('assets',document.querySelector('[data-page=assets]'));setTimeout(()=>Assets.select('${asset.id}'),120)">${escHtml(asset.name)}</div>
+      </div>` : ''}
+      ${w.recurring ? `
+      <div class="wo-detail-field">
+        <div class="wo-detail-label">Recurring</div>
+        <div class="wo-detail-val" style="font-size:11px;color:#60A5FA">${typeof w.recurring==='string'?escHtml(w.recurring):'Yes'}</div>
+      </div>` : ''}
+      ${w.fromPMS ? `
+      <div class="wo-detail-field" style="grid-column:1/-1">
+        <div class="wo-detail-label">Source</div>
+        <div class="wo-detail-val"><span class="badge" style="background:rgba(251,146,60,.1);color:var(--or);cursor:pointer" onclick="closePanel();navTo('pms',document.querySelector('[data-page=pms]'))">⚙ Maintenance schedule</span></div>
+      </div>` : ''}
     </div>
 
-    <!-- Procedures -->
-    ${(w.procedures || []).length ? `
-    <div class="panel-section">
-      <div class="panel-section-title">Procedures</div>
-      ${w.procedures.map((step, i) => `
+    ${w.desc ? `
+    <div class="wo-detail-section">
+      <div class="wo-detail-label">Description</div>
+      <p class="wo-detail-desc">${escHtml(w.desc)}</p>
+    </div>` : ''}
+
+    ${(w.procedures||[]).length ? `
+    <div class="wo-detail-section">
+      <div class="wo-detail-label">Procedures</div>
+      ${w.procedures.map((step,i) => `
         <div style="display:flex;gap:10px;padding:6px 0;border-bottom:.5px solid var(--bd);font-size:12px;color:var(--txt2);line-height:1.5">
           <span style="width:16px;height:16px;border-radius:50%;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--txt3);flex-shrink:0;margin-top:1px">${i+1}</span>
           <span>${escHtml(step)}</span>
         </div>`).join('')}
     </div>` : ''}
 
-    <!-- Subtasks -->
     ${subtasksTotal ? `
-    <div class="panel-section">
-      <div class="panel-section-title">
+    <div class="wo-detail-section">
+      <div class="wo-detail-label" style="display:flex;align-items:center;gap:8px">
         Sub-tasks
-        <span style="color:var(--txt3);font-weight:400;font-size:11px">${subtasksDone}/${subtasksTotal}</span>
-        <div style="flex:1;background:var(--bg5);border-radius:2px;height:2px;max-width:72px">
+        <span style="color:var(--txt3);font-weight:400">${subtasksDone}/${subtasksTotal}</span>
+        <div style="flex:1;background:var(--bg5);border-radius:2px;height:2px;max-width:60px">
           <div style="width:${progress}%;height:2px;border-radius:2px;background:${progress===100?'var(--grn)':'var(--or)'}"></div>
         </div>
       </div>
       ${w.subtasks.map(s => `
         <div class="subtask" onclick="WO.toggleSubtask('${w.id}','${s.id}')">
-          <div class="subtask-check ${s.done ? 'checked' : ''}">
-            ${s.done ? '<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#060606" stroke-width="2.5" stroke-linecap="round"><path d="M3 8l4 4 6-6"/></svg>' : ''}
+          <div class="subtask-check ${s.done?'checked':''}">
+            ${s.done?'<svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#060606" stroke-width="2.5" stroke-linecap="round"><path d="M3 8l4 4 6-6"/></svg>':''}
           </div>
-          <span class="subtask-text ${s.done ? 'done' : ''}">${escHtml(s.text)}</span>
-        </div>
-      `).join('')}
-    </div>
-    ` : ''}
+          <span class="subtask-text ${s.done?'done':''}">${escHtml(s.text)}</span>
+        </div>`).join('')}
+    </div>` : ''}
 
-    <!-- Photos -->
-    <div class="panel-section">
-      <div class="panel-section-title" style="display:flex;align-items:center;justify-content:space-between">
+    <div class="wo-detail-section">
+      <div class="wo-detail-label" style="display:flex;align-items:center;justify-content:space-between">
         Photos
         <label class="btn btn-ghost btn-xs" style="cursor:pointer">
           + Add photo
@@ -364,13 +389,13 @@ WO.openPanel = function(id) {
         </label>
       </div>
       <div class="wo-photo-grid" id="wo-photos-${w.id}">
-        ${(w.images || []).length === 0 ? `
+        ${(w.images||[]).length === 0 ? `
           <label class="wo-photo-empty" style="cursor:pointer">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--txt4)" stroke-width="1.4" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M9 5l1.5-2h3L15 5"/></svg>
             <span style="font-size:11px;color:var(--txt4);margin-top:4px">Tap to add photos</span>
             <input type="file" accept="image/*" multiple style="display:none" onchange="WO.addPhotos('${w.id}', this)">
           </label>` :
-          (w.images || []).map((src, i) => `
+          (w.images||[]).map((src,i) => `
             <div class="wo-photo-thumb" onclick="WO.viewPhoto('${w.id}',${i})">
               <img src="${escHtml(src)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
             </div>`).join('')
@@ -378,48 +403,28 @@ WO.openPanel = function(id) {
       </div>
     </div>
 
-    <!-- Parts -->
     ${w.parts.length ? `
-    <div class="panel-section">
-      <div class="panel-section-title">Parts required</div>
+    <div class="wo-detail-section">
+      <div class="wo-detail-label">Parts required</div>
       ${w.parts.map(p => `
         <div style="font-size:12px;color:var(--txt2);padding:7px 0;border-bottom:.5px solid var(--bd);display:flex;gap:8px;align-items:center">
-          <span style="font-size:10px;color:var(--txt4)">·</span>
-          ${escHtml(p)}
-        </div>
-      `).join('')}
-    </div>
-    ` : ''}
+          <span style="font-size:10px;color:var(--txt4)">·</span>${escHtml(p)}
+        </div>`).join('')}
+    </div>` : ''}
 
-    <!-- Status -->
-    <div class="panel-section">
-      <div class="panel-section-title">Status</div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap">
-        ${['open','in-progress','on-hold','done'].map(s => `
-          <button class="btn btn-xs ${w.status === s ? 'btn-primary' : 'btn-ghost'}"
-                  onclick="WO.setStatus('${w.id}','${s}')">
-            ${FM.statusLabel(s)}
-          </button>
-        `).join('')}
-      </div>
-    </div>
-
-    <!-- Comments -->
-    <div class="panel-section">
-      <div class="panel-section-title">Comments${w.comments.length ? ` <span style="color:var(--txt3);font-weight:400;font-size:11px">${w.comments.length}</span>` : ''}</div>
+    <div class="wo-detail-section">
+      <div class="wo-detail-label">Comments ${w.comments.length ? `<span style="color:var(--txt3);font-weight:400">${w.comments.length}</span>` : ''}</div>
       <div class="wo-comments">
-        ${w.comments.length === 0 ? `<p style="font-size:12px;color:var(--txt3)">No comments yet.</p>` : ''}
+        ${w.comments.length===0 ? `<p style="font-size:12px;color:var(--txt3)">No comments yet.</p>` : ''}
         ${w.comments.map(c => {
           const cr = FM.getCrew(c.author);
-          return `
-            <div class="wo-comment">
-              <div class="wo-comment-av" style="background:${cr?.color||'#555'}">${cr?.initials||'?'}</div>
-              <div class="wo-comment-body">
-                <div class="wo-comment-meta">${cr?.name||'Unknown'} · ${c.time}</div>
-                <div class="wo-comment-text">${escHtml(c.text)}</div>
-              </div>
+          return `<div class="wo-comment">
+            <div class="wo-comment-av" style="background:${cr?.color||'#555'}">${cr?.initials||'?'}</div>
+            <div class="wo-comment-body">
+              <div class="wo-comment-meta">${cr?.name||'Unknown'} · ${c.time}</div>
+              <div class="wo-comment-text">${escHtml(c.text)}</div>
             </div>
-          `;
+          </div>`;
         }).join('')}
       </div>
       <div style="margin-top:12px;display:flex;gap:8px;align-items:flex-end">
@@ -432,6 +437,13 @@ WO.openPanel = function(id) {
   const titleEl = document.getElementById('panel-title');
   titleEl.innerHTML = `<span style="font-family:var(--mono);font-size:11px;color:var(--txt3);font-weight:400;letter-spacing:0;margin-right:8px">${w.id}</span>${escHtml(w.title.slice(0,44))}${w.title.length > 44 ? '…' : ''}`;
   openPanel(content);
+  WO.bindPanel();
+};
+
+WO.bindPanel = function() {
+  document.querySelectorAll('#panel-body .wo-status-tab').forEach(btn => {
+    btn.addEventListener('click', () => WO.setStatus(btn.dataset.woid, btn.dataset.status));
+  });
 };
 
 WO.toggleSubtask = function(woId, subtaskId) {
@@ -595,7 +607,7 @@ WO.renderTodo = function() {
 WO.todoCardHTML = function(w) {
   const pColors = { high: 'var(--red)', medium: '#f59e0b', low: 'var(--txt3)' };
   const dueStr  = w.due ? fmtDate(w.due) : null;
-  const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date();
+  const overdue = w.due && w.status !== 'done' && new Date(w.due) < new Date('2026-05-07');
   return `
     <div class="wo-card ${WO.activeId === w.id ? 'active' : ''}" data-id="${w.id}">
       <div class="wo-card-body">
@@ -666,7 +678,7 @@ WO.todoDetailHTML = function(w) {
         </div>
         <div class="wo-detail-field">
           <div class="wo-detail-label">Due</div>
-          <div class="wo-detail-val" style="color:${w.due&&new Date(w.due)<new Date()&&w.status!=='done'?'var(--red)':'inherit'}">
+          <div class="wo-detail-val" style="color:${w.due&&new Date(w.due)<new Date('2026-05-07')&&w.status!=='done'?'var(--red)':'inherit'}">
             ${w.due ? fmtDate(w.due) : '—'}
           </div>
         </div>
@@ -825,6 +837,8 @@ WO.openNewModal = function(prefill) {
   `;
 
   openModal(body, 'New work order');
+  const _wof = document.getElementById('modal-footer');
+  if (_wof) _wof.style.display = '';
   document.getElementById('modal-submit').textContent = 'Create work order';
   document.getElementById('modal-submit').onclick = WO.createNew;
 };
@@ -851,7 +865,7 @@ WO.createNew = function() {
     team: document.getElementById('nwo-team')?.value || 'engineering',
     assignee: document.getElementById('nwo-assignee')?.value || null,
     createdBy: 'c1',
-    created: new Date().toISOString().slice(0, 10),
+    created: '2026-05-07',
     due: document.getElementById('nwo-due')?.value || null,
     recurring: false,
     subtasks,

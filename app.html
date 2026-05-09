@@ -20,8 +20,76 @@
   <link rel="stylesheet" href="css/design-system.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    .ch-map-tip { background:rgba(10,10,12,.9)!important; border:.5px solid rgba(249,115,22,.35)!important; color:#F97316!important; font-size:10px!important; font-weight:600!important; font-family:inherit!important; border-radius:5px!important; padding:3px 8px!important; box-shadow:none!important; }
+    .ch-map-tip::before { display:none!important; }
+    .leaflet-control-zoom { border:.5px solid rgba(255,255,255,.08)!important; border-radius:8px!important; overflow:hidden; }
+    .leaflet-control-zoom a { background:rgba(20,20,24,.95)!important; color:rgba(255,255,255,.7)!important; border-color:rgba(255,255,255,.08)!important; font-size:16px!important; line-height:26px!important; width:26px!important; height:26px!important; }
+    .leaflet-control-zoom a:hover { background:rgba(40,40,48,.95)!important; color:#fff!important; }
+    .leaflet-control-attribution { display:none; }
+  </style>
 </head>
 <body>
+
+<!-- GLOBAL SEARCH OVERLAY -->
+<!-- ONBOARDING OVERLAY -->
+<div id="onboard-overlay" style="display:none;opacity:0;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;transition:opacity .2s">
+  <div style="width:100%;max-width:520px;margin:0 16px;background:var(--bg2);border:.5px solid var(--bd2);border-radius:18px;box-shadow:0 32px 80px rgba(0,0,0,.8);overflow:hidden">
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,rgba(249,115,22,.12) 0%,rgba(249,115,22,.03) 100%);border-bottom:.5px solid rgba(249,115,22,.15);padding:28px 28px 24px">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(249,115,22,.15);border:.5px solid rgba(249,115,22,.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#F97316" stroke-width="1.8" stroke-linecap="round" style="width:22px;height:22px"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <div>
+          <div style="font-size:20px;font-weight:700;color:var(--txt);letter-spacing:-.02em">Welcome to Frame</div>
+          <div style="font-size:13px;color:var(--txt3);margin-top:2px">Let's get your fleet set up in a few quick steps</div>
+        </div>
+      </div>
+      <!-- Step indicator -->
+      <div style="display:flex;gap:6px" id="ob-steps">
+        <div class="ob-step ob-step-1" style="height:4px;border-radius:99px;flex:1;background:var(--or);transition:background .3s"></div>
+        <div class="ob-step ob-step-2" style="height:4px;border-radius:99px;flex:1;background:var(--bg4);transition:background .3s"></div>
+        <div class="ob-step ob-step-3" style="height:4px;border-radius:99px;flex:1;background:var(--bg4);transition:background .3s"></div>
+        <div class="ob-step ob-step-4" style="height:4px;border-radius:99px;flex:1;background:var(--bg4);transition:background .3s"></div>
+      </div>
+    </div>
+    <!-- Step content -->
+    <div id="ob-content" style="padding:24px 28px 20px;min-height:200px"></div>
+    <!-- Footer -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 28px 22px;border-top:.5px solid var(--bd)">
+      <button id="ob-skip" onclick="Onboard.skip()" style="font-size:12px;color:var(--txt4);background:none;border:none;cursor:pointer;padding:4px 0">Skip setup</button>
+      <div style="display:flex;gap:8px">
+        <button id="ob-back" onclick="Onboard.back()" class="btn btn-ghost btn-sm" style="display:none">Back</button>
+        <button id="ob-next" onclick="Onboard.next()" class="btn btn-primary btn-sm">Get started →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="search-overlay" style="display:none;opacity:0;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding-top:80px;transition:opacity .15s">
+  <div style="width:100%;max-width:580px;background:var(--bg2);border:.5px solid var(--bd2);border-radius:14px;box-shadow:0 24px 64px rgba(0,0,0,.7);overflow:hidden;display:flex;flex-direction:column">
+    <!-- Search input row -->
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:.5px solid var(--bd)">
+      <svg viewBox="0 0 16 16" fill="currentColor" style="width:15px;height:15px;color:var(--txt3);flex-shrink:0"><path d="M6.5 1a5.5 5.5 0 014.384 8.823l3.646 3.647-.707.707-3.647-3.646A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      <input id="search-input" placeholder="Search anything…" autocomplete="off" style="flex:1;background:none;border:none;outline:none;font-size:15px;color:var(--txt);font-family:inherit">
+      <kbd style="font-size:10px;color:var(--txt4);background:var(--bg3);border:.5px solid var(--bd);border-radius:5px;padding:2px 6px;font-family:inherit;flex-shrink:0">ESC</kbd>
+    </div>
+    <!-- Results -->
+    <div id="search-results" style="max-height:420px;overflow-y:auto;padding:6px 0"></div>
+    <!-- Footer hint -->
+    <div style="display:flex;align-items:center;gap:16px;padding:8px 16px;border-top:.5px solid var(--bd);background:var(--bg3)">
+      <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt4)">
+        <kbd style="background:var(--bg2);border:.5px solid var(--bd);border-radius:4px;padding:1px 5px;font-family:inherit">↑↓</kbd> navigate
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt4)">
+        <kbd style="background:var(--bg2);border:.5px solid var(--bd);border-radius:4px;padding:1px 5px;font-family:inherit">↵</kbd> open
+      </div>
+      <div style="margin-left:auto;font-size:10px;color:var(--txt4)">Frame Search</div>
+    </div>
+  </div>
+</div>
 
 <!-- OFFLINE BANNER -->
 <div id="offline-banner">
@@ -42,7 +110,7 @@
         <path d="M0 27H40V50H0V27Z" fill="#F97316" opacity=".75"/>
         <path d="M0 0H58V23H0V0Z" fill="#F97316" opacity=".5"/>
       </svg>
-      <span style="font-weight:600;letter-spacing:-.01em">Frame</span>
+      <span class="logo-text" style="font-weight:600;letter-spacing:-.01em">Frame</span>
     </a>
 
     <div class="tb-divider"></div>
@@ -58,13 +126,22 @@
 
     <div class="tb-divider"></div>
 
+    <!-- Search — desktop: full bar, mobile: icon only via CSS class -->
+    <button class="tb-search" onclick="Search.open()">
+      <svg viewBox="0 0 16 16" fill="currentColor" style="width:12px;height:12px;flex-shrink:0"><path d="M6.5 1a5.5 5.5 0 014.384 8.823l3.646 3.647-.707.707-3.647-3.646A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg>
+      <span class="tb-search-text">Search…</span>
+      <kbd class="tb-search-kbd">⌘K</kbd>
+    </button>
+
+    <div class="tb-divider"></div>
+
     <!-- Right side -->
     <div class="tb-right">
       <button class="btn btn-ghost btn-sm" id="template-btn" onclick="renderWOTemplates()" style="display:none">Templates</button>
       <div style="position:relative">
         <button class="btn btn-primary" id="quick-action-btn" onclick="toggleQuickMenu()" style="gap:6px">
-          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:12px;height:12px"><path d="M8 2v12M2 8h12"/></svg>
-          Quick add
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="width:14px;height:14px"><path d="M8 2v12M2 8h12"/></svg>
+          <span class="tb-quick-text">Quick add</span>
         </button>
         <div id="quick-menu" style="display:none;position:absolute;top:calc(100% + 8px);right:0;z-index:300;background:var(--bg2);border:.5px solid var(--bd);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.5);min-width:230px;padding:6px;overflow:hidden">
           <button onclick="closeQuickMenu();WO.openNewModal()" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:8px;border:none;background:transparent;cursor:pointer;text-align:left;color:var(--txt)" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='transparent'">
@@ -93,6 +170,13 @@
           </button>
         </div>
       </div>
+      <!-- Role switcher — mobile only -->
+      <button class="btn-icon mob-only" onclick="Roles.openSwitcher()" title="Switch role" style="display:flex;align-items:center;justify-content:center;position:relative">
+        <svg viewBox="0 0 16 16" fill="currentColor" style="width:14px;height:14px">
+          <path d="M8 7a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"/>
+        </svg>
+        <div id="tb-role-dot" style="position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--or);border:1.5px solid var(--bg2)"></div>
+      </button>
       <button class="btn-icon" onclick="openAI()" title="Frame AI" style="display:flex;align-items:center;justify-content:center;position:relative">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" style="width:14px;height:14px">
           <circle cx="8" cy="8" r="2.5"/>
@@ -118,160 +202,237 @@
     </div>
     <div class="sb-scroll">
 
-      <!-- OVERVIEW -->
-      <div class="sec-lbl">Overview</div>
-
-      <div class="ni" data-page="portfolio" data-label="Portfolio" onclick="navTo('portfolio',this)" style="display:none">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3h14v2H1V3zm2 4h10v6H3V7zm2 2v2h6V9H5z" opacity=".85"/></svg>
-        <span class="ni-lbl">Portfolio</span>
+      <!-- PROPERTY CONTEXT BANNER (shown when a property is selected) -->
+      <div id="prop-ctx-banner" style="display:none;padding:10px 10px 2px">
+        <div style="background:linear-gradient(135deg,rgba(74,222,128,.07) 0%,rgba(74,222,128,.02) 100%);border:.5px solid rgba(74,222,128,.2);border-radius:9px;padding:10px 11px">
+          <button onclick="Properties.clearContext()" style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--txt3);background:none;border:none;cursor:pointer;padding:0;margin-bottom:7px" onmouseover="this.style.color='var(--txt)'" onmouseout="this.style.color='var(--txt3)'">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:10px;height:10px"><path d="M10 4l-4 4 4 4"/></svg>
+            <span class="ni-lbl">All assets</span>
+          </button>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="width:26px;height:26px;border-radius:7px;background:rgba(74,222,128,.12);border:.5px solid rgba(74,222,128,.25);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg viewBox="0 0 16 16" fill="#4ADE80" style="width:12px;height:12px"><path d="M8 1L1 6.5V7h1v7h4v-4h4v4h4V7h1v-.5L8 1zm0 1.5l5 3.7V7H3V6.2L8 2.5z"/></svg>
+            </div>
+            <div style="min-width:0">
+              <div id="prop-ctx-name" class="ni-lbl" style="font-size:12px;font-weight:600;color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Property</div>
+              <div id="prop-ctx-loc" class="ni-lbl" style="font-size:10px;color:var(--txt3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="ni active" data-page="dashboard" data-label="Dashboard" onclick="navTo('dashboard',this)">
+      <!-- PROPERTY NAV (shown when in property context) -->
+      <div class="sec-lbl" id="prop-nav-sec" style="display:none">Property</div>
+
+      <div class="ni" data-page="prop-overview" data-label="Overview" data-ctx="property" style="display:none" onclick="navTo('prop-overview',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h6v6H1V1zm8 0h6v6H9V1zM1 9h6v6H1V9zm8 0h6v6H9V9z" opacity=".85"/></svg>
-        <span class="ni-lbl">Dashboard</span>
+        <span class="ni-lbl">Overview</span>
       </div>
 
-      <div class="ni" data-page="reports" data-label="Reports" onclick="navTo('reports',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12h2V6H2v6zm3 0h2V3H5v9zm3 0h2V8H8v4zm3 0h2V1h-2v11zM1 13h14v1H1v-1z" opacity=".9"/></svg>
-        <span class="ni-lbl">Reports</span>
+      <div class="ni" data-page="prop-workorders" data-label="Work orders" data-ctx="property" style="display:none" onclick="navTo('prop-workorders',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/></svg>
+        <span class="ni-lbl">Work orders</span>
       </div>
 
-      <div class="ni" data-page="calendar" data-label="Calendar" onclick="navTo('calendar',this)">
+      <div class="ni" data-page="prop-documents" data-label="Documents" data-ctx="property" style="display:none" onclick="navTo('prop-documents',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h3.586a1 1 0 01.707.293L8.707 3.707A1 1 0 019.414 4H13a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/></svg>
+        <span class="ni-lbl">Documents</span>
+      </div>
+
+      <div class="ni" data-page="prop-bookings" data-label="Bookings" data-ctx="property" style="display:none" onclick="navTo('prop-bookings',this)">
         <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h.5A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14h-9A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H4v-.5a.5.5 0 01.5-.5zM3.5 5a.5.5 0 000 1h9a.5.5 0 000-1h-9z"/></svg>
-        <span class="ni-lbl">Calendar</span>
+        <span class="ni-lbl">Bookings</span>
+      </div>
+
+      <div class="ni" data-page="prop-staff" data-label="Staff" data-ctx="property" style="display:none" onclick="navTo('prop-staff',this)">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/></svg>
+        <span class="ni-lbl">Staff</span>
+      </div>
+
+      <!-- OVERVIEW -->
+      <div class="nav-group open" data-group="overview">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('overview')">
+          <span class="nav-group-lbl">Overview</span>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="portfolio" data-label="Portfolio" onclick="navTo('portfolio',this)" style="display:none">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 3h14v2H1V3zm2 4h10v6H3V7zm2 2v2h6V9H5z" opacity=".85"/></svg>
+            <span class="ni-lbl">Portfolio</span>
+          </div>
+          <div class="ni active" data-page="dashboard" data-roles="owner,captain,crew" data-label="Dashboard" onclick="navTo('dashboard',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 1h6v6H1V1zm8 0h6v6H9V1zM1 9h6v6H1V9zm8 0h6v6H9V9z" opacity=".85"/></svg>
+            <span class="ni-lbl">Dashboard</span>
+          </div>
+          <div class="ni" data-page="reports" data-roles="owner" data-label="Reports" onclick="navTo('reports',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 12h2V6H2v6zm3 0h2V3H5v9zm3 0h2V8H8v4zm3 0h2V1h-2v11zM1 13h14v1H1v-1z" opacity=".9"/></svg>
+            <span class="ni-lbl">Reports</span>
+          </div>
+          <div class="ni" data-page="calendar" data-roles="owner,captain,crew" data-label="Calendar" onclick="navTo('calendar',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4.5 1a.5.5 0 01.5.5V2h6v-.5a.5.5 0 011 0V2h.5A1.5 1.5 0 0114 3.5v9A1.5 1.5 0 0112.5 14h-9A1.5 1.5 0 012 12.5v-9A1.5 1.5 0 013.5 2H4v-.5a.5.5 0 01.5-.5zM3.5 5a.5.5 0 000 1h9a.5.5 0 000-1h-9z"/></svg>
+            <span class="ni-lbl">Calendar</span>
+          </div>
+        </div>
       </div>
 
       <!-- VESSEL -->
-      <div class="sec-lbl">Vessel</div>
-
-      <div class="ni" data-page="logbook" data-label="Logbook" onclick="navTo('logbook',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 1v10h6V3H5zm1 2h4v1H6V5zm0 2h4v1H6V7zm0 2h3v1H6V9z"/></svg>
-        <span class="ni-lbl">Logbook</span>
-      </div>
-
-      <div class="ni" data-page="work-orders" data-label="Work orders" onclick="navTo('work-orders',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/></svg>
-        <span class="ni-lbl">Work orders</span>
-        <span class="ni-count ni-count-red" id="sb-wo-count">5</span>
-      </div>
-
-      <div class="ni" data-page="requests" data-label="Requests" onclick="navTo('requests',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M13 2H3a1 1 0 00-1 1v8a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M5 6h6M5 9h4"/></svg>
-        <span class="ni-lbl">Requests</span>
-        <span class="ni-count ni-count-or" id="sb-req-count" style="display:none"></span>
-      </div>
-
-      <div class="ni" data-page="pms" data-label="Maintenance" onclick="navTo('pms',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1"/></svg>
-        <span class="ni-lbl">Maintenance</span>
-        <span class="dot dot-red dot-pulse" style="margin-left:auto;width:6px;height:6px"></span>
-      </div>
-
-      <div class="ni" data-page="inventory" data-label="Inventory" onclick="navTo('inventory',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1V3a1 1 0 011-1zm0 5h12a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1V8a1 1 0 011-1zm0 5h7a1 1 0 011 1v1a1 1 0 01-1 1H2a1 1 0 01-1-1v-1a1 1 0 011-1z"/></svg>
-        <span class="ni-lbl">Inventory</span>
-      </div>
-
-      <div class="ni" data-page="fleet" data-label="Tenders" onclick="navTo('fleet',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 11l2-6h10l2 6H1zm3-4h8l-1 3H5L4 7zm3-6a1 1 0 011 1v1H7V2a1 1 0 011-1z" opacity=".85"/></svg>
-        <span class="ni-lbl">Tenders</span>
-      </div>
-
-      <div class="ni" data-page="monitoring" data-label="Monitoring" onclick="navTo('monitoring',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h2l2-5 2 9 2-6 2 4 1-2h3"/></svg>
-        <span class="ni-lbl">Monitoring</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
+      <div class="nav-group" data-group="vessel">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('vessel')">
+          <span class="nav-group-lbl">Vessel</span>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="logbook" data-roles="owner,captain" data-label="Logbook" onclick="navTo('logbook',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 1v10h6V3H5zm1 2h4v1H6V5zm0 2h4v1H6V7zm0 2h3v1H6V9z"/></svg>
+            <span class="ni-lbl">Logbook</span>
+          </div>
+          <div class="ni" data-page="work-orders" data-roles="owner,captain,crew" data-label="Work orders" onclick="navTo('work-orders',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3zm2 2v1h8V5H4zm0 3v1h8V8H4zm0 3v1h5v-1H4z"/></svg>
+            <span class="ni-lbl">Work orders</span>
+            <span class="ni-count ni-count-red" id="sb-wo-count">5</span>
+          </div>
+          <div class="ni" data-page="requests" data-roles="owner,captain" data-label="Requests" onclick="navTo('requests',this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><path d="M13 2H3a1 1 0 00-1 1v8a1 1 0 001 1h3l2 2 2-2h3a1 1 0 001-1V3a1 1 0 00-1-1z"/><path d="M5 6h6M5 9h4"/></svg>
+            <span class="ni-lbl">Requests</span>
+            <span class="ni-count ni-count-or" id="sb-req-count" style="display:none"></span>
+          </div>
+          <div class="ni" data-page="pms" data-roles="owner,captain" data-label="Maintenance" onclick="navTo('pms',this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 1"/></svg>
+            <span class="ni-lbl">Maintenance</span>
+            <span class="dot dot-red dot-pulse" style="margin-left:auto;width:6px;height:6px"></span>
+          </div>
+          <div class="ni" data-page="inventory" data-roles="owner,captain" data-label="Inventory" onclick="navTo('inventory',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1V3a1 1 0 011-1zm0 5h12a1 1 0 011 1v2a1 1 0 01-1 1H2a1 1 0 01-1-1V8a1 1 0 011-1zm0 5h7a1 1 0 011 1v1a1 1 0 01-1 1H2a1 1 0 01-1-1v-1a1 1 0 011-1z"/></svg>
+            <span class="ni-lbl">Inventory</span>
+          </div>
+          <div class="ni" data-page="procurement" data-roles="owner,captain" data-label="Procurement" onclick="navTo('procurement',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 2h2l2.4 6h7.1l1.5-4H5.5M7 13a1 1 0 100-2 1 1 0 000 2zm6 0a1 1 0 100-2 1 1 0 000 2z"/><path d="M1 2h2l2.4 6h7.1l1.5-4H5.5" stroke="currentColor" stroke-width=".3" fill="none"/></svg>
+            <span class="ni-lbl">Procurement</span>
+          </div>
+          <div class="ni" data-page="compliance" data-roles="owner,captain" data-label="Compliance" onclick="navTo('compliance',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 3v5c0 3.5 2.5 6.3 6 7 3.5-.7 6-3.5 6-7V3L8 1zm-1 9.4L4.6 8 5.7 7l1.3 1.3 3.3-3.3 1.1 1.1L7 10.4z"/></svg>
+            <span class="ni-lbl">Compliance</span>
+          </div>
+          <div class="ni" data-page="fleet" data-roles="owner,captain" data-label="Tenders" onclick="navTo('fleet',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M1 11l2-6h10l2 6H1zm3-4h8l-1 3H5L4 7zm3-6a1 1 0 011 1v1H7V2a1 1 0 011-1z" opacity=".85"/></svg>
+            <span class="ni-lbl">Tenders</span>
+          </div>
+          <div class="ni" data-page="monitoring" data-roles="owner,captain" data-label="Monitoring" onclick="navTo('monitoring',this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8h2l2-5 2 9 2-6 2 4 1-2h3"/></svg>
+            <span class="ni-lbl">Monitoring</span>
+            <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
+          </div>
+        </div>
       </div>
 
       <!-- CHARTER -->
-      <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Charter</span>
-        <button onclick="event.stopPropagation();Upgrade.show('charter')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(249,115,22,.12);color:#F97316;border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
-      </div>
-
-      <div class="ni" data-page="charter" data-label="Charters" onclick="navTo('charter',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V6.414a1 1 0 00-.293-.707L11 3l-1.293-1.293A1 1 0 009 1.586V2H4zm5-1v1.586l2.707 2.707A2 2 0 0112 6.414V12a3 3 0 01-3 3H4a3 3 0 01-3-3V4a3 3 0 013-3h5zM5 7h6v1H5V7zm0 2h6v1H5V9zm0 2h4v1H5v-1z" opacity=".85"/></svg>
-        <span class="ni-lbl">Charters</span>
+      <div class="nav-group" data-group="charter">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('charter')">
+          <span class="nav-group-lbl">Charter</span>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="charter" data-roles="owner,captain" data-label="Charters" onclick="navTo('charter',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 2a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2V6.414a1 1 0 00-.293-.707L11 3l-1.293-1.293A1 1 0 009 1.586V2H4zm5-1v1.586l2.707 2.707A2 2 0 0112 6.414V12a3 3 0 01-3 3H4a3 3 0 01-3-3V4a3 3 0 013-3h5zM5 7h6v1H5V7zm0 2h6v1H5V9zm0 2h4v1H5v-1z" opacity=".85"/></svg>
+            <span class="ni-lbl">Charters</span>
+          </div>
+        </div>
       </div>
 
       <!-- CREW -->
-      <div class="sec-lbl">Crew</div>
-
-      <div class="ni" data-page="team" data-label="Crew" onclick="navTo('team',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/></svg>
-        <span class="ni-lbl">Crew</span>
-      </div>
-
-      <!-- COMPLIANCE -->
-      <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Compliance</span>
-        <button onclick="event.stopPropagation();Upgrade.show('compliance')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--or-bg);color:var(--or);border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
-      </div>
-
-      <div class="ni" data-page="certificates" data-label="Certificates" onclick="navTo('certificates',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.5 2.5L12 4l-2 2 .5 2.5L8 7.5 5.5 8.5 6 6 4 4l2.5-.5L8 1z" opacity=".9"/><path d="M2 10a1 1 0 011-1h10a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm2 1v2h8v-2H4z"/></svg>
-        <span class="ni-lbl">Certificates</span>
-        <span class="ni-count ni-count-red" id="sb-cert-count" style="display:none">0</span>
-      </div>
-
-      <div class="ni" data-page="safety" data-label="Safety & ISM" onclick="navTo('safety',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 3.5v4C2 11 5 14 8 15c3-1 6-4 6-7.5v-4L8 1zm-.5 4h1v3.5h-1V5zm0 4.5h1v1h-1V9.5z" opacity=".9"/></svg>
-        <span class="ni-lbl">Safety &amp; ISM</span>
-        <span class="ni-count ni-count-red" id="sb-nc-count" style="display:none">0</span>
-      </div>
-
-      <div class="ni" data-page="hours" data-label="Hours of rest" onclick="navTo('hours',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/></svg>
-        <span class="ni-lbl">Hours of rest</span>
-        <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
+      <div class="nav-group" data-group="crew">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('crew')">
+          <span class="nav-group-lbl">Crew</span>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="team" data-roles="owner,captain,crew" data-label="Crew" onclick="navTo('team',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M5 4a2.5 2.5 0 115 0 2.5 2.5 0 01-5 0zM1 13.5a6 6 0 0114 0v.5H1v-.5z"/></svg>
+            <span class="ni-lbl">Crew</span>
+          </div>
+          <div class="ni" data-page="certificates" data-roles="owner,captain,crew" data-label="Certificates" onclick="navTo('certificates',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1l1.5 2.5L12 4l-2 2 .5 2.5L8 7.5 5.5 8.5 6 6 4 4l2.5-.5L8 1z" opacity=".9"/><path d="M2 10a1 1 0 011-1h10a1 1 0 011 1v4a1 1 0 01-1 1H3a1 1 0 01-1-1v-4zm2 1v2h8v-2H4z"/></svg>
+            <span class="ni-lbl">Certificates</span>
+            <span class="ni-count ni-count-red" id="sb-cert-count" style="display:none">0</span>
+          </div>
+          <div class="ni" data-page="safety" data-roles="owner,captain,crew" data-label="Safety & ISM" onclick="navTo('safety',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1L2 3.5v4C2 11 5 14 8 15c3-1 6-4 6-7.5v-4L8 1zm-.5 4h1v3.5h-1V5zm0 4.5h1v1h-1V9.5z" opacity=".9"/></svg>
+            <span class="ni-lbl">Safety &amp; ISM</span>
+            <span class="ni-count ni-count-red" id="sb-nc-count" style="display:none">0</span>
+          </div>
+          <div class="ni" data-page="hours" data-roles="owner,captain,crew" data-label="Hours of rest" onclick="navTo('hours',this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"><circle cx="8" cy="8" r="6"/><path d="M8 5v3"/><circle cx="8" cy="8" r="1" fill="currentColor" stroke="none"/></svg>
+            <span class="ni-lbl">Hours of rest</span>
+            <svg viewBox="0 0 16 16" fill="currentColor" class="ni-lock"><path d="M8 1a3 3 0 00-3 3v1H4a1 1 0 00-1 1v7a1 1 0 001 1h8a1 1 0 001-1V6a1 1 0 00-1-1h-1V4a3 3 0 00-3-3zm0 1.5a1.5 1.5 0 011.5 1.5V5h-3V4A1.5 1.5 0 018 2.5zM7 9a1 1 0 112 0 1 1 0 01-2 0z"/></svg>
+          </div>
+        </div>
       </div>
 
       <!-- DOCUMENTS -->
-      <div class="sec-lbl">Documents</div>
-
-      <div class="ni" data-page="documents" data-label="Docs" onclick="navTo('documents',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h3.586a1 1 0 01.707.293L8.707 3.707A1 1 0 019.414 4H13a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/></svg>
-        <span class="ni-lbl">Docs</span>
+      <div class="nav-group" data-group="documents">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('documents')">
+          <span class="nav-group-lbl">Documents</span>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="documents" data-roles="owner,captain" data-label="Docs" onclick="navTo('documents',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3a1 1 0 011-1h3.586a1 1 0 01.707.293L8.707 3.707A1 1 0 019.414 4H13a1 1 0 011 1v7a1 1 0 01-1 1H3a1 1 0 01-1-1V3z"/></svg>
+            <span class="ni-lbl">Docs</span>
+          </div>
+          <div class="ni" data-page="checklists" data-roles="owner,captain,crew" data-label="Checklists" onclick="navTo('checklists',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 2v1h6V4H5zm0 2v1h6V6H5zm0 2v1h4V8H5zm0 2v1h6v-1H5z" opacity=".8"/><path d="M8.5 9.5l1 1 2-2" stroke="#4ADE80" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
+            <span class="ni-lbl">Checklists</span>
+          </div>
+          <div class="ni" data-page="kb" data-roles="owner,captain,crew" data-label="Manuals" onclick="navTo('kb',this)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h6v12H2zm6 0h6v12h-6"/><path d="M2 6h6M2 9h4M10 6h4M10 9h3"/></svg>
+            <span class="ni-lbl">Manuals</span>
+          </div>
+        </div>
       </div>
 
-      <div class="ni" data-page="checklists" data-label="Checklists" onclick="navTo('checklists',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2a1 1 0 011-1h8a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V2zm2 2v1h6V4H5zm0 2v1h6V6H5zm0 2v1h4V8H5zm0 2v1h6v-1H5z" opacity=".8"/><path d="M8.5 9.5l1 1 2-2" stroke="#4ADE80" stroke-width="1.4" stroke-linecap="round" fill="none"/></svg>
-        <span class="ni-lbl">Checklists</span>
-      </div>
-
-      <div class="ni" data-page="kb" data-label="Manuals" onclick="navTo('kb',this)">
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2h6v12H2zm6 0h6v12h-6"/><path d="M2 6h6M2 9h4M10 6h4M10 9h3"/></svg>
-        <span class="ni-lbl">Manuals</span>
-      </div>
-
-      <!-- OWNER -->
-      <div class="sec-lbl" style="display:flex;align-items:center;justify-content:space-between">
-        <span>Owner</span>
-        <button onclick="event.stopPropagation();Upgrade.show('owner')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--or-bg);color:var(--or);border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
-      </div>
-
-      <div class="ni" data-page="budget" data-label="Budget" onclick="navTo('budget',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM5 7.5h6v1H5v-1zm0-2h6v1H5v-1zm1.5 4.5h3v1h-3v-1z" opacity=".8"/></svg>
-        <span class="ni-lbl">Budget</span>
-      </div>
-
-      <div class="ni" data-page="owner" data-label="Owner" onclick="navTo('owner',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13a5 5 0 0110 0v1H3v-1z" opacity=".7"/><path d="M11 7.5l1.5 1.5-1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
-        <span class="ni-lbl">Owner</span>
+      <!-- OWNER/FINANCE -->
+      <div class="nav-group" data-group="owner-finance">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('owner-finance')">
+          <span class="nav-group-lbl">Owner</span>
+          <button onclick="event.stopPropagation();Upgrade.show('owner')" style="font-size:9px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--or-bg);color:var(--or);border:none;cursor:pointer;letter-spacing:.03em">Upgrade</button>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="budget" data-roles="owner" data-label="Budget" onclick="navTo('budget',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zM5 7.5h6v1H5v-1zm0-2h6v1H5v-1zm1.5 4.5h3v1h-3v-1z" opacity=".8"/></svg>
+            <span class="ni-lbl">Budget</span>
+          </div>
+          <div class="ni" data-page="owner" data-roles="owner" data-label="Owner" onclick="navTo('owner',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13a5 5 0 0110 0v1H3v-1z" opacity=".7"/><path d="M11 7.5l1.5 1.5-1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
+            <span class="ni-lbl">Owner</span>
+          </div>
+        </div>
       </div>
 
       <!-- SYSTEM -->
-      <div class="sec-lbl">System</div>
-
-      <div class="ni" data-page="settings" data-label="Settings" onclick="navTo('settings',this)">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.5 1a.75.75 0 01.75.75v.878a5.002 5.002 0 012.314 1.337l.76-.44a.75.75 0 011.03.274l.5.866a.75.75 0 01-.274 1.03l-.76.44a5.002 5.002 0 010 2.67l.76.44a.75.75 0 01.274 1.03l-.5.866a.75.75 0 01-1.03.274l-.76-.44a5.002 5.002 0 01-2.314 1.337v.878a.75.75 0 01-1.5 0v-.878a5.002 5.002 0 01-2.314-1.337l-.76.44a.75.75 0 01-1.03-.274l-.5-.866a.75.75 0 01.274-1.03l.76-.44a5.002 5.002 0 010-2.67l-.76-.44a.75.75 0 01-.274-1.03l.5-.866a.75.75 0 011.03-.274l.76.44A5.002 5.002 0 016.75 2.628V1.75A.75.75 0 017.5 1zM7.5 5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg>
-        <span class="ni-lbl">Settings</span>
+      <div class="nav-group" data-group="system">
+        <div class="nav-group-hdr" onclick="toggleNavGroup('system')">
+          <span class="nav-group-lbl">System</span>
+          <svg class="nav-group-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 4l4 4-4 4"/></svg>
+        </div>
+        <div class="nav-group-items">
+          <div class="ni" data-page="settings" data-roles="owner,captain,crew" data-label="Settings" onclick="navTo('settings',this)">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7.5 1a.75.75 0 01.75.75v.878a5.002 5.002 0 012.314 1.337l.76-.44a.75.75 0 011.03.274l.5.866a.75.75 0 01-.274 1.03l-.76.44a5.002 5.002 0 010 2.67l.76.44a.75.75 0 01.274 1.03l-.5.866a.75.75 0 01-1.03.274l-.76-.44a5.002 5.002 0 01-2.314 1.337v.878a.75.75 0 01-1.5 0v-.878a5.002 5.002 0 01-2.314-1.337l-.76.44a.75.75 0 01-1.03-.274l-.5-.866a.75.75 0 01.274-1.03l.76-.44a5.002 5.002 0 010-2.67l-.76-.44a.75.75 0 01-.274-1.03l.5-.866a.75.75 0 011.03-.274l.76.44A5.002 5.002 0 016.75 2.628V1.75A.75.75 0 017.5 1zM7.5 5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/></svg>
+            <span class="ni-lbl">Settings</span>
+          </div>
+        </div>
       </div>
 
     </div>
 
     <!-- Sidebar footer -->
     <div class="sb-foot">
+      <!-- Role switcher pill -->
+      <div onclick="Roles.openSwitcher()" title="Switch role" style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:6px;border-radius:8px;border:.5px solid var(--bd);cursor:pointer;background:var(--bg3);transition:background .15s" onmouseover="this.style.background='var(--bg4)'" onmouseout="this.style.background='var(--bg3)'">
+        <div id="role-dot" style="width:7px;height:7px;border-radius:50%;background:var(--or);flex-shrink:0"></div>
+        <div style="font-size:11px;color:var(--txt3);flex:1;min-width:0" class="ni-lbl">Viewing as <span id="role-badge" style="color:var(--or);font-weight:600">Owner</span></div>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="width:10px;height:10px;color:var(--txt4);flex-shrink:0"><path d="M4 6l4 4 4-4"/></svg>
+      </div>
       <div class="sb-foot-av" onclick="openPersonalSettings()" style="cursor:pointer" title="Personal settings">
         <div class="sb-foot-img">AJ</div>
         <div>
@@ -317,30 +478,30 @@
   <!-- ── MAIN ── -->
   <main class="main">
 
-    <!-- Page header -->
-    <div class="page-hdr">
-      <div class="page-title" id="page-title">Dashboard</div>
-      <div class="search" id="main-search" style="display:none">
-        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1a5.5 5.5 0 014.384 8.823l3.646 3.647-.707.707-3.647-3.646A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg>
-        <input id="wo-search" placeholder="Search work orders…">
-      </div>
-      <div class="ml-auto flex gap-8" id="page-actions"></div>
-    </div>
+    <!-- Hidden title element (updated by JS, not displayed) -->
+    <span id="page-title" style="display:none">Dashboard</span>
 
     <!-- Stats bar (populated per-page) -->
     <div class="stats" id="wo-stats" style="display:none"></div>
 
-    <!-- Filters (work orders) -->
+    <!-- Filters (work orders) — search + view switcher live here too -->
     <div class="filters" id="wo-filters" style="display:none">
       <div class="fp on" data-f="all">All</div>
+      <div class="fp" data-f="todo">To Do</div>
       <div class="fp" data-f="open">Open</div>
       <div class="fp" data-f="in-progress">In progress</div>
       <div class="fp" data-f="high">High priority</div>
       <div class="fp" data-f="on-hold">On hold</div>
-      <div class="fp" data-f="done">Completed</div>
+      <div class="fp" data-f="done">Done</div>
       <div class="fp-sep"></div>
       <div class="fp" data-f="engineering">Engineering</div>
       <div class="fp" data-f="deck">Deck</div>
+      <div class="fp-sep"></div>
+      <div class="search" id="main-search">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.5 1a5.5 5.5 0 014.384 8.823l3.646 3.647-.707.707-3.647-3.646A5.5 5.5 0 116.5 1zm0 1.5a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <input id="wo-search" placeholder="Search work orders…">
+      </div>
+      <div style="margin-left:auto" id="page-actions"></div>
     </div>
 
     <!-- Stats bar (monitoring) -->
@@ -393,6 +554,34 @@
       <div class="fp" data-df="Manuals">Manuals</div>
     </div>
 
+    <!-- Stats + Filters: Property Overview -->
+    <div class="stats" id="prop-stats" style="display:none"></div>
+
+    <!-- Stats + Filters: Property Work Orders -->
+    <div class="stats" id="prop-wo-stats" style="display:none"></div>
+    <div class="filters" id="prop-wo-filters" style="display:none">
+      <div class="fp on" data-pwf="all">All</div>
+      <div class="fp" data-pwf="open">Open</div>
+      <div class="fp" data-pwf="in-progress">In progress</div>
+      <div class="fp" data-pwf="done">Done</div>
+    </div>
+
+    <!-- Stats + Filters: Property Documents -->
+    <div class="stats" id="prop-doc-stats" style="display:none"></div>
+    <div class="filters" id="prop-doc-filters" style="display:none">
+      <div class="fp on" data-pdf="All">All</div>
+      <div class="fp" data-pdf="Lease">Lease</div>
+      <div class="fp" data-pdf="Insurance">Insurance</div>
+      <div class="fp" data-pdf="Contracts">Contracts</div>
+      <div class="fp" data-pdf="Compliance">Compliance</div>
+    </div>
+
+    <!-- Stats: Property Bookings -->
+    <div class="stats" id="prop-booking-stats" style="display:none"></div>
+
+    <!-- Stats: Property Staff -->
+    <div class="stats" id="prop-staff-stats" style="display:none"></div>
+
     <!-- ── PAGE CONTENT ── -->
     <div class="page-body">
 
@@ -431,19 +620,27 @@
                 <button class="cal-nav-btn" onclick="calNav(1)">&#8250;</button>
               </div>
               <span class="cal-month-title" id="cal-month-title">May 2026</span>
-              <div class="cal-month-legend">
-                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--or)"></div>Charter</div>
-                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--eng)"></div>Maintenance</div>
-                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red)"></div>Regulatory</div>
-                <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--grn)"></div>Logistics</div>
+              <div style="display:flex;align-items:center;gap:14px;margin-left:auto">
+                <div class="cal-month-legend">
+                  <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--or)"></div>Charter</div>
+                  <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--eng)"></div>Maintenance</div>
+                  <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--red)"></div>Regulatory</div>
+                  <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--grn)"></div>Logistics</div>
+                </div>
+                <div id="cal-view-toggle" style="display:flex;gap:4px">
+                  <button onclick="calSetView('month')" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:.5px solid var(--or);background:rgba(249,115,22,.1);color:var(--or);cursor:pointer">Month</button>
+                  <button onclick="calSetView('week')" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:.5px solid var(--bd);background:var(--bg3);color:var(--txt3);cursor:pointer">Week</button>
+                </div>
               </div>
             </div>
-            <div class="cal-month-dow">
+            <div class="cal-month-dow" id="cal-dow-row">
               <div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div>
               <div class="cal-dow">Thu</div><div class="cal-dow">Fri</div>
               <div class="cal-dow" style="color:var(--txt2)">Sat</div><div class="cal-dow" style="color:var(--txt2)">Sun</div>
             </div>
             <div class="cal-month-grid" id="cal-month-grid"></div>
+            <!-- Mobile day-tap panel -->
+            <div id="cal-day-panel" style="display:none;border-top:.5px solid var(--bd);padding:14px 16px"></div>
           </div>
           <div class="cal-upcoming-panel">
             <div class="cal-upcoming-hdr">Upcoming</div>
@@ -565,6 +762,12 @@
       <!-- INVENTORY -->
       <div id="page-inventory" class="page"></div>
 
+      <!-- PROCUREMENT -->
+      <div id="page-procurement" class="page"></div>
+
+      <!-- COMPLIANCE -->
+      <div id="page-compliance" class="page"></div>
+
       <!-- BUDGET -->
       <div id="page-budget" class="page"></div>
 
@@ -592,12 +795,34 @@
       <!-- PORTFOLIO -->
       <div id="page-portfolio" class="page"></div>
 
+      <!-- PROPERTY PAGES -->
+      <div id="page-prop-overview"   class="page"></div>
+      <div id="page-prop-workorders" class="page"></div>
+      <div id="page-prop-documents"  class="page"></div>
+      <div id="page-prop-bookings"   class="page"></div>
+      <div id="page-prop-staff"      class="page"></div>
+
       <!-- UPGRADE OVERLAY (shown over any locked page) -->
       <div id="upgrade-overlay"></div>
 
       <!-- SETTINGS -->
       <div id="page-settings" class="page">
         <div class="settings-wrap">
+
+          <!-- Appearance -->
+          <div class="settings-section">
+            <div class="settings-title">Appearance</div>
+            <div class="settings-row">
+              <div>
+                <div class="settings-row-label">Theme</div>
+                <div class="settings-row-sub">Switch between dark and light mode</div>
+              </div>
+              <div class="theme-seg" id="settings-page-theme-seg">
+                <button class="theme-seg-btn" id="seg-dark2" onclick="Settings.setTheme('dark');document.getElementById('seg-dark2').classList.add('active');document.getElementById('seg-light2').classList.remove('active')">Dark</button>
+                <button class="theme-seg-btn" id="seg-light2" onclick="Settings.setTheme('light');document.getElementById('seg-light2').classList.add('active');document.getElementById('seg-dark2').classList.remove('active')">Light</button>
+              </div>
+            </div>
+          </div>
 
               <!-- Notifications -->
           <div class="settings-section">
@@ -793,6 +1018,7 @@
 <script src="js/work-orders.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/monitoring.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="js/charter.js"></script>
 <script src="js/owner.js"></script>
 <script src="js/certificates.js"></script>
@@ -804,6 +1030,11 @@
 <script src="js/reports.js"></script>
 <script src="js/kb.js"></script>
 <script src="js/upgrade.js"></script>
+<script src="js/roles.js"></script>
+<script src="js/properties.js"></script>
+<script src="js/procurement.js"></script>
+<script src="js/compliance.js"></script>
+<script src="js/search.js"></script>
 <script src="js/offline.js"></script>
 
 <script>
@@ -832,7 +1063,10 @@ Requests.save = function(reqs) {
 Requests.updateBadge = function() {
   const newCount = Requests.data().filter(r => r.status === 'new').length;
   const el = document.getElementById('sb-req-count');
-  if (el) { el.textContent = newCount; el.style.display = newCount ? '' : 'none'; }
+  if (el) {
+    el.textContent = newCount; el.style.display = newCount ? '' : 'none';
+    el.closest('.ni')?.classList.toggle('has-alert', newCount > 0);
+  }
 };
 
 Requests.statusBadge = function(s) {
@@ -900,7 +1134,42 @@ Requests.render = function() {
     pill.classList.toggle('on', pill.dataset.rf === f);
   });
 
+  const portalLink = `<div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+    <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none">Share portal link ↗</a>
+  </div>`;
   const empty = `<div class="empty"><div class="empty-title">No ${f !== 'all' ? f : ''} requests${f === 'all' ? ' yet' : ''}</div><div class="empty-sub">${f === 'all' ? 'Share the portal link with guests or crew to receive requests' : ''}</div></div>`;
+
+  const isMob = window.innerWidth <= 768;
+
+  if (isMob) {
+    const cards = visible.map(r => {
+      const submitted = new Date(r.submitted).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      return `<div class="wo-mob-card-row req-mob-card" data-id="${r.id}" style="cursor:pointer">
+        <div class="wo-mob-card-body">
+          <div class="wo-mob-card-title">${escHtml(r.title)}</div>
+          <div class="wo-mob-card-meta">
+            ${r.location ? `<span>${escHtml(r.location)}</span><span class="wo-mob-dot">·</span>` : ''}
+            <span>${escHtml(r.contact)}</span>
+          </div>
+          <div class="wo-mob-card-foot">
+            <div style="display:flex;gap:6px;align-items:center">
+              ${Requests.statusBadge(r.status)}
+              ${r.woId ? `<span class="wo-id" style="font-size:10px">${r.woId}</span>` : ''}
+            </div>
+            <span class="wo-mob-due">${submitted}</span>
+          </div>
+        </div>
+        <svg class="wo-mob-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+      </div>`;
+    }).join('');
+
+    wrap.innerHTML = `<div style="padding:12px 16px 80px">${portalLink}${visible.length === 0 ? empty : `<div class="wo-mob-list">${cards}</div>`}</div>`;
+    wrap.querySelectorAll('.req-mob-card').forEach(card => {
+      card.addEventListener('click', () => Requests.openDetail(card.dataset.id));
+    });
+    Requests.updateBadge();
+    return;
+  }
 
   const rows = visible.map(r => {
     const submitted = new Date(r.submitted).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
@@ -923,9 +1192,7 @@ Requests.render = function() {
   }).join('');
 
   wrap.innerHTML = `<div style="padding:18px 20px 80px">
-    <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
-      <a href="/request" target="_blank" style="font-size:12px;color:var(--or);font-weight:500;text-decoration:none">Share portal link ↗</a>
-    </div>
+    ${portalLink}
     ${visible.length === 0 ? empty : `<div class="tbl-wrap"><table class="tbl">
       <thead><tr>
         <th>Request</th>
@@ -977,18 +1244,23 @@ Hub.render = function() {
   const me = (FM.crew || []).find(c => c.id === 'c1');
   const chev = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>`;
 
-  const rows = [
-    { page:'work-orders',  label:'Work orders',   color:'#60a5fa', bg:'rgba(59,130,246,.15)',  icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 8h6M9 16h4"/>' },
-    { page:'fleet',        label:'Tenders',        color:'#fb923c', bg:'rgba(251,146,60,.15)', icon:'<path d="M3 17h18M3 11l9-8 9 8" stroke-linecap="round" stroke-linejoin="round"/>' },
-    { page:'monitoring',   label:'Monitoring',    color:'#22d3ee', bg:'rgba(34,211,238,.15)',  icon:'<path d="M2 12l4-6 4 8 3-4 3 4 4-7" stroke-linecap="round" stroke-linejoin="round"/>' },
-    { page:'calendar',     label:'Calendar',      color:'#a78bfa', bg:'rgba(167,139,250,.15)', icon:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/>' },
-    { page:'charter',      label:'Charter',       color:'#F97316', bg:'rgba(249,115,22,.15)',  icon:'<path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-2M12 17l-5 4 5-4z" stroke-linecap="round" stroke-linejoin="round"/>' },
-    { page:'checklists',   label:'Checklists',    color:'#4ade80', bg:'rgba(74,222,128,.12)',  icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-linecap="round" stroke-linejoin="round"/>' },
-    { page:'team',         label:'Team',          color:'#f9a8d4', bg:'rgba(249,168,212,.12)', icon:'<circle cx="9" cy="7" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6h0M15 11a3 3 0 110-6 3 3 0 010 6zM21 20c0-3.3-2.7-6-6-6h-3" stroke-linecap="round"/>' },
-    { page:'hours',        label:'Hours of rest', color:'#fbbf24', bg:'rgba(251,191,36,.12)',  icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/>' },
-    { page:'budget',       label:'Budget',        color:'#F97316', bg:'rgba(249,115,22,.15)',  icon:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" stroke-linecap="round"/>' },
-    { page:'requests',     label:'Requests',      color:'#34d399', bg:'rgba(52,211,153,.12)',  icon:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>' },
+  const role = FM.role || 'owner';
+  const allRows = [
+    { page:'work-orders',  label:'Work orders',   roles:['owner','captain','crew'], color:'#60a5fa', bg:'rgba(59,130,246,.15)',  icon:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 12h6M9 8h6M9 16h4"/>' },
+    { page:'fleet',        label:'Tenders',        roles:['owner','captain'],        color:'#fb923c', bg:'rgba(251,146,60,.15)', icon:'<path d="M3 17h18M3 11l9-8 9 8" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'monitoring',   label:'Monitoring',    roles:['owner','captain'],         color:'#22d3ee', bg:'rgba(34,211,238,.15)',  icon:'<path d="M2 12l4-6 4 8 3-4 3 4 4-7" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'calendar',     label:'Calendar',      roles:['owner','captain','crew'],  color:'#a78bfa', bg:'rgba(167,139,250,.15)', icon:'<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke-linecap="round"/>' },
+    { page:'charter',      label:'Charter',       roles:['owner','captain'],         color:'#F97316', bg:'rgba(249,115,22,.15)',  icon:'<path d="M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h16a2 2 0 012 2v10a2 2 0 01-2 2h-2M12 17l-5 4 5-4z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'checklists',   label:'Checklists',    roles:['owner','captain','crew'],  color:'#4ade80', bg:'rgba(74,222,128,.12)',  icon:'<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'team',         label:'Team',          roles:['owner','captain','crew'],  color:'#f9a8d4', bg:'rgba(249,168,212,.12)', icon:'<circle cx="9" cy="7" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6h0M15 11a3 3 0 110-6 3 3 0 010 6zM21 20c0-3.3-2.7-6-6-6h-3" stroke-linecap="round"/>' },
+    { page:'hours',        label:'Hours of rest', roles:['owner','captain','crew'],  color:'#fbbf24', bg:'rgba(251,191,36,.12)',  icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3" stroke-linecap="round"/>' },
+    { page:'budget',       label:'Budget',        roles:['owner'],                   color:'#F97316', bg:'rgba(249,115,22,.15)',  icon:'<path d="M12 1v22M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" stroke-linecap="round"/>' },
+    { page:'requests',     label:'Requests',      roles:['owner','captain'],         color:'#34d399', bg:'rgba(52,211,153,.12)',  icon:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'safety',      label:'Safety & ISM',  roles:['owner','captain','crew'],   color:'#f87171', bg:'rgba(248,113,113,.12)', icon:'<path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'compliance',  label:'Compliance',    roles:['owner','captain'],          color:'#22d3ee', bg:'rgba(34,211,238,.12)',  icon:'<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round"/>' },
+    { page:'assets',      label:'Assets',        roles:['owner','captain'],          color:'#a78bfa', bg:'rgba(167,139,250,.12)', icon:'<path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" stroke-linecap="round" stroke-linejoin="round"/>' },
   ];
+  const rows = allRows.filter(r => r.roles.includes(role));
 
   const openWOs = (FM.workOrders || []).filter(w => w.vessel === (v && v.id) && w.status === 'open').length;
   const unreadNotifs = (FM.notifications || []).filter(n => !n.read).length;
@@ -1040,15 +1312,6 @@ Hub.render = function() {
           </div>
           ${chev}
         </button>
-        <button class="hub-list-row" onclick="navTo('safety',document.querySelector('.ni[data-page=safety]'))">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:34px;height:34px;border-radius:9px;background:rgba(167,139,250,.12);color:#a78bfa;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 22s-8-4-8-10V5l8-3 8 3v7c0 6-8 10-8 10z"/></svg>
-            </div>
-            <span style="font-size:14px;font-weight:500;color:var(--txt)">Safety &amp; ISM</span>
-          </div>
-          ${chev}
-        </button>
         <button class="hub-list-row" onclick="navTo('settings',document.querySelector('.ni[data-page=settings]'))">
           <div style="display:flex;align-items:center;gap:12px">
             <div style="width:34px;height:34px;border-radius:9px;background:var(--bg4);color:var(--txt2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -1092,6 +1355,8 @@ document.addEventListener('DOMContentLoaded', () => {
   WO.initFilters();
   WO.initSearch();
   Settings.init();
+  Roles.init();
+  Search.init();
 
   // Wire up request filters
   document.querySelectorAll('#req-filters .fp').forEach(pill => {
@@ -1138,6 +1403,24 @@ document.addEventListener('DOMContentLoaded', () => {
       Documents.setTab(this.dataset.df);
     });
   });
+
+  // Wire up property work order filters
+  document.querySelectorAll('#prop-wo-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#prop-wo-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Properties.setWOFilter(this.dataset.pwf);
+    });
+  });
+
+  // Wire up property document filters
+  document.querySelectorAll('#prop-doc-filters .fp').forEach(pill => {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('#prop-doc-filters .fp').forEach(p => p.classList.remove('on'));
+      this.classList.add('on');
+      Properties.setDocTab(this.dataset.pdf);
+    });
+  });
 });
 
 // Show/hide chrome per page
@@ -1156,7 +1439,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const p = pageId;
     document.getElementById('wo-stats').style.display     = p==='work-orders'  ? 'grid' : 'none';
     document.getElementById('wo-filters').style.display   = p==='work-orders'  ? 'flex' : 'none';
-    document.getElementById('main-search').style.display  = p==='work-orders'  ? 'flex' : 'none';
     document.getElementById('mon-stats').style.display    = p==='monitoring'   ? 'grid' : 'none';
     document.getElementById('req-stats').style.display    = p==='requests'     ? 'grid' : 'none';
     document.getElementById('req-filters').style.display  = p==='requests'     ? 'flex' : 'none';
@@ -1169,9 +1451,28 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('docs-stats').style.display   = p==='documents'    ? 'grid' : 'none';
     document.getElementById('docs-filters').style.display = p==='documents'    ? 'flex' : 'none';
 
+    // Property chrome
+    document.getElementById('prop-stats').style.display          = p==='prop-overview'   ? 'grid' : 'none';
+    document.getElementById('prop-wo-stats').style.display       = p==='prop-workorders' ? 'grid' : 'none';
+    document.getElementById('prop-wo-filters').style.display     = p==='prop-workorders' ? 'flex' : 'none';
+    document.getElementById('prop-doc-stats').style.display      = p==='prop-documents'  ? 'grid' : 'none';
+    document.getElementById('prop-doc-filters').style.display    = p==='prop-documents'  ? 'flex' : 'none';
+    document.getElementById('prop-booking-stats').style.display  = p==='prop-bookings'   ? 'grid' : 'none';
+    document.getElementById('prop-staff-stats').style.display    = p==='prop-staff'      ? 'grid' : 'none';
+
+    // Trigger property page render
+    if (p.startsWith('prop-')) window.Properties && Properties.onNavTo(p);
+
     // Show templates button only on work orders page
     const tmplBtn = document.getElementById('template-btn');
     if (tmplBtn) tmplBtn.style.display = pageId === 'work-orders' ? '' : 'none';
+    // Sync settings page theme buttons
+    if (p === 'settings') {
+      const mode = document.documentElement.getAttribute('data-theme') || 'dark';
+      document.getElementById('seg-dark2')?.classList.toggle('active', mode === 'dark');
+      document.getElementById('seg-light2')?.classList.toggle('active', mode === 'light');
+    }
+
     // Close quick menu on page change
     closeQuickMenu();
   };
@@ -1735,10 +2036,6 @@ window.renderFleetLog = renderFleetLog;
 function fleetLogHours(craftId, craftName) {
   const craft = (FM.fleet || []).find(c => c.id === craftId);
   openModal(`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <span style="font-weight:600;font-size:15px">Log hours: ${craftName}</span>
-      <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
-    </div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--txt2)">Engine hours (total odometer)
         <input id="fl-hours" type="number" style="padding:8px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--bg);color:var(--txt);font-size:13px" value="${craft ? craft.hours : ''}" min="0">
@@ -1750,7 +2047,7 @@ function fleetLogHours(craftId, craftName) {
         <button class="btn btn-primary" onclick="submitFleetHours('${craftId}')">Save</button>
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       </div>
-    </div>`);
+    </div>`, `Log hours: ${craftName}`);
 }
 window.fleetLogHours = fleetLogHours;
 
@@ -1772,10 +2069,6 @@ window.submitFleetHours = submitFleetHours;
 
 function fleetFuelUp(craftId, craftName) {
   openModal(`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <span style="font-weight:600;font-size:15px">Fuel up: ${craftName}</span>
-      <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
-    </div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--txt2)">Litres
         <input id="fl-litres" type="number" style="padding:8px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--bg);color:var(--txt);font-size:13px" placeholder="0" min="0">
@@ -1793,7 +2086,7 @@ function fleetFuelUp(craftId, craftName) {
         <button class="btn btn-primary" onclick="submitFleetFuel('${craftId}')">Save</button>
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       </div>
-    </div>`);
+    </div>`, `Fuel up: ${craftName}`);
 }
 window.fleetFuelUp = fleetFuelUp;
 
@@ -1817,10 +2110,6 @@ window.submitFleetFuel = submitFleetFuel;
 
 function fleetCharge(craftId, craftName) {
   openModal(`
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-      <span style="font-weight:600;font-size:15px">Charge: ${craftName}</span>
-      <button style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt2)" onclick="closeModal()">×</button>
-    </div>
     <div style="display:flex;flex-direction:column;gap:14px">
       <label style="display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--txt2)">Battery level %
         <input id="fl-fuelpct" type="number" style="padding:8px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--bg);color:var(--txt);font-size:13px" value="100" min="0" max="100">
@@ -1832,7 +2121,7 @@ function fleetCharge(craftId, craftName) {
         <button class="btn btn-primary" onclick="submitFleetCharge('${craftId}')">Save</button>
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
       </div>
-    </div>`);
+    </div>`, `Charge: ${craftName}`);
 }
 window.fleetCharge = fleetCharge;
 
@@ -1857,7 +2146,10 @@ window.Vendors = {
   render() {
     const wrap = document.getElementById('vendors-wrap');
     if (!wrap) return;
-    wrap.style.cssText = 'display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 104px);overflow:hidden;';
+    const isMob = window.innerWidth <= 768;
+    wrap.style.cssText = isMob
+      ? 'display:flex;flex-direction:column;'
+      : 'display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 104px);overflow:hidden;';
     const vendors = FM.vendors || [];
     wrap.innerHTML = `
       <div style="border-right:.5px solid var(--bd);overflow-y:auto">
@@ -1865,7 +2157,7 @@ window.Vendors = {
         ${vendors.map(v => `
           <div class="logbook-entry-row${v.id === Vendors._active ? ' active' : ''}" onclick="Vendors.select('${v.id}')">
             <div style="font-size:13px;font-weight:500;color:var(--txt);margin-bottom:2px">${v.name}</div>
-            <div style="font-size:11px;color:var(--txt3)">${v.trade}</div>
+            <div style="font-size:11px;color:var(--txt3)">${v.category || v.trade || ''}</div>
           </div>`).join('')}
       </div>
       <div id="vendor-detail" style="overflow-y:auto;background:var(--bg2)">
@@ -1892,7 +2184,7 @@ window.Vendors = {
     detail.innerHTML = `
       <div style="padding:24px">
         <div style="font-size:20px;font-weight:400;color:var(--txt);margin-bottom:4px">${v.name}</div>
-        <div style="font-size:12px;color:var(--txt3);margin-bottom:20px">${v.trade}</div>
+        <div style="font-size:12px;color:var(--txt3);margin-bottom:20px">${v.category || v.trade || ''}</div>
         <div class="part-detail-grid" style="margin-bottom:20px">
           <div class="part-detail-item"><div class="part-detail-lbl">Contact</div><div>${v.contact}</div></div>
           <div class="part-detail-item"><div class="part-detail-lbl">Phone</div><div>${v.phone}</div></div>
@@ -1940,45 +2232,77 @@ window.Team = {
     const expiring  = allCerts.filter(x => { const d = (new Date(x.expires) - today) / 86400000; return d >= 0 && d < 90; }).length;
     const expired   = allCerts.filter(x => x.expires && new Date(x.expires) <= today).length;
 
+    const isMob = window.innerWidth <= 768;
+
+    const statsHTML = `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
+      <div class="wo-stat"><div class="wo-stat-num">${crew.length}</div><div class="wo-stat-lbl">Total crew</div></div>
+      <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${onboard}</div><div class="wo-stat-lbl">On board</div></div>
+      <div class="wo-stat"><div class="wo-stat-num" style="color:var(--txt3)">${ashore}</div><div class="wo-stat-lbl">Ashore</div></div>
+      <div class="wo-stat" style="${expired ? 'background:rgba(248,113,113,.05)' : ''}"><div class="wo-stat-num" style="color:${expired ? 'var(--red)' : expiring ? 'var(--yel)' : 'var(--txt3)'}">${expired || expiring}</div><div class="wo-stat-lbl">${expired ? 'Certs expired' : 'Certs expiring'}</div></div>
+    </div>`;
+
+    const crewCards = crew.map(c => {
+      const certs   = (FM.crewCerts || []).filter(x => x.crewId === c.id);
+      const certExp = certs.filter(x => x.expires && new Date(x.expires) <= today).length;
+      const certWrn = certs.filter(x => x.expires && (new Date(x.expires) - today) / 86400000 < 90 && new Date(x.expires) > today).length;
+      const isOnboard = c.status === 'onboard';
+
+      if (isMob) {
+        return `<div class="wo-mob-card-row team-mob-row" data-id="${c.id}" style="cursor:pointer">
+          <div style="width:40px;height:40px;border-radius:10px;background:${c.color}22;color:${c.color};font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.02em">${c.initials}</div>
+          <div class="wo-mob-card-body">
+            <div class="wo-mob-card-title">${escHtml(c.name)}</div>
+            <div class="wo-mob-card-meta">${escHtml(c.role)}</div>
+            <div class="wo-mob-card-foot">
+              <div style="display:flex;gap:6px;align-items:center">
+                <span class="badge ${isOnboard ? 'b-done' : 'b-hold'}">${isOnboard ? 'On board' : 'Ashore'}</span>
+                ${certExp ? `<span style="font-size:10px;font-weight:600;color:var(--red)">${certExp} expired</span>` : ''}
+                ${certWrn && !certExp ? `<span style="font-size:10px;font-weight:600;color:var(--yel)">${certWrn} expiring</span>` : ''}
+              </div>
+              <span style="font-size:11px;color:var(--txt4)">${certs.length} certs</span>
+            </div>
+          </div>
+          <svg class="wo-mob-chevron" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M6 3l5 5-5 5"/></svg>
+        </div>`;
+      }
+
+      return `<div class="crew-card" onclick="Team.openCrew('${c.id}')" style="cursor:pointer">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="width:40px;height:40px;border-radius:10px;background:${c.color}22;color:${c.color};font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.02em">${c.initials}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--txt);letter-spacing:-.01em">${escHtml(c.name)}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px">${escHtml(c.role)}</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:5px">
+            <span style="width:6px;height:6px;border-radius:50%;background:${isOnboard ? 'var(--grn)' : 'var(--txt4)'}"></span>
+            <span style="font-size:11px;color:${isOnboard ? 'var(--grn)' : 'var(--txt3)'}">${isOnboard ? 'On board' : 'Ashore'}</span>
+          </div>
+          <div style="display:flex;gap:5px;align-items:center">
+            <span style="font-size:10px;color:var(--txt4)">${certs.length} certs</span>
+            ${certExp ? `<span style="font-size:10px;font-weight:600;color:var(--red)">· ${certExp} expired</span>` : ''}
+            ${certWrn ? `<span style="font-size:10px;font-weight:600;color:var(--yel)">· ${certWrn} expiring</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
     wrap.innerHTML = `
       <div style="padding:18px 20px 48px">
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px">
-          <div class="wo-stat"><div class="wo-stat-num">${crew.length}</div><div class="wo-stat-lbl">Total crew</div></div>
-          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--grn)">${onboard}</div><div class="wo-stat-lbl">On board</div></div>
-          <div class="wo-stat"><div class="wo-stat-num" style="color:var(--txt3)">${ashore}</div><div class="wo-stat-lbl">Ashore</div></div>
-          <div class="wo-stat ${expired ? 'style="background:rgba(248,113,113,.05)"' : ''}"><div class="wo-stat-num" style="color:${expired ? 'var(--red)' : expiring ? 'var(--yel)' : 'var(--txt3)'}">${expired || expiring}</div><div class="wo-stat-lbl">${expired ? 'Certs expired' : 'Certs expiring'}</div></div>
-        </div>
-        <div class="crew-grid">
-          ${crew.map(c => {
-            const certs   = (FM.crewCerts || []).filter(x => x.crewId === c.id);
-            const certExp = certs.filter(x => x.expires && new Date(x.expires) <= today).length;
-            const certWrn = certs.filter(x => x.expires && (new Date(x.expires) - today) / 86400000 < 90 && new Date(x.expires) > today).length;
-            const onboard = c.status === 'onboard';
-            return `
-            <div class="crew-card" onclick="Team.openCrew('${c.id}')" style="cursor:pointer">
-              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
-                <div style="width:40px;height:40px;border-radius:10px;background:${c.color}22;color:${c.color};font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;letter-spacing:.02em">${c.initials}</div>
-                <div style="flex:1;min-width:0">
-                  <div style="font-size:13px;font-weight:600;color:var(--txt);letter-spacing:-.01em">${escHtml(c.name)}</div>
-                  <div style="font-size:11px;color:var(--txt3);margin-top:2px">${escHtml(c.role)}</div>
-                </div>
-              </div>
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div style="display:flex;align-items:center;gap:5px">
-                  <span style="width:6px;height:6px;border-radius:50%;background:${onboard ? 'var(--grn)' : 'var(--txt4)'}"></span>
-                  <span style="font-size:11px;color:${onboard ? 'var(--grn)' : 'var(--txt3)'}">${onboard ? 'On board' : 'Ashore'}</span>
-                </div>
-                <div style="display:flex;gap:5px;align-items:center">
-                  <span style="font-size:10px;color:var(--txt4)">${certs.length} certs</span>
-                  ${certExp  ? `<span style="font-size:10px;font-weight:600;color:var(--red)">· ${certExp} expired</span>` : ''}
-                  ${certWrn  ? `<span style="font-size:10px;font-weight:600;color:var(--yel)">· ${certWrn} expiring</span>` : ''}
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
+        ${statsHTML}
+        ${isMob
+          ? `<div class="wo-mob-list">${crewCards}</div>`
+          : `<div class="crew-grid">${crewCards}</div>`
+        }
       </div>
     `;
+
+    if (isMob) {
+      wrap.querySelectorAll('.team-mob-row').forEach(row => {
+        row.addEventListener('click', () => Team.openCrew(row.dataset.id));
+      });
+    }
   },
 
   openCrew(id) {
@@ -2204,108 +2528,283 @@ window.Chat = {
   }
 };
 
-/* ── SIMPLE CALENDAR RENDER ── */
+/* ── CALENDAR ── */
 (function() {
-  /* ── CALENDAR ── */
   let calYear = 2026, calMonth = 4; // 0-indexed, May = 4
+  let calView = 'month'; // 'month' | 'week'
+  let calWeekStart = null; // Date object, Monday of current week
+
+  const todayStr = '2026-05-07';
+  const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const colorVars  = { or:'var(--or)', eng:'#F59E0B', red:'var(--red)', blu:'#60A5FA', grn:'var(--grn)', pur:'#A78BFA' };
+  const typeLabels = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics', 'work-order':'Work order' };
+
+  function padZ(n) { return String(n).padStart(2,'0'); }
+  function fmtDate(ds) {
+    const d = new Date(ds + 'T00:00');
+    return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  }
+  function fmtDateLong(ds) {
+    return new Date(ds + 'T00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }
+
+  // Build unified event list from FM.events + FM.charters + FM.workOrders
+  function _buildEvents() {
+    const vid = App.currentVesselId;
+    const all = [];
+
+    // Base events
+    (FM.events || []).forEach(e => {
+      if (vid === 'all' || vid === 'portfolio' || e.vessel === vid)
+        all.push({ ...e, _src: 'event' });
+    });
+
+    // Charters (skip if already in FM.events to avoid duplicate)
+    (FM.charters || []).forEach(c => {
+      if ((vid === 'all' || vid === 'portfolio' || c.vessel === vid) && c.start && c.end) {
+        // Only add if no FM.event already covers this charter by title match
+        const exists = all.find(e => e.type === 'charter' && e.start === c.start && e.title.toLowerCase().includes(c.name.toLowerCase().split(' ')[0].toLowerCase()));
+        if (!exists) {
+          all.push({
+            id: 'ch_' + c.id, title: c.name,
+            start: c.start, end: c.end,
+            type: 'charter', color: 'or',
+            _charterId: c.id, _src: 'charter'
+          });
+        }
+      }
+    });
+
+    // Work order due dates
+    (FM.workOrders || []).forEach(w => {
+      if ((vid === 'all' || vid === 'portfolio' || w.vessel === vid) && w.due) {
+        all.push({
+          id: 'wo_' + w.id, title: w.title,
+          start: w.due, end: w.due,
+          type: 'work-order', color: w.priority === 'critical' ? 'red' : w.priority === 'high' ? 'or' : 'blu',
+          _woId: w.id, _src: 'wo'
+        });
+      }
+    });
+
+    return all;
+  }
 
   function calNav(dir) {
-    calMonth += dir;
-    if (calMonth < 0)  { calMonth = 11; calYear--; }
-    if (calMonth > 11) { calMonth = 0;  calYear++; }
+    if (calView === 'week') {
+      if (!calWeekStart) _initWeekStart();
+      calWeekStart = new Date(calWeekStart.getTime() + dir * 7 * 864e5);
+    } else {
+      calMonth += dir;
+      if (calMonth < 0)  { calMonth = 11; calYear--; }
+      if (calMonth > 11) { calMonth = 0;  calYear++; }
+    }
     renderCalendar();
   }
   window.calNav = calNav;
+
+  function _initWeekStart() {
+    const today = new Date(todayStr + 'T00:00');
+    const dow = today.getDay(); // 0=Sun
+    const monday = new Date(today.getTime() - ((dow === 0 ? 6 : dow - 1) * 864e5));
+    calWeekStart = monday;
+  }
+
+  function calSetView(v) {
+    calView = v;
+    if (v === 'week' && !calWeekStart) _initWeekStart();
+    renderCalendar();
+  }
+  window.calSetView = calSetView;
+
+  function calDayTap(ds) {
+    if (window.innerWidth > 768) return;
+    const panel = document.getElementById('cal-day-panel');
+    if (!panel) return;
+    // Toggle off if same day tapped again
+    if (panel.dataset.date === ds && panel.style.display !== 'none') {
+      panel.style.display = 'none';
+      panel.dataset.date = '';
+      document.querySelectorAll('.cal-month-cell.mob-selected').forEach(c => c.classList.remove('mob-selected'));
+      return;
+    }
+    panel.dataset.date = ds;
+    document.querySelectorAll('.cal-month-cell.mob-selected').forEach(c => c.classList.remove('mob-selected'));
+    document.querySelectorAll(`.cal-month-cell[data-date="${ds}"]`).forEach(c => c.classList.add('mob-selected'));
+
+    const dayEvts = _buildEvents().filter(e => e.start <= ds && e.end >= ds);
+    const [yr, mo, dy] = ds.split('-');
+    const label = new Date(ds + 'T12:00').toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+    const colorVars = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)', pur:'var(--pur)' };
+    const typeLabels = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics', 'work-order':'Work order' };
+    panel.style.display = 'block';
+    panel.innerHTML = `
+      <div style="font-size:12px;font-weight:600;color:var(--txt);margin-bottom:10px">${label}</div>
+      ${dayEvts.length ? dayEvts.map(e => {
+        const clr = colorVars[e.color] || 'var(--or)';
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:.5px solid var(--bd);cursor:pointer" onclick="openCalEvent('${e.id}')">
+          <div style="width:3px;background:${clr};border-radius:2px;align-self:stretch;flex-shrink:0"></div>
+          <div>
+            <div style="font-size:13px;font-weight:500;color:var(--txt)">${escHtml(e.title)}</div>
+            <div style="font-size:11px;color:var(--txt3);margin-top:2px">${typeLabels[e.type] || e.type}${e.wo ? ' · ' + e.wo : ''}</div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="font-size:12px;color:var(--txt3)">No events</div>'}
+    `;
+  }
+  window.calDayTap = calDayTap;
 
   function renderCalendar() {
     const grid     = document.getElementById('cal-month-grid');
     const titleEl  = document.getElementById('cal-month-title');
     const upcoming = document.getElementById('cal-upcoming-list');
+    const hdr      = document.querySelector('.cal-month-hdr');
     if (!grid) return;
 
-    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const events = _buildEvents();
+
+    // View toggle buttons
+    const toggleHtml = `<div style="display:flex;gap:4px;margin-left:auto">
+      <button onclick="calSetView('month')" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:.5px solid ${calView==='month'?'var(--or)':'var(--bd)'};background:${calView==='month'?'rgba(249,115,22,.1)':'var(--bg3)'};color:${calView==='month'?'var(--or)':'var(--txt3)'};cursor:pointer">Month</button>
+      <button onclick="calSetView('week')" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px;border:.5px solid ${calView==='week'?'var(--or)':'var(--bd)'};background:${calView==='week'?'rgba(249,115,22,.1)':'var(--bg3)'};color:${calView==='week'?'var(--or)':'var(--txt3)'};cursor:pointer">Week</button>
+    </div>`;
+
+    if (calView === 'week') {
+      _renderWeek(grid, titleEl, events, toggleHtml);
+    } else {
+      _renderMonth(grid, titleEl, events, toggleHtml);
+    }
+
+    // Upcoming sidebar — next 60 days from today
+    const cutoff = new Date(todayStr + 'T00:00');
+    cutoff.setDate(cutoff.getDate() + 60);
+    const cutoffStr = cutoff.toISOString().slice(0,10);
+
+    const upEvents = events
+      .filter(e => e.end >= todayStr && e.start <= cutoffStr)
+      .sort((a,b) => a.start.localeCompare(b.start));
+
+    upcoming.innerHTML = upEvents.length ? upEvents.map(e => {
+      const range = e.start === e.end ? fmtDate(e.start) : `${fmtDate(e.start)} – ${fmtDate(e.end)}`;
+      const clr = colorVars[e.color] || 'var(--txt3)';
+      return `<div class="cal-up-item" onclick="openCalEvent('${e.id}')" style="cursor:pointer">
+        <div class="cal-up-date" style="color:${clr}">${range}</div>
+        <div class="cal-up-title">${escHtml(e.title)}</div>
+        <div class="cal-up-meta">${typeLabels[e.type] || e.type}${e.wo ? ' · '+e.wo : ''}</div>
+      </div>`;
+    }).join('') : '<div style="padding:12px;font-size:12px;color:var(--txt3)">No upcoming events in 60 days</div>';
+  }
+
+  function _renderMonth(grid, titleEl, events, toggleHtml) {
+    document.getElementById('cal-view-toggle').innerHTML = toggleHtml;
+    const dowRow = document.getElementById('cal-dow-row');
+    if (dowRow) dowRow.style.display = '';
+
     titleEl.textContent = `${monthNames[calMonth]} ${calYear}`;
 
-    const today = new Date(2026, 4, 1); // May 1, 2026 as "today" for demo
-    const todayStr = `2026-05-01`;
-
-    const firstDow   = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
-    const offset     = firstDow === 0 ? 6 : firstDow - 1;      // Mon-anchored
+    const firstDow    = new Date(calYear, calMonth, 1).getDay();
+    const offset      = firstDow === 0 ? 6 : firstDow - 1;
     const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     const prevDays    = new Date(calYear, calMonth, 0).getDate();
 
-    const padZ = n => String(n).padStart(2,'0');
     const dateStr = d => `${calYear}-${padZ(calMonth+1)}-${padZ(d)}`;
 
     let html = '';
-
-    // Leading days from previous month
-    for (let i = offset - 1; i >= 0; i--) {
+    for (let i = offset - 1; i >= 0; i--)
       html += `<div class="cal-month-cell other-month"><div class="cal-day-num">${prevDays - i}</div></div>`;
-    }
 
     for (let d = 1; d <= daysInMonth; d++) {
       const ds = dateStr(d);
-      const dayEvents = FM.events.filter(e => e.vessel === App.currentVesselId && e.start <= ds && e.end >= ds);
+      const dayEvts = events.filter(e => e.start <= ds && e.end >= ds);
       const isToday = ds === todayStr;
-      html += `<div class="cal-month-cell${isToday ? ' today' : ''}">
+      const shown = dayEvts.slice(0, 3);
+      const extra = dayEvts.length - shown.length;
+      html += `<div class="cal-month-cell${isToday ? ' today' : ''}" data-date="${ds}" onclick="calDayTap('${ds}')">
         <div class="cal-day-num">${d}</div>
-        ${dayEvents.map(e => `<div class="cal-pill cal-pill-${e.color}" title="${e.title}" onclick="openCalEvent('${e.id}')" style="cursor:pointer">${e.title}</div>`).join('')}
+        ${shown.map(e => {
+          const clr = colorVars[e.color] || 'var(--or)';
+          return `<div class="cal-pill" style="background:${clr}22;color:${clr};border:.5px solid ${clr}44;border-radius:4px;font-size:10px;font-weight:500;padding:1px 5px;margin-bottom:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer" onclick="openCalEvent('${e.id}')" title="${escHtml(e.title)}">${escHtml(e.title)}</div>`;
+        }).join('')}
+        ${extra > 0 ? `<div style="font-size:9px;color:var(--txt4);padding:0 2px">+${extra} more</div>` : ''}
       </div>`;
     }
 
-    // Trailing days
     const totalCells = Math.ceil((offset + daysInMonth) / 7) * 7;
-    for (let i = 1; i <= totalCells - offset - daysInMonth; i++) {
+    for (let i = 1; i <= totalCells - offset - daysInMonth; i++)
       html += `<div class="cal-month-cell other-month"><div class="cal-day-num">${i}</div></div>`;
-    }
 
     grid.innerHTML = html;
+    grid.style.cssText = '';
+  }
 
-    // Upcoming sidebar — all events from today forward
-    const upEvents = FM.events
-      .filter(e => e.vessel === App.currentVesselId && e.end >= todayStr)
-      .sort((a,b) => a.start.localeCompare(b.start));
+  function _renderWeek(grid, titleEl, events, toggleHtml) {
+    if (!calWeekStart) _initWeekStart();
+    const ws = calWeekStart;
 
-    const typeLabels = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics' };
-    const colorVars  = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
+    document.getElementById('cal-view-toggle').innerHTML = toggleHtml;
+    const dowRow = document.getElementById('cal-dow-row');
+    if (dowRow) dowRow.style.display = 'none';
 
-    upcoming.innerHTML = upEvents.map(e => {
-      const start = new Date(e.start + 'T00:00');
-      const end   = new Date(e.end + 'T00:00');
-      const fmt   = d => d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-      const range = e.start === e.end ? fmt(start) : `${fmt(start)} – ${fmt(end)}`;
-      return `<div class="cal-up-item" onclick="openCalEvent('${e.id}')" style="cursor:pointer">
-        <div class="cal-up-date" style="color:${colorVars[e.color]}">${range}</div>
-        <div class="cal-up-title">${e.title}</div>
-        <div class="cal-up-meta">${typeLabels[e.type] || e.type}${e.wo ? ' · '+e.wo : ''}</div>
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(ws.getTime() + i * 864e5);
+      const ds = `${d.getFullYear()}-${padZ(d.getMonth()+1)}-${padZ(d.getDate())}`;
+      days.push({ d, ds, label: d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}) });
+    }
+
+    // Week title
+    const wStart = days[0].d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const wEnd   = days[6].d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    titleEl.textContent = `${wStart} – ${wEnd}`;
+
+    let html = `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;height:100%;min-height:340px">`;
+    days.forEach(({ d, ds, label }) => {
+      const isToday = ds === todayStr;
+      const dayEvts = events.filter(e => e.start <= ds && e.end >= ds);
+      html += `<div style="background:${isToday ? 'rgba(249,115,22,.04)' : 'var(--bg2)'};border:.5px solid ${isToday ? 'rgba(249,115,22,.2)' : 'var(--bd)'};border-radius:8px;padding:8px 6px;display:flex;flex-direction:column;gap:4px">
+        <div style="font-size:10px;font-weight:600;color:${isToday ? 'var(--or)' : 'var(--txt4)'};margin-bottom:4px;text-align:center">${label}</div>
+        ${dayEvts.map(e => {
+          const clr = colorVars[e.color] || 'var(--or)';
+          return `<div onclick="openCalEvent('${e.id}')" style="background:${clr}20;border:.5px solid ${clr}44;border-radius:5px;padding:4px 6px;cursor:pointer;font-size:10px;color:${clr};font-weight:500;line-height:1.3;overflow:hidden">${escHtml(e.title)}</div>`;
+        }).join('')}
+        ${dayEvts.length === 0 ? `<div style="flex:1"></div>` : ''}
       </div>`;
-    }).join('') || '<div style="padding:12px;font-size:12px;color:var(--txt3)">No upcoming events</div>';
+    });
+    html += `</div>`;
+
+    grid.innerHTML = html;
+    grid.style.cssText = 'display:block';
   }
 
   function openCalEvent(id) {
-    const e = FM.events.find(x => x.id === id);
+    const events = _buildEvents();
+    const e = events.find(x => x.id === id);
     if (!e) return;
-    const typeLabels = { charter:'Charter', maintenance:'Maintenance', regulatory:'Regulatory', logistics:'Logistics' };
-    const colorVars  = { or:'var(--or)', eng:'var(--eng)', red:'var(--red)', blu:'var(--blu)', grn:'var(--grn)' };
-    const fmt = d => new Date(d + 'T00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-    const dateRange = e.start === e.end ? fmt(e.start) : `${fmt(e.start)} – ${fmt(e.end)}`;
+    const clr = colorVars[e.color] || 'var(--or)';
+    const dateRange = e.start === e.end ? fmtDateLong(e.start) : `${fmtDateLong(e.start)} – ${fmtDateLong(e.end)}`;
+
+    let actionBtn = '';
+    if (e._src === 'charter' || e._charterId) {
+      actionBtn = `<button class="btn btn-primary btn-sm" onclick="closeModal();navTo('charter',document.querySelector('.ni[data-page=charter]'));setTimeout(()=>Charter.openDetail('${e._charterId || e.id.replace('ch_','')}'),80)">View charter</button>`;
+    } else if (e._src === 'wo' || e._woId) {
+      actionBtn = `<button class="btn btn-primary btn-sm" onclick="closeModal();navTo('work-orders',document.querySelector('.ni[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${e._woId || e.wo}'),80)">View work order</button>`;
+    } else if (e.wo) {
+      actionBtn = `<button class="btn btn-primary btn-sm" onclick="closeModal();navTo('work-orders',document.querySelector('.ni[data-page=work-orders]'));setTimeout(()=>WO.openPanel('${e.wo}'),80)">View work order</button>`;
+    }
+
     openModal(`
       <div style="display:flex;flex-direction:column;gap:14px">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:10px;height:10px;border-radius:50%;background:${colorVars[e.color]};flex-shrink:0"></div>
+          <div style="width:10px;height:10px;border-radius:50%;background:${clr};flex-shrink:0"></div>
           <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--txt3)">${typeLabels[e.type] || e.type}</span>
         </div>
         <div>
           <div style="font-size:10px;color:var(--txt3);margin-bottom:3px">Date</div>
           <div style="font-size:13px;color:var(--txt)">${dateRange}</div>
         </div>
-        ${e.wo ? `<div>
-          <div style="font-size:10px;color:var(--txt3);margin-bottom:3px">Work order</div>
-          <div style="font-size:13px;color:var(--blu);font-weight:600;cursor:pointer" onclick="closeModal();navTo('work-orders');setTimeout(()=>WO.openPanel('${escHtml(e.wo)}'),120)">${escHtml(e.wo)}</div>
-        </div>` : ''}
         <div style="display:flex;gap:8px;justify-content:flex-end">
           <button class="btn btn-ghost btn-sm" onclick="closeModal()">Close</button>
+          ${actionBtn}
         </div>
       </div>
     `, escHtml(e.title));
@@ -3451,7 +3950,7 @@ function renderPortfolio() {
     const highPri = (FM.workOrders || []).filter(w => w.vessel === v.id && w.status !== 'done' && w.priority === 'high').length;
     const statusColor = v.status === 'In service' ? '#4ADE80' : '#FACC15';
     return `
-      <div class="pf-card" onclick="switchVessel('${v.id}');navTo('dashboard',document.querySelector('.ni[data-page=dashboard]'))">
+      <div class="pf-card" id="pf-card-${v.id}" onclick="switchVessel('${v.id}');navTo('dashboard',document.querySelector('.ni[data-page=dashboard]'))">
         <div class="pf-card-banner" style="background:linear-gradient(135deg,#60A5FA18 0%,#60A5FA06 100%);border-bottom:.5px solid #60A5FA22">
           <div style="display:flex;align-items:center;gap:10px">
             <div style="width:36px;height:36px;border-radius:9px;background:#60A5FA18;border:.5px solid #60A5FA35;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -3502,7 +4001,7 @@ function renderPortfolio() {
     const statusColor = isOcc ? '#4ADE80' : 'var(--txt3)';
     const issueColor  = p.openIssues > 0 ? (p.openIssues >= 3 ? '#F87171' : 'var(--or)') : 'var(--txt)';
     return `
-      <div class="pf-card">
+      <div class="pf-card" id="pf-card-${p.id}" onclick="Properties.switchTo('${p.id}')" style="cursor:pointer">
         <div class="pf-card-banner" style="background:linear-gradient(135deg,#4ADE8018 0%,#4ADE8006 100%);border-bottom:.5px solid #4ADE8022">
           <div style="display:flex;align-items:center;gap:10px">
             <div style="width:36px;height:36px;border-radius:9px;background:#4ADE8018;border:.5px solid #4ADE8035;display:flex;align-items:center;justify-content:center;flex-shrink:0">
@@ -3542,17 +4041,17 @@ function renderPortfolio() {
             </div>`}
         </div>
         <div class="pf-card-foot">
-          <span style="font-size:11px;color:var(--txt3)">${escHtml(p.type)}</span>
-          ${p.openIssues > 0 ? `<span style="font-size:11px;color:${issueColor}">${p.openIssues} issue${p.openIssues>1?'s':''}</span>` : '<span style="font-size:11px;color:#4ADE80">All clear ✓</span>'}
+          <span style="font-size:11px;color:var(--txt3)">${escHtml(p.type)} · ${escHtml(p.location.split(',')[0])}</span>
+          <span style="font-size:11px;color:#4ADE80">Open →</span>
         </div>
       </div>`;
   }
 
   wrap.innerHTML = `
-    <div style="padding:20px 20px 80px;max-width:1100px">
+    <div style="padding:20px 20px 80px;max-width:none">
 
       <!-- Summary stats -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px">
+      <div class="kpi-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:28px">
         <div class="pf-kpi">
           <div class="pf-kpi-val">${totalAssets}</div>
           <div class="pf-kpi-lbl">Total assets</div>
@@ -3604,6 +4103,17 @@ function renderPortfolio() {
       </div>
     </div>
   `;
+
+  // Highlight + scroll to the selected asset
+  const selId = FM.currentVesselId;
+  if (selId && selId !== 'portfolio' && selId !== 'all') {
+    const card = document.getElementById('pf-card-' + selId);
+    if (card) {
+      card.style.outline = '1.5px solid var(--or)';
+      card.style.boxShadow = '0 0 0 5px rgba(249,115,22,.08)';
+      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 80);
+    }
+  }
 }
 window.renderPortfolio = renderPortfolio;
 
@@ -3704,10 +4214,9 @@ function _pmsReset(t) {
 
 /* ── LOGBOOK ENTRY MODAL ── */
 function openLogbookEntry() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = '2026-05-07';
   const crew = FM.crew || [];
   openModal(`
-    <div style="font-size:17px;font-weight:500;color:var(--txt);margin-bottom:18px">New logbook entry</div>
     <div class="inp-row">
       <div class="inp-group"><label class="inp-lbl">Date</label><input class="inp" type="date" id="lb-date" value="${today}"></div>
       <div class="inp-group"><label class="inp-lbl">Watch officer</label>
@@ -3739,7 +4248,7 @@ function openLogbookEntry() {
     <div style="display:flex;gap:8px">
       <button class="btn btn-primary btn-sm" onclick="saveLogbookEntry()">Save entry</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal()">Cancel</button>
-    </div>`);
+    </div>`, 'New logbook entry');
 }
 function saveLogbookEntry() {
   const entry = {
@@ -3778,21 +4287,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── GENERIC MODAL ── */
-function openModal(html) {
-  let overlay = document.getElementById('app-modal-overlay');
-  if (!overlay) {
-    overlay = document.createElement('div');
-    overlay.id = 'app-modal-overlay';
-    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:800;display:flex;align-items:center;justify-content:center;padding:20px';
-    overlay.onclick = e => { if (e.target === overlay) closeModal(); };
-    document.body.appendChild(overlay);
-  }
-  overlay.innerHTML = `<div style="background:var(--bg3);border:.5px solid var(--bd2);border-radius:var(--r12);padding:24px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 60px rgba(0,0,0,.7)">${html}</div>`;
-  overlay.style.display = 'flex';
+function openModal(html, title) {
+  document.getElementById('modal-title').textContent = title || '';
+  document.getElementById('modal-body').innerHTML = html || '';
+  const footer = document.getElementById('modal-footer');
+  if (footer) footer.style.display = 'none';
+  document.getElementById('modal-overlay').classList.add('open');
+  if (window.App) App.modalOpen = true;
 }
 function closeModal() {
-  const o = document.getElementById('app-modal-overlay');
-  if (o) o.style.display = 'none';
+  document.getElementById('modal-overlay').classList.remove('open');
+  const footer = document.getElementById('modal-footer');
+  if (footer) footer.style.display = '';
+  if (window.App) App.modalOpen = false;
 }
 window.openModal = openModal;
 window.closeModal = closeModal;
@@ -3819,10 +4326,6 @@ function renderWOTemplates() {
   // Actually just use the existing modal pattern
   const systems = [...new Set(FM.woTemplates.map(t => t.system))];
   openModal(`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div style="font-size:17px;font-weight:500;color:var(--txt)">Work order templates</div>
-      <button class="btn btn-ghost btn-sm" onclick="closeModal()">✕</button>
-    </div>
     ${systems.map(sys => `
       <div style="font-size:9px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.1em;margin:14px 0 6px">${sys}</div>
       ${FM.woTemplates.filter(t=>t.system===sys).map(t=>`
@@ -3835,7 +4338,7 @@ function renderWOTemplates() {
           <span class="badge b-${t.priority}">${FM.priorityLabel(t.priority)}</span>
           <button class="btn btn-primary btn-xs" onclick="closeModal();createWOFromTemplate('${t.id}')">Use template</button>
         </div>`).join('')}
-    `).join('')}`);
+    `).join('')}`, 'Work order templates');
 }
 function createWOFromTemplate(id) {
   const t = FM.woTemplates.find(x => x.id === id);
@@ -3845,6 +4348,212 @@ function createWOFromTemplate(id) {
 }
 window.renderWOTemplates = renderWOTemplates;
 window.createWOFromTemplate = createWOFromTemplate;
+</script>
+
+<!-- ONBOARDING MODULE -->
+<script>
+const Onboard = (() => {
+  let _step = 1;
+  const TOTAL = 4;
+
+  const steps = [
+    {
+      title: 'Add your first vessel or property',
+      sub: 'Frame manages both yachts and real estate in one place.',
+      content: () => `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <button onclick="Onboard._pick('vessel')" id="ob-pick-vessel" style="padding:18px 14px;border-radius:12px;border:.5px solid var(--bd);background:var(--bg3);cursor:pointer;text-align:left;transition:all .15s" onmouseover="this.style.borderColor='rgba(96,165,250,.5)'" onmouseout="if(!this.classList.contains('ob-selected'))this.style.borderColor='var(--bd)'">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(96,165,250,.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg viewBox="0 0 16 16" fill="#60A5FA" style="width:16px;height:16px"><path d="M1 10l2-5h10l2 5H1zm3-3h8l-1 2H5L4 7zm3-5a1 1 0 011 1v1H7V3a1 1 0 011-1z"/></svg>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">Vessel</div>
+            <div style="font-size:11px;color:var(--txt4)">Yacht, sailboat, motor vessel</div>
+          </button>
+          <button onclick="Onboard._pick('property')" id="ob-pick-property" style="padding:18px 14px;border-radius:12px;border:.5px solid var(--bd);background:var(--bg3);cursor:pointer;text-align:left;transition:all .15s" onmouseover="this.style.borderColor='rgba(74,222,128,.5)'" onmouseout="if(!this.classList.contains('ob-selected'))this.style.borderColor='var(--bd)'">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(74,222,128,.1);display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+              <svg viewBox="0 0 16 16" fill="#4ADE80" style="width:16px;height:16px"><path d="M8 1L1 6.5V7h1v7h4v-4h4v4h4V7h1v-.5L8 1z"/></svg>
+            </div>
+            <div style="font-size:13px;font-weight:600;color:var(--txt);margin-bottom:3px">Property</div>
+            <div style="font-size:11px;color:var(--txt4)">Home, villa, estate, or office</div>
+          </button>
+        </div>
+        <div style="margin-top:14px;padding:12px 14px;background:var(--bg3);border-radius:8px;font-size:12px;color:var(--txt3)">You can add more vessels and properties at any time from the fleet or properties section.</div>`,
+      next: 'Continue →',
+    },
+    {
+      title: 'Enter your information',
+      sub: 'A few details help Frame surface the right data for your fleet.',
+      content: () => `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Name</label>
+            <input id="ob-asset-name" type="text" placeholder="e.g. Lady M / Castello Ibiza" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Type</label>
+            <input id="ob-asset-type" type="text" placeholder="e.g. 75m Motor Yacht / Villa" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Home port / Location</label>
+            <input id="ob-asset-location" type="text" placeholder="e.g. Fort Lauderdale / Ibiza, Spain" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+          </div>
+        </div>`,
+      next: 'Continue →',
+    },
+    {
+      title: 'Create your first work order',
+      sub: 'Work orders keep maintenance, repairs, and tasks organized.',
+      content: () => `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Work order title</label>
+            <input id="ob-wo-title" type="text" placeholder="e.g. Engine service — starboard" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Zone</label>
+              <input id="ob-wo-zone" type="text" placeholder="Engine room" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Priority</label>
+              <select id="ob-wo-priority" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none">
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="low">Low</option>
+                <option value="critical">Critical</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:rgba(249,115,22,.06);border:.5px solid rgba(249,115,22,.15);border-radius:8px;font-size:12px;color:var(--txt3)">You can skip this for now — work orders can be created from the Work Orders page any time.</div>`,
+      next: 'Continue →',
+    },
+    {
+      title: 'Invite your crew',
+      sub: 'Give your captain and crew access to the right information.',
+      content: () => `
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Crew member name</label>
+            <input id="ob-crew-name" type="text" placeholder="e.g. James Carter" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Role</label>
+              <select id="ob-crew-role" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none">
+                <option>Captain</option>
+                <option>Chief Engineer</option>
+                <option>First Mate</option>
+                <option>Chef</option>
+                <option>Deckhand</option>
+                <option>Stewardess</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:5px">Email</label>
+              <input id="ob-crew-email" type="email" placeholder="captain@email.com" style="width:100%;padding:9px 12px;background:var(--bg3);border:.5px solid var(--bd);border-radius:8px;color:var(--txt);font-size:13px;outline:none;box-sizing:border-box" />
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:rgba(74,222,128,.05);border:.5px solid rgba(74,222,128,.15);border-radius:8px;font-size:12px;color:var(--txt3)">They'll receive an email invite and can log in with role-based access. Manage the team from the Team page.</div>`,
+      next: 'Finish setup',
+    },
+  ];
+
+  function _setStep(s) {
+    _step = s;
+    const step = steps[s - 1];
+    if (!step) return;
+
+    // Update step dots
+    document.querySelectorAll('.ob-step').forEach((el, i) => {
+      el.style.background = i < s ? 'var(--or)' : 'var(--bg4)';
+    });
+
+    // Render content
+    const content = document.getElementById('ob-content');
+    content.innerHTML = `
+      <div style="font-size:16px;font-weight:700;color:var(--txt);margin-bottom:5px">${step.title}</div>
+      <div style="font-size:12px;color:var(--txt3);margin-bottom:18px">${step.sub}</div>
+      ${step.content()}`;
+
+    // Update buttons
+    const nextBtn = document.getElementById('ob-next');
+    const backBtn = document.getElementById('ob-back');
+    if (nextBtn) nextBtn.textContent = step.next || 'Continue →';
+    if (backBtn) backBtn.style.display = s > 1 ? '' : 'none';
+  }
+
+  function _show() {
+    const ol = document.getElementById('onboard-overlay');
+    if (!ol) return;
+    ol.style.display = 'flex';
+    requestAnimationFrame(() => ol.style.opacity = '1');
+    _setStep(1);
+  }
+
+  function skip() {
+    try { localStorage.setItem('fm_onboarded', '1'); } catch(e) {}
+    const ol = document.getElementById('onboard-overlay');
+    if (!ol) return;
+    ol.style.opacity = '0';
+    setTimeout(() => ol.style.display = 'none', 200);
+    showToast('Setup skipped — you can explore Frame at your own pace');
+  }
+
+  function back() {
+    if (_step > 1) _setStep(_step - 1);
+  }
+
+  function next() {
+    if (_step < TOTAL) {
+      _setStep(_step + 1);
+    } else {
+      skip(); // Finish
+      showToast('Welcome to Frame! Your fleet is ready.');
+    }
+  }
+
+  function _pick(type) {
+    ['vessel','property'].forEach(t => {
+      const el = document.getElementById('ob-pick-' + t);
+      if (!el) return;
+      if (t === type) {
+        el.style.borderColor = type === 'vessel' ? 'rgba(96,165,250,.7)' : 'rgba(74,222,128,.7)';
+        el.style.background = type === 'vessel' ? 'rgba(96,165,250,.07)' : 'rgba(74,222,128,.06)';
+        el.classList.add('ob-selected');
+      } else {
+        el.style.borderColor = 'var(--bd)';
+        el.style.background = 'var(--bg3)';
+        el.classList.remove('ob-selected');
+      }
+    });
+  }
+
+  function init() {
+    let done = false;
+    try { done = !!localStorage.getItem('fm_onboarded'); } catch(e) {}
+    if (!done) {
+      setTimeout(_show, 600);
+    }
+  }
+
+  return { init, skip, back, next, _pick };
+})();
+window.Onboard = Onboard;
+
+document.addEventListener('DOMContentLoaded', () => {
+  Onboard.init();
+});
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .catch(err => console.warn('SW registration failed:', err));
+  });
+}
 </script>
 
 </body>

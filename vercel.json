@@ -1,6 +1,15 @@
 {
-  "buildCommand": "npm install --cache /tmp/npm-cache && npm run build",
   "outputDirectory": ".",
+  "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+    },
+    {
+      "source": "/app.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }]
+    }
+  ],
   "rewrites": [
     { "source": "/request", "destination": "/request.html" },
     { "source": "/(.*)", "destination": "/app.html" }

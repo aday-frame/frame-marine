@@ -1,0 +1,6 @@
+{"type":"server-started","port":57113,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:57113","screen_dir":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/60735-1778272233/content","state_dir":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/60735-1778272233/state"}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/60735-1778272233/content/sidebar-layout.html"}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/60735-1778272233/content/shell-polish.html"}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/60735-1778272233/content/shell-polish-v2.html"}
+{"type":"screen-added","file":"/Users/albertday/Downloads/frame-marine/.superpowers/brainstorm/60735-1778272233/content/shell-polish-v3.html"}
+{"type":"server-stopped","reason":"idle timeout"}

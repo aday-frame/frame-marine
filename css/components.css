@@ -1194,6 +1194,96 @@ span.badge.pms-status-upcoming { background: var(--bg4); color: var(--txt2); }
     transition: transform .15s, box-shadow .15s;
   }
   .mob-fab-show:active { transform: scale(.95); }
+
+  /* ══ MOBILE SCROLL FIX — let page-body own the scroll ══
+     All split-panel layouts that use fixed height + overflow:hidden
+     trap content on mobile. Reset them so page-body scrolls. */
+
+  /* Calendar month/week views */
+  .cal-month-wrap {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .cal-month-main { overflow: visible !important; height: auto !important; }
+  .cal-month-grid { height: auto !important; overflow: visible !important; min-height: 280px; }
+  .cal-upcoming-panel { display: none !important; }
+  .cal-month-legend { display: none !important; }
+  .cal-month-cell { min-height: 52px !important; cursor: pointer; }
+  .cal-month-cell.mob-selected { background: var(--bg3) !important; border-color: var(--or-bd) !important; }
+  .cal-pill { font-size: 9px !important; padding: 1px 3px !important; }
+  #cal-day-panel { display: none; }
+
+  .cal-wrap {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .cal-main { overflow: visible !important; height: auto !important; }
+  .cal-sidebar { height: auto !important; overflow: visible !important; border-left: none !important; border-top: .5px solid var(--bd); }
+  .cal-body { height: auto !important; overflow: visible !important; }
+  .cal-events-list { height: auto !important; overflow: visible !important; }
+
+  /* SOP / Procedures */
+  .sop-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .sop-sidebar { height: auto !important; overflow: visible !important; max-height: none !important; border-right: none !important; border-bottom: .5px solid var(--bd); }
+  .sop-main { overflow: visible !important; height: auto !important; }
+
+  /* Files & Docs */
+  .files-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .files-sidebar { height: auto !important; max-height: none !important; border-right: none !important; border-bottom: .5px solid var(--bd); }
+  .files-main { overflow: visible !important; height: auto !important; }
+
+  /* Parts / Inventory */
+  .parts-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .parts-list-wrap { overflow: visible !important; border-right: none !important; border-bottom: .5px solid var(--bd); }
+  .parts-detail { border-left: none !important; height: auto !important; overflow: visible !important; }
+
+  /* Assets */
+  .assets-layout {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .assets-detail { display: none !important; }
+  .assets-list-wrap { overflow: visible !important; border-right: none !important; }
+
+  /* Fleet grid */
+  .fleet-grid { height: auto !important; overflow-y: visible !important; }
+
+  /* PMS */
+  .pms-body { height: auto !important; overflow: visible !important; }
+
+  /* KB / Manuals */
+  .kb-wrap {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Checklist & logbook: fix safe-area cutoff at bottom */
+  .cl-layout, .logbook-layout {
+    height: calc(100dvh - 108px - env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* Inner scrollers in mob-detail mode need bottom clearance for nav */
+  .cl-layout.mob-detail .cl-main,
+  .logbook-layout.mob-detail .logbook-main {
+    padding-bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 72px)) !important;
+  }
+  /* Sidebar scroll containers also need clearance */
+  .cl-sidebar, .logbook-sidebar { padding-bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 72px)); }
 }
 
 /* ── RESPONSIVE — TABLET ── */

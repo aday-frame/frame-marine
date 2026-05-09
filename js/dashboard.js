@@ -4,7 +4,7 @@
 const Dash = window.Dash = {};
 Dash._ack = Dash._ack || new Set();
 
-const _T = '2026-05-06'; // today reference for demo
+const _T = '2026-05-07'; // today reference for demo
 
 /* ─── Helpers ───────────────────────────────────────────── */
 function _du(s)  { if (!s) return null; return Math.ceil((new Date(s) - new Date(_T)) / 86400000); }

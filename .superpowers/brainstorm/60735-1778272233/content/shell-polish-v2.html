@@ -1,0 +1,245 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+.fm {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+.shell-wrap {
+  display: flex;
+  height: 360px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: .5px solid rgba(255,255,255,.1);
+}
+.sb {
+  width: 196px;
+  background: #0d0e0f;
+  border-right: .5px solid rgba(255,255,255,.07);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.sb-top {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 10px 10px;
+  border-bottom: .5px solid rgba(255,255,255,.07);
+}
+.logo-box {
+  width: 28px; height: 28px; background: #F97316;
+  border-radius: 7px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-inner { width: 12px; height: 12px; background: rgba(0,0,0,.35); border-radius: 3px; }
+.logo-name { font-size: 14px; font-weight: 600; color: #f5f6f7; letter-spacing: -.03em; }
+.collapse-btn {
+  margin-left: auto; width: 20px; height: 20px;
+  background: rgba(255,255,255,.06); border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; color: #545861;
+}
+.sb-nav { flex: 1; padding: 8px 6px; display: flex; flex-direction: column; gap: 1px; overflow: hidden; }
+.sb-section {
+  font-size: 10px; font-weight: 600; color: #2e3033;
+  letter-spacing: .04em; padding: 8px 8px 4px;
+}
+.ni {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 8px; border-radius: 7px; cursor: pointer;
+}
+.ni.active { background: rgba(249,115,22,.13); }
+.ni-icon {
+  width: 15px; height: 15px; flex-shrink: 0;
+  background: #545861; border-radius: 3px; opacity: .45;
+}
+.ni.active .ni-icon { background: #F97316; opacity: 1; }
+.ni-label { font-size: 12.5px; font-weight: 500; color: #8a8f98; }
+.ni.active .ni-label { color: #F97316; }
+.sb-footer {
+  padding: 8px 8px 10px;
+  border-top: .5px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; gap: 8px;
+}
+.avatar {
+  width: 26px; height: 26px; background: #F97316; border-radius: 50%;
+  font-size: 9px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.avatar-name { font-size: 12px; color: #8a8f98; }
+
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; background: #080808; min-width: 0; }
+.topbar {
+  height: 44px; background: #0c0c0e;
+  border-bottom: .5px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; padding: 0 14px; gap: 8px; flex-shrink: 0;
+}
+.ws-btn {
+  display: flex; align-items: center; gap: 6px;
+  background: #131415; border: .5px solid rgba(255,255,255,.09);
+  border-radius: 7px; padding: 5px 10px;
+  font-size: 12.5px; font-weight: 500; color: #f5f6f7;
+}
+.ws-dot { width: 7px; height: 7px; background: #F97316; border-radius: 50%; flex-shrink: 0; }
+.ws-chev { font-size: 8px; color: #545861; }
+.tb-sep { width: .5px; height: 18px; background: rgba(255,255,255,.09); }
+.breadcrumb { display: flex; align-items: center; gap: 5px; font-size: 12px; color: #545861; }
+.bc-cur { color: #c8ccd4; font-weight: 500; }
+.tb-right { margin-left: auto; display: flex; align-items: center; gap: 7px; }
+.tb-search {
+  display: flex; align-items: center; gap: 6px;
+  background: #131415; border: .5px solid rgba(255,255,255,.09);
+  border-radius: 7px; padding: 5px 11px; font-size: 12px; color: #545861;
+}
+.tb-icon {
+  width: 28px; height: 28px;
+  background: #131415; border: .5px solid rgba(255,255,255,.08);
+  border-radius: 7px; display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+}
+
+/* Page */
+.page { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.page-title { font-size: 19px; font-weight: 600; color: #f5f6f7; letter-spacing: -.03em; line-height: 1.1; }
+.page-sub { font-size: 11.5px; color: #545861; margin-top: 2px; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
+.stat-card {
+  background: #131415; border: .5px solid rgba(255,255,255,.08);
+  border-radius: 9px; padding: 12px 14px;
+  position: relative; overflow: hidden;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: rgba(255,255,255,.09);
+}
+.stat-lbl {
+  font-size: 10px; font-weight: 600; color: #545861;
+  margin-bottom: 5px; letter-spacing: .01em;
+}
+.stat-val {
+  font-size: 24px; font-weight: 300; color: #f5f6f7; line-height: 1;
+  font-variant-numeric: tabular-nums; letter-spacing: -.025em;
+}
+.stat-val.or { color: #F97316; }
+.stat-val.amber { color: #FBBF24; }
+.stat-val.red { color: #f87171; }
+
+.content-card {
+  flex: 1; background: #0c0c0e; border: .5px solid rgba(255,255,255,.07);
+  border-radius: 9px; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.content-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: rgba(255,255,255,.06);
+}
+.content-card-lbl { font-size: 12px; color: #2e3033; }
+</style>
+
+<h2>Updated Design — Title Case Throughout</h2>
+<p class="subtitle">All labels, nav items, stat headers, and section names use title case. Does this look right?</p>
+
+<div class="mockup">
+  <div class="mockup-header">Frame Marine — App Shell</div>
+  <div class="mockup-body fm" style="background:#080808;padding:0;overflow:hidden;">
+    <div class="shell-wrap" style="border-radius:0;border:none;">
+      <div class="sb">
+        <div class="sb-top">
+          <div class="logo-box"><div class="logo-inner"></div></div>
+          <span class="logo-name">Frame</span>
+          <div class="collapse-btn">◀</div>
+        </div>
+        <div class="sb-nav">
+          <div class="sb-section">Marine</div>
+          <div class="ni active">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Dashboard</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Work Orders</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Maintenance</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Inventory</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Certificates</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Safety & ISM</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Documents</span>
+          </div>
+          <div class="ni">
+            <div class="ni-icon"></div>
+            <span class="ni-label">Charter</span>
+          </div>
+        </div>
+        <div class="sb-footer">
+          <div class="avatar">AD</div>
+          <span class="avatar-name">Albert Day</span>
+        </div>
+      </div>
+
+      <div class="main">
+        <div class="topbar">
+          <div class="ws-btn">
+            <div class="ws-dot"></div>
+            Unica
+            <span class="ws-chev">▾</span>
+          </div>
+          <div class="tb-sep"></div>
+          <div class="breadcrumb">
+            <span>Frame</span>
+            <span>›</span>
+            <span class="bc-cur">Dashboard</span>
+          </div>
+          <div class="tb-right">
+            <div class="tb-search">⌕ &nbsp;Search</div>
+            <div class="tb-icon">🔔</div>
+          </div>
+        </div>
+
+        <div class="page">
+          <div>
+            <div class="page-title">Dashboard</div>
+            <div class="page-sub">Vessel overview</div>
+          </div>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-lbl">Open Work Orders</div>
+              <div class="stat-val">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Overdue Maintenance</div>
+              <div class="stat-val or">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Certs Expiring</div>
+              <div class="stat-val amber">—</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-lbl">Low Stock Items</div>
+              <div class="stat-val red">—</div>
+            </div>
+          </div>
+          <div class="content-card">
+            <span class="content-card-lbl">Dashboard content arrives in Phase 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

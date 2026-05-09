@@ -1,0 +1,159 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
+* { font-family: 'DM Sans', sans-serif; box-sizing: border-box; }
+
+.wrap { display: flex; gap: 16px; margin-top: 16px; }
+.card {
+  flex: 1; border: 1.5px solid rgba(255,255,255,.1); border-radius: 10px;
+  overflow: hidden; cursor: pointer; transition: border-color .15s;
+}
+.card:hover { border-color: rgba(249,115,22,.5); }
+.card.selected { border-color: #F97316; }
+.card-label {
+  padding: 10px 14px; font-size: 13px; font-weight: 600; color: #f5f6f7;
+  background: rgba(255,255,255,.04); border-bottom: .5px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; gap: 8px;
+}
+.badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: rgba(249,115,22,.15); color: #F97316; }
+
+/* mini shell */
+.mini-shell { display: flex; height: 300px; background: #080808; }
+.mini-sb { width: 36px; background: #0d0e0f; border-right: .5px solid rgba(255,255,255,.07); flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding-top: 10px; gap: 6px; }
+.mini-sb-dot { width: 8px; height: 8px; border-radius: 2px; background: rgba(255,255,255,.12); }
+.mini-sb-dot.active { background: #F97316; }
+.mini-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.mini-tb { height: 28px; background: #0c0c0e; border-bottom: .5px solid rgba(255,255,255,.07); flex-shrink: 0; }
+.page { flex: 1; padding: 10px; display: flex; flex-direction: column; gap: 7px; overflow: hidden; }
+.page-title { height: 13px; width: 70px; background: rgba(255,255,255,.18); border-radius: 3px; margin-bottom: 2px; }
+.page-sub { height: 8px; width: 100px; background: rgba(255,255,255,.08); border-radius: 2px; margin-bottom: 4px; }
+
+/* stat cards */
+.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; }
+.stat { background: #131415; border: .5px solid rgba(255,255,255,.08); border-radius: 6px; padding: 7px 8px; position: relative; overflow: hidden; }
+.stat::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:rgba(255,255,255,.09); }
+.stat-lbl { height: 6px; width: 70%; background: rgba(255,255,255,.1); border-radius: 2px; margin-bottom: 5px; }
+.stat-val { height: 14px; width: 40%; background: rgba(255,255,255,.2); border-radius: 3px; }
+.stat-val.or { background: rgba(249,115,22,.5); }
+.stat-val.am { background: rgba(251,191,36,.5); }
+.stat-val.re { background: rgba(248,113,113,.5); }
+
+/* section block */
+.section-block { background: #131415; border: .5px solid rgba(255,255,255,.08); border-radius: 6px; padding: 7px 8px; position: relative; overflow: hidden; flex-shrink: 0; }
+.section-block::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:rgba(255,255,255,.09); }
+.block-title { height: 7px; width: 50%; background: rgba(255,255,255,.15); border-radius: 2px; margin-bottom: 5px; }
+.mini-row { height: 14px; background: rgba(255,255,255,.05); border-radius: 3px; margin-bottom: 3px; display: flex; align-items: center; padding: 0 4px; gap: 3px; }
+.mini-row:last-child { margin-bottom: 0; }
+.rd { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.ln { height: 4px; border-radius: 1px; background: rgba(255,255,255,.1); }
+
+/* two-col layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.alert-row { height: 12px; background: rgba(248,113,113,.08); border-radius: 3px; border-left: 2px solid #f87171; margin-bottom: 3px; }
+.alert-row.am { background: rgba(251,191,36,.08); border-left-color: #FBBF24; }
+.health-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.health-tile { background: rgba(255,255,255,.04); border-radius: 4px; height: 22px; display: flex; align-items: center; padding: 0 5px; gap: 4px; }
+.health-dot { width: 5px; height: 5px; border-radius: 50%; }
+.health-lbl { height: 5px; border-radius: 1px; background: rgba(255,255,255,.1); flex: 1; }
+</style>
+
+<h2>Dashboard depth</h2>
+<p class="subtitle">How much information on the dashboard for Phase 2?</p>
+
+<div class="wrap">
+
+  <!-- Option A: Stat cards + open WOs -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-label">A — Stat cards + open work orders</div>
+    <div class="mini-shell">
+      <div class="mini-sb">
+        <div class="mini-sb-dot active"></div>
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot"></div>
+      </div>
+      <div class="mini-main">
+        <div class="mini-tb"></div>
+        <div class="page">
+          <div class="page-title"></div>
+          <div class="page-sub"></div>
+          <div class="stat-row">
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val"></div></div>
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val or"></div></div>
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val am"></div></div>
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val re"></div></div>
+          </div>
+          <div class="section-block" style="flex:1">
+            <div class="block-title"></div>
+            <div class="mini-row"><div class="rd" style="background:#f87171"></div><div class="ln" style="width:55%"></div><div class="ln" style="width:20%;margin-left:auto"></div></div>
+            <div class="mini-row"><div class="rd" style="background:#F97316"></div><div class="ln" style="width:70%"></div><div class="ln" style="width:20%;margin-left:auto"></div></div>
+            <div class="mini-row"><div class="rd" style="background:#F97316"></div><div class="ln" style="width:45%"></div><div class="ln" style="width:20%;margin-left:auto"></div></div>
+            <div class="mini-row"><div class="rd" style="background:#FBBF24"></div><div class="ln" style="width:60%"></div><div class="ln" style="width:20%;margin-left:auto"></div></div>
+            <div class="mini-row"><div class="rd" style="background:rgba(255,255,255,.2)"></div><div class="ln" style="width:50%"></div><div class="ln" style="width:20%;margin-left:auto"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;font-size:12px;color:#8a8f98;border-top:.5px solid rgba(255,255,255,.07)">
+      Clean and focused. 4 live stat cards + a list of open work orders sorted by priority. Everything else lives in its own module.
+    </div>
+  </div>
+
+  <!-- Option B: Full suite -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-label">
+      B — Full suite
+      <span class="badge">Like the old app</span>
+    </div>
+    <div class="mini-shell">
+      <div class="mini-sb">
+        <div class="mini-sb-dot active"></div>
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot"></div>
+        <div class="mini-sb-dot"></div>
+      </div>
+      <div class="mini-main">
+        <div class="mini-tb"></div>
+        <div class="page">
+          <div class="page-title"></div>
+          <div class="page-sub"></div>
+          <!-- stat cards -->
+          <div class="stat-row">
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val"></div></div>
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val or"></div></div>
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val am"></div></div>
+            <div class="stat"><div class="stat-lbl"></div><div class="stat-val re"></div></div>
+          </div>
+          <!-- alerts -->
+          <div class="section-block">
+            <div class="block-title"></div>
+            <div class="alert-row"></div>
+            <div class="alert-row am"></div>
+            <div class="alert-row"></div>
+          </div>
+          <!-- two col: WOs + health -->
+          <div class="two-col" style="flex:1;min-height:0">
+            <div class="section-block" style="overflow:hidden">
+              <div class="block-title"></div>
+              <div class="mini-row"><div class="rd" style="background:#f87171"></div><div class="ln" style="width:60%"></div></div>
+              <div class="mini-row"><div class="rd" style="background:#F97316"></div><div class="ln" style="width:45%"></div></div>
+              <div class="mini-row"><div class="rd" style="background:#FBBF24"></div><div class="ln" style="width:55%"></div></div>
+            </div>
+            <div class="section-block" style="overflow:hidden">
+              <div class="block-title"></div>
+              <div class="health-grid">
+                <div class="health-tile"><div class="health-dot" style="background:#f87171"></div><div class="health-lbl"></div></div>
+                <div class="health-tile"><div class="health-dot" style="background:#34d399"></div><div class="health-lbl"></div></div>
+                <div class="health-tile"><div class="health-dot" style="background:#FBBF24"></div><div class="health-lbl"></div></div>
+                <div class="health-tile"><div class="health-dot" style="background:#34d399"></div><div class="health-lbl"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:10px 14px;font-size:12px;color:#8a8f98;border-top:.5px solid rgba(255,255,255,.07)">
+      Stat cards + priority alerts feed + open work orders list + health tiles (Engines, Crew, Documents, WOs). Denser but more at-a-glance.
+    </div>
+  </div>
+
+</div>

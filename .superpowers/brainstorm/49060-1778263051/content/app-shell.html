@@ -1,0 +1,194 @@
+<h2>App Shell — Phase 1</h2>
+<p class="subtitle">Full shell mockup: icon sidebar + topbar + content area. This is what every module will sit inside.</p>
+
+<div class="mockup">
+  <div class="mockup-header">Frame Marine — App Shell (desktop)</div>
+  <div class="mockup-body" style="padding:0;">
+    <div style="background:#080808;border-radius:6px;overflow:hidden;height:480px;display:flex;font-family:Inter,sans-serif;">
+
+      <!-- SIDEBAR -->
+      <div style="width:56px;background:#0d0e0f;border-right:1px solid #242628;display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;">
+
+        <!-- Logo -->
+        <div style="width:32px;height:32px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;">
+          <div style="width:28px;height:28px;background:#F97316;border-radius:7px;display:flex;align-items:center;justify-content:center;">
+            <div style="width:14px;height:14px;border:2px solid #080808;border-radius:2px;"></div>
+          </div>
+        </div>
+
+        <!-- Nav items -->
+        <!-- Dashboard (active) -->
+        <div style="width:40px;height:40px;background:#1e1f21;border-radius:8px;border:1px solid #F97316;display:flex;align-items:center;justify-content:center;position:relative;" title="Dashboard">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="#F97316"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="#F97316"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="#F97316"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="#F97316" opacity="0.4"/></svg>
+          <div style="position:absolute;left:-1px;top:50%;transform:translateY(-50%);width:2px;height:20px;background:#F97316;border-radius:0 2px 2px 0;"></div>
+        </div>
+
+        <!-- Work Orders -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Work Orders">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="12" height="3" rx="1.5" fill="#545861"/><rect x="2" y="7" width="9" height="3" rx="1.5" fill="#545861"/><rect x="2" y="12" width="6" height="2" rx="1" fill="#545861"/></svg>
+        </div>
+
+        <!-- Maintenance -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Maintenance">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="#545861" stroke-width="1.5"/><path d="M8 5v3.5l2 2" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <!-- Inventory -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Inventory">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="9" width="14" height="6" rx="1.5" fill="#545861" opacity="0.5"/><rect x="3" y="5" width="10" height="5" rx="1" fill="#545861"/><rect x="5" y="2" width="6" height="4" rx="1" fill="#545861" opacity="0.6"/></svg>
+        </div>
+
+        <!-- Certificates -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Certificates">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="1" width="12" height="14" rx="2" stroke="#545861" stroke-width="1.5"/><path d="M5 5h6M5 8h4" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="12" r="2" stroke="#545861" stroke-width="1"/></svg>
+        </div>
+
+        <!-- Safety -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Safety & ISM">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2L2 5v4c0 3 2.5 4.5 6 5 3.5-.5 6-2 6-5V5L8 2z" stroke="#545861" stroke-width="1.5"/></svg>
+        </div>
+
+        <!-- Documents -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Documents">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="1" width="10" height="14" rx="2" stroke="#545861" stroke-width="1.5"/><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <!-- Charter -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;" title="Charter">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="11" rx="2" stroke="#545861" stroke-width="1.5"/><path d="M5 3V1.5M11 3V1.5" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/><path d="M1 7h14" stroke="#545861" stroke-width="1.5"/></svg>
+        </div>
+
+        <!-- Spacer -->
+        <div style="flex:1;"></div>
+
+        <!-- Settings -->
+        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;" title="Settings">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="#545861" stroke-width="1.5"/><path d="M8 1.5v1.5M8 13v1.5M1.5 8H3M13 8h1.5M3.5 3.5l1 1M11.5 11.5l1 1M3.5 12.5l1-1M11.5 4.5l1-1" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+
+        <!-- User avatar -->
+        <div style="width:32px;height:32px;background:#1e1f21;border-radius:50%;border:1px solid #2e3033;display:flex;align-items:center;justify-content:center;">
+          <span style="font-size:10px;font-weight:600;color:#c8ccd4;">AD</span>
+        </div>
+      </div>
+
+      <!-- MAIN AREA -->
+      <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
+
+        <!-- TOPBAR -->
+        <div style="height:48px;background:#0d0e0f;border-bottom:1px solid #242628;display:flex;align-items:center;padding:0 16px;gap:10px;flex-shrink:0;">
+
+          <!-- Workspace switcher -->
+          <div style="display:flex;align-items:center;gap:8px;background:#131415;border:1px solid #2e3033;border-radius:6px;padding:5px 10px;cursor:pointer;min-width:0;">
+            <div style="width:8px;height:8px;background:#F97316;border-radius:50%;flex-shrink:0;"></div>
+            <span style="font-size:12px;font-weight:500;color:#f5f6f7;white-space:nowrap;">Lady M</span>
+            <span style="font-size:10px;color:#545861;white-space:nowrap;">Vessel</span>
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:2px;flex-shrink:0;"><path d="M2.5 3.5L5 6.5L7.5 3.5" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+
+          <!-- Breadcrumb -->
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:12px;color:#545861;">Frame</span>
+            <span style="font-size:12px;color:#383b3f;">/</span>
+            <span style="font-size:12px;color:#f5f6f7;font-weight:500;">Dashboard</span>
+          </div>
+
+          <div style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+            <!-- Search -->
+            <div style="width:32px;height:32px;background:#131415;border:1px solid #242628;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="5.5" cy="5.5" r="4" stroke="#545861" stroke-width="1.5"/><path d="M8.5 8.5L12 12" stroke="#545861" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <!-- Notifications -->
+            <div style="width:32px;height:32px;background:#131415;border:1px solid #242628;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5a4 4 0 014 4v2.5l1 1.5H2l1-1.5V5.5a4 4 0 014-4z" stroke="#545861" stroke-width="1.5"/><path d="M5.5 11.5a1.5 1.5 0 003 0" stroke="#545861" stroke-width="1.5"/></svg>
+              <div style="position:absolute;top:6px;right:6px;width:6px;height:6px;background:#f87171;border-radius:50%;border:1.5px solid #0d0e0f;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAGE CONTENT (placeholder) -->
+        <div style="flex:1;padding:20px;overflow-y:auto;">
+          <!-- Page header -->
+          <div style="margin-bottom:20px;">
+            <div style="font-size:18px;font-weight:600;color:#f5f6f7;letter-spacing:-0.3px;margin-bottom:4px;">Dashboard</div>
+            <div style="font-size:12px;color:#545861;">Lady M · Motor Yacht · 48m</div>
+          </div>
+
+          <!-- Stat strip -->
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+            <div style="background:#131415;border:1px solid #242628;border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:#545861;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Open WOs</div>
+              <div style="font-size:22px;font-weight:600;color:#f5f6f7;">7</div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:#545861;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Overdue PMS</div>
+              <div style="font-size:22px;font-weight:600;color:#f87171;">2</div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:#545861;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Certs Expiring</div>
+              <div style="font-size:22px;font-weight:600;color:#FBBF24;">3</div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:8px;padding:12px;">
+              <div style="font-size:10px;color:#545861;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Low Stock</div>
+              <div style="font-size:22px;font-weight:600;color:#f5f6f7;">5</div>
+            </div>
+          </div>
+
+          <!-- Two column -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <div style="background:#131415;border:1px solid #242628;border-radius:8px;padding:12px;">
+              <div style="font-size:11px;font-weight:600;color:#c8ccd4;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Recent Work Orders</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#191a1b;border-radius:5px;">
+                  <div style="width:6px;height:6px;background:#f87171;border-radius:50%;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#f5f6f7;flex:1;">Port engine oil change</span>
+                  <span style="font-size:10px;color:#545861;">High</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#191a1b;border-radius:5px;">
+                  <div style="width:6px;height:6px;background:#FBBF24;border-radius:50%;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#f5f6f7;flex:1;">Stabilizer inspection</span>
+                  <span style="font-size:10px;color:#545861;">Med</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#191a1b;border-radius:5px;">
+                  <div style="width:6px;height:6px;background:#545861;border-radius:50%;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#f5f6f7;flex:1;">AC filter replacement</span>
+                  <span style="font-size:10px;color:#545861;">Low</span>
+                </div>
+              </div>
+            </div>
+            <div style="background:#131415;border:1px solid #242628;border-radius:8px;padding:12px;">
+              <div style="font-size:11px;font-weight:600;color:#c8ccd4;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;">Upcoming</div>
+              <div style="display:flex;flex-direction:column;gap:6px;">
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#191a1b;border-radius:5px;">
+                  <div style="width:6px;height:6px;background:#F97316;border-radius:50%;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#f5f6f7;flex:1;">Charter — Antibes</span>
+                  <span style="font-size:10px;color:#545861;">May 14</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#191a1b;border-radius:5px;">
+                  <div style="width:6px;height:6px;background:#60A5FA;border-radius:50%;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#f5f6f7;flex:1;">Annual survey due</span>
+                  <span style="font-size:10px;color:#545861;">May 22</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:#191a1b;border-radius:5px;">
+                  <div style="width:6px;height:6px;background:#22c55e;border-radius:50%;flex-shrink:0;"></div>
+                  <span style="font-size:11px;color:#f5f6f7;flex:1;">Provisioning run</span>
+                  <span style="font-size:10px;color:#545861;">May 18</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Shell components built in Phase 1</h3>
+  <ul>
+    <li><strong>Sidebar</strong> — icon nav, active state (orange border + fill), tooltips on hover, collapses to overlay on mobile</li>
+    <li><strong>Topbar</strong> — workspace switcher dropdown (lists all your vessels/properties), breadcrumb, search, notifications bell</li>
+    <li><strong>WorkspaceSwitcher</strong> — shows all orgs the user is a member of, orange dot = vessel, blue dot = property. Click to switch active workspace.</li>
+    <li><strong>Onboarding flow</strong> — create first workspace after sign-up (name, type, optional photo)</li>
+  </ul>
+</div>

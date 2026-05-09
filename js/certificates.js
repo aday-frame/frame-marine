@@ -2,7 +2,7 @@
 const Certs = (() => {
   let _tab = 'vessel';
 
-  const today = new Date();
+  const today = new Date('2026-05-07');
 
   function daysUntil(dateStr) {
     if (!dateStr) return null;
@@ -268,7 +268,7 @@ const Certs = (() => {
     const issued  = document.getElementById('cm-issued')?.value;
     const expires = document.getElementById('cm-expires')?.value || null;
 
-    if (!name) { alert('Certificate name is required.'); return; }
+    if (!name) { showToast('Certificate name is required', 'error'); return; }
 
     const vessel = FM.currentVessel();
     if (type === 'vessel') {
@@ -322,11 +322,11 @@ const Certs = (() => {
   }
 
   function del(id, type) {
-    if (!confirm('Remove this certificate?')) return;
     if (type === 'vessel') FM.vesselCerts = FM.vesselCerts.filter(c => c.id !== id);
     else FM.crewCerts = FM.crewCerts.filter(c => c.id !== id);
     closeModal();
     render();
+    showToast('Certificate removed');
   }
 
   function tab(t) {
@@ -337,7 +337,10 @@ const Certs = (() => {
   function updateSidebarBadge() {
     const n = expiringCount();
     const el = document.getElementById('sb-cert-count');
-    if (el) { el.textContent = n; el.style.display = n ? '' : 'none'; }
+    if (el) {
+      el.textContent = n; el.style.display = n ? '' : 'none';
+      el.closest('.ni')?.classList.toggle('has-alert', n > 0);
+    }
   }
 
   return { render, tab, openAdd, closeModal, save, del, view, updateSidebarBadge, expiringCount };
